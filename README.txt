@@ -11,4 +11,4 @@ of speech.  Praat can be found at http://www.fon.hum.uva.nl/praat/
 Very much a work in progress.  This will house various resources that I 
 use in working with praat.
 
-See /tests for example usages
+See /test for example usages
