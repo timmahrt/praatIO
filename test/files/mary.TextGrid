@@ -1,0 +1,92 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0.0124716553288 
+xmax = 1.18979591837 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "phone" 
+        xmin = 0.0124716553288 
+        xmax = 1.18979591837 
+        intervals: size = 14 
+        intervals [1]:
+            xmin = 0.0124716553288 
+            xmax = 0.102267573696 
+            text = "M" 
+        intervals [2]:
+            xmin = 0.102267573696 
+            xmax = 0.192063492063 
+            text = "EH1" 
+        intervals [3]:
+            xmin = 0.192063492063 
+            xmax = 0.30296278256763925 
+            text = "R" 
+        intervals [4]:
+            xmin = 0.30296278256763925 
+            xmax = 0.451473922902 
+            text = "IY0" 
+        intervals [5]:
+            xmin = 0.451473922902 
+            xmax = 0.531292517007 
+            text = "R" 
+        intervals [6]:
+            xmin = 0.531292517007 
+            xmax = 0.571201814059 
+            text = "OW1" 
+        intervals [7]:
+            xmin = 0.571201814059 
+            xmax = 0.6410430839 
+            text = "L" 
+        intervals [8]:
+            xmin = 0.6410430839 
+            xmax = 0.700907029478 
+            text = "D" 
+        intervals [9]:
+            xmin = 0.700907029478 
+            xmax = 0.740816326531 
+            text = "DH" 
+        intervals [10]:
+            xmin = 0.740816326531 
+            xmax = 0.780725623583 
+            text = "AH0" 
+        intervals [11]:
+            xmin = 0.780725623583 
+            xmax = 0.8322822781165286 
+            text = "B" 
+        intervals [12]:
+            xmin = 0.8322822781165286 
+            xmax = 0.9368054833435799 
+            text = "AE1" 
+        intervals [13]:
+            xmin = 0.9368054833435799 
+            xmax = 1.03015873016 
+            text = "R" 
+        intervals [14]:
+            xmin = 1.03015873016 
+            xmax = 1.18979591837 
+            text = "AH0L" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0.0124716553288 
+        xmax = 1.18979591837 
+        intervals: size = 4 
+        intervals [1]:
+            xmin = 0.0124716553288 
+            xmax = 0.451473922902 
+            text = "MARY" 
+        intervals [2]:
+            xmin = 0.451473922902 
+            xmax = 0.700907029478 
+            text = "ROLLED" 
+        intervals [3]:
+            xmin = 0.700907029478 
+            xmax = 0.780725623583 
+            text = "THE" 
+        intervals [4]:
+            xmin = 0.780725623583 
+            xmax = 1.18979591837 
+            text = "BARREL" 
