@@ -12,3 +12,15 @@ Very much a work in progress.  This will house various resources that I
 use in working with praat.
 
 See /test for example usages
+
+========
+Installation
+========
+
+Navigate to the directory this is located in and type:
+
+	python setup.py install
+
+If python is not in your path, you'll need to enter the full path e.g.
+
+	C:\Python27\python.exe setup.py install
