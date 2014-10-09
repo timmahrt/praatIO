@@ -427,13 +427,31 @@ class TextgridTier():
         return TextgridTier(self.name, entryList, self.tierType)
     
         
-    def offsetTimestamps(self, time):
+    def offsetTimestamps(self, startOffset, stopOffset, allowOvershoot=False):
+        '''
+        Modifies all timestamps by a constant amount
+        
+        Can modify the interval start independent of the interval end
+        
+        If allowOvershoot is True, an interval can go beyond the duration
+        of the textgrid (I can't imagine why this should be the case) 
+        '''
         
         newEntryList = []
         for start, stop, label in self.entryList:
-            newEntryList.append( (time+start, time+stop, label) )
             
-        return TextgridTier(self.name, newEntryList, self.tierType)
+            newStart = startOffset+start
+            if newStart < 0:
+                newStart = 0
+            
+            newStop = stopOffset+stop
+            if newStop > self.maxTimestamp and not allowOvershoot:
+                newStop = self.maxTimestamp
+            
+            newEntryList.append( (newStart, newStop, label) )
+            
+        newMax = max([self.maxTimestamp, _getMaxInTupleList(newEntryList)])
+        return TextgridTier(self.name, newEntryList, self.tierType, 0, newMax)
     
         
         
