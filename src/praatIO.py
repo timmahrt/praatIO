@@ -652,7 +652,73 @@ class Textgrid():
         
         return retTG
 
+    
+    def mergeTiers(self, includeFunc=None, 
+                   tierList=None, preserveOtherTiers=True):
+        '''
+        Combine tiers.
+        
+        /includeFunc/ regulates which intervals to include in the merging
+          with all others being tossed (default tosses silent labels: '')
+          
+        If /tierList/ is none, combine all tiers.
+        '''
+        
+        if tierList == None:
+            tierList = self.tierNameList
+            
+        if includeFunc == None:
+            includeFunc = lambda entryList: not entryList[2] == ''
+           
+        # Merge tiers
+        superEntryList = []
+        for tierName in tierList:
+            tier = self.tierDict[tierName]
+            superEntryList.extend(tier.entryList)
+        
+        superEntryList = [entry for entry in superEntryList if includeFunc(entry)]
+            
+        superEntryList.sort()
+        
+        # Do the merge here
+        i = 0
+        while i < len(superEntryList) - 1:
+            currentEntry = superEntryList[i]
+            nextEntry = superEntryList[i+1]
+            
+            if _intervalOverlapCheck(currentEntry, nextEntry):
+                currentStart, currentStop, currentLabel = superEntryList[i]
+                nextStart, nextStop, nextLabel = superEntryList.pop(i+1)
+                
+                newStop = max([currentStop, nextStop])
+                newLabel = "%s / %s" % (currentLabel, nextLabel)
+                
+                superEntryList[i] = (currentStart, newStop, newLabel)
+                
+            else:
+                i += 1
+            
+        # Create the final textgrid
+        tg = Textgrid() 
+            
+        # Preserve non-merged tiers
+        if preserveOtherTiers == True:
+            otherTierList = []
+            for tierName in self.tierNameList:
+                if tierName not in tierList:
+                    otherTierList.append(self.tierDict[tierName])
 
+            for tier in otherTierList:
+                tg.addTier(tier)
+
+        # Add merged tier
+        tierName = "/".join(tierList)
+        mergedTier = TextgridTier(tierName, superEntryList, INTERVAL_TIER)
+        tg.addTier(mergedTier)
+        
+        return tg
+        
+        
     def mergeSilences(self):
         
         tg = Textgrid()
