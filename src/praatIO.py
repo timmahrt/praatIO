@@ -83,6 +83,16 @@ def _manipulate(tier, iterateFunc):
     return adjustedTier
 
 
+def _intervalOverlapCheck(interval, cmprInterval):
+    '''Checks whether two intervals overlap'''
+    
+    startTime, endTime, label = interval
+    cmprStartTime, cmprEndTime, cmprLabel = cmprInterval
+    
+    return (float(startTime) <= float(cmprEndTime) and 
+            float(endTime) >= float(cmprStartTime))
+
+
 class TimelessTextgridTierException(Exception):
     
     def __str__(self):
@@ -140,10 +150,10 @@ class TextgridTier():
     
     
     def insertInterval(self, startTime, endTime, label):
+        interval = (startTime, endTime, label)
         
         # True if any existing times overlap with the new insertion time
-        matchList = [ (float(startTime) <= float(oldEndTime) and
-                    float(endTime) >= float(oldStartTime)) for oldStartTime, oldEndTime, oldLabel in self.entryList]
+        matchList = [ _intervalOverlapCheck(interval, oldInterval) for oldInterval in self.entryList]
         print matchList
         print matchList.count(True)
         print self.entryList[matchList.index(True)]
