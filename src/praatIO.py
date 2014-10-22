@@ -278,6 +278,16 @@ class TextgridTier():
         newTier = TextgridTier(self.name, newEntryList, self.tierType)
         
         return newTier
+    
+    
+    def editLabels(self, editFunc):
+        
+        newEntryList = []
+        for start, stop, label in self.entryList:
+            newEntryList.append( (start, stop, editFunc(label)))
+    
+        newTier = TextgridTier(self.name, newEntryList, self.tierType)
+            
         return newTier
     
     
@@ -573,6 +583,26 @@ class Textgrid():
         self.tierNameList.pop(self.tierNameList.index(name))
         del self.tierDict[name]
         
+        
+    def removeLabels(self, label, tierNameList=None):
+        '''Remove labels from tiers'''
+        
+        # Remove from all tiers if no tiers are specified
+        if tierNameList == None:
+            tierNameList = self.tierNameList
+        
+        tg = Textgrid()
+        for tierName in self.tierNameList:
+            tier = self.tierDict[tierName]
+            
+            if tierName in tierNameList:
+                newEntryList = [entry for entry in tier.entryList if entry[2] != label]
+                tier = TextgridTier(tierName, newEntryList, tier.tierType)
+            
+            tg.addTier(tier)
+        
+        return tg
+        
     
     def renameTier(self, oldName, newName):
         oldTier = self.tierDict[oldName]
@@ -618,7 +648,7 @@ class Textgrid():
             newTG.addTier(newTier)
         
         retTG = newTG.fillInBlanks()
-        retTG = retTG.timeFromZero()
+        retTG = retTG.setTimeFromZero()
         
         return retTG
 
@@ -774,15 +804,27 @@ class Textgrid():
         return patchedTG    
     
     
-    def timeFromZero(self):
+    def setTimeFromZero(self):
         
         zeroedTG = Textgrid()
         for tierName in self.tierNameList:
-            newTier = self.tierDict[tierName].timeFromZero()
+            newTier = self.tierDict[tierName].setTimeFromZero()
             zeroedTG.addTier(newTier)
             
         return zeroedTG
     
+    
+    def offsetTimestamps(self, startOffset, stopOffset):
+        
+        tg = Textgrid()
+        for tierName in self.tierNameList:
+            tier = self.tierDict[tierName]
+            tier = tier.offsetTimestamps(startOffset, stopOffset)
+            
+            tg.addTier(tier)
+        
+        return tg
+        
     
 #     def append(self, tg, timeRelative=False):
 #         
