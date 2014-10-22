@@ -11,6 +11,6 @@ setup(name='praatio',
       package_dir={'praatio':'praatio'},
       packages=['praatio'],
       license='LICENSE',
-      long_description=open('README.txt', 'r').read(),
+      long_description=open('README.rst', 'r').read(),
 #       install_requires=[], # No requirements! # requires 'from setuptools import setup'
       )
