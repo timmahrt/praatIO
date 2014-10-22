@@ -577,7 +577,39 @@ class Textgrid():
             raise BadIntervalError(start, end, label)
         newTier = TextgridTier(name, tierEntryList, tierType)
         self.addTier(newTier, tierIndex)
+    
+    
+    def appendTG(self, tg, onlyMatchingNames=True):
+        '''
+        Append one textgrid to the end of this one
+        
+        if onlyMatchingNames is false, tiers that don't appear in both tgs
+        will also appear
+        '''
+        retTG = Textgrid()
+        
+        # First add tiers that are in this tg or both tgs
+        for name in self.tierNameList:
+            sourceTier = self.tierDict[name]
             
+            if name in self.tierNameList:
+                tier = tg.tierDict[name]
+                tier = sourceTier.appendTier(tier, timeRelativeFlag=True)
+                retTG.addTier(tier)
+            
+            elif onlyMatchingNames == False:
+                retTG.addTier(tier)
+        
+        # Second add tiers that are only in the input tg
+        if onlyMatchingNames == False:
+            for name in tg.tierNameList:
+                
+                if name not in retTG.tierNameList:
+                    tier = tier.offsetTimestamps(self.maxTimestamp, self.maxTimestamp)
+                    retTG.addTier(tier)
+        
+        return retTG
+                
     
     def removeTier(self, name):
         self.tierNameList.pop(self.tierNameList.index(name))
@@ -618,6 +650,11 @@ class Textgrid():
         self.addTierByList(name, newTierEntryList, oldTier.tierType, tierIndex)
         
     
+    def sort(self):
+        for name in self.tierNameList:
+            self.tierDict[name].sort()
+            
+            
     def save(self, fn):
         
         # Kindof inelegant
