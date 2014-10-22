@@ -620,6 +620,11 @@ class Textgrid():
     
     def save(self, fn):
         
+        # Kindof inelegant
+        tmpTG = self.fillInBlanks()
+        self.tierDict = tmpTG.tierDict
+        self.sort()
+        
         outputTxt = ""
         outputTxt += 'File type = "ooTextFile short"\n'
         outputTxt += '"TextGrid"\n\n'
