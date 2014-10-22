@@ -46,7 +46,9 @@ if not os.path.exists(outputPath):
 
 for wavFN, tgFN in [("bobby.wav", "bobby_words.TextGrid"),
                     ("mary.wav", "mary.TextGrid")]:
-    tg = praatIO.openTextGrid(join(path, tgFN), tossSilence=True)
+    print tgFN
+    fullPath = join(path, tgFN)
+    tg = praatIO.openTextGrid(fullPath)
     tier = tg.tierDict["word"]
     name = os.path.splitext(wavFN)[0]
     for i, intervalList in enumerate(tier.entryList):

@@ -89,29 +89,54 @@ class TimelessTextgridTierException(Exception):
         return "All textgrid tiers much have a min and max duration"
 
 
+class BadIntervalError(Exception):
+    
+    def __init__(self, start, stop, label):
+        self.start = start
+        self.stop = stop
+        self.label = label
+        
+    def __str__(self):
+        return "Problem with interval--could not create textgrid (%s,%s,%s)" % (self.start, self.stop, self.label)
+
+
 class TextgridTier():
     
     
     def __init__(self, name, entryList, tierType, minT=None, maxT=None):
+        
+        # Prevent poorly-formed textgrids from being created
+        for entry in entryList:
+            if float(entry[0]) > float(entry[1]):
+                print "Anomaly: startTime=%f, stopTime=%f, label=%s" % (entry[0], entry[1], entry[2])
+            assert(float(entry[0]) < float(entry[1]))
+
+        
+        # Remove whitespace
+        tmpEntryList = []
+        for start, stop, label in entryList:
+            tmpEntryList.append( (start, stop, label.strip()))
+        entryList = tmpEntryList
+        
         self.name = name
         self.entryList = entryList
         self.tierType = tierType
         
         if minT != None and maxT != None:
-            pass # Do nothing
+            if entryList == None or entryList == []:
+                entryList.append( [minT, maxT, ""] )
         elif entryList != None and entryList != []:
             minT = _getMinInTupleList(entryList)
             maxT = _getMaxInTupleList(entryList)
         else:
+            # Need to have some timing information to create a textgrid tier
             raise TimelessTextgridTierException()
             
         self.minTimestamp = minT
         self.maxTimestamp = maxT
         
-        for entry in entryList:
-            assert(float(entry[0]) < float(entry[1]))
-            if float(entry[0]) > float(entry[1]):
-                print "Annomoly: startTime=%f, stopTime=%f" % (entry[0], entry[1])
+        # If an entry list contains "holes"-- fill them in
+        self.entryList = self._fillInBlanks("", self.minTimestamp, self.maxTimestamp)
     
     
     def insertInterval(self, startTime, endTime, label):
@@ -194,11 +219,7 @@ class TextgridTier():
         return duration
     
 
-    def fillInBlanks(self, blankLabel, startTime=None, endTime=None):
-        '''
-        Fills-in an improperly made textgrid with blank entries
-        '''
-        
+    def _fillInBlanks(self, blankLabel, startTime=None, endTime=None):
         if startTime == None:
             startTime = self.minTimestamp
             
@@ -231,11 +252,22 @@ class TextgridTier():
             print newEntryList[-1][1], endTime
         assert( float(newEntryList[-1][1]) <= float(endTime) )
         if float(newEntryList[-1][1]) < float(endTime):
-            newEntryList.append( (newEntryList[-1][1], endTime, blankLabel) )    
+            newEntryList.append( (newEntryList[-1][1], endTime, blankLabel) ) 
+
+        newEntryList.sort()
+
+        return newEntryList
+    
+
+    def fillInBlanks(self, blankLabel, startTime=None, endTime=None):
+        '''
+        Fills-in an improperly made textgrid with blank entries
+        '''
+        newEntryList = self._fillInBlanks(blankLabel, startTime, endTime)
         
         newTier = TextgridTier(self.name, newEntryList, self.tierType)
         
-        newTier.sort()
+        return newTier
         return newTier
     
     
@@ -386,6 +418,9 @@ class TextgridTier():
                     print 'F: ', matchedEntry
                 newEntryList.append(matchedEntry)
 
+        if len(newEntryList) == 0:
+            newEntryList.append( (0, cropEnd-cropStart, ""))
+
         # Create subtier
         subTier = TextgridTier(self.name, newEntryList, self.tierType)
         return subTier, cutTStart, cutTWithin, cutTEnd, firstIntervalKeptProportion, lastIntervalKeptProportion
@@ -516,7 +551,10 @@ class Textgrid():
         
         
     def addTierByList(self, name, tierEntryList, tierType, tierIndex=None):
-        tierEntryList = [(float(start), float(end), label) for start, end, label in tierEntryList ]
+        try:
+            tierEntryList = [(float(start), float(end), label) for start, end, label in tierEntryList ]
+        except ValueError:
+            raise BadIntervalError(start, end, label)
         newTier = TextgridTier(name, tierEntryList, tierType)
         self.addTier(newTier, tierIndex)
             
@@ -752,7 +790,7 @@ class Textgrid():
 #                     newTG[tierName] = appendTier
 
 
-def openTextGrid(fnFullPath, tossSilence):
+def openTextGrid(fnFullPath):
     
     try:
         data = codecs.open(fnFullPath, "rU", encoding="utf-16").read()
@@ -763,14 +801,14 @@ def openTextGrid(fnFullPath, tossSilence):
     caseA = u"ooTextFile short" in data
     caseB = u"item" not in data   
     if caseA or caseB:
-        textgrid = _parseShortTextGrid(data, tossSilence)
+        textgrid = _parseShortTextGrid(data)
     else:
-        textgrid = _parseNormalTextGrid(data, tossSilence)
+        textgrid = _parseNormalTextGrid(data)
         
     return textgrid
 
 
-def _parseNormalTextGrid(data, tossSilence):
+def _parseNormalTextGrid(data):
     '''
     Reads a normal textgrid
     '''
@@ -790,10 +828,10 @@ def _parseNormalTextGrid(data, tossSilence):
         
         # Get tier name
         tierName = header.split("name = ")[1].split("\n", 1)[0]
-        tierName = tierName.strip()
-        tierName = tierName.replace('"', '')
+        tierName = tierName.strip()[1:-1]
+#         tierName = tierName.replace('"', '')
         
-        tierEntryList = processIntervalTier(tierData, tossSilence)
+        tierEntryList = processIntervalTier(tierData)
         if tierEntryList == []:
             print "Empty tier.  Not sure how to handle this at the moment.  Skipping"
             continue
@@ -802,7 +840,7 @@ def _parseNormalTextGrid(data, tossSilence):
     return newTG
     
 
-def _parseShortTextGrid(data, tossSilence):
+def _parseShortTextGrid(data):
     '''
     Reads a short textgrid file
     '''
@@ -814,26 +852,19 @@ def _parseShortTextGrid(data, tossSilence):
     for tierData in tierList:
         tierData = tierData.strip()
         tierDataList = tierData.split("\n")
-        tierName = tierDataList.pop(0).replace('"', '')
+#         tierName = tierDataList.pop(0).replace('"', '')
+        tierName = tierDataList.pop(0)[1:-1]
         startTime = tierDataList.pop(0)
         endTime = tierDataList.pop(0)
         n = tierDataList.pop(0)
         
         startTimeList = [float(time.strip()) for time in tierDataList[0::3]]
         endTimeList = [float(time.strip()) for time in tierDataList[1::3]]
-        textList = [text.replace('"', '').strip() for text in tierDataList[2::3]]
-        
-        newTextList = []
-        for text in textList:
-            if text == 'sp':
-                text = ''
-            newTextList.append(text)
-        textList = newTextList
+        textList = [text[1:-1] for text in tierDataList[2::3]]
+#         textList = [text.replace('"', '').strip() for text in tierDataList[2::3]]
         
         tierEntryList = []
         for triTuple in zip(startTimeList, endTimeList, textList):
-            if tossSilence == True and triTuple[2] == '':
-                continue
             tierEntryList.append(triTuple)
             
 
@@ -842,7 +873,7 @@ def _parseShortTextGrid(data, tossSilence):
     return newTG
 
 
-def processIntervalTier(tierData, tossSilence):
+def processIntervalTier(tierData):
     # Extract segment lengths and values
     tierEntryList = []
     segmentDataList = tierData.split("intervals")[1:]
@@ -855,12 +886,10 @@ def processIntervalTier(tierData, tossSilence):
             key, value = row.split("=", 1)
             key = key.strip()
             value = value.strip()
-            lineDict[key] = value
-        
-        # Clean up results
-        lineDict["text"] = lineDict["text"].replace('"', '')
-        if (tossSilence == True and lineDict["text"] == '') or (tossSilence == True and lineDict["text"] == 'sp'):
-            continue
+            lineDict[key] = value.replace('"', '')
+#         
+#         # Clean up results
+#         lineDict["text"] = lineDict["text"].replace('"', '')
         
         tierEntryList.append( [lineDict[key] for key in ["xmin", "xmax", "text",]] )
         

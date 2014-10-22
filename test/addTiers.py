@@ -12,8 +12,8 @@ from pypraat import praatIO
 
 path = join('.', "files")
 
-tgPhones = praatIO.openTextGrid(join(path, "bobby_phones.TextGrid"), tossSilence=False)
-tgWords = praatIO.openTextGrid(join(path, "bobby_words.TextGrid"), tossSilence=False)
+tgPhones = praatIO.openTextGrid(join(path, "bobby_phones.TextGrid"))
+tgWords = praatIO.openTextGrid(join(path, "bobby_words.TextGrid"))
 
 tgPhones.addTier(tgWords.tierDict["word"])
 tgPhones.save(join(path, "bobby.TextGrid"))

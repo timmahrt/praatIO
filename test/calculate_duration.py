@@ -17,7 +17,7 @@ from pypraat import praatIO
 path = join(".", "files")
 for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid",
            "mary.TextGrid"]:
-    tg = praatIO.openTextGrid(join(path, fn), tossSilence=True)
+    tg = praatIO.openTextGrid(join(path, fn))
     name = os.path.splitext(fn)[0]
     
     # Get the durations for each tier
