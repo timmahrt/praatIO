@@ -12,7 +12,7 @@ from os.path import join
 import wave
 import audioop
 
-from pypraat import praatIO
+import praatio
 
 
 def extractSubwav(fn, outputFN, startT, endT, singleChannelFlag):
@@ -48,7 +48,7 @@ for wavFN, tgFN in [("bobby.wav", "bobby_words.TextGrid"),
                     ("mary.wav", "mary.TextGrid")]:
     print tgFN
     fullPath = join(path, tgFN)
-    tg = praatIO.openTextGrid(fullPath)
+    tg = praatio.openTextGrid(fullPath)
     tier = tg.tierDict["word"]
     name = os.path.splitext(wavFN)[0]
     for i, intervalList in enumerate(tier.entryList):

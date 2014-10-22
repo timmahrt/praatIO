@@ -8,12 +8,12 @@ Adds two tiers to the same textgrid
 
 from os.path import join
 
-from pypraat import praatIO
+import praatio
 
 path = join('.', "files")
 
-tgPhones = praatIO.openTextGrid(join(path, "bobby_phones.TextGrid"))
-tgWords = praatIO.openTextGrid(join(path, "bobby_words.TextGrid"))
+tgPhones = praatio.openTextGrid(join(path, "bobby_phones.TextGrid"))
+tgWords = praatio.openTextGrid(join(path, "bobby_words.TextGrid"))
 
 tgPhones.addTier(tgWords.tierDict["word"])
 tgPhones.save(join(path, "bobby.TextGrid"))
