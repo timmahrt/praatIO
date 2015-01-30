@@ -365,7 +365,6 @@ class TextgridTier():
         cutTEnd = 0
         firstIntervalKeptProportion = 0
         lastIntervalKeptProportion = 0
-        copy.deepcopy(self.entryList)
         
         for entry in self.entryList:
             matchedEntry = None
