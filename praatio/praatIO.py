@@ -16,14 +16,6 @@ from os.path import join
 INTERVAL_TIER = "IntervalTier"
 
 
-def _getMinInTupleList(timestampList):
-    return min([float(subList[0]) for subList in timestampList])
-
-
-def _getMaxInTupleList(timestampList):
-    return max([float(subList[1]) for subList in timestampList])
-
-
 def _morphFunc(fromTier, toTier):
     for fromEntry, toEntry in zip(fromTier.entryList, toTier.entryList):
         
@@ -132,13 +124,10 @@ class TextgridTier():
         self.entryList = entryList
         self.tierType = tierType
         
-        if minT != None and maxT != None:
-            if entryList == None or entryList == []:
-                entryList.append( [minT, maxT, ""] )
-        elif entryList != None and entryList != []:
-            minT = _getMinInTupleList(entryList)
-            maxT = _getMaxInTupleList(entryList)
-        else:
+        if entryList != None and entryList != []:
+            minT = min([float(subList[0]) for subList in entryList])
+            maxT = max([float(subList[1]) for subList in entryList])
+        elif minT == None or maxT == None:
             # Need to have some timing information to create a textgrid tier
             raise TimelessTextgridTierException()
             
