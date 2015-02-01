@@ -14,6 +14,7 @@ from os.path import join
 
 # Can only handle interval tiers at the moment
 INTERVAL_TIER = "IntervalTier"
+POINT_TIER = "TextTier"
 
 
 def _morphFunc(fromTier, toTier):
@@ -68,23 +69,61 @@ def _manipulate(tier, iterateFunc):
         
         adjustAmount += tmpAdjustAmount
         
-        adjustedEntryList.append( [adjustedStart, adjustedEnd, fromLabel] )
-        
-    adjustedTier = TextgridTier(tier.name, adjustedEntryList, tier.tierType)           
+        adjustedEntryList.append([adjustedStart, adjustedEnd, fromLabel])          
     
-    return adjustedTier
+    return tier.newTier(tier.name, adjustedEntryList) 
 
 
-def _intervalOverlapCheck(interval, cmprInterval):
-    '''Checks whether two intervals overlap'''
+def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0, 
+                         timeThreshold=0, boundaryInclusive=False):
+    '''
+    Checks whether two intervals overlap
+    
+    If percentThreshold is greater than 0, then if the intervals overlap, they
+        must overlap by at least this threshold
+    
+    If timeThreshold is greater than 0, then if the intervals overlap, they
+        must overlap by at least this threshold
+        
+    If boundaryInclusive is true, then two intervals are considered to overlap 
+        if they share a boundary
+    '''
     
     startTime, endTime, label = interval
     cmprStartTime, cmprEndTime, cmprLabel = cmprInterval
     
-    return (float(startTime) <= float(cmprEndTime) and 
-            float(endTime) >= float(cmprStartTime))
+    overlapTime = max(0, min(endTime, cmprEndTime) - max(startTime, cmprStartTime))
+    overlapFlag = overlapTime > 0
+    
+    # Is the overlap over a certain percent?
+    percentOverlapFlag = False
+    if percentThreshold > 0 and overlapFlag:
+        totalTime = max(endTime, cmprEndTime) - min(startTime, cmprStartTime)
+        percentOverlap = overlapTime / float(totalTime)
+        
+        percentOverlapFlag = percentOverlap >= percentThreshold
+    
+    # Is the overlap more than a certain threshold?
+    timeOverlapFlag = False
+    if timeThreshold > 0 and overlapFlag:
+        timeOverlapFlag = overlapTime > timeThreshold
+        
+    overlapFlag = overlapFlag or percentOverlapFlag or timeOverlapFlag
+    
+    return overlapFlag
 
 
+class TextgridCollisionException(Exception):
+    
+    def __init__(self, tierName, insertInterval, collisionList):
+        self.tierName = tierName
+        self.insertInterval = insertInterval
+        self.collisionList = collisionList
+        
+    def __str__(self):
+        return "Attempted to insert interval %s into tier %s of textgrid but overlapping entries %s already exist" % (str(self.insertInterval), tierName, str(self.collisionList))
+    
+    
 class TimelessTextgridTierException(Exception):
     
     def __str__(self):
@@ -102,17 +141,251 @@ class BadIntervalError(Exception):
         return "Problem with interval--could not create textgrid (%s,%s,%s)" % (self.start, self.stop, self.label)
 
 
-class TextgridTier():
+
+class TextgridTier(object):
     
     
-    def __init__(self, name, entryList, tierType, minT=None, maxT=None):
+    def __init__(self, name, entryList):
+        self.name = name
+        self.entryList = entryList
+        
+
+    def appendTier(self, tier, timeRelativeFlag):
+        
+        if timeRelativeFlag == True:
+            appendTier = tier.editTimestamps(self.maxTimestamp, self.maxTimestamp, allowOvershoot=True)
+        else:
+            appendTier = tier
+            
+        assert(self.tierType == tier.tierType)
+        
+        entryList = self.entryList + appendTier.entryList
+        entryList.sort()
+        
+        return self.newTier(entryList)
+
+
+    def deleteEntry(self, entry):
+        '''Removes an entry from the entryList'''
+        self.entryList.pop(self.entryList.index(entry))
+        
+    
+    def editLabels(self, editFunc):
+        
+        newEntryList = []
+        for entry in self.entryList:
+            entry[-1] = editFunc(entry[-1])
+            newEntryList.append(entry)
+    
+        newTier = self.newTier(self.name, newEntryList)
+            
+        return newTier   
+    
+
+    def find(self, matchLabel, substrMatchFlag=False):
+        '''
+        Returns all intervals that match the given label
+        '''
+        returnList = []
+        for entry in self.entryList:
+            if not substrMatchFlag:
+                if entry[-1] == matchLabel:
+                    returnList.append(entry)
+            else:
+                if matchLabel in entry[-1]:
+                    returnList.append(entry)
+        
+        return returnList
+    
+    
+    def findRE(self, matchLabel):
+        '''
+        Returns all intervals that match the given label, using regular expressions
+        '''
+        returnList = []
+        for entry in self.entryList:
+            matchList = re.findall(matchLabel, entry[-1], re.I)
+            if matchList != []:
+                returnList.append(entry)
+        
+        return returnList
+    
+
+    def getAsText(self):
+        '''Prints each entry in the tier on a separate line w/ timing info'''
+        text = ""
+        text += '"%s"\n' % self.tierType
+        text += '"%s"\n' % self.name
+        text += '%s,%s,%s\n' % (self.minTimestamp, self.maxTimestamp, len(self.entryList))
+        
+        for entry in self.entryList:
+            text += ",".join([str(val) for val in entry]) + "\n"
+            
+        return text
+    
+    
+    def getDuration(self):
+        '''Returns the duration of the tier'''
+        return self.maxTimestamp - self.minTimestamp
+
+    
+    def _newTier(self, name, entryList):
+        '''Returns a new instance of the same type of tier as self'''
+        raise NotImplementedError()
+    
+    
+    def sort(self):
+        '''Sorts the entries in the entryList'''
+        self.entryList.sort()
+        
+
+class PointTier(TextgridTier):
+    
+    tierType = POINT_TIER
+    
+    def __init__(self, name, entryList, minT=None, maxT=None):
+        self.name = name
+        self.entryList = entryList
+        
+        if minT == None:
+            minT = min([time for time, label in entryList])
+        if maxT == None:
+            maxT = max([time for time, label in entryList])
+        
+        self.minTimestamp = minT
+        self.maxTimestamp = maxT
+
+
+    def crop(self, cropStart, cropEnd):
+        '''
+        Creates a new tier containing all entries that fit inside a new interval
+        '''
+        newEntryList = []
+        
+        for entry in self.entryList:
+            timestamp = entry[0]
+            
+            if timestamp >= cropStart and timestamp <= cropEnd:
+                newEntryList.append(entry)
+
+        # Create subtier
+        subTier = PointTier(self.name, newEntryList, cropStart, cropEnd)
+        return subTier
+
+
+    def editTimestamps(self, offset, allowOvershoot=False):
+        '''
+        Modifies all timestamps by a constant amount
+        
+        If allowOvershoot is True, an interval can go beyond the bounds
+        of the textgrid 
+        '''
+        
+        newEntryList = []
+        for timestamp, label in self.entryList:
+            
+            newTimestamp = timestamp + offset
+            if not allowOvershoot:
+                assert(newTimestamp > self.minTimestamp)
+                assert(newTimestamp <= self.maxTimestamp)
+            
+            newEntryList.append( (newTimestamp, label) )
+        
+        # Determine new min and max timestamps
+        newMin = min([self.minTimestamp, _getMaxInTupleList(newEntryList)])
+        newMax = max([self.maxTimestamp, _getMaxInTupleList(newEntryList)])
+        
+        if newMin > self.minTimestamp:
+            newMin = self.minTimestamp
+        
+        if newMax < self.maxTimestamp:
+            newMax = self.maxTimestamp
+        
+        return PointTier(self.name, newEntryList, newMin, newMax)
+    
+    
+    def getEntries(self, start=None, stop=None, boundaryInclusive=True):
+        '''
+        Get all entries for the included range
+        '''
+        
+        if start == None:
+            start = self.minTimestamp
+        
+        if stop == None:
+            end = self.maxTimestamp
+        
+        returnList = []
+        for entry in self.entryList:
+            if boundaryInclusive == True and (entry[0] == start or entry[0] == stop):
+                returnList.append(entry)
+            elif entry[0] > start and entry[0] < stop:
+                returnList.append(entry)
+        
+        return returnList
+    
+    
+    def insert(self, entry, warnFlag, collisionCode=None):
+        '''
+        inserts an interval into the tier
+        
+        collisionCode: in the event that intervals exist in the insertion area,
+                        one of three things may happen
+        - 'replace' - existing items will be removed
+        - 'merge' - inserting item will be fused with existing items
+        - None or any other value - TextgridCollisionException is thrown
+        
+        if warnFlag is True and collisionCode is not None, 
+        the user is notified of each collision
+        '''
+        timestamp, label = entry
+        
+        matchIndex = None
+        for i, searchEntry in self.getEntries():
+            if searchEntry[0] == entry[0]:
+                matchIndex = i
+                break
+        
+        if matchIndex == None: 
+            self.entryList.append(entry)
+            
+        elif collisionCode.lower() == "replace":
+            self.delete(self.entryList[i])
+            self.entryList.append(entry)
+            
+        elif collisionCode.lower() == "merge":
+            oldEntry = self.entryList[i]
+            newEntry = (timestmap, "-".join([oldEntry[-1], label]))
+            self.delete(self.entryList[i])
+            self.entryList.append(entry)
+            
+        else:
+            raise TextgridCollisionException(tierName, entry, matchList)
+            
+        self.entryList.sort()
+        
+        if len(matchList) != 0 and warnFlag == True:
+            print "Collision warning for %s with items %s of tier %s" % (str(entry),
+                                                                       str(matchList),
+                                                                       self.name)
+    
+    
+    def newTier(self, name, entryList):
+        return PointTier(name, entryList)
+    
+
+        
+class IntervalTier(TextgridTier):
+    
+    tierType = INTERVAL_TIER
+    
+    def __init__(self, name, entryList, minT=None, maxT=None):
         
         # Prevent poorly-formed textgrids from being created
         for entry in entryList:
             if float(entry[0]) > float(entry[1]):
                 print "Anomaly: startTime=%f, stopTime=%f, label=%s" % (entry[0], entry[1], entry[2])
             assert(float(entry[0]) < float(entry[1]))
-
         
         # Remove whitespace
         tmpEntryList = []
@@ -122,7 +395,6 @@ class TextgridTier():
         
         self.name = name
         self.entryList = entryList
-        self.tierType = tierType
         
         if entryList != None and entryList != []:
             minT = min([float(subList[0]) for subList in entryList])
@@ -133,144 +405,11 @@ class TextgridTier():
             
         self.minTimestamp = minT
         self.maxTimestamp = maxT
-        
-        # If an entry list contains "holes"-- fill them in
-        self.entryList = self._fillInBlanks("", self.minTimestamp, self.maxTimestamp)
-    
-    
-    def insertInterval(self, startTime, endTime, label):
-        interval = (startTime, endTime, label)
-        
-        # True if any existing times overlap with the new insertion time
-        matchList = [ _intervalOverlapCheck(interval, oldInterval) for oldInterval in self.entryList]
-        print matchList
-        print matchList.count(True)
-        print self.entryList[matchList.index(True)]
-        assert(matchList.count(True) == 0 or (matchList.count(True) == 1 and self.entryList[matchList.index(True)][2] == ""))
-        
-        # For inserting into an 'empty' textgrid
-        if matchList.count(True) == 0:
-            self.entryList.append([startTime, endTime, label])
-            self.entryList.sort()
-            
-        # For inserting into a textgrid with content
-        elif matchList.count(True) == 1:
-            i = matchList.index(True)
-            oldStart, oldStop, oldLabel = self.entryList[i]
-        
-            subEntryList = []
-            if oldStart != startTime:
-                subEntryList.append([oldStart, startTime, ""])
-            subEntryList.append([startTime, endTime, label])
-            if oldStop != endTime:
-                subEntryList.append([endTime, oldStop, ""]) 
-    
-            newEntryList = self.entryList[:i] + subEntryList + self.entryList[i+1:]
-            self.entryList = newEntryList
-            
-    
-    def getDuration(self):
-        return self.maxTimestamp - self.minTimestamp
-    
-    
-    def getSegmentDurations(self):
-        return [float(subList[1]) - float(subList[0]) for subList in self.entryList]
-    
-        
-    def getText(self):
-        '''
-        Prints each entry in the tier on a separate line w/ timing info
-        '''
-        text = ""
-        text += '"%s"\n' % self.tierType
-        text += '"%s"\n' % self.name
-        text += '%s\n%s\n%s\n' % (self.minTimestamp, self.maxTimestamp, len(self.entryList))
-        
-        for startTime, endTime, label in self.entryList:
-            text += '%s\n%s\n"%s"\n' % (startTime, endTime, label)
-            
-        return text
 
 
-    def getIntervals(self, includeSilence, filterFunc=None):
-        extractList = []
-        for start, end, label in self.entryList:
-            if (not includeSilence) and (label != "" and label != "sp"):
-                if filterFunc == None or (filterFunc != None and filterFunc(label)):
-                    extractList.append((start,end,label))
-                    
-        return extractList
-    
-
-    def getSpeakingTime(self, blankLabel=None):
-        '''
-        Calculates the combined duration of every interval that is not silence
-        '''
-        
-        if blankLabel == None:
-            blankLabel = ""
-        
-        duration = 0.0
-        for start, end, label in self.entryList:
-            if label != blankLabel:
-                duration += end - start
-        
-        return duration
-    
-    
-    def editLabels(self, editFunc):
-        
-        newEntryList = []
-        for start, stop, label in self.entryList:
-            newEntryList.append( (start, stop, editFunc(label)))
-    
-        newTier = TextgridTier(self.name, newEntryList, self.tierType)
-            
-        return newTier
-    
-    
-    def sort(self):
-        self.entryList.sort()
-        
-
-    def morph(self, targetTier):
-        return _manipulate(self, functools.partial(_morphFunc, self, targetTier))
-    
-    
-    def manipulate(self, modFunc, filterFunc):
-        return _manipulate(self, functools.partial(_manipulateFunc, self, modFunc, filterFunc))
-    
-    
-    def find(self, matchLabel, substrMatchFlag=False):
-        '''
-        Returns all intervals that match the given label
-        '''
-        returnList = []
-        for start, stop, label in self.entryList:
-            if not substrMatchFlag:
-                if label == matchLabel:
-                    returnList.append((start, stop, label))
-            else:
-                if matchLabel in label:
-                    returnList.append((start, stop, label))
-        
-        return returnList
-    
-    
-    def reSearch(self, matchLabel):
-        returnList = []
-        for start, stop, label in self.entryList:
-            matchList = re.findall(matchLabel, label, re.I)
-            if matchList != []:
-                returnList.append( (start, stop, label) )
-                print label
-        
-        return returnList
-    
-            
     def crop(self, cropStart, cropEnd, strictFlag, softFlag):
         '''
-        Creates a new tier containing all entries that fit inside a new, given interval
+        Creates a new tier containing all entries that fit inside a new interval
         
         If strictFlag = True, only intervals wholly contained by the crop period
             will be kept
@@ -304,15 +443,11 @@ class TextgridTier():
             # within the superEntry
             if intervalStart >= cropStart and intervalEnd <= cropEnd:
                 matchedEntry = entry
-                if matchedEntry[0] >= matchedEntry[1]:
-                    print 'A: ', matchedEntry
             
             # If it is only partially contained within the superEntry AND 
             # inclusion is 'soft', include it anyways
             elif softFlag and (intervalStart >= cropStart or intervalEnd <= cropEnd):
                 matchedEntry = entry
-                if matchedEntry[0] >= matchedEntry[1]:
-                    print 'B: ', matchedEntry
             
             # If not strict, include partial tiers on the edges
             # -- regardless, record how much information was lost
@@ -328,8 +463,6 @@ class TextgridTier():
 
                 if not strictFlag:
                     matchedEntry = (intervalStart, cropEnd, intervalLabel)
-                    if matchedEntry[0] >= matchedEntry[1]:
-                        print 'C: ', matchedEntry
                     
                 else:
                     cutTWithin += cropEnd - cropStart
@@ -340,8 +473,6 @@ class TextgridTier():
                 firstIntervalKeptProportion = (intervalEnd - cropStart) / (intervalEnd - intervalStart)
                 if not strictFlag:
                     matchedEntry = [cropStart, intervalEnd, intervalLabel]
-                    if matchedEntry[0] >= matchedEntry[1]:
-                        print 'D: ', matchedEntry
                 else:
                     cutTWithin += cropEnd - cropStart
 
@@ -349,37 +480,158 @@ class TextgridTier():
             elif intervalStart <= cropStart and intervalEnd >= cropEnd:
                 if not strictFlag:
                     matchedEntry = (cropStart, cropEnd, intervalLabel)
-                    if matchedEntry[0] >= matchedEntry[1]:
-                        print 'E: ', matchedEntry
                 else:
                     cutTWithin += cropEnd - cropStart
                         
             if matchedEntry != None:
-                if matchedEntry[0] >= matchedEntry[1]:
-                    print 'F: ', matchedEntry
                 newEntryList.append(matchedEntry)
 
         if len(newEntryList) == 0:
             newEntryList.append( (0, cropEnd-cropStart, ""))
 
         # Create subtier
-        subTier = TextgridTier(self.name, newEntryList, self.tierType)
+        subTier = IntervalTier(self.name, newEntryList, cropStart, cropEnd)
         return subTier, cutTStart, cutTWithin, cutTEnd, firstIntervalKeptProportion, lastIntervalKeptProportion
+        
+         
+    def editTimestamps(self, startOffset, stopOffset, allowOvershoot=False):
+        '''
+        Modifies all timestamps by a constant amount
+        
+        Can modify the interval start independent of the interval end
+        
+        If allowOvershoot is True, an interval can go beyond the bounds
+        of the textgrid 
+        '''
+        
+        newEntryList = []
+        for start, stop, label in self.entryList:
+            
+            newStart = startOffset+start            
+            newStop = stopOffset + stop
+            if not allowOvershoot:
+                assert(newStart > self.minTimestamp)
+                assert(newStop <= self.maxTimestamp)
+            
+            newEntryList.append( (newStart, newStop, label) )
+        
+        # Determine new min and max timestamps
+        newMin = min([self.minTimestamp, _getMaxInTupleList(newEntryList)])
+        newMax = max([self.maxTimestamp, _getMaxInTupleList(newEntryList)])
+            
+        if newMin > self.minTimestamp:
+            newMin = self.minTimestamp
+        
+        if newMax < self.maxTimestamp:
+            newMax = self.maxTimestamp
+        
+        return IntervalTier(self.name, newEntryList, self.tierType, newMin, newMax)
     
     
-    def appendTier(self, tier, timeRelativeFlag):
+    def getEntries(self, start=None, stop=None, boundaryInclusive=False):
         
-        entryList = copy.deepcopy(self.entryList)
-        for start, stop, label in tier.entryList:
+        if start == None:
+            start = self.minTimestamp
+        
+        if stop == None:
+            end = self.maxTimestamp
+        
+        returnList = []
+        for entry in self.entryList:
+            if intervalOverlapCheck(entry, (start, stop, ""),
+                                    boundaryInclusive=boundaryInclusive):
+                returnList.append(entry)
+        
+        return returnList
+    
+    
+    def getDurationOfIntervals(self):
+        return [float(subList[1]) - float(subList[0]) for subList in self.entryList]
+    
+    
+    def getNonEntries(self, includeSilence):
+        '''
+        Returns the regions of the textgrid without labels
+        
+        This can include unlabeled segments and regions marked as silent.
+        '''
+        extractList = []
+        entryList = self.getIntervals(not includeSilence)
+        invertedEntryList = [(entryList[i][1], entryList[i+1][0], "") for i in xrange(len(entryList)-1)]
+        
+        if entryList[0][0] > 0:
+            invertedEntryList.insert(0, (0, entryList[0][0], ""))
+        
+        if entryList[-1][1] < self.maxTimestamp:
+            invertedEntryList.append((entryList[-1][1], self.maxTimestamp, ""))
             
-            if timeRelativeFlag == True:
-                entryList.append( (start + self.maxTimestamp, stop + self.maxTimestamp, label) )
-            else:
-                entryList.append( (start, stop, label) )
+        return invertedEntryList
+    
+    
+    def insert(self, entry, warnFlag, collisionCode=None):
+        '''
+        inserts an interval into the tier
+        
+        collisionCode: in the event that intervals exist in the insertion area,
+                        one of three things may happen
+        - 'replace' - existing items will be removed
+        - 'merge' - inserting item will be fused with existing items
+        - None or any other value - TextgridCollisionException is thrown
+        
+        if warnFlag is True and collisionCode is not None, 
+        the user is notified of each collision
+        '''
+        startTime, endTime, label = entry
+        
+        matchList = self.getEntries(startTime, endTime)
+        
+        if len(matchList) == 0: 
+            self.entryList.append(entry)
             
+        elif collisionCode.lower() == "replace":
+            for matchEntry in matchList:
+                self.delete(matchEntry)
+            self.entryList.append(entry)
+            
+        elif collisionCode.lower() == "merge":
+            for matchEntry in matchList:
+                self.delete(matchEntry)
+            matchList.append(entry)
+            matchList.sort() # By starting time
+            
+            newEntry = [min([mStart for mStart, mEnd, mLabel in matchList]), 
+                        max([mEnd for mStart, mEnd, mLabel in matchList]),
+                        "-".join([mLabel for mStart, mEnd, mLabel in matchList])]
+            self.entryList.append(entry)
+            
+        else:
+            raise TextgridCollisionException(tierName, entry, matchList)
+            
+        self.entryList.sort()
         
-        return TextgridTier(self.name, entryList, self.tierType)
+        if len(matchList) != 0 and warnFlag == True:
+            print "Collision warning for %s with items %s of tier %s" % (str(entry),
+                                                                       str(matchList),
+                                                                       self.name)
+
+
+    def manipulate(self, modFunc, filterFunc):
+        '''
         
+        '''
+        return _manipulate(self, functools.partial(_manipulateFunc, self, modFunc, filterFunc))
+    
+    
+    def morph(self, targetTier):
+        '''
+        Makes one interval tier look more like another
+        '''
+        return _manipulate(self, functools.partial(_morphFunc, self, targetTier))
+
+    
+    def newTier(self, name, entryList):
+        return IntervalTier(name, entryList)
+    
         
 class Textgrid():
     
@@ -392,6 +644,79 @@ class Textgrid():
         self.maxTimestamp = None
     
     
+    def addTier(self, tier, tierIndex=None):
+        
+        if tierIndex == None:
+            self.tierNameList.append(tier.name)
+        else:
+            self.tierNameList.insert(tierIndex, tier.name)
+            
+        assert(tier.name not in self.tierDict.keys())
+        self.tierDict[tier.name] = tier
+        
+        minV = tier.minTimestamp
+        if minV < self.minTimestamp or self.minTimestamp == None:
+            self.minTimestamp = minV
+        
+        maxV = tier.maxTimestamp
+        if maxV > self.maxTimestamp or self.maxTimestamp == None:
+            self.maxTimestamp = maxV
+    
+    
+    def appendTextgrid(self, tg, onlyMatchingNames=True):
+        '''
+        Append one textgrid to the end of this one
+        
+        if onlyMatchingNames is False, tiers that don't appear in both
+        textgrids will also appear
+        '''
+        retTG = Textgrid()
+        
+        # First add tiers that are in this tg or both tgs
+        for name in self.tierNameList:
+            sourceTier = self.tierDict[name]
+            
+            if name in self.tierNameList:
+                tier = tg.tierDict[name]
+                tier = sourceTier.appendTier(tier, timeRelativeFlag=True)
+                retTG.addTier(tier)
+            
+            elif onlyMatchingNames == False:
+                retTG.addTier(tier)
+        
+        # Second add tiers that are only in the input tg
+        if onlyMatchingNames == False:
+            for name in tg.tierNameList:
+                
+                if name not in retTG.tierNameList:
+                    tier = tier.offsetTimestamps(self.maxTimestamp, self.maxTimestamp)
+                    retTG.addTier(tier)
+        
+        return retTG
+
+
+    def crop(self, strictFlag, softFlag, startTime=None, endTime=None):
+        
+        if startTime == None:
+            startTime = self.minTimestamp
+            
+        if startTime == None:
+            endTime = self.maxTimestamp
+            
+        newTG = Textgrid()
+        for tierName in self.tierNameList:
+            tier = self.tierDict[tierName]
+            if tier.tierType == INTERVAL_TIER:
+                newTier = tier.crop(startTime, endTime, strictFlag, softFlag)[0]
+            elif tier.tierType == POINT_TIER:
+                newTier = tier.crop(startTime, endTime)
+            newTier.sort()
+            
+            newTG.addTier(newTier)
+        
+        return retTG
+
+
     def getContainedLabels(self, superTier):
         '''
         Returns a list of tiers that fall under each label in the given superTier
@@ -424,148 +749,36 @@ class Textgrid():
         return returnList
     
     
-    def addTier(self, tier, tierIndex=None):
-        
-        if tierIndex == None:
-            self.tierNameList.append(tier.name)
-        else:
-            self.tierNameList.insert(tierIndex, tier.name)
-        self.tierDict[tier.name] = tier
-        
-        minV = tier.minTimestamp
-        if minV < self.minTimestamp or self.minTimestamp == None:
-            self.minTimestamp = minV
-        
-        maxV = tier.maxTimestamp
-        if maxV > self.maxTimestamp or self.maxTimestamp == None:
-            self.maxTimestamp = maxV
-        
-        
-    def addTierByList(self, name, tierEntryList, tierType, tierIndex=None):
-        try:
-            tierEntryList = [(float(start), float(end), label) for start, end, label in tierEntryList ]
-        except ValueError:
-            raise BadIntervalError(start, end, label)
-        newTier = TextgridTier(name, tierEntryList, tierType)
-        self.addTier(newTier, tierIndex)
-    
-    
-    def appendTG(self, tg, onlyMatchingNames=True):
+    def getSubtextgrid(self, superTierName, qualifyingFunc, strictFlag):
         '''
-        Append one textgrid to the end of this one
+        Returns intervals that are contained within qualifying superTier intervals
         
-        if onlyMatchingNames is false, tiers that don't appear in both tgs
-        will also appear
+        For labeled regions in the super tier that pass the qualifyFunc,
+        labeled intervals in the 
+        
+        If /strictFlag/ is True, only intervals wholly contained within the
+        textgrid are included.  Otherwise, partially-contained intervals
+        will also be included (but truncated to fit within the super tier).
         '''
-        retTG = Textgrid()
-        
-        # First add tiers that are in this tg or both tgs
-        for name in self.tierNameList:
-            sourceTier = self.tierDict[name]
-            
-            if name in self.tierNameList:
-                tier = tg.tierDict[name]
-                tier = sourceTier.appendTier(tier, timeRelativeFlag=True)
-                retTG.addTier(tier)
-            
-            elif onlyMatchingNames == False:
-                retTG.addTier(tier)
-        
-        # Second add tiers that are only in the input tg
-        if onlyMatchingNames == False:
-            for name in tg.tierNameList:
-                
-                if name not in retTG.tierNameList:
-                    tier = tier.offsetTimestamps(self.maxTimestamp, self.maxTimestamp)
-                    retTG.addTier(tier)
-        
-        return retTG
-                
-    
-    def removeTier(self, name):
-        self.tierNameList.pop(self.tierNameList.index(name))
-        del self.tierDict[name]
-        
-        
-    def removeLabels(self, label, tierNameList=None):
-        '''Remove labels from tiers'''
-        
-        # Remove from all tiers if no tiers are specified
-        if tierNameList == None:
-            tierNameList = self.tierNameList
+
+        tierDataDict = {superTierName:self.dataDict[superTierName]}
+        for superEntry in superTier.entryList:
+            if qualifyFunc(superEntry):
+                subTG = self.crop(strictFlag, False, superEntry[0], superEntry[1])
+                for tierName in subTG.tierNameList:
+                    if tierName == superTierName:
+                        continue
+                    tierDataDict.setdefault(subTierName, [])
+                    tierDataDict[subTierName].append(subEntry)
         
         tg = Textgrid()
         for tierName in self.tierNameList:
-            tier = self.tierDict[tierName]
-            
-            if tierName in tierNameList:
-                newEntryList = [entry for entry in tier.entryList if entry[2] != label]
-                tier = TextgridTier(tierName, newEntryList, tier.tierType)
-            
+            tier = self.tierDict[tierName](tierName, tierDataDict[tierName])
             tg.addTier(tier)
-        
+            
         return tg
-        
-    
-    def renameTier(self, oldName, newName):
-        oldTier = self.tierDict[oldName]
-        tierIndex = self.tierNameList.index(oldName)
-        self.removeTier(oldName)
-        self.addTierByList(newName, oldTier.entryList, oldTier.tierType, tierIndex)
-        
-        
-    def replaceTier(self, name, newTierEntryList):
-        oldTier = self.tierDict[name]
-        tierIndex = self.tierNameList.index(name)
-        self.removeTier(name)
-        self.addTierByList(name, newTierEntryList, oldTier.tierType, tierIndex)
-        
-    
-    def sort(self):
-        for name in self.tierNameList:
-            self.tierDict[name].sort()
-            
-            
-    def save(self, fn):
-        
-        # Kindof inelegant
-        tmpTG = self.fillInBlanks()
-        self.tierDict = tmpTG.tierDict
-        self.sort()
-        
-        outputTxt = ""
-        outputTxt += 'File type = "ooTextFile short"\n'
-        outputTxt += '"TextGrid"\n\n'
-        outputTxt += "%s\n%s\n" % (self.minTimestamp, self.maxTimestamp)
-        outputTxt += "<exists>\n%d\n" % len(self.tierNameList)
-        
-        for tierName in self.tierNameList:
-            outputTxt += self.tierDict[tierName].getText()
-        
-        codecs.open(fn, "w", encoding="utf-8").write(outputTxt)
 
 
-    def crop(self, strictFlag, softFlag, startTime=None, endTime=None):
-        
-        if startTime == None:
-            startTime = self.minTimestamp
-            
-        if startTime == None:
-            endTime = self.maxTimestamp
-            
-        newTG = Textgrid()
-        for tierName in self.tierNameList:
-            newTier = self.tierDict[tierName].crop(startTime, endTime, strictFlag, softFlag)[0]
-            newTier.sort()
-            
-            newTG.addTier(newTier)
-        
-        retTG = newTG.fillInBlanks()
-        retTG = retTG.setTimeFromZero()
-        
-        return retTG
-
-    
     def mergeTiers(self, includeFunc=None, 
                    tierList=None, preserveOtherTiers=True):
         '''
@@ -593,13 +806,13 @@ class Textgrid():
             
         superEntryList.sort()
         
-        # Do the merge here
+        # Combine overlapping intervals
         i = 0
         while i < len(superEntryList) - 1:
             currentEntry = superEntryList[i]
             nextEntry = superEntryList[i+1]
             
-            if _intervalOverlapCheck(currentEntry, nextEntry):
+            if intervalOverlapCheck(currentEntry, nextEntry):
                 currentStart, currentStop, currentLabel = superEntryList[i]
                 nextStart, nextStop, nextLabel = superEntryList.pop(i+1)
                 
@@ -619,10 +832,7 @@ class Textgrid():
             otherTierList = []
             for tierName in self.tierNameList:
                 if tierName not in tierList:
-                    otherTierList.append(self.tierDict[tierName])
-
-            for tier in otherTierList:
-                tg.addTier(tier)
+                    tg.addTier(self.tierDict[tierName])
 
         # Add merged tier
         tierName = "/".join(tierList)
@@ -632,64 +842,80 @@ class Textgrid():
         return tg
     
     
-    def fillInBlanks(self):
-
+    def offsetTimestamps(self, startOffset, stopOffset):
+        
         tg = Textgrid()
         for tierName in self.tierNameList:
-            
             tier = self.tierDict[tierName]
-            if tier.tierType == INTERVAL_TIER:
-                tier = tier.fillInBlanks("", self.minTimestamp, self.maxTimestamp)
+            tier = tier.offsetTimestamps(startOffset, stopOffset)
             
-            tg.addTier(tier)    
-            
+            tg.addTier(tier)
+        
         return tg
+    
 
-               
-    def getSubtextgrid(self, superTierName, qualifyingFunc, strictFlag):
-        '''
-        Returns intervals that are contained within qualifying superTier intervals
-        
-        Data is returned for all intervals in the subtiers that exist within an
-        interval in the supertier.
-        
-        If /strictFlag/ is True, only intervals wholly contained within the
-        textgrid are included.  Otherwise, partially-contained intervals
-        will also be included (but truncated to fit within the super tier).
-        '''
+    def renameTier(self, oldName, newName):
+        oldTier = self.tierDict[oldName]
+        tierIndex = self.tierNameList.index(oldName)
+        self.removeTier(oldName)
+        self.addTier(oldTier.newTier(newName, oldTier.entryList))
 
-        tierDataDict = {superTierName:self.dataDict[superTierName]}
-        for superEntry in superTier.entryList:
-            if qualifyFunc(superEntry):
-                subTG = self.crop(strictFlag, False, superEntry[0], superEntry[1])
-                for tierName in subTG.tierNameList:
-                    if tierName == superTierName:
-                        continue
-                    tierDataDict.setdefault(subTierName, [])
-                    tierDataDict[subTierName].append(subEntry)
+
+    def removeLabels(self, label, tierNameList=None):
+        '''Remove labels from tiers'''
+        
+        # Remove from all tiers if no tiers are specified
+        if tierNameList == None:
+            tierNameList = self.tierNameList
         
         tg = Textgrid()
         for tierName in self.tierNameList:
-            tier = TextgridTier(tierName, tierDataDict[tierName], INTERVAL_TIER)
-            tg.addTier(tier)
+            tier = self.tierDict[tierName]
             
-        return tg  
+            if tierName in tierNameList:
+                newEntryList = [entry for entry in tier.entryList if entry[2] != label]
+                tier = TextgridTier(tierName, newEntryList, tier.tierType,
+                                    tier.minTimestamp, tier.maxTimestamp)
+            
+            tg.addTier(tier)
         
+        return tg
     
-#     def append(self, tg, timeRelative=False):
-#         
-#         newTG = Textgrid()
-#         
-#         for tierName in tg.tierNameList:
-#             newTier = tg.tierDict[tierName]
-#             if tierName in self.tierNameList:
-#                 newTier = self.tierDict[tierName].appendTier(newTier, timeRelative)
-#             else:
-#                 if timeRelative:
-#                     newTier = newTier.offsetTimestamps(self.maxTimestamp)
-#             
-#                 else:
-#                     newTG[tierName] = appendTier
+    
+    def removeTier(self, name):
+        self.tierNameList.pop(self.tierNameList.index(name))
+        del self.tierDict[name]
+
+
+    def replaceTier(self, name, newTierEntryList):
+        oldTier = self.tierDict[name]
+        tierIndex = self.tierNameList.index(name)
+        self.removeTier(name)
+        self.addTier(oldTier.newTier(name, newTierEntryList))
+        
+            
+    def save(self, fn):
+        
+        # Kindof inelegant
+        tmpTG = self.fillInBlanks()
+        self.tierDict = tmpTG.tierDict
+        self.sort()
+        
+        outputTxt = ""
+        outputTxt += 'File type = "ooTextFile short"\n'
+        outputTxt += '"TextGrid"\n\n'
+        outputTxt += "%s\n%s\n" % (self.minTimestamp, self.maxTimestamp)
+        outputTxt += "<exists>\n%d\n" % len(self.tierNameList)
+        
+        for tierName in self.tierNameList:
+            outputTxt += self.tierDict[tierName].getText()
+        
+        codecs.open(fn, "w", encoding="utf-8").write(outputTxt)
+    
+    
+    def sort(self):
+        for name in self.tierNameList:
+            self.tierDict[name].sort()
 
 
 def openTextGrid(fnFullPath):
@@ -706,7 +932,9 @@ def openTextGrid(fnFullPath):
         textgrid = _parseShortTextGrid(data)
     else:
         textgrid = _parseNormalTextGrid(data)
-        
+    
+    textgrid = textgrid.removeLabels("")
+    
     return textgrid
 
 
@@ -721,26 +949,70 @@ def _parseNormalTextGrid(data):
     
     # Process each tier individually (will be output to separate folders)
     tierList = data.split("item")[1:]
-    for tier in tierList:
-        try:
-            header, tierData = tier.split("intervals", 1)
-        except ValueError:
-            print "Could not process tier -- probably a point tier"
-            continue
+    for tierTxt in tierList:
         
-        # Get tier name
+        if 'class = "IntervalTier"' in tierTxt:
+            tierType = INTERVAL_TIER
+            searchWord = "intervals"
+        else:
+            tierType = POINT_TIER
+            searchWord = "points"
+        
+        # Get tier meta-information
+        header, tierData = tierTxt.split(searchWord, 1)
         tierName = header.split("name = ")[1].split("\n", 1)[0]
         tierName = tierName.strip()[1:-1]
-#         tierName = tierName.replace('"', '')
         
-        tierEntryList = processIntervalTier(tierData)
+        # Get the tier entry list
+        tierEntryList = []
+        labelI = 0
+        if tierType == INTERVAL_TIER:
+            while True:
+                try:
+                    timeStart, timeStartI = _fetchRow(tierData, "xmin = ", labelI)
+                    timeEnd, timeEndI = _fetchRow(tierData, "xmax = ", timeStartI)
+                    label, labelI = _fetchRow(tierData, "text =", timeEndI)
+                except ValueError:
+                    break
+            
+                tierEntryList.append((timeStart, timeEnd, label))
+            tier = IntervalTier(name, tierEntryList)
+        else:
+            header, tierData = tierTxt.split("points", 1)
+            while True:
+                try:
+                    time, timeI = _fetchRow(tierData, "number = ", labelI)
+                    label, labelI = _fetchRow(tierData, "mark =", timeI)
+                except ValueError:
+                    break
+                
+                tierEntryList.append((time, label))
+            tier = PointTier(name, tierEntryList)
+
+
         if tierEntryList == []:
             print "Empty tier.  Not sure how to handle this at the moment.  Skipping"
             continue
-        newTG.addTierByList(tierName, tierEntryList, 'IntervalTier')
+        
+        newTG.addTier(tier)
         
     return newTG
+
+
+def _findAll(txt, subStr):
     
+    indexList = []
+    index = 0
+    while True:
+        try:
+            index = txt.index(subStr, index)
+        except ValueError:
+            break
+        indexList.append(int(index))
+        index += 1
+    
+    return indexList
+
 
 def _parseShortTextGrid(data):
     '''
@@ -750,52 +1022,69 @@ def _parseShortTextGrid(data):
     
     tierList = data.split('"IntervalTier"')[1:]
     
+    intervalIndicies = [(i, True) for i in _findAll(data, '"IntervalTier"')]
+    pointIndicies = [(i, False) for i in _findAll(data, '"TextTier"')]
     
-    for tierData in tierList:
-        tierData = tierData.strip()
-        tierDataList = tierData.split("\n")
-#         tierName = tierDataList.pop(0).replace('"', '')
-        tierName = tierDataList.pop(0)[1:-1]
-        startTime = tierDataList.pop(0)
-        endTime = tierDataList.pop(0)
-        n = tierDataList.pop(0)
+    indexList = intervalIndicies + pointIndicies
+    indexList.append((len(data), None)) # The 'end' of the file
+    indexList.sort()
+    
+    tupleList = [(indexList[i][0], indexList[i+1][0], indexList[i][1]) 
+                 for i in xrange(len(indexList) - 1)]
+    
+    for blockStartI, blockEndI, isInterval in tupleList:
+        tierData = data[blockStartI:blockEndI]
         
-        startTimeList = [float(time.strip()) for time in tierDataList[0::3]]
-        endTimeList = [float(time.strip()) for time in tierDataList[1::3]]
-        textList = [text[1:-1] for text in tierDataList[2::3]]
-#         textList = [text.replace('"', '').strip() for text in tierDataList[2::3]]
+        # First row contains the tier type, which we already know
+        metaStartI = _fetchRow(tierData, '', 0)[1] 
         
-        tierEntryList = []
-        for triTuple in zip(startTimeList, endTimeList, textList):
-            tierEntryList.append(triTuple)
+        # Tier meta-information
+        tierName, tierNameEndI = _fetchRow(tierData, '', metaStartI)
+        tierStartTime, tierStartTimeI = _fetchRow(tierData, '', tierNameEndI)
+        tierEndTime, tierEndTimeI = _fetchRow(tierData, '', tierStartTimeI)
+        tierNumItems, startTimeI = _fetchRow(tierData, '', tierEndTimeI)
+        
+        # Tier entry data
+        entryList = []
+        if isInterval:
+            while True:
+                try:
+                    startTime, endTimeI = _fetchRow(tierData, '', startTimeI)
+                    endTime, labelI = _fetchRow(tierData, '', endTimeI)
+                    label, startTimeI = _fetchRow(tierData, '', labelI)
+                except ValueError:
+                    break
+                
+                entryList.append((startTime, endTime, label))
+                
+            newTG.addTier(IntervalTier(tierName, entryList))
             
-
-        newTG.addTierByList(tierName, tierEntryList, 'IntervalTier')
+        else:
+            while True:
+                try:
+                    time, labelI = _fetchRow(tierData, '', startTimeI)
+                    label, startTimeI = _fetchRow(tierData, '', labelI)
+                except ValueError:
+                    break
+                
+                entryList.append((time, label))
+                
+            newTG.addTier(PointTier(tierName, entryList))
 
     return newTG
 
 
-def processIntervalTier(tierData):
-    # Extract segment lengths and values
-    tierEntryList = []
-    segmentDataList = tierData.split("intervals")[1:]
-    for segment in segmentDataList:
-        
-        segmentList = segment.split("\n", 3)[1:]
-        
-        lineDict = {}
-        for row in segmentList:
-            key, value = row.split("=", 1)
-            key = key.strip()
-            value = value.strip()
-            lineDict[key] = value.replace('"', '')
-#         
-#         # Clean up results
-#         lineDict["text"] = lineDict["text"].replace('"', '')
-        
-        tierEntryList.append( [lineDict[key] for key in ["xmin", "xmax", "text",]] )
-        
-    return tierEntryList
+def _fetchRow(dataStr, searchStr, index):
+    startIndex = dataStr.index(searchStr, index) + len(searchStr)
+    endIndex = dataStr.index("\n", startIndex)
+    
+    word = dataStr[startIndex:endIndex]
+    word = word.strip()
+    if word[0] == '"' and word[-1] == '"':
+        word = word[1:-1]
+    word = word.strip()
+    
+    return word, endIndex + 1
 
 
 def readPitchTier(path, fn):
@@ -817,13 +1106,3 @@ def writePitchTier(path, fn, pitchHeader, pitchDataList):
     open(join(path, fn), "w").write(pitchTxt)
 
 
-
-if __name__ == "__main__":
-    
-    pass
-
-
-
-
-    
-    
