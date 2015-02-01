@@ -773,46 +773,12 @@ class Textgrid():
 
         tg = Textgrid()
         for tierName in self.tierNameList:
-            tg.addTier(self.tierDict[tierName].fillInBlanks("", self.minTimestamp, self.maxTimestamp))    
             
-        return tg
-    
-
-    def findMatchedTGSubset(self, superTierName, qualifyFunc, strictFlag):
-        '''
-        Returns intervals that are contained in qualifying superTier intervals
-        
-        For labeled regions in the super tier that pass the qualifyFunc,
-        labeled intervals in the 
-        
-        If /strictFlag/ is True, only intervals wholly contained within the
-        textgrid are included.  Otherwise, partially-contained intervals
-        will also be included (but truncated to fit within the super tier).
-        '''
-        superTier = self.tierDict[superTierName]
-        
-        newTierNameList = copy.deepcopy(self.tierNameList)
-        newTierNameList.pop(newTierNameList.index(superTierName))
-        
-        for subTierName in newTierNameList:
-            subTier = self.tierDict[subTierName]
-        
-            for superEntry in superTier.entryList:
-                if qualifyFunc(superEntry):
-                    yield superEntry, subTierName, subTier.createTierSubset(superEntry[0], superEntry[1], strictFlag)
-
-
-    def createSubtextgrid(self, superTierName, qualifyingFunc, strictFlag):
-        
-        tierDataDict = {}
-        for superEntry, subTierName, subEntry in self.findMatchedTGSubset(superTierName, qualifyingFunc, strictFlag):
-            tierDataDict.setdefault(subTierName, [])
-            tierDataDict[subTierName].append(subEntry)
-        
-        tg = Textgrid()
-        for tierName, tierData in tierDataDict.items():
-            tier = TextgridTier(tierName, tierData, INTERVAL_TIER)
-            tg.addTier(tier)
+            tier = self.tierDict[tierName]
+            if tier.tierType == INTERVAL_TIER:
+                tier = tier.fillInBlanks("", self.minTimestamp, self.maxTimestamp)
+            
+            tg.addTier(tier)    
             
         return tg
 
@@ -841,74 +807,34 @@ class Textgrid():
             yield intervalDataList
             
                
-    def getSubtextgrid(self, superTierName, qualifyFunc):
+    def getSubtextgrid(self, superTierName, qualifyingFunc, strictFlag):
         '''
-        Create a tg that includes only a subset of the orig tg entries
+        Returns intervals that are contained within qualifying superTier intervals
         
-        So, for example, if you only wanted the labeled portions for every
-        instance of "the" or some other word, you could use this to isolate
-        those portions (and then extract the text from that entire tier,
-        for example)
+        Data is returned for all intervals in the subtiers that exist within an
+        interval in the supertier.
         
-        Deleted segments are indicated in the superTier
+        If /strictFlag/ is True, only intervals wholly contained within the
+        textgrid are included.  Otherwise, partially-contained intervals
+        will also be included (but truncated to fit within the super tier).
         '''
-        
-        superTier = self.tierDict[superTierName]
-        
-        # Determine which segments in the subTiers to keep
-        tierList = []
 
-        subTierDict = {}
-        for superEntry, subTierName, subEntry in self.findMatchedTGSubset(superTierName, qualifyFunc, strictFlag=True):
-#             subTierEntryList.append(subEntry)
-            if subTierName not in subTierDict.keys():
-                subTierDict[subTierName] = []
-            subTierDict[subTierName].append(subEntry)
-            
-        for subTierName, subTierEntryList in subTierDict.items():
-            subTier = self.tierDict[subTierName]
-            
-            # Sort tier by start time (for reasons I do not understand, 
-            # the order of the tier gets jumbled)
-            subTierEntryList.sort()
-            tierList.append( (subTier, subTierName, subTierEntryList, subTier.tierType) )
-            
-        # Include the superTier in the tierList
-        superEntryList = []
+        tierDataDict = {superTierName:self.dataDict[superTierName]}
         for superEntry in superTier.entryList:
             if qualifyFunc(superEntry):
-                superEntryList.append(superEntry)
-        tierList.append( (superTier, superTierName, superEntryList, superTier.tierType))
+                subTG = self.crop(strictFlag, False, superEntry[0], superEntry[1])
+                for tierName in subTG.tierNameList:
+                    if tierName == superTierName:
+                        continue
+                    tierDataDict.setdefault(subTierName, [])
+                    tierDataDict[subTierName].append(subEntry)
         
-        # Make a new textgrid from tierList
-        newTG = Textgrid()
-        for oldTier, name, tierEntryList, tierType in tierList:
-            tier = TextgridTier(name, tierEntryList, tierType)
-            tier.maxTimestamp = oldTier.maxTimestamp
-            tier.minTimestamp = oldTier.minTimestamp
+        tg = Textgrid()
+        for tierName in self.tierNameList:
+            tier = TextgridTier(tierName, tierDataDict[tierName], INTERVAL_TIER)
+            tg.addTier(tier)
             
-            newTG.addTier(tier)
-            
-        newTG.maxTimestamp = self.maxTimestamp
-
-        # Although we just created it, we're going to make a new textgrid
-        # with the missing data areas (if any) patched with empty intervals
-        patchedTG = Textgrid()
-        for tierName in newTG.tierNameList:
-            tier = newTG.tierDict[tierName]
-            
-            # The interval should be empty, except for the superTier,
-            # where we should indicate that the section was deleted
-            # with this script
-            if tier.name == superTierName:
-                blankText = "/deleted/"
-            else:
-                blankText = ""
-                
-            newTier = tier.fillInBlanks(blankText)
-            patchedTG.addTierByList(newTier.name, newTier.entryList, newTier.tierType)
-
-        return patchedTG    
+        return tg  
     
     
     def setTimeFromZero(self):
