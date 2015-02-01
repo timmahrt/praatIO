@@ -217,57 +217,6 @@ class TextgridTier():
         
         return duration
     
-
-    def _fillInBlanks(self, blankLabel, startTime=None, endTime=None):
-        if startTime == None:
-            startTime = self.minTimestamp
-            
-        if endTime == None:
-            endTime = self.maxTimestamp
-        
-        # Special case: empty textgrid
-        if len(self.entryList) == 0:
-            self.entryList.append( (startTime, endTime, blankLabel))
-        
-        # For the current entryList, fill in any gaps between two items
-        entry = self.entryList[0]
-        newEntryList = [entry]
-        prevEnd = float(entry[1])
-        for entry in self.entryList[1:]:
-            newStart = float(entry[0])
-            newEnd = float(entry[1])
-            if prevEnd < newStart:
-                newEntryList.append( (prevEnd, newStart, blankLabel) )
-            newEntryList.append(entry)
-            prevEnd = newEnd
-        
-        # Special case: If there is a gap at the start of the file
-        assert( float(self.entryList[0][0]) >= float(startTime) )
-        if float(newEntryList[0][0]) > float(startTime):
-            newEntryList.insert(0, (startTime, newEntryList[0][0], blankLabel))
-        
-        # Special case -- if there is a gap at the end of the file
-        if not float(newEntryList[-1][1]) <= float(endTime):
-            print newEntryList[-1][1], endTime
-        assert( float(newEntryList[-1][1]) <= float(endTime) )
-        if float(newEntryList[-1][1]) < float(endTime):
-            newEntryList.append( (newEntryList[-1][1], endTime, blankLabel) ) 
-
-        newEntryList.sort()
-
-        return newEntryList
-    
-
-    def fillInBlanks(self, blankLabel, startTime=None, endTime=None):
-        '''
-        Fills-in an improperly made textgrid with blank entries
-        '''
-        newEntryList = self._fillInBlanks(blankLabel, startTime, endTime)
-        
-        newTier = TextgridTier(self.name, newEntryList, self.tierType)
-        
-        return newTier
-    
     
     def editLabels(self, editFunc):
         
@@ -290,22 +239,6 @@ class TextgridTier():
     
     def manipulate(self, modFunc, filterFunc):
         return _manipulate(self, functools.partial(_manipulateFunc, self, modFunc, filterFunc))
-    
-    
-    def setTimeFromZero(self, tareTime=None):
-        '''
-        Adjusts all timestamps by a given value
-        
-        By default, it assumes that the smallest timestamp should be adjusted 
-        to zero.
-        '''
-        if tareTime == None:
-            firstTimestamp = self.minTimestamp
-        entryList = [(start - firstTimestamp, end - firstTimestamp, label)  for start, end, label in self.entryList]
-
-        newTier = TextgridTier(self.name, entryList, self.tierType)
-        
-        return newTier
     
     
     def find(self, matchLabel, substrMatchFlag=False):
@@ -434,28 +367,6 @@ class TextgridTier():
         return subTier, cutTStart, cutTWithin, cutTEnd, firstIntervalKeptProportion, lastIntervalKeptProportion
     
     
-    def mergeSilences(self, minTimestamp, maxTimestamp):
-        
-        # First remove all silences
-        newEntryList = []
-        for entry in self.entryList:
-            label = entry[2]
-            if label == "":
-                continue
-            else:
-                newEntryList.append(entry)
-        
-        # Fill in the empty spaces between non-empty spaces
-        if newEntryList == []:
-            newEntryList = [(minTimestamp, maxTimestamp, ""),]
-            newTier = TextgridTier(self.name, newEntryList, self.tierType)
-        else:
-            newTier = TextgridTier(self.name, newEntryList, self.tierType)
-            newTier = newTier.fillInBlanks("", minTimestamp, maxTimestamp)
-
-        return newTier
-    
-    
     def appendTier(self, tier, timeRelativeFlag):
         
         entryList = copy.deepcopy(self.entryList)
@@ -468,34 +379,6 @@ class TextgridTier():
             
         
         return TextgridTier(self.name, entryList, self.tierType)
-    
-        
-    def offsetTimestamps(self, startOffset, stopOffset, allowOvershoot=False):
-        '''
-        Modifies all timestamps by a constant amount
-        
-        Can modify the interval start independent of the interval end
-        
-        If allowOvershoot is True, an interval can go beyond the duration
-        of the textgrid (I can't imagine why this should be the case) 
-        '''
-        
-        newEntryList = []
-        for start, stop, label in self.entryList:
-            
-            newStart = startOffset+start
-            if newStart < 0:
-                newStart = 0
-            
-            newStop = stopOffset+stop
-            if newStop > self.maxTimestamp and not allowOvershoot:
-                newStop = self.maxTimestamp
-            
-            newEntryList.append( (newStart, newStop, label) )
-            
-        newMax = max([self.maxTimestamp, _getMaxInTupleList(newEntryList)])
-        return TextgridTier(self.name, newEntryList, self.tierType, 0, newMax)
-    
         
         
 class Textgrid():
@@ -747,15 +630,6 @@ class Textgrid():
         tg.addTier(mergedTier)
         
         return tg
-        
-        
-    def mergeSilences(self):
-        
-        tg = Textgrid()
-        for tierName in self.tierNameList:
-            tg.addTier(self.tierDict[tierName].mergeSilences(self.minTimestamp, self.maxTimestamp))
-            
-        return tg
     
     
     def fillInBlanks(self):
@@ -771,30 +645,6 @@ class Textgrid():
             
         return tg
 
-    
-    def findStr(self, tierName, matchStr, substrMatchFlag=False):
-        return self.tierDict[tierName].find(matchStr, substrMatchFlag)
-    
-    
-    def findMatchedData(self, dataTupleList, tierName, qualifyFunc=None):
-        '''
-        Returns all data from dataTupleList in chunks, divided by labeled regions
-        
-        dataTupleList should be of the form [(value1, time1), (value2, time2),...]
-        '''
-        if qualifyFunc == None:
-            qualifyFunc = lambda label: True # All labels pass
-            
-        tier = self.tierDict[tierName]
-        
-        for interval in tier.entryList:
-            print "--'%s'" % interval[2]
-            intervalDataList = []
-            for value, time in dataTupleList:
-                if interval[0] <= time and interval[1] >= time:
-                    intervalDataList.append( (value, time) )
-            yield intervalDataList
-            
                
     def getSubtextgrid(self, superTierName, qualifyingFunc, strictFlag):
         '''
@@ -824,28 +674,6 @@ class Textgrid():
             tg.addTier(tier)
             
         return tg  
-    
-    
-    def setTimeFromZero(self):
-        
-        zeroedTG = Textgrid()
-        for tierName in self.tierNameList:
-            newTier = self.tierDict[tierName].setTimeFromZero()
-            zeroedTG.addTier(newTier)
-            
-        return zeroedTG
-    
-    
-    def offsetTimestamps(self, startOffset, stopOffset):
-        
-        tg = Textgrid()
-        for tierName in self.tierNameList:
-            tier = self.tierDict[tierName]
-            tier = tier.offsetTimestamps(startOffset, stopOffset)
-            
-            tg.addTier(tier)
-        
-        return tg
         
     
 #     def append(self, tg, timeRelative=False):
