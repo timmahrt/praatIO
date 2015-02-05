@@ -17,6 +17,8 @@ Requirements
 
 ``Python 2.7.*`` or above
 
+``Python 3.3.*`` or above
+
 
 Usage
 =========

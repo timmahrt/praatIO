@@ -422,7 +422,7 @@ class PointTier(TextgridTier):
         
         if len(matchList) != 0 and warnFlag is True:
             fmtStr = "Collision warning for %s with items %s of tier %s"
-            print fmtStr % (str(entry), str(matchList), self.name)
+            print((fmtStr % (str(entry), str(matchList), self.name)))
     
     def newTier(self, name, entryList, minTimestamp=None, maxTimestamp=None):
         if minTimestamp is None:
@@ -450,7 +450,7 @@ class IntervalTier(TextgridTier):
         for entry in entryList:
             if entry[0] > entry[1]:
                 fmtStr = "Anomaly: startTime=%f, stopTime=%f, label=%s"
-                print fmtStr % (entry[0], entry[1], entry[2])
+                print((fmtStr % (entry[0], entry[1], entry[2])))
             assert(entry[0] < entry[1])
         
         # Remove whitespace
@@ -627,7 +627,7 @@ class IntervalTier(TextgridTier):
         '''
         entryList = self.getIntervals(not includeSilence)
         invertedEntryList = [(entryList[i][1], entryList[i + 1][0], "")
-                             for i in xrange(len(entryList) - 1)]
+                             for i in range(len(entryList) - 1)]
         
         if entryList[0][0] > 0:
             invertedEntryList.insert(0, (0, entryList[0][0], ""))
@@ -680,7 +680,7 @@ class IntervalTier(TextgridTier):
         
         if len(matchList) != 0 and warnFlag is True:
             fmtStr = "Collision warning for %s with items %s of tier %s"
-            print fmtStr % (str(entry), str(matchList), self.name)
+            print((fmtStr % (str(entry), str(matchList), self.name)))
 
     def manipulate(self, modFunc, filterFunc):
         '''
@@ -721,7 +721,7 @@ class Textgrid():
         else:
             self.tierNameList.insert(tierIndex, tier.name)
             
-        assert(tier.name not in self.tierDict.keys())
+        assert(tier.name not in list(self.tierDict.keys()))
         self.tierDict[tier.name] = tier
         
         minV = tier.minTimestamp
@@ -993,15 +993,15 @@ class Textgrid():
 
 
 def openTextGrid(fnFullPath):
-    print fnFullPath
+    
     try:
         data = codecs.open(fnFullPath, "rU", encoding="utf-16").read()
     except UnicodeError:
         data = codecs.open(fnFullPath, "rU", encoding="utf-8").read()
     data = data.replace("\r\n", "\n")
     
-    caseA = u"ooTextFile short" in data
-    caseB = u"item" not in data
+    caseA = "ooTextFile short" in data
+    caseB = "item" not in data
     if caseA or caseB:
         textgrid = _parseShortTextGrid(data)
     else:
@@ -1107,7 +1107,7 @@ def _parseShortTextGrid(data):
     indexList.sort()
     
     tupleList = [(indexList[i][0], indexList[i + 1][0], indexList[i][1])
-                 for i in xrange(len(indexList) - 1)]
+                 for i in range(len(indexList) - 1)]
     
     for blockStartI, blockEndI, isInterval in tupleList:
         tierData = data[blockStartI:blockEndI]

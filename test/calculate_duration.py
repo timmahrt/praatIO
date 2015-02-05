@@ -24,7 +24,8 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid",
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
         for start, stop, label in tier.entryList:
-            print "%s,%s,%s,%0.2f" % (name, tierName, label, float(stop) - float(start))
+            print(("%s,%s,%s,%0.2f" % (name, tierName, label, 
+                                      float(stop) - float(start))))
     
         
     

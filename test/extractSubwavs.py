@@ -31,7 +31,8 @@ def extractSubwav(fn, outputFN, startT, endT, singleChannelFlag):
         audioFrames = audioop.tomono(audioFrames, sampwidth, 1, 0)
         nchannels = 1
     
-    outParams = [nchannels, sampwidth, framerate, len(audioFrames), comptype, compname]
+    outParams = [nchannels, sampwidth, framerate, 
+                 len(audioFrames), comptype, compname]
     
     outWave = wave.open(outputFN, "w")
     outWave.setparams(outParams)
@@ -46,7 +47,7 @@ if not os.path.exists(outputPath):
 
 for wavFN, tgFN in [("bobby.wav", "bobby_words.TextGrid"),
                     ("mary.wav", "mary.TextGrid")]:
-    print tgFN
+    print(tgFN)
     fullPath = join(path, tgFN)
     tg = praatio.openTextGrid(fullPath)
     tier = tg.tierDict["word"]

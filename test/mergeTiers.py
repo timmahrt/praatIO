@@ -4,8 +4,6 @@ from os.path import join
 
 import praatio
 
-
-
 path = join('.', 'files')
 
 # Let's use praatio to construct some hypothetical textgrids
@@ -18,9 +16,9 @@ bobbyPhoneTG = praatio.openTextGrid(join(path, "bobby_phones.TextGrid"))
 
 bobbyTG = praatio.Textgrid()
 bobbyTG.addTier(bobbyPhoneTG.tierDict["phone"])
-bobbyTG.addTier(praatio.TextgridTier("nouns", [entryList[1],], praatio.INTERVAL_TIER))
-bobbyTG.addTier(praatio.TextgridTier("verbs", [entryList[2],], praatio.INTERVAL_TIER))
-bobbyTG.addTier(praatio.TextgridTier("subjects", entryList[3:5], praatio.INTERVAL_TIER))
+bobbyTG.addTier(praatio.IntervalTier("nouns", [entryList[1],]))
+bobbyTG.addTier(praatio.IntervalTier("verbs", [entryList[2],]))
+bobbyTG.addTier(praatio.IntervalTier("subjects", entryList[3:5]))
 
 # Let's save it, in case you want to see it
 bobbyTG.save(join(path, "mergeExample_bobby_words_split.TextGrid"))
@@ -33,19 +31,20 @@ entryList = wordTier.entryList
 
 maryTG = praatio.Textgrid()
 maryTG.addTier(tg.tierDict["phone"])
-maryTG.addTier(praatio.TextgridTier("nouns", [entryList[0],], praatio.INTERVAL_TIER))
-maryTG.addTier(praatio.TextgridTier("verbs", [entryList[1],], praatio.INTERVAL_TIER))
-maryTG.addTier(praatio.TextgridTier("subjects", entryList[2:4], praatio.INTERVAL_TIER))
+maryTG.addTier(praatio.IntervalTier("nouns", [entryList[0],]))
+maryTG.addTier(praatio.IntervalTier("verbs", [entryList[1],]))
+maryTG.addTier(praatio.IntervalTier("subjects", entryList[2:4]))
 
 maryTG.save(join(path, "mergeExample_mary_words_split.TextGrid"))
 
 # Let's combine Mary and Bob's textgrids
-combinedTG = bobbyTG.appendTG(maryTG, True)
+combinedTG = bobbyTG.appendTextgrid(maryTG, True)
 combinedTG.save(join(path, "mergeExample_mary_and_bob_words_split.TextGrid"))
 
 # And now let's merge their tiers together
-# We'll go with the default merge function which accepts all labels, except silence
-# Any non-silent intervals that overlap will be merged together into a super interval
+# We'll go with the default merge function which accepts all labels, 
+# except silence. Any non-silent intervals that overlap will be merged
+# together into a super interval
 mergedTG = combinedTG.mergeTiers(tierList=["nouns", "verbs", "subjects"], 
                                  preserveOtherTiers=True)
 
