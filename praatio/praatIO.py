@@ -413,7 +413,7 @@ class PointTier(TextgridTier):
             oldEntry = self.entryList[i]
             newEntry = (timestamp, "-".join([oldEntry[-1], label]))
             self.deleteEntry(self.entryList[i])
-            self.entryList.append(entry)
+            self.entryList.append(newEntry)
             
         else:
             raise TextgridCollisionException(self.name, entry, matchList)
@@ -937,8 +937,7 @@ class Textgrid():
         oldTier = self.tierDict[oldName]
         tierIndex = self.tierNameList.index(oldName)
         self.removeTier(oldName)
-        self.addTier(oldTier.newTier(newName, oldTier.entryList))
-
+        self.addTier(oldTier.newTier(newName, oldTier.entryList), tierIndex)
 
     def removeLabels(self, label, tierNameList=None):
         '''Remove labels from tiers'''
