@@ -3,13 +3,73 @@
 praatIO
 ---------
 
-A library that facilitates working with praat and praat files.
+A library for working with praat and praat files *that comes with batteries included*.  This isn't just a data struct for reading and writing textgrids--many utilities are provided to make it easy to work with textgrid data.
 
 Praat is a software program for doing phonetic analysis and annotation 
 of speech.  `Praat can be downloaded here <http://www.fon.hum.uva.nl/praat/>`_
 
-Very much a work in progress.  This will house various resources that I 
-use in working with praat.
+
+Common Use Cases
+================
+
+What can you do with this library?
+
+- query a textgrid to get information about the tiers or intervals contained within::
+
+    tg = praatio.openTextGrid("path_to_textgrid")
+
+    entryList = tg.tierDict["speaker_1_tier"].getEntries() # Get all intervals
+
+    entryList = tg.tierDict["phone_tier"].find("a") # Get all instances of 'a'
+
+- create or augment textgrids using data from other sources
+
+- found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid::
+
+    tg = praatio.openTextGrid("path_to_textgrid")
+
+    moddedTG = tg.editTimestamps(5, 5, 5)
+
+    moddedTG.save('output_path_to_textgrid')
+    
+- manipulate an audio file based on information in a textgrid::
+
+    see test/extractSubwavs.py
+    
+- remove all intervals (and associated intervals in other tiers) that don't match a query.::
+
+    # This would remove all words that are not content words from the word_tier 
+
+    # and also remove their associated phone listings in the phone_tier
+
+    tg = praatio.openTextGrid("path_to_textgrid")
+
+    print(tg.tierNameList)
+
+    >> ["word_tier", "phone_tier"]
+
+    subTG = tg.getSubtextgrid("word_tier", isContentWord, True)
+
+    subTG.save('output_path_to_textgrid')
+
+
+Major revisions
+================
+
+Ver 2.0 (February 5, 2015)
+
+- Support for reading, writing, and manipulating **point** tiers
+
+- Ported to python 3
+
+- Major cleanup/reorganizing of code
+
+
+Ver 1.0 (August 31, 2014)
+
+- Reading and writing of textgrids
+
+- Support for reading, writing, and manipulating **interval** tiers
 
 
 Requirements
