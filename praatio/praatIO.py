@@ -786,6 +786,22 @@ class Textgrid():
         
         return newTG
 
+    
+    def editTimestamps(self, startOffset, stopOffset, pointOffset):
+        
+        tg = Textgrid()
+        for tierName in self.tierNameList:
+            tier = self.tierDict[tierName]
+            if type(tier) == IntervalTier:
+                tier = tier.offsetTimestamps(startOffset, stopOffset)
+            elif type(tier) == PointTier:
+                tier = tier.offsetTimestamps(pointOffset)
+            
+            tg.addTier(tier)
+        
+        return tg
+    
+
     def getContainedLabels(self, superTier):
         '''
         Returns a list of tiers that fall under each label in the superTier
@@ -913,17 +929,7 @@ class Textgrid():
         tg.addTier(mergedTier)
         
         return tg
-    
-    def offsetTimestamps(self, startOffset, stopOffset):
-        
-        tg = Textgrid()
-        for tierName in self.tierNameList:
-            tier = self.tierDict[tierName]
-            tier = tier.offsetTimestamps(startOffset, stopOffset)
-            
-            tg.addTier(tier)
-        
-        return tg
+
     
     def renameTier(self, oldName, newName):
         oldTier = self.tierDict[oldName]
