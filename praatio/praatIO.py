@@ -725,11 +725,11 @@ class Textgrid():
         self.tierDict[tier.name] = tier
         
         minV = tier.minTimestamp
-        if minV < self.minTimestamp or self.minTimestamp is None:
+        if self.minTimestamp is None or minV < self.minTimestamp:
             self.minTimestamp = minV
         
         maxV = tier.maxTimestamp
-        if maxV > self.maxTimestamp or self.maxTimestamp is None:
+        if self.maxTimestamp is None or maxV > self.maxTimestamp:
             self.maxTimestamp = maxV
     
     def appendTextgrid(self, tg, onlyMatchingNames=True):
