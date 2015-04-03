@@ -648,6 +648,11 @@ class IntervalTier(TextgridTier):
         invertedEntryList = [(entryList[i][1], entryList[i + 1][0], "")
                              for i in range(len(entryList) - 1)]
         
+        # Remove entries that have no duration (ie lie between two entries
+        # that share a border)
+        invertedEntryList = [entry for entry in invertedEntryList
+                             if entry[0] < entry[1]]
+        
         if entryList[0][0] > 0:
             invertedEntryList.insert(0, (0, entryList[0][0], ""))
         
