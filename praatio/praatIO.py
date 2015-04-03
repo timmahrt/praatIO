@@ -12,7 +12,6 @@ import codecs
 
 from os.path import join
 
-# Can only handle interval tiers at the moment
 INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
 
@@ -21,7 +20,7 @@ def _morphFunc(fromTier, toTier):
     for fromEntry, toEntry in zip(fromTier.entryList, toTier.entryList):
         
         fromStart, fromEnd, fromLabel = fromEntry
-        toStart, toEnd, _toLabel = toEntry
+        toStart, toEnd = toEntry[:2]
         
         # Silent pauses are not manipulated to the target destination
         if fromLabel == 'sp' or fromLabel == '':
@@ -184,6 +183,7 @@ def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
 class TextgridCollisionException(Exception):
     
     def __init__(self, tierName, insertInterval, collisionList):
+        super(TextgridCollisionException, self).__init__()
         self.tierName = tierName
         self.insertInterval = insertInterval
         self.collisionList = collisionList
@@ -205,6 +205,7 @@ class TimelessTextgridTierException(Exception):
 class BadIntervalError(Exception):
     
     def __init__(self, start, stop, label):
+        super(BadIntervalError, self).__init__()
         self.start = start
         self.stop = stop
         self.label = label
@@ -418,6 +419,7 @@ class PointTier(TextgridTier):
         
         matchList = []
         entryList = self.getEntries()
+        i = None
         for i, searchEntry in entryList:
             if searchEntry[0] == entry[0]:
                 matchList.append(searchEntry)
@@ -578,11 +580,8 @@ class IntervalTier(TextgridTier):
             if matchedEntry is not None:
                 newEntryList.append(matchedEntry)
 
-        if len(newEntryList) == 0:
-            newEntryList.append((0, cropEnd - cropStart, ""))
-
         # Create subtier
-        subTier = IntervalTier(self.name, newEntryList, cropStart, cropEnd)
+        subTier = IntervalTier(self.name, newEntryList, 0, cropEnd - cropStart)
         return (subTier, cutTStart, cutTWithin, cutTEnd,
                 firstIntervalKeptProportion, lastIntervalKeptProportion)
          
@@ -602,7 +601,7 @@ class IntervalTier(TextgridTier):
             newStart = startOffset + start
             newStop = stopOffset + stop
             if allowOvershoot is not True:
-                assert(newStart > self.minTimestamp)
+                assert(newStart >= self.minTimestamp)
                 assert(newStop <= self.maxTimestamp)
             
             newEntryList.append((newStart, newStop, label))
@@ -610,7 +609,7 @@ class IntervalTier(TextgridTier):
         # Determine new min and max timestamps
         newMin = min([entry[0] for entry in newEntryList])
         newMax = max([entry[1] for entry in newEntryList])
-            
+        
         if newMin > self.minTimestamp:
             newMin = self.minTimestamp
         
@@ -639,13 +638,13 @@ class IntervalTier(TextgridTier):
         return [float(subList[1]) - float(subList[0])
                 for subList in self.entryList]
     
-    def getNonEntries(self, includeSilence):
+    def getNonEntries(self):
         '''
         Returns the regions of the textgrid without labels
         
         This can include unlabeled segments and regions marked as silent.
         '''
-        entryList = self.getIntervals(not includeSilence)
+        entryList = self.getEntries()
         invertedEntryList = [(entryList[i][1], entryList[i + 1][0], "")
                              for i in range(len(entryList) - 1)]
         
@@ -670,7 +669,7 @@ class IntervalTier(TextgridTier):
         if warnFlag is True and collisionCode is not None,
         the user is notified of each collision
         '''
-        startTime, endTime, _label = entry
+        startTime, endTime = entry[:2]
         
         matchList = self.getEntries(startTime, endTime)
         
@@ -806,22 +805,20 @@ class Textgrid():
         
         return newTG
 
-    
     def editTimestamps(self, startOffset, stopOffset, pointOffset):
         
         tg = Textgrid()
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             if type(tier) == IntervalTier:
-                tier = tier.offsetTimestamps(startOffset, stopOffset)
+                tier = tier.editTimestamps(startOffset, stopOffset)
             elif type(tier) == PointTier:
-                tier = tier.offsetTimestamps(pointOffset)
+                tier = tier.editTimestamps(pointOffset)
             
             tg.addTier(tier)
         
         return tg
     
-
     def getContainedLabels(self, superTier):
         '''
         Returns a list of tiers that fall under each label in the superTier
@@ -865,7 +862,7 @@ class Textgrid():
         will also be included (but truncated to fit within the super tier).
         '''
 
-        superTier = self.dataDict[superTierName]
+        superTier = self.tierDict[superTierName]
         tierDataDict = {superTierName: superTier}
         for superEntry in superTier.entryList:
             if qualifyingFunc(superEntry):
@@ -921,7 +918,7 @@ class Textgrid():
             
             if intervalOverlapCheck(currentEntry, nextEntry):
                 currentStart, currentStop, currentLabel = superEntryList[i]
-                _nextStart, nextStop, nextLabel = superEntryList.pop(i + 1)
+                nextStop, nextLabel = superEntryList.pop(i + 1)[1:]
                 
                 newStop = max([currentStop, nextStop])
                 newLabel = "%s / %s" % (currentLabel, nextLabel)
@@ -950,7 +947,6 @@ class Textgrid():
         
         return tg
 
-    
     def renameTier(self, oldName, newName):
         oldTier = self.tierDict[oldName]
         tierIndex = self.tierNameList.index(oldName)
@@ -1145,7 +1141,7 @@ def _parseShortTextGrid(data):
         tierName, tierNameEndI = _fetchRow(tierData, '', metaStartI)
         tierStartTime, tierStartTimeI = _fetchRow(tierData, '', tierNameEndI)
         tierEndTime, tierEndTimeI = _fetchRow(tierData, '', tierStartTimeI)
-        _tierNumItems, startTimeI = _fetchRow(tierData, '', tierEndTimeI)
+        startTimeI = _fetchRow(tierData, '', tierEndTimeI)[1]
         
         tierStartTime = float(tierStartTime)
         tierEndTime = float(tierEndTime)
