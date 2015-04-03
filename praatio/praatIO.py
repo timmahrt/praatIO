@@ -93,11 +93,21 @@ def _fillInBlanks(intervalTier, blankLabel="", startTime=None, endTime=None):
     if len(intervalTier.entryList) == 0:
         intervalTier.entryList.append((startTime, endTime, blankLabel))
     
+    newEntryList = fillInBlanks(intervalTier.entryList, blankLabel,
+                                startTime, endTime)
+
+    return IntervalTier(intervalTier.name, newEntryList)
+
+
+def fillInBlanks(entryList, blankLabel="", startTime=0, endTime=None):
+    '''
+    Fills in an entry list with empty entries-gaps between contentful entries
+    '''
     # Create a new entry list
-    entry = intervalTier.entryList[0]
+    entry = entryList[0]
     prevEnd = float(entry[1])
     newEntryList = [entry]
-    for entry in intervalTier.entryList[1:]:
+    for entry in entryList[1:]:
         newStart = float(entry[0])
         newEnd = float(entry[1])
         
@@ -113,13 +123,14 @@ def _fillInBlanks(intervalTier, blankLabel="", startTime=None, endTime=None):
         newEntryList.insert(0, (startTime, newEntryList[0][0], blankLabel))
     
     # Special case -- if there is a gap at the end of the file
-    assert(float(newEntryList[-1][1]) <= float(endTime))
-    if float(newEntryList[-1][1]) < float(endTime):
-        newEntryList.append((newEntryList[-1][1], endTime, blankLabel))
+    if endTime is not None:
+        assert(float(newEntryList[-1][1]) <= float(endTime))
+        if float(newEntryList[-1][1]) < float(endTime):
+            newEntryList.append((newEntryList[-1][1], endTime, blankLabel))
 
     newEntryList.sort()
 
-    return IntervalTier(intervalTier.name, newEntryList)
+    return newEntryList
 
 
 def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
@@ -137,12 +148,19 @@ def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
         if they share a boundary
     '''
     
-    startTime, endTime, _label = interval
-    cmprStartTime, cmprEndTime, _cmprLabel = cmprInterval
+    startTime, endTime = interval[:2]
+    cmprStartTime, cmprEndTime = cmprInterval[:2]
     
     overlapTime = max(0, min(endTime, cmprEndTime) -
                       max(startTime, cmprStartTime))
     overlapFlag = overlapTime > 0
+    
+    # Do they share a boundary?  Only need to check if one boundary ends
+    # when another begins (because otherwise, they overlap in other ways)
+    boundaryOverlapFlag = False
+    if boundaryInclusive:
+        boundaryOverlapFlag = (startTime == cmprEndTime or
+                               endTime == cmprStartTime)
     
     # Is the overlap over a certain percent?
     percentOverlapFlag = False
@@ -157,7 +175,8 @@ def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
     if timeThreshold > 0 and overlapFlag:
         timeOverlapFlag = overlapTime > timeThreshold
         
-    overlapFlag = overlapFlag or percentOverlapFlag or timeOverlapFlag
+    overlapFlag = (overlapFlag or boundaryOverlapFlag or
+                   percentOverlapFlag or timeOverlapFlag)
     
     return overlapFlag
 
