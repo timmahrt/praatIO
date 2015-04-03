@@ -217,9 +217,13 @@ class BadIntervalError(Exception):
 
 class TextgridTier(object):
     
-    def __init__(self, name, entryList):
+    tierType = None
+    
+    def __init__(self, name, entryList, minT, maxT):
         self.name = name
         self.entryList = entryList
+        self.minTimestamp = minT
+        self.maxTimestamp = maxT
         
     def appendTier(self, tier, timeRelativeFlag):
         
@@ -312,25 +316,23 @@ class PointTier(TextgridTier):
     tierType = POINT_TIER
     
     def __init__(self, name, entryList, minT=None, maxT=None):
-        self.name = name
-        if minT is not None:
-            minT = float(minT)
-        if maxT is not None:
-            maxT = float(maxT)
-        self.entryList = [(float(time), label) for time, label in entryList]
+        
+        entryList = [(float(time), label) for time, label in entryList]
         
         # Determine the min and max timestamps
         timeList = [time for time, label in entryList]
         if minT is not None:
-            timeList.append(minT)
+            timeList.append(float(minT))
         if maxT is not None:
-            timeList.append(maxT)
+            timeList.append(float(maxT))
         
         try:
-            self.minTimestamp = min(timeList)
-            self.maxTimestamp = max(timeList)
+            minT = min(timeList)
+            maxT = max(timeList)
         except ValueError:
             raise TimelessTextgridTierException()
+
+        super(PointTier, self).__init__(name, entryList, minT, maxT)
 
     def crop(self, cropStart, cropEnd):
         '''
@@ -478,9 +480,6 @@ class IntervalTier(TextgridTier):
             tmpEntryList.append((start, stop, label.strip()))
         entryList = tmpEntryList
         
-        self.name = name
-        self.entryList = entryList
-        
         # Determine the minimum and maximum timestampes
         minTimeList = [subList[0] for subList in entryList]
         maxTimeList = [subList[1] for subList in entryList]
@@ -491,11 +490,13 @@ class IntervalTier(TextgridTier):
             maxTimeList.append(maxT)
 
         try:
-            self.minTimestamp = min(minTimeList)
-            self.maxTimestamp = max(maxTimeList)
+            minT = min(minTimeList)
+            maxT = max(maxTimeList)
         except ValueError:
             raise TimelessTextgridTierException()
-
+        
+        super(IntervalTier, self).__init__(name, entryList, minT, maxT)
+        
     def crop(self, cropStart, cropEnd, strictFlag, softFlag):
         '''
         Creates a new tier with all entries that fit inside the new interval
