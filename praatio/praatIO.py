@@ -638,6 +638,24 @@ class IntervalTier(TextgridTier):
         return [float(subList[1]) - float(subList[0])
                 for subList in self.entryList]
     
+    def getMatchedData(self, dataTupleList, qualifyFunc=None):
+        '''
+        Returns data from dataTupleList in chunks, divided by labeled regions
+        
+        dataTupleList should be of the form
+        [(value1, time1), (value2, time2),...]
+        '''
+        if qualifyFunc is None:
+            qualifyFunc = lambda label: True  # All labels pass
+        
+        for interval in self.entryList:
+            print "--'%s'" % interval[2]
+            intervalDataList = []
+            for value, time in dataTupleList:
+                if interval[0] <= time and interval[1] >= time:
+                    intervalDataList.append((value, time))
+            yield intervalDataList
+            
     def getNonEntries(self):
         '''
         Returns the regions of the textgrid without labels
