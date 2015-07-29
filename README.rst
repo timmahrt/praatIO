@@ -3,7 +3,9 @@
 praatIO
 ---------
 
-A library for working with praat and praat files *that comes with batteries included*.  This isn't just a data struct for reading and writing textgrids--many utilities are provided to make it easy to work with textgrid data.
+A library for working with praat and praat files *that comes with batteries included*.
+This isn't just a data struct for reading and writing textgrids--many utilities are
+provided to make it easy to work with textgrid data.
 
 Praat is a software program for doing phonetic analysis and annotation 
 of speech.  `Praat can be downloaded here <http://www.fon.hum.uva.nl/praat/>`_
@@ -16,7 +18,7 @@ What can you do with this library?
 
 - query a textgrid to get information about the tiers or intervals contained within::
 
-    tg = praatio.openTextGrid("path_to_textgrid")
+    tg = tgio.openTextGrid("path_to_textgrid")
 
     entryList = tg.tierDict["speaker_1_tier"].getEntries() # Get all intervals
 
@@ -26,7 +28,7 @@ What can you do with this library?
 
 - found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid::
 
-    tg = praatio.openTextGrid("path_to_textgrid")
+    tg = tgio.openTextGrid("path_to_textgrid")
 
     moddedTG = tg.editTimestamps(5, 5, 5)
 
@@ -34,7 +36,7 @@ What can you do with this library?
     
 - manipulate an audio file based on information in a textgrid::
 
-    see test/extractSubwavs.py
+    see splitAudioOnTier() in /praatio/praatio_scripts.py
     
 - remove all intervals (and associated intervals in other tiers) that don't match a query.::
 
@@ -42,7 +44,7 @@ What can you do with this library?
 
     # and also remove their associated phone listings in the phone_tier
 
-    tg = praatio.openTextGrid("path_to_textgrid")
+    tg = tgio.openTextGrid("path_to_textgrid")
 
     print(tg.tierNameList)
 
@@ -55,6 +57,13 @@ What can you do with this library?
 
 Major revisions
 ================
+
+Ver 2.1 (July 27, 2015)
+
+- Addition of praatio_scripts.py where commonly used scripts will be placed
+
+- Import clash led to praatio.py being renamed to tgio.py
+
 
 Ver 2.0 (February 5, 2015)
 
@@ -85,8 +94,8 @@ Usage
 
 99% of the time you're going to want to run::
 
-    import praatio
-    tg = praatio.openTextGrid(r"C:\Users\tim\Documents\transcript.TextGrid")
+    from praatio import tgio
+    tg = tgio.openTextGrid(r"C:\Users\tim\Documents\transcript.TextGrid")
 
 See /test for example usages
 
