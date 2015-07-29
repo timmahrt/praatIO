@@ -295,7 +295,7 @@ class TextgridTier(object):
         
         for entry in self.entryList:
             entry = entry[:-1] + ('"%s"' % entry[-1],)
-            text += "\n".join([str(val) for val in entry]) + "\n"
+            text += "\n".join([unicode(val) for val in entry]) + "\n"
             
         return text
         
