@@ -54,7 +54,7 @@ What can you do with this library?
 
     subTG.save('output_path_to_textgrid')
     
-- utilize the klattgrid interface to raise all speech formants by 20%::
+- utilize the klattgrid interface to raise all speech formants by 20% (among other possible manipulations)::
 
     tg = tgio.openTextGrid("path_to_textgrid")
     
