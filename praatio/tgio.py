@@ -12,6 +12,8 @@ import codecs
 
 from os.path import join
 
+from praatio import common
+
 INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
 
@@ -1123,29 +1125,15 @@ def _parseNormalTextGrid(data):
     return newTG
 
 
-def _findAll(txt, subStr):
-    
-    indexList = []
-    index = 0
-    while True:
-        try:
-            index = txt.index(subStr, index)
-        except ValueError:
-            break
-        indexList.append(int(index))
-        index += 1
-    
-    return indexList
-
-
 def _parseShortTextGrid(data):
     '''
     Reads a short textgrid file
     '''
     newTG = Textgrid()
     
-    intervalIndicies = [(i, True) for i in _findAll(data, '"IntervalTier"')]
-    pointIndicies = [(i, False) for i in _findAll(data, '"TextTier"')]
+    intervalIndicies = [(i, True)
+                        for i in common.findAll(data, '"IntervalTier"')]
+    pointIndicies = [(i, False) for i in common.findAll(data, '"TextTier"')]
     
     indexList = intervalIndicies + pointIndicies
     indexList.append((len(data), None))  # The 'end' of the file
