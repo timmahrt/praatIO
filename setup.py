@@ -5,7 +5,7 @@ Created on Aug 29, 2014
 '''
 from distutils.core import setup
 setup(name='praatio',
-      version='2.1.0',
+      version='3.0.0',
       author='Tim Mahrt',
       author_email='timmahrt@gmail.com',
       package_dir={'praatio':'praatio'},

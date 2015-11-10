@@ -53,10 +53,24 @@ What can you do with this library?
     subTG = tg.getSubtextgrid("word_tier", isContentWord, True)
 
     subTG.save('output_path_to_textgrid')
+    
+- utilize the klattgrid interface to raise all speech formants by 20%::
+
+    tg = tgio.openTextGrid("path_to_textgrid")
+    
+    incrTwenty = lambda x: x * 1.2
+    
+    kg.tierDict["oral_formants"].modifySubtiers("formants",incrTwenty)
+
+    kg.save(join(outputPath, "bobby_twenty_percent_less.KlattGrid"))
 
 
 Major revisions
 ================
+
+Ver 3.0 (November 10, 2015)
+
+- Support for reading and writing klattgrids
 
 Ver 2.1 (July 27, 2015)
 
@@ -96,6 +110,11 @@ Usage
 
     from praatio import tgio
     tg = tgio.openTextGrid(r"C:\Users\tim\Documents\transcript.TextGrid")
+
+Or if you want to work with KlaatGrid files::
+
+    from praatio import kgio
+    kg = kgio.openKlattGrid(r"C:\Users\tim\Documents\transcript.KlattGrid")
 
 See /test for example usages
 
