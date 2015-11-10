@@ -255,6 +255,8 @@ class TextgridTier(object):
         newEntryList = []
         for entry in self.entryList:
             entry[-1] = editFunc(entry[-1])
+            if entry[0] < 0.0:  # Toss data that appears before 0 seconds
+                continue
             newEntryList.append(entry)
     
         newTier = self.newTier(self.name, newEntryList)
@@ -370,6 +372,9 @@ class PointTier(TextgridTier):
             if not allowOvershoot:
                 assert(newTimestamp > self.minTimestamp)
                 assert(newTimestamp <= self.maxTimestamp)
+            
+            if newTimestamp < 0:
+                continue
             
             newEntryList.append((newTimestamp, label))
         
@@ -608,6 +613,14 @@ class IntervalTier(TextgridTier):
                 assert(newStart >= self.minTimestamp)
                 assert(newStop <= self.maxTimestamp)
             
+            if newStop < 0:
+                continue
+            if newStart < 0:
+                newStart = 0
+            
+            if newStart < 0:
+                continue
+            
             newEntryList.append((newStart, newStop, label))
 
         # Determine new min and max timestamps
@@ -832,15 +845,19 @@ class Textgrid():
         
         return newTG
 
-    def editTimestamps(self, startOffset, stopOffset, pointOffset):
+    def editTimestamps(self, startOffset, stopOffset, pointOffset,
+                       allowOvershoot=False):
         
         tg = Textgrid()
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
-            if type(tier) == IntervalTier:
-                tier = tier.editTimestamps(startOffset, stopOffset)
-            elif type(tier) == PointTier:
-                tier = tier.editTimestamps(pointOffset)
+            if len(tier.entryList) > 0:
+                if isinstance(tier, IntervalTier):
+                    tier = tier.editTimestamps(startOffset, stopOffset,
+                                               allowOvershoot)
+                elif isinstance(tier, PointTier):
+                    tier = tier.editTimestamps(pointOffset,
+                                               allowOvershoot)
             
             tg.addTier(tier)
         
