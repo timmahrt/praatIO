@@ -1,4 +1,6 @@
 '''
+Functions for reading/writing/manipulating textgrid files
+
 Created on Apr 15, 2013
 
 @author: timmahrt
@@ -540,8 +542,8 @@ class IntervalTier(TextgridTier):
             
             # If it is only partially contained within the superEntry AND
             # inclusion is 'soft', include it anyways
-            elif softFlag and (intervalStart >= cropStart
-                               or intervalEnd <= cropEnd):
+            elif softFlag and (intervalStart >= cropStart or
+                               intervalEnd <= cropEnd):
                 matchedEntry = entry
             
             # If not strict, include partial tiers on the edges
@@ -819,10 +821,10 @@ class Textgrid():
         newTG = Textgrid()
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
-            if type(tier) == IntervalTier:
+            if isinstance(tier, IntervalTier):
                 newTier = tier.crop(startTime, endTime,
                                     strictFlag, softFlag)[0]
-            elif type(tier) == PointTier:
+            elif isinstance(tier, PointTier):
                 newTier = tier.crop(startTime, endTime)
             newTier.sort()
             
@@ -1014,7 +1016,7 @@ class Textgrid():
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
             tier = self.tierDict[name]
-            if type(tier) == IntervalTier:
+            if isinstance(tier, IntervalTier):
                 self.tierDict[name] = _fillInBlanks(tier,
                                                     "",
                                                     self.minTimestamp,
