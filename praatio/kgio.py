@@ -25,6 +25,7 @@ any points
 '''
 
 import codecs
+from os.path import join
 
 from praatio import common
 from praatio import tgio
@@ -187,6 +188,32 @@ def openKlattGrid(fnFullPath):
 
     return kg
 
+
+def wavToKlaatGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
+                   numFormants=5, maxFormantFreq=5500.0, windowLength=0.025,
+                   preEmphasis=50.0, pitchFloor=60.0, pitchCeiling=600.0,
+                   minPitch=50.0, subtractMean=True,
+                   scriptFN=None):
+    '''
+    Extracts the klaatgrid from a wav file
+    
+    The default values are the same as the ones used in praat
+    '''
+    
+    if subtractMean is True:
+        subtractMean = "yes"
+    else:
+        subtractMean = "no"
+    
+    if scriptFN is None:
+        scriptFN = join(common.scriptsPath, "sound_to_klaatgrid.praat")
+    
+    common.runPraatScript(praatEXE, scriptFN,
+                          [inputFullPath, outputFullPath, timeStep,
+                           numFormants, maxFormantFreq, windowLength,
+                           preEmphasis, pitchFloor, pitchCeiling,
+                           minPitch, subtractMean])
+    
 
 def _openNormalKlattGrid(data):
 
