@@ -4,6 +4,15 @@ Created on Oct 30, 2015
 @author: tmahrt
 '''
 
+import os
+from os.path import join
+import subprocess
+
+import inspect
+
+# Get the folder one level above the current folder
+praatioPath = os.path.split(inspect.getfile(inspect.currentframe()))[0]
+scriptsPath = join(praatioPath, "praatScripts")
 def findAll(txt, subStr):
     
     indexList = []
@@ -17,3 +26,13 @@ def findAll(txt, subStr):
         index += 1
     
     return indexList
+
+
+def runPraatScript(praatEXE, scriptFN, argList):
+    
+    argList = ["%s" % arg for arg in argList]
+    cmdList = [praatEXE, '--run', scriptFN] + argList
+    myProcess = subprocess.Popen(cmdList)
+ 
+    if myProcess.wait():
+        exit()

@@ -10,6 +10,7 @@ setup(name='praatio',
       author_email='timmahrt@gmail.com',
       package_dir={'praatio':'praatio'},
       packages=['praatio'],
+      package_data={'praatio': ['praatScripts/*.praat', ]},
       license='LICENSE',
       long_description=open('README.rst', 'r').read(),
 #       install_requires=[], # No requirements! # requires 'from setuptools import setup'
