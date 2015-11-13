@@ -69,7 +69,7 @@ class KlattContainerTier(_KlaatBaseTier):
         outputTxt += "%s? <exists>\n" % self.name
         
         try:
-            outputTxt += "xmin = %f\nxmax = %f\n" % (self.minTimestamp,
+            outputTxt += "xmin = %s\nxmax = %s\n" % (self.minTimestamp,
                                                      self.maxTimestamp)
         except TypeError:
             pass
@@ -112,28 +112,35 @@ class KlattSubPointTier(tgio.PointTier):
     def getAsText(self):
         outputList = []
         outputList.append("%s:" % self.name)
-        outputList.append("    xmin = %f" % self.minTimestamp)
-        outputList.append("    xmax = %f" % self.maxTimestamp)
+        outputList.append("    xmin = %s" % self.minTimestamp)
+        outputList.append("    xmax = %s" % self.maxTimestamp)
         outputList.append("    points: size = %d" % len(self.entryList))
         
         for i, entry in enumerate(self.entryList):
             outputList.append("    points [%d]:" % (i + 1))
-            outputList.append("        number = %f" % entry[0])
-            outputList.append("        value = %f" % entry[1])
+            outputList.append("        number = %s" % entry[0])
+            outputList.append("        value = %s" % entry[1])
     
         return "\n".join(outputList) + '\n'
     
-    
+
 class KlattPointTier(tgio.PointTier):
     '''
     A Klatt tier not contained within another tier
     '''
+    def modifyValues(self, modFunc):
+        newEntryList = []
+        for timestamp, value in self.entryList:
+            newEntryList.append((timestamp, modFunc(value)))
+        
+        self.entryList = newEntryList
+        
     def getAsText(self):
         outputList = []
         
         outputList.append("%s? <exists> " % self.name)
-        outputList.append("xmin = %f" % self.minTimestamp)
-        outputList.append("xmax = %f" % self.maxTimestamp)
+        outputList.append("xmin = %s" % self.minTimestamp)
+        outputList.append("xmax = %s" % self.maxTimestamp)
         
         if self.name not in ["phonation", "vocalTract", "coupling",
                              "frication"]:
@@ -141,8 +148,8 @@ class KlattPointTier(tgio.PointTier):
         
         for i, entry in enumerate(self.entryList):
             outputList.append("points [%d]:" % (i + 1))
-            outputList.append("    number = %f" % entry[0])
-            outputList.append("    value = %f" % entry[1])
+            outputList.append("    number = %s" % entry[0])
+            outputList.append("    value = %s" % entry[1])
     
         return "\n".join(outputList) + "\n"
 
@@ -155,13 +162,13 @@ class Klattgrid(tgio.Textgrid):
         outputTxt = ""
         outputTxt += 'File type = "ooTextFile"\n'
         outputTxt += 'Object class = "KlattGrid"\n\n'
-        outputTxt += "xmin = %f\nxmax = %f\n" % (self.minTimestamp,
+        outputTxt += "xmin = %s\nxmax = %s\n" % (self.minTimestamp,
                                                  self.maxTimestamp)
         
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()
         
-        outputTxt = _makeValuesIntegers(outputTxt)
+        outputTxt = _cleanNumericValues(outputTxt)
         
         codecs.open(fn, "w", encoding="utf-8").write(outputTxt)
     
@@ -345,7 +352,7 @@ def _processSectionData(sectionData):
     return tupleList
 
 
-def _makeValuesIntegers(dataStr):
+def _cleanNumericValues(dataStr):
     dataList = dataStr.split("\n")
     newDataList = []
     for row in dataList:
@@ -357,7 +364,7 @@ def _makeValuesIntegers(dataStr):
             try:
                 row = str(int(tail))
             except ValueError:
-                tail = "%f" % float(tail)
+                tail = "%s" % tail
                 if float(tail) == 0:
                     tail = "0"
             row = "%s = %s" % (head, tail)
