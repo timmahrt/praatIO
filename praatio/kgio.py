@@ -103,25 +103,6 @@ class KlattIntermediateTier(_KlaatBaseTier):
         outputTxt = headerTxt + outputTxt
         
         return outputTxt
-
-
-class KlattSubPointTier(tgio.PointTier):
-    '''
-    Tiers contained in a KlattIntermediateTier
-    '''
-    def getAsText(self):
-        outputList = []
-        outputList.append("%s:" % self.name)
-        outputList.append("    xmin = %s" % self.minTimestamp)
-        outputList.append("    xmax = %s" % self.maxTimestamp)
-        outputList.append("    points: size = %d" % len(self.entryList))
-        
-        for i, entry in enumerate(self.entryList):
-            outputList.append("    points [%d]:" % (i + 1))
-            outputList.append("        number = %s" % entry[0])
-            outputList.append("        value = %s" % entry[1])
-    
-        return "\n".join(outputList) + '\n'
     
 
 class KlattPointTier(tgio.PointTier):
@@ -153,6 +134,26 @@ class KlattPointTier(tgio.PointTier):
     
         return "\n".join(outputList) + "\n"
 
+
+class KlattSubPointTier(KlattPointTier):
+    '''
+    Tiers contained in a KlattIntermediateTier
+    '''
+        
+    def getAsText(self):
+        outputList = []
+        outputList.append("%s:" % self.name)
+        outputList.append("    xmin = %s" % self.minTimestamp)
+        outputList.append("    xmax = %s" % self.maxTimestamp)
+        outputList.append("    points: size = %d" % len(self.entryList))
+        
+        for i, entry in enumerate(self.entryList):
+            outputList.append("    points [%d]:" % (i + 1))
+            outputList.append("        number = %s" % entry[0])
+            outputList.append("        value = %s" % entry[1])
+    
+        return "\n".join(outputList) + '\n'
+    
     
 class Klattgrid(tgio.Textgrid):
     
