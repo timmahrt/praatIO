@@ -666,7 +666,7 @@ class IntervalTier(TextgridTier):
             qualifyFunc = lambda label: True  # All labels pass
         
         for interval in self.entryList:
-            print "--'%s'" % interval[2]
+            print("--'%s'" % interval[2])
             intervalDataList = []
             for value, time in dataTupleList:
                 if interval[0] <= time and interval[1] >= time:
