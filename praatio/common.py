@@ -13,6 +13,8 @@ import inspect
 # Get the folder one level above the current folder
 praatioPath = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 scriptsPath = join(praatioPath, "praatScripts")
+
+
 def findAll(txt, subStr):
     
     indexList = []
