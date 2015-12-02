@@ -28,11 +28,11 @@ def findAll(txt, subStr):
     return indexList
 
 
-def runPraatScript(praatEXE, scriptFN, argList):
+def runPraatScript(praatEXE, scriptFN, argList, exitOnError=True):
     
     argList = ["%s" % arg for arg in argList]
     cmdList = [praatEXE, '--run', scriptFN] + argList
     myProcess = subprocess.Popen(cmdList)
  
-    if myProcess.wait():
+    if myProcess.wait() and exitOnError:
         exit()

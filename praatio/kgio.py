@@ -233,7 +233,25 @@ def wavToKlattGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
                            numFormants, maxFormantFreq, windowLength,
                            preEmphasis, pitchFloor, pitchCeiling,
                            minPitch, subtractMean])
+
+
+def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
+                 scriptFN=None):
     
+    if doCascade:
+        method = "Cascade"
+    else:
+        method = "Parallel"
+    
+    if scriptFN is None:
+        scriptFN = join(common.scriptsPath,
+                        "resynthesize_from_klattgrid.praat")
+    
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    common.runPraatScript(praatEXE, scriptFN,
+                          [wavFN, klattFN, outputWavFN, method],
+                          exitOnError=False)
+
 
 def _openNormalKlattGrid(data):
 
