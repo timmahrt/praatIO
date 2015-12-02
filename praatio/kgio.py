@@ -31,7 +31,7 @@ from praatio import common
 from praatio import tgio
 
 
-class _KlaatBaseTier(object):
+class _KlattBaseTier(object):
 
     def __init__(self, name):
         self.tierNameList = []  # Preserves the order of the tiers
@@ -61,7 +61,7 @@ class _KlaatBaseTier(object):
             self.maxTimestamp = maxV
 
 
-class KlattContainerTier(_KlaatBaseTier):
+class KlattContainerTier(_KlattBaseTier):
     '''
     Contains a set of intermediate tiers
     '''
@@ -90,7 +90,7 @@ class KlattContainerTier(_KlaatBaseTier):
             subpointTier.modifyValues(modFunc)
     
     
-class KlattIntermediateTier(_KlaatBaseTier):
+class KlattIntermediateTier(_KlattBaseTier):
     '''
     Has many point tiers that are semantically related (e.g. formant tiers)
     '''
@@ -189,13 +189,13 @@ def openKlattGrid(fnFullPath):
     return kg
 
 
-def wavToKlaatGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
+def wavToKlattGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
                    numFormants=5, maxFormantFreq=5500.0, windowLength=0.025,
                    preEmphasis=50.0, pitchFloor=60.0, pitchCeiling=600.0,
                    minPitch=50.0, subtractMean=True,
                    scriptFN=None):
     '''
-    Extracts the klaatgrid from a wav file
+    Extracts the klattgrid from a wav file
     
     The default values are the same as the ones used in praat
     '''
@@ -206,7 +206,7 @@ def wavToKlaatGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
         subtractMean = "no"
     
     if scriptFN is None:
-        scriptFN = join(common.scriptsPath, "sound_to_klaatgrid.praat")
+        scriptFN = join(common.scriptsPath, "sound_to_klattgrid.praat")
     
     common.runPraatScript(praatEXE, scriptFN,
                           [inputFullPath, outputFullPath, timeStep,
