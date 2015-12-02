@@ -406,6 +406,8 @@ def _cleanNumericValues(dataStr):
     for row in dataList:
         row = row.rstrip()
         try:
+            assert("min" not in row and "max" not in row)
+            
             head, tail = row.split("=")
             head = head.rstrip()
             tail = tail.strip()
@@ -416,7 +418,7 @@ def _cleanNumericValues(dataStr):
                 if float(tail) == 0:
                     tail = "0"
             row = "%s = %s" % (head, tail)
-        except ValueError:
+        except (ValueError, AssertionError):
             pass
         finally:
             newDataList.append(row.rstrip())
