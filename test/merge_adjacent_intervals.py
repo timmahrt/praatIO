@@ -58,7 +58,7 @@ def merge_adjacent_batch(inputPath, outputPath):
 if __name__ == "__main__":
     
     path = join(".", "files")
-    outputPath = join(path, "merge_example")
+    outputPath = join(path, "merged_textgrids")
     
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)

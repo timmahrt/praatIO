@@ -6,14 +6,18 @@ Created on Aug 31, 2014
 Adds two tiers to the same textgrid
 '''
 
+import os
 from os.path import join
 
 from praatio import tgio
 
-path = join('.', "files")
+path = join('.', 'files')
+outputPath = join(path, "merged_textgrids")
+if not os.path.exists(outputPath):
+    os.mkdir(outputPath)
 
 tgPhones = tgio.openTextGrid(join(path, "bobby_phones.TextGrid"))
 tgWords = tgio.openTextGrid(join(path, "bobby_words.TextGrid"))
 
 tgPhones.addTier(tgWords.tierDict["word"])
-tgPhones.save(join(path, "bobby.TextGrid"))
+tgPhones.save(join(outputPath, "bobby.TextGrid"))

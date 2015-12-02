@@ -1,11 +1,14 @@
 
-
+import os
 from os.path import join
 
 from praatio import tgio
 
 
 path = join('.', 'files')
+outputPath = join(path, "merged_textgrids")
+if not os.path.exists(outputPath):
+    os.mkdir(outputPath)
 
 # Let's use praatio to construct some hypothetical textgrids
 tg = tgio.openTextGrid(join(path, "bobby_words.TextGrid"))
@@ -22,7 +25,7 @@ bobbyTG.addTier(tgio.IntervalTier("verbs", [entryList[2],]))
 bobbyTG.addTier(tgio.IntervalTier("subjects", entryList[3:5]))
 
 # Let's save it, in case you want to see it
-bobbyTG.save(join(path, "mergeExample_bobby_words_split.TextGrid"))
+bobbyTG.save(join(outputPath, "mergeExample_bobby_words_split.TextGrid"))
 
 
 # And we'll do the same for mary's textgrid
@@ -36,11 +39,12 @@ maryTG.addTier(tgio.IntervalTier("nouns", [entryList[0],]))
 maryTG.addTier(tgio.IntervalTier("verbs", [entryList[1],]))
 maryTG.addTier(tgio.IntervalTier("subjects", entryList[2:4]))
 
-maryTG.save(join(path, "mergeExample_mary_words_split.TextGrid"))
+maryTG.save(join(outputPath, "mergeExample_mary_words_split.TextGrid"))
 
 # Let's combine Mary and Bob's textgrids
 combinedTG = bobbyTG.appendTextgrid(maryTG, True)
-combinedTG.save(join(path, "mergeExample_mary_and_bob_words_split.TextGrid"))
+combinedTG.save(join(outputPath,
+                     "mergeExample_mary_and_bob_words_split.TextGrid"))
 
 # And now let's merge their tiers together
 # We'll go with the default merge function which accepts all labels, 
@@ -49,7 +53,8 @@ combinedTG.save(join(path, "mergeExample_mary_and_bob_words_split.TextGrid"))
 mergedTG = combinedTG.mergeTiers(tierList=["nouns", "verbs", "subjects"], 
                                  preserveOtherTiers=True)
 
-mergedTG.save(join(path, "mergeExample_mary_and_bob_words_joined.TextGrid"))
+mergedTG.save(join(outputPath,
+                   "mergeExample_mary_and_bob_words_joined.TextGrid"))
 
 
 
