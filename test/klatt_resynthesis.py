@@ -8,6 +8,7 @@ import os
 from os.path import join
 
 from praatio import kgio
+from praatio import praat_scripts
 
 path = os.path.abspath(join(".", "files"))
 outputPath = join(path, "resynthesized_wavs")
@@ -50,4 +51,8 @@ klattFN = join(outputPath, outputName + ".KlattGrid")
 outputWavFN = join(outputPath, outputName + ".wav")
 kg.save(klattFN)
 kgio.resynthesize(praatEXE, wavFN, klattFN, outputWavFN)
+
+# Decrease formants by 20% using praat's changeGender function
+outputWavFN = join(outputPath, outputName + "_changeGender.wav")
+praat_scripts.changeGender(praatEXE, wavFN, outputWavFN, 75, 600, 0.8)
 

@@ -15,3 +15,5 @@ endform
 Read from file: input_audio_file_name$
 To KlattGrid (simple): time_step_s, num_formants, max_formant_hz, window_length_s, pre_emphasis_hz, pitch_floor_hz, pitch_ceiling_hz, min_pitch_for_intensity_hz, subtract_mean_flag$
 Save as text file: output_audio_file_name$
+
+exitScript()
