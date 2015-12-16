@@ -301,7 +301,14 @@ class TextgridTier(object):
         
         for entry in self.entryList:
             entry = entry[:-1] + ('"%s"' % entry[-1],)
-            text += "\n".join([unicode(val) for val in entry]) + "\n"
+            try:
+                unicode
+            except NameError:
+                unicodeFunc = str
+            else:
+                unicodeFunc = unicode 
+                
+            text += "\n".join([unicodeFunc(val) for val in entry]) + "\n"
             
         return text
         
