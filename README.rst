@@ -68,9 +68,15 @@ What can you do with this library?
 Major revisions
 ================
 
+Ver 3.1 (December 16, 2015)
+
+- Support for reading/writing point processes
+
+
 Ver 3.0 (November 10, 2015)
 
 - Support for reading and writing klattgrids
+
 
 Ver 2.1 (July 27, 2015)
 
