@@ -21,7 +21,8 @@ wavFN = join(path, name + ".wav")
 mainKlaatFN = join(outputPath, name + ".KlattGrid")
 
 # Wav to klaatgrid
-praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"
+praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat" # Example for Mac
+# praatEXE = r"C:\Praat.exe" # Example for Windows
 kgio.wavToKlattGrid(praatEXE, wavFN, mainKlaatFN, maxFormantFreq=3500,
                     pitchFloor=50, pitchCeiling=350)
 
