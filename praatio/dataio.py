@@ -32,7 +32,7 @@ class PointProcess(object):
     def getPointsInInterval(self, start, stop, startIndex = 0):
     
         returnPointList = []
-        for i, time in enumerate(self.pointList[startIndex:]):
+        for time in self.pointList[startIndex:]:
             if time >= start:
                 if time <= stop:
                     returnPointList.append(time)

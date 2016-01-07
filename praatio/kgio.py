@@ -28,7 +28,7 @@ import codecs
 import decimal
 from os.path import join
 
-from praatio import common
+from praatio.utilities import utils
 from praatio import tgio
 
 
@@ -226,13 +226,13 @@ def wavToKlattGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
         subtractMean = "no"
     
     if scriptFN is None:
-        scriptFN = join(common.scriptsPath, "sound_to_klattgrid.praat")
+        scriptFN = join(utils.scriptsPath, "sound_to_klattgrid.praat")
     
-    common.runPraatScript(praatEXE, scriptFN,
-                          [inputFullPath, outputFullPath, timeStep,
-                           numFormants, maxFormantFreq, windowLength,
-                           preEmphasis, pitchFloor, pitchCeiling,
-                           minPitch, subtractMean])
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputFullPath, outputFullPath, timeStep,
+                          numFormants, maxFormantFreq, windowLength,
+                          preEmphasis, pitchFloor, pitchCeiling,
+                          minPitch, subtractMean])
 
 
 def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
@@ -244,13 +244,13 @@ def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
         method = "Parallel"
     
     if scriptFN is None:
-        scriptFN = join(common.scriptsPath,
+        scriptFN = join(utils.scriptsPath,
                         "resynthesize_from_klattgrid.praat")
     
     #  Praat crashes on exit after resynthesis with a klaatgrid
-    common.runPraatScript(praatEXE, scriptFN,
-                          [wavFN, klattFN, outputWavFN, method],
-                          exitOnError=False)
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, klattFN, outputWavFN, method],
+                         exitOnError=False)
 
 
 def _openNormalKlattGrid(data):
@@ -361,7 +361,7 @@ def _proccessContainerTierInput(sectionData, name):
 
 
 def _findIndicies(data, keyword):
-    indexList = common.findAll(data, keyword)
+    indexList = utils.findAll(data, keyword)
     indexList = [data.rfind("\n", 0, i) for i in indexList]
     
     return indexList

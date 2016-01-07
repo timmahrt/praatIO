@@ -48,6 +48,7 @@ class FileNotFound(Exception):
     
 def runPraatScript(praatEXE, scriptFN, argList, exitOnError=True):
     
+    # Popen gives a not-very-transparent error 
     if not os.path.exists(praatEXE):
         raise FileNotFound(praatEXE)
     if not os.path.exists(scriptFN):

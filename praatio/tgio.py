@@ -14,7 +14,7 @@ import codecs
 
 from os.path import join
 
-from praatio import common
+from praatio.utilities import utils
 
 INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
@@ -1158,8 +1158,8 @@ def _parseShortTextGrid(data):
     newTG = Textgrid()
     
     intervalIndicies = [(i, True)
-                        for i in common.findAll(data, '"IntervalTier"')]
-    pointIndicies = [(i, False) for i in common.findAll(data, '"TextTier"')]
+                        for i in utils.findAll(data, '"IntervalTier"')]
+    pointIndicies = [(i, False) for i in utils.findAll(data, '"TextTier"')]
     
     indexList = intervalIndicies + pointIndicies
     indexList.append((len(data), None))  # The 'end' of the file

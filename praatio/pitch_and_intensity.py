@@ -13,7 +13,7 @@ import os
 from os.path import join
 import math
 
-from praatio import common
+from praatio.utilities import utils
 from praatio.utilities import external_data_utils as exUtil
 from praatio.utilities import myMath
 
@@ -45,10 +45,10 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     inputFullFN = join(inputPath, inputFN)
     outputFullFN = join(outputPath, outputFN)
     
-    common.makeDir(outputPath)
+    utils.makeDir(outputPath)
     
     if scriptFN is None:
-        scriptFN = join(common.scriptsPath,
+        scriptFN = join(utils.scriptsPath,
                         "get_pitch_and_intensity_via_python.praat")
     
     assert(os.path.exists(inputFullFN))
@@ -60,9 +60,9 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
         if os.path.exists(outputFullFN):
             os.remove(outputFullFN)
         
-        common.runPraatScript(praatEXE, scriptFN,
-                              [inputFullFN, outputFullFN, sampleStep,
-                               minPitch, maxPitch],
+        utils.runPraatScript(praatEXE, scriptFN,
+                             [inputFullFN, outputFullFN, sampleStep,
+                              minPitch, maxPitch],
                               exitOnError=False)
     
     return loadPIAndTime(outputPath, outputFN)
@@ -114,7 +114,7 @@ def getPIMeasuresBatch(piPath, tgPath, outputPath, tierName,
     if 'doPitch'=true get pitch measures; if =false get rms intensity
     '''
     
-    for piFN in common.findFiles(piPath, filterExt=".txt"):
+    for piFN in utils.findFiles(piPath, filterExt=".txt"):
         name = os.path.splitext(piFN)[0]
         tgFN = "%s.TextGrid" % name
         
@@ -138,7 +138,7 @@ def getPIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
       
     if 'doPitch'=true get pitch measures; if =false get rms intensity
     '''
-    common.makeDir(outputPath)
+    utils.makeDir(outputPath)
     
     dataList = loadPIAndTime(piPath, piFN)
     

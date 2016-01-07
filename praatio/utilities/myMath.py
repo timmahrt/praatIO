@@ -4,11 +4,7 @@ Created on Jan 6, 2016
 @author: Tim
 '''
 
-from os.path import join
-
 import math
-
-import utils
 
 
 def medianFilter(dist, window, useEdgePadding):
