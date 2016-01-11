@@ -1247,8 +1247,20 @@ def readPitchTier(path, fn):
     return pitchTierheader, outputPitchDataList
 
 
-def writePitchTier(path, fn, pitchHeader, pitchDataList):
-    pitchList = pitchHeader + pitchDataList
+def writePitchTier(path, fn, pitchDataList, startTime, endTime):
+    
+    pitchDataList = [row for subList in pitchDataList for row in subList]
+    pitchDataList = [str(val) for val in pitchDataList]
+    
+    header = ['File type = "ooTextFile"',
+              'Object class = "PitchTier"',
+              '',
+              str(startTime),  # start time
+              str(endTime),  # end time
+              str(len(pitchDataList) / 2),  # Num Items
+              ]
+    
+    pitchList = header + pitchDataList
     
     pitchTxt = "\n".join(pitchList)
     
