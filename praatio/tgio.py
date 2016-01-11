@@ -662,23 +662,29 @@ class IntervalTier(TextgridTier):
         return [float(subList[1]) - float(subList[0])
                 for subList in self.entryList]
     
-    def getMatchedData(self, dataTupleList, qualifyFunc=None):
+    def getValuesInIntervals(self, dataTupleList, getTimeFunc=None):
         '''
-        Returns data from dataTupleList in chunks, divided by labeled regions
+        Returns data from dataTupleList contained in labeled intervals
         
-        dataTupleList should be of the form
-        [(value1, time1), (value2, time2),...]
+        dataTupleList should be of the form:
+        [(time1, value1a, value1b,...), (time2, value2a, value2b...), ...] 
+        but you can change how time is determined using the getTimeFunc()
         '''
-        if qualifyFunc is None:
-            qualifyFunc = lambda label: True  # All labels pass
+        
+        returnList = []
+        
+        if getTimeFunc is None:
+            getTimeFunc = lambda x: x[0] # Get the first element
         
         for interval in self.entryList:
-            print("--'%s'" % interval[2])
             intervalDataList = []
-            for value, time in dataTupleList:
+            for dataTuple in dataTupleList:
+                time = getTimeFunc(dataTuple)
                 if interval[0] <= time and interval[1] >= time:
-                    intervalDataList.append((value, time))
-            yield intervalDataList
+                    intervalDataList.append(dataTuple)
+            returnList.append((interval, intervalDataList))
+        
+        return returnList
             
     def getNonEntries(self):
         '''

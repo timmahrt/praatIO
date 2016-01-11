@@ -6,15 +6,15 @@ Created on Oct 20, 2014
 
 To be used in conjunction with get_pitch_and_intensity.praat.
 
-For brevity, 'pitch_and_intensity' is refered to as 'PI'
+For brevity, 'pitch_and_intensity' is referred to as 'PI'
 '''
 
 import os
 from os.path import join
 import math
 
+from praatio import tgio
 from praatio.utilities import utils
-from praatio.utilities import external_data_utils as exUtil
 from praatio.utilities import myMath
 
 
@@ -145,19 +145,20 @@ def getPIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
     name = os.path.splitext(piFN)[0]
     
     tgFN = join(tgPath, tgFN)
-    timeFunc = lambda x: x[0]
-    piData = exUtil.getValuesInLabeledIntervals(tgFN, tierName, dataList,
-                                                timeFunc, nullLabelList)
+    tg = tgio.openTextGrid(tgFN)
+    piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
     
     outputList = []
-    for label, entryList in piData:
+    for interval, entryList in piData:
+        label = interval[0]
+        print(entryList)
         if doPitch:
-            tmpValList = [f0Val for f0Val, _ in entryList]
+            tmpValList = [f0Val for _, f0Val, _ in entryList]
             f0Measures = ["%f" % val for val in 
                           getPitchMeasures(tmpValList, tgFN, label, True, True)]
             appendStr = ",".join(f0Measures)
         else:
-            tmpValList = [intensityVal for _, intensityVal in entryList]
+            tmpValList = [intensityVal for _, _, intensityVal in entryList]
     
             tmpValList = [intensityVal for intensityVal in tmpValList
                           if intensityVal != 0.0]
