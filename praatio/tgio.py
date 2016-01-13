@@ -12,8 +12,6 @@ import functools
 
 import codecs
 
-from os.path import join
-
 from praatio.utilities import utils
 
 INTERVAL_TIER = "IntervalTier"
@@ -306,7 +304,7 @@ class TextgridTier(object):
             except NameError:
                 unicodeFunc = str
             else:
-                unicodeFunc = unicode 
+                unicodeFunc = unicode
                 
             text += "\n".join([unicodeFunc(val) for val in entry]) + "\n"
             
@@ -667,14 +665,14 @@ class IntervalTier(TextgridTier):
         Returns data from dataTupleList contained in labeled intervals
         
         dataTupleList should be of the form:
-        [(time1, value1a, value1b,...), (time2, value2a, value2b...), ...] 
+        [(time1, value1a, value1b,...), (time2, value2a, value2b...), ...]
         but you can change how time is determined using the getTimeFunc()
         '''
         
         returnList = []
         
         if getTimeFunc is None:
-            getTimeFunc = lambda x: x[0] # Get the first element
+            getTimeFunc = lambda x: x[0]  # Get the first element
         
         for interval in self.entryList:
             intervalDataList = []

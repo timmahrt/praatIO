@@ -27,8 +27,8 @@ class OverwriteException(Exception):
 
 
 def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
-          minPitch, maxPitch, scriptFN=None,
-          sampleStep=0.01, forceRegenerate=True):
+              minPitch, maxPitch, scriptFN=None,
+              sampleStep=0.01, forceRegenerate=True):
     '''
     Extracts pitch and intensity values from an audio file
     
@@ -63,8 +63,8 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
         utils.runPraatScript(praatEXE, scriptFN,
                              [inputFullFN, outputFullFN, sampleStep,
                               minPitch, maxPitch],
-                              exitOnError=False)
-    
+                             exitOnError=False)
+
     return loadPIAndTime(outputPath, outputFN)
 
 
@@ -104,33 +104,11 @@ def loadPIAndTime(rawPitchDir, fn):
     return dataList
 
 
-def getPIMeasuresBatch(piPath, tgPath, outputPath, tierName, 
-                       doPitch, nullLabelList=None, outputSuffix="measures"):
+def generatePIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
+                       doPitch, outputSuffix="measures"):
     '''
-    Batch generation of pitch and intensity values and measures
-    
-    Assumes audio files and textgrids have the same names, minus extension.
-    
-    if 'doPitch'=true get pitch measures; if =false get rms intensity
-    '''
-    
-    for piFN in utils.findFiles(piPath, filterExt=".txt"):
-        name = os.path.splitext(piFN)[0]
-        tgFN = "%s.TextGrid" % name
-        
-        if not os.path.exists(join(tgPath, tgFN)):
-            print("No paired textgrid exists for pitch file: %s" % piFN)
-            continue
-        
-        getPIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
-                      doPitch, nullLabelList, outputSuffix)
-        
-    
-def getPIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
-                      doPitch, nullLabelList=None, outputSuffix="measures"):
-    '''
-    Returns processed values for the labeled intervals in a textgrid
-    
+    Generates processed values for the labeled intervals in a textgrid
+
     nullLabelList - labels to ignore in the textgrid.  Defaults to ["",]
     
     if 'outputSuffix' is a non-empty string, append it to the end of each
@@ -151,11 +129,11 @@ def getPIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
     outputList = []
     for interval, entryList in piData:
         label = interval[0]
-        print(entryList)
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entryList]
-            f0Measures = ["%f" % val for val in 
-                          getPitchMeasures(tmpValList, tgFN, label, True, True)]
+            f0Measures = ["%f" % val for val in
+                          getPitchMeasures(tmpValList, tgFN, label,
+                                           True, True)]
             appendStr = ",".join(f0Measures)
         else:
             tmpValList = [intensityVal for _, _, intensityVal in entryList]
@@ -175,7 +153,7 @@ def getPIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
     
     # Ensure that this operation will not overwrite any data
     if piPath == outputPath:
-        if (outputSuffix == None) or (outputSuffix == ""):
+        if (outputSuffix is None) or (outputSuffix == ""):
             raise OverwriteException()
     
     open(join(outputPath, "%s.txt" % name),
