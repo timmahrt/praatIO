@@ -34,3 +34,29 @@ def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
                          exitOnError=False)
 
 
+def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
+                      minPitch, maxPitch, scriptFN=None):
+    '''
+    Resynthesizes the pitch in a wav file with the given pitch contour
+    '''
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavFN, pitchFN, outputWavFN,
+                          minPitch, maxPitch],
+                         exitOnError=True)
+
+
+def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
+                         minPitch, maxPitch, scriptFN=None):
+    '''
+    Resynthesizes the duration in a wav file with the given duration tier
+    '''
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavFN, durationTierFN, outputWavFN,
+                          minPitch, maxPitch],
+                         exitOnError=True)
