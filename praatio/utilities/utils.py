@@ -40,13 +40,23 @@ def findAll(txt, subStr):
 class FileNotFound(Exception):
     
     def __init__(self, fullPath):
+        super(FileNotFound, self).__init__()
         self.fullPath = fullPath
     
     def __str__(self):
         return ("File not found:\n%s" % self.fullPath)
+
+
+class PraatExecutionFailed(Exception):
+    
+    def __str__(self):
+        return ("Praat Execution Failed.  Please check the following:\n"
+                "- Praat exists in the location specified"
+                "- Praat script can execute ok outside of praat"
+                "- script arguments are correct")
     
     
-def runPraatScript(praatEXE, scriptFN, argList, exitOnError=True):
+def runPraatScript(praatEXE, scriptFN, argList):
     
     # Popen gives a not-very-transparent error 
     if not os.path.exists(praatEXE):
@@ -58,8 +68,8 @@ def runPraatScript(praatEXE, scriptFN, argList, exitOnError=True):
     cmdList = [praatEXE, '--run', scriptFN] + argList
     myProcess = subprocess.Popen(cmdList)
  
-    if myProcess.wait() and exitOnError:
-        exit()
+    if myProcess.wait():
+        raise PraatExecutionFailed()
 
 
 def _getMatchFunc(pattern):
