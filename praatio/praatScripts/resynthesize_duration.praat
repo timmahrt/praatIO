@@ -1,34 +1,30 @@
-numSteps = %(num_steps)s
+form Resynthesize duration
+    sentence Input_audio_file_name
+    sentence Input_duration_file_name
+    sentence Output_audio_file_name
+    real MinPitch 75
+    real MaxPitch 350
+endform
 
-Read from file... %(input_dir)s/%(input_name)s.wav
+Read from file: input_audio_file_name$
+sound = selected ("Sound")
 
-for iStep to numSteps
-    zeroedI = iStep
-    
-    Create DurationTier... %(input_name)s_'zeroedI' %(start_time)f %(end_time)f
-    %(durationTierPoints)s
-    
-    select Sound %(input_name)s
-    To Manipulation... 0.01 %(pitch_lower_bound)d %(pitch_upper_bound)d
-    
-    select DurationTier %(input_name)s_'zeroedI'
-    plus Manipulation %(input_name)s
-    Replace duration tier
-    
-    select Manipulation %(input_name)s
-    Get resynthesis (overlap-add)
-    if numSteps == 1
-        Save as WAV file... %(output_dir)s/%(output_name)s.wav
-    else
-        Save as WAV file... %(output_dir)s/%(output_name)s_'numSteps'_'zeroedI'.wav
-    endif
-    
-    Remove
-    select Manipulation %(input_name)s
-    Remove
-    select DurationTier %(input_name)s_'zeroedI'
-    Remove
-endfor
+Read from file: input_duration_file_name$
+durationtier = selected ("DurationTier")
 
-select Sound %(input_name)s
-Remove
+selectObject: sound
+To Manipulation: 0.01, minPitch, maxPitch
+manipulation = selected ("Manipulation")
+
+selectObject: durationtier
+plus manipulation
+Replace duration tier
+
+selectObject: manipulation
+Get resynthesis (overlap-add)
+Save as WAV file: output_audio_file_name$
+
+
+exitScript()
+
+
