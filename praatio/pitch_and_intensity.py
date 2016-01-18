@@ -205,37 +205,3 @@ def getPitchMeasures(f0Values, name=None, label=None,
         std = math.sqrt(variance)
             
     return (meanF0, maxF0, minF0, rangeF0, variance, std)
-
-
-def readPitchTier(path, fn):
-    data = open(join(path, fn), "r").read()
-    dataList = data.split("\n")
-    
-    pitchTierheader = dataList[:6]
-    pitchDataList = dataList[6:]
-    
-    outputPitchDataList = [(float(pitchValue), float(time))
-                           for time, pitchValue
-                           in zip(pitchDataList[::2], pitchDataList[1::2])]
-
-    return pitchTierheader, outputPitchDataList
-
-
-def writePitchTier(path, fn, pitchDataList, startTime, endTime):
-    
-    pitchDataList = [row for subList in pitchDataList for row in subList]
-    pitchDataList = [str(val) for val in pitchDataList]
-    
-    header = ['File type = "ooTextFile"',
-              'Object class = "PitchTier"',
-              '',
-              str(startTime),  # start time
-              str(endTime),  # end time
-              str(len(pitchDataList) / 2),  # Num Items
-              ]
-    
-    pitchList = header + pitchDataList
-    
-    pitchTxt = "\n".join(pitchList)
-    
-    open(join(path, fn), "w").write(pitchTxt)
