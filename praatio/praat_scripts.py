@@ -30,8 +30,7 @@ def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
     utils.runPraatScript(praatEXE, scriptFN,
                          [wavFN, outputWavFN, pitchFloor, pitchCeiling,
                           formantShiftRatio, pitchMedian, pitchRange,
-                          duration],
-                         exitOnError=False)
+                          duration])
 
 
 def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
@@ -44,8 +43,7 @@ def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
 
     utils.runPraatScript(praatEXE, scriptFN,
                          [inputWavFN, pitchFN, outputWavFN,
-                          minPitch, maxPitch],
-                         exitOnError=True)
+                          minPitch, maxPitch])
 
 
 def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
@@ -54,9 +52,8 @@ def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
     Resynthesizes the duration in a wav file with the given duration tier
     '''
     if scriptFN is None:
-        scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
+        scriptFN = join(utils.scriptsPath, "resynthesize_duration.praat")
 
     utils.runPraatScript(praatEXE, scriptFN,
                          [inputWavFN, durationTierFN, outputWavFN,
-                          minPitch, maxPitch],
-                         exitOnError=True)
+                          minPitch, maxPitch])
