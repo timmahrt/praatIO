@@ -10,6 +10,8 @@ provided to make it easy to work with textgrid data.
 Praat is a software program for doing phonetic analysis and annotation 
 of speech.  `Praat can be downloaded here <http://www.fon.hum.uva.nl/praat/>`_
 
+.. sectnum::
+.. contents::
 
 Common Use Cases
 ================
@@ -136,3 +138,11 @@ If python is not in your path, you'll need to enter the full path e.g.::
 
 	C:\Python27\python.exe setup.py install
 
+
+Citing praatIO
+===============
+
+PraatIO is general purpose coding and doesn't need to be cited
+but if you would like to, it can be cited like so:
+
+Tim Mahrt. PraatIO. https://github.com/timmahrt/praatIO, 2016.
