@@ -151,5 +151,5 @@ Tim Mahrt. PraatIO. https://github.com/timmahrt/praatIO, 2016.
 Acknowledgements
 ================
 
-Development of PraatIO was possible thanks to NSF grant BCS 12-51343
+Development of PraatIO was possible thanks to NSF grant **BCS 12-51343**
 to Jennifer Cole, José Hualde, and Caroline Smith.
