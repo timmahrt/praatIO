@@ -33,3 +33,4 @@ var/
 *.pydevproject
 
 test/files/*/
+examples/files/*/
