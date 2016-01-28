@@ -3,6 +3,11 @@
 praatIO
 ---------
 
+.. image:: https://travis-ci.org/timmahrt/praatIO.svg?branch=master
+    :target: https://travis-ci.org/timmahrt/praatIO
+
+.. image:: https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?branch=master :target: https://coveralls.io/github/timmahrt/praatIO?branch=master
+
 A library for working with praat and praat files *that comes with batteries included*.
 This isn't just a data struct for reading and writing textgrids--many utilities are
 provided to make it easy to work with textgrid data.
