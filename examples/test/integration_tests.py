@@ -18,8 +18,9 @@ import unittest
 import os
 import sys
 
-os.chdir("..")
-sys.path.append(".")
+cwd = os.path.dirname(os.path.realpath(__file__))
+_root = os.path.split(cwd)[0]
+sys.path.append(_root)
 
 class IntegrationTests(unittest.TestCase):
     """Integration tests"""
@@ -54,20 +55,21 @@ class IntegrationTests(unittest.TestCase):
     def test_merge_tiers(self):
         """Running 'merge_tiers.py'"""
         print(os.getcwd())
-        print "hello"
         import merge_tiers
     
     def setUp(self):
         unittest.TestCase.setUp(self)
 
-        root = os.path.join(".", "files")
+        root = os.path.join(_root, "files")
+        self.oldRoot = os.getcwd()
+        os.chdir(_root)
         self.startingList = os.listdir(root)
         self.startingDir = os.getcwd()
     
     def tearDown(self):
         '''Remove any files generated during the test'''
         #unittest.TestCase.tearDown(self)
- 
+        
         root = os.path.join(".", "files")
         endingList = os.listdir(root)
         endingDir = os.getcwd()
@@ -76,12 +78,13 @@ class IntegrationTests(unittest.TestCase):
         if self.startingDir == endingDir:
             for fn in rmList:
                 fnFullPath = os.path.join(root, fn)
-                print fnFullPath
                 if os.path.isdir(fnFullpath):
                      
                     os.rmdir(fnFullpath)
                 else:
                     os.remove(fnFullpath)
+        
+        os.chdir(self.oldRoot)
         
 
 if __name__ == '__main__':

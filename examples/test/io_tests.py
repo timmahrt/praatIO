@@ -46,7 +46,9 @@ class IOTests(unittest.TestCase):
     def __init__(self, *args, **kargs):
         super(IOTests, self).__init__(*args, **kargs)
         
-        self.dataRoot = join("..", "files")
+        cwd = os.path.dirname(os.path.realpath(__file__))
+        root = os.path.split(cwd)[0]
+        self.dataRoot = join(root, "files")
         self.outputRoot = join(self.dataRoot, "io_test_output")
         
     def setUp(self):
