@@ -39,7 +39,20 @@ class _KlattBaseTier(object):
         self.name = name
         self.minTimestamp = None
         self.maxTimestamp = None
+    
+    def __eq__(self, other):
+        isEqual = True
+        isEqual &= self.name == other.name
+        isEqual &= self.minTimestamp == other.minTimestamp
+        isEqual &= self.maxTimestamp == other.maxTimestamp
         
+        isEqual &= self.tierNameList == other.tierNameList
+        if isEqual:
+            for tierName in self.tierNameList:
+                isEqual &= self.tierDict[tierName] == other.tierDict[tierName]
+        
+        return isEqual
+    
     def addTier(self, tier, tierIndex=None):
         
         if tierIndex is None:
@@ -251,8 +264,7 @@ def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
     
     #  Praat crashes on exit after resynthesis with a klaatgrid
     utils.runPraatScript(praatEXE, scriptFN,
-                         [wavFN, klattFN, outputWavFN, method],
-                         exitOnError=False)
+                         [wavFN, klattFN, outputWavFN, method])
 
 
 def _openNormalKlattGrid(data):

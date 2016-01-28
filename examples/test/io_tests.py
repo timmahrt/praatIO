@@ -18,6 +18,7 @@ from os.path import join
 
 from praatio import tgio
 from praatio import dataio
+from praatio import kgio
 
 
 def areTheSame(fn1, fn2, fileHandler=None):
@@ -25,7 +26,9 @@ def areTheSame(fn1, fn2, fileHandler=None):
     Tests that files contain the same data
     
     Usually we don't want to compare the raw text files.  There are minute
-    differences in the way floating points values are 
+    differences in the way floating points values are.
+    
+    Also allows us to compare short and long-form textgrids
     '''
     if fileHandler is None:
         fileHandler = lambda fn: open(fn, "r").read()
@@ -93,6 +96,17 @@ class IOTests(unittest.TestCase):
         pp.save(outputFN)
         
         self.assertTrue(areTheSame(inputFN, outputFN, dataio.open1DPointObject))
+
+    def test_kg_io(self):
+        '''Tests for reading/writing klattgrids'''
+        fn = "bobby.KlattGrid"
+        inputFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, fn)
         
+        kg = kgio.openKlattGrid(inputFN)
+        kg.save(outputFN)
+        
+        self.assertTrue(areTheSame(inputFN, outputFN, kgio.openKlattGrid))
+ 
 if __name__ == "__main__":
     unittest.main()
