@@ -229,16 +229,17 @@ class TextgridTier(object):
         self.maxTimestamp = maxT
     
     def __eq__(self, other):
+        def isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
+            return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+        
         isEqual = True
         isEqual &= self.name == other.name
         isEqual &= self.minTimestamp == other.minTimestamp
         isEqual &= self.maxTimestamp == other.maxTimestamp
         
         for selfEntry, otherEntry in zip(self.entryList, other.entryList):
-            isEqual &= selfEntry == otherEntry
-#         isEqual &= all([selfEntry == otherEntry
-#                         for selfEntry, otherEntry
-#                         in zip(self.entryList, other.EntryList)])
+            for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
+                isEqual &= isclose(selfSubEntry, otherSubEntry)
         
         return isEqual
     
