@@ -184,8 +184,8 @@ class Klattgrid(tgio.Textgrid):
         outputTxt = ""
         outputTxt += 'File type = "ooTextFile"\n'
         outputTxt += 'Object class = "KlattGrid"\n\n'
-        outputTxt += "xmin = %s\nxmax = %s\n" % (self.minTimestamp,
-                                                 self.maxTimestamp)
+        outputTxt += "xmin = %f\nxmax = %f\n" % (repr(self.minTimestamp),
+                                                 repr(self.maxTimestamp))
         
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()

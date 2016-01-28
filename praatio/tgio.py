@@ -307,19 +307,19 @@ class TextgridTier(object):
         text = ""
         text += '"%s"\n' % self.tierType
         text += '"%s"\n' % self.name
-        text += '%s\n%s\n%s\n' % (self.minTimestamp,
-                                  self.maxTimestamp,
+        text += '%s\n%s\n%s\n' % (repr(self.minTimestamp),
+                                  repr(self.maxTimestamp),
                                   len(self.entryList))
         
         for entry in self.entryList:
-            entry = entry[:-1] + ('"%s"' % entry[-1],)
+            entry = [repr(val) for val in entry[:-1]] + ['"%s"' % entry[-1], ]
             try:
                 unicode
             except NameError:
                 unicodeFunc = str
             else:
                 unicodeFunc = unicode
-                
+            
             text += "\n".join([unicodeFunc(val) for val in entry]) + "\n"
             
         return text
@@ -1081,8 +1081,9 @@ class Textgrid():
         # Header
         outputTxt = ""
         outputTxt += 'File type = "ooTextFile short"\n'
-        outputTxt += '"TextGrid"\n\n'
-        outputTxt += "%s\n%s\n" % (self.minTimestamp, self.maxTimestamp)
+        outputTxt += 'Object class = "TextGrid"\n\n'
+        outputTxt += "%s\n%s\n" % (repr(self.minTimestamp),
+                                   repr(self.maxTimestamp))
         outputTxt += "<exists>\n%d\n" % len(self.tierNameList)
         
         for tierName in self.tierNameList:
@@ -1138,8 +1139,10 @@ def _parseNormalTextGrid(data):
         # Get tier meta-information
         header, tierData = tierTxt.split(searchWord, 1)
         tierName = header.split("name = ")[1].split("\n", 1)[0]
-        tierStart = float(header.split("xmin = ")[1].split("\n", 1)[0])
-        tierEnd = float(header.split("xmax = ")[1].split("\n", 1)[0])
+        tierStart = header.split("xmin = ")[1].split("\n", 1)[0]
+        tierStart = strToIntOrFloat(tierStart)
+        tierEnd = header.split("xmax = ")[1].split("\n", 1)[0]
+        tierEnd = strToIntOrFloat(tierEnd)
         tierName = tierName.strip()[1:-1]
         
         # Get the tier entry list
@@ -1210,8 +1213,8 @@ def _parseShortTextGrid(data):
         tierEndTime, tierEndTimeI = _fetchRow(tierData, '', tierStartTimeI)
         startTimeI = _fetchRow(tierData, '', tierEndTimeI)[1]
         
-        tierStartTime = float(tierStartTime)
-        tierEndTime = float(tierEndTime)
+        tierStartTime = strToIntOrFloat(tierStartTime)
+        tierEndTime = strToIntOrFloat(tierEndTime)
         
         # Tier entry data
         entryList = []
@@ -1249,6 +1252,9 @@ def _parseShortTextGrid(data):
 
     return newTG
 
+
+def strToIntOrFloat(inputStr):
+    return float(inputStr) if '.' in inputStr else int(inputStr)
 
 def _fetchRow(dataStr, searchStr, index):
     startIndex = dataStr.index(searchStr, index) + len(searchStr)

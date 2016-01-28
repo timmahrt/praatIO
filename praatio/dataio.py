@@ -19,7 +19,7 @@ class PointObject(object):
             
         self.pointList = pointList
         self.objectClass = objectClass
-        self.minTime = minTime
+        self.minTime = minTime if minTime > 0 else 0
         self.maxTime = maxTime
     
     def __eq__(self, other):
@@ -36,14 +36,14 @@ class PointObject(object):
     def save(self, fn):
         header = ('File type = "ooTextFile"\n'
                   'Object class = "%s"\n'
-                  '\n%f\n%f\n%d')
-        header %= (self.objectClass, self.minTime, self.maxTime,
+                  '\n%s\n%s\n%d')
+        header %= (self.objectClass, repr(self.minTime), repr(self.maxTime),
                    len(self.pointList))
         
-        strPoints = "\n".join([str(val) for subList in self.pointList
-                               for val in subList])
+        tmp = [repr(val) for entry in self.pointList for val in entry]
+        strPoints = "\n".join(tmp)
         
-        outputStr = "%s\n%s" % (header, strPoints)
+        outputStr = "%s\n%s\n" % (header, strPoints)
         
         open(fn, "w").write(outputStr)
     
