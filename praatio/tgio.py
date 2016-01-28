@@ -239,7 +239,10 @@ class TextgridTier(object):
         
         for selfEntry, otherEntry in zip(self.entryList, other.entryList):
             for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
-                isEqual &= isclose(selfSubEntry, otherSubEntry)
+                try:
+                    isEqual &= isclose(selfSubEntry, otherSubEntry)
+                except TypeError:
+                    isEqual &= selfSubEntry == otherSubEntry
         
         return isEqual
     
