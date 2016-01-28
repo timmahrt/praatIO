@@ -227,7 +227,21 @@ class TextgridTier(object):
         self.entryList = entryList
         self.minTimestamp = minT
         self.maxTimestamp = maxT
+    
+    def __eq__(self, other):
+        isEqual = True
+        isEqual &= self.name == other.name
+        isEqual &= self.minTimestamp == other.minTimestamp
+        isEqual &= self.maxTimestamp == other.maxTimestamp
         
+        for selfEntry, otherEntry in zip(self.entryList, other.entryList):
+            isEqual &= selfEntry == otherEntry
+#         isEqual &= all([selfEntry == otherEntry
+#                         for selfEntry, otherEntry
+#                         in zip(self.entryList, other.EntryList)])
+        
+        return isEqual
+    
     def appendTier(self, tier, timeRelativeFlag):
         
         if timeRelativeFlag is True:
@@ -783,6 +797,18 @@ class Textgrid():
     
         self.minTimestamp = None
         self.maxTimestamp = None
+    
+    def __eq__(self, other):
+        isEqual = True
+        isEqual &= self.minTimestamp == other.minTimestamp
+        isEqual &= self.maxTimestamp == other.maxTimestamp
+
+        isEqual &= self.tierNameList == other.tierNameList
+        if isEqual:
+            for tierName in self.tierNameList:
+                isEqual &= self.tierDict[tierName] == other.tierDict[tierName]
+        
+        return isEqual
     
     def addTier(self, tier, tierIndex=None):
         

@@ -21,7 +21,18 @@ class PointObject(object):
         self.objectClass = objectClass
         self.minTime = minTime
         self.maxTime = maxTime
+    
+    def __eq__(self, other):
+        isEqual = True
+        isEqual &= self.objectClass == other.objectClass
+        isEqual &= self.minTime == other.minTime
+        isEqual &= self.maxTime == other.maxTime
         
+        for selfEntry, otherEntry in zip(self.pointList, other.pointList):
+            isEqual &= selfEntry == otherEntry
+        
+        return isEqual
+    
     def save(self, fn):
         header = ('File type = "ooTextFile"\n'
                   'Object class = "%s"\n'
