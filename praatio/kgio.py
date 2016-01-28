@@ -25,7 +25,6 @@ any points
 '''
 
 import codecs
-import decimal
 from os.path import join
 
 from praatio.utilities import utils
@@ -71,8 +70,9 @@ class KlattContainerTier(_KlattBaseTier):
         outputTxt += "%s? <exists>\n" % self.name
         
         try:
-            outputTxt += "xmin = %s\nxmax = %s\n" % (self.minTimestamp,
-                                                     self.maxTimestamp)
+            self.minTimestamp = toIntOrFloat(self.minTimestamp)
+            outputTxt += "xmin = %s\nxmax = %s\n" % (repr(self.minTimestamp),
+                                                     repr(self.maxTimestamp))
         except TypeError:
             pass
         
@@ -119,9 +119,9 @@ class KlattPointTier(tgio.TextgridTier):
         # Determine the min and max timestamps
         timeList = [time for time, label in entryList]
         if minT is not None:
-            timeList.append(decimal.Decimal(minT))
+            timeList.append(float(minT))
         if maxT is not None:
-            timeList.append(decimal.Decimal(maxT))
+            timeList.append(float(maxT))
         
         try:
             minT = min(timeList)
@@ -139,10 +139,10 @@ class KlattPointTier(tgio.TextgridTier):
         
     def getAsText(self):
         outputList = []
-        
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputList.append("%s? <exists> " % self.name)
-        outputList.append("xmin = %s" % self.minTimestamp)
-        outputList.append("xmax = %s" % self.maxTimestamp)
+        outputList.append("xmin = %s" % repr(self.minTimestamp))
+        outputList.append("xmax = %s" % repr(self.maxTimestamp))
         
         if self.name not in ["phonation", "vocalTract", "coupling",
                              "frication"]:
@@ -150,8 +150,8 @@ class KlattPointTier(tgio.TextgridTier):
         
         for i, entry in enumerate(self.entryList):
             outputList.append("points [%d]:" % (i + 1))
-            outputList.append("    number = %s" % entry[0])
-            outputList.append("    value = %s" % entry[1])
+            outputList.append("    number = %s" % repr(entry[0]))
+            outputList.append("    value = %s" % repr(entry[1]))
     
         return "\n".join(outputList) + "\n"
 
@@ -164,14 +164,15 @@ class KlattSubPointTier(KlattPointTier):
     def getAsText(self):
         outputList = []
         outputList.append("%s:" % self.name)
-        outputList.append("    xmin = %s" % self.minTimestamp)
-        outputList.append("    xmax = %s" % self.maxTimestamp)
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputList.append("    xmin = %s" % repr(self.minTimestamp))
+        outputList.append("    xmax = %s" % repr(self.maxTimestamp))
         outputList.append("    points: size = %d" % len(self.entryList))
         
         for i, entry in enumerate(self.entryList):
             outputList.append("    points [%d]:" % (i + 1))
-            outputList.append("        number = %s" % entry[0])
-            outputList.append("        value = %s" % entry[1])
+            outputList.append("        number = %s" % repr(entry[0]))
+            outputList.append("        value = %s" % repr(entry[1]))
     
         return "\n".join(outputList) + '\n'
     
@@ -184,7 +185,8 @@ class Klattgrid(tgio.Textgrid):
         outputTxt = ""
         outputTxt += 'File type = "ooTextFile"\n'
         outputTxt += 'Object class = "KlattGrid"\n\n'
-        outputTxt += "xmin = %f\nxmax = %f\n" % (repr(self.minTimestamp),
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputTxt += "xmin = %s\nxmax = %s\n" % (repr(self.minTimestamp),
                                                  repr(self.maxTimestamp))
         
         for tierName in self.tierNameList:
@@ -375,8 +377,8 @@ def _getSectionHeader(data, indexList, i):
     
     subheader, minr, maxr = sectionTuple[:3]
     name = subheader.split("?")[0].strip()
-    minT = decimal.Decimal(minr.split("=")[1].strip())
-    maxT = decimal.Decimal(maxr.split("=")[1].strip())
+    minT = float(minr.split("=")[1].strip())
+    maxT = float(maxr.split("=")[1].strip())
 
     tail = sectionTuple[3:]
 
@@ -386,7 +388,7 @@ def _getSectionHeader(data, indexList, i):
 def _buildEntryList(sectionTuple):
     entryList = []
     if len(sectionTuple) > 1:  # Has points
-        npoints = decimal.Decimal(sectionTuple[0].split("=")[1].strip())
+        npoints = float(sectionTuple[0].split("=")[1].strip())
         if npoints > 0:
             entryList = _processSectionData(sectionTuple[1])
     
@@ -406,11 +408,11 @@ def _processSectionData(sectionData):
             break
         
         endI = sectionData.index("\n", startI)
-        time = decimal.Decimal(sectionData[startI:endI].strip())
+        time = float(sectionData[startI:endI].strip())
         
         startI = sectionData.index("=", endI) + 1  # Just past the '=' sign
         endI = sectionData.index("\n", startI)
-        value = decimal.Decimal(sectionData[startI:endI].strip())
+        value = float(sectionData[startI:endI].strip())
         
         startI = endI
         tupleList.append((time, value))
@@ -444,3 +446,11 @@ def _cleanNumericValues(dataStr):
     outputTxt = "\n".join(newDataList)
     
     return outputTxt
+
+
+def toIntOrFloat(val):
+    if float(val) - float(int(val)) == 0.0:
+        val = int(val)
+    else:
+        val = float(val)
+    return val
