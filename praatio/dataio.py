@@ -50,7 +50,8 @@ class PointObject(object):
     def getPointsInInterval(self, start, stop, startIndex=0):
     
         returnPointList = []
-        for time in self.pointList[startIndex:]:
+        for entry in self.pointList[startIndex:]:
+            time = entry[0]
             if time >= start:
                 if time <= stop:
                     returnPointList.append(time)
@@ -58,19 +59,88 @@ class PointObject(object):
                     break
         
         return returnPointList
-        
 
-def openPointObject(fn):
+
+class PointObject1D(PointObject):
+    '''Points that only carry temporal information'''
+
+    def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
+
+        assert(objectClass != PITCH)
+        assert(objectClass != DURATION)
+        
+        super(PointObject1D, self).__init__(pointList, objectClass,
+                                            minTime, maxTime)
+
+
+class PointObject2D(PointObject):
+    '''Points that carry a temporal value and some other value'''
+
+    def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
+
+        assert(objectClass != POINT)
+
+        super(PointObject2D, self).__init__(pointList, objectClass,
+                                            minTime, maxTime)
+
+
+def open1DPointObject(fn):
     data = open(fn, "rU").read()
     if "xmin" in data[:100]:  # Kindof lazy
-        dataList = _parseNormalPointObject(fn)
+        data, objectType, minT, maxT = _parseNormalHeader(fn)
+
+        start = 0
+        dataList = []
+        while True:
+            try:
+                start = data.index('=', start)
+            except ValueError:
+                break
+            
+            timeVal, start = _getNextValue(data, start)
+            pointVal, start = _getNextValue(data, start)
+            dataList.append([float(timeVal), float(pointVal), ])
+        
+        po = PointObject2D(dataList, objectType, minT, maxT)
     else:
-        dataList = _parseShortPointObject(fn)
+        data, objectType, minT, maxT = _parseShortHeader(fn)
+        dataList = data.split('\n')
+        dataList = [[float(val), ] for val in dataList if val.strip() != '']
+        po = PointObject1D(dataList, objectType, minT, maxT)
     
-    return dataList
+    return po
 
 
-def _parseNormalPointObject(fn):
+def open2DPointObject(fn):
+    data = open(fn, "rU").read()
+    if "xmin" in data[:100]:  # Kindof lazy
+        data, objectType, minT, maxT = _parseNormalHeader(fn)
+
+        start = 0
+        dataList = []
+        while True:
+            try:
+                start = data.index('=', start)
+            except ValueError:
+                break
+            
+            pointVal, start = _getNextValue(data, start)
+            dataList.append([float(pointVal), ])
+        
+        po = PointObject2D(dataList, objectType, minT, maxT)
+        
+    else:
+        data, objectType, minT, maxT = _parseShortHeader(fn)
+        dataList = data.split('\n')
+        dataList = [(float(dataList[i]), float(dataList[i + 1]))
+                    for i in range(0, len(dataList), 2)
+                    if dataList[i].strip() != '']
+        po = PointObject2D(dataList, objectType, minT, maxT)
+    
+    return po
+
+
+def _parseNormalHeader(fn):
     data = open(fn, "rU").read()
     
     chunkedData = data.split("\n", 7)
@@ -83,23 +153,16 @@ def _parseNormalPointObject(fn):
     minT = chunkedData[-5].split("=")[-1].strip()
     minT, maxT = float(minT), float(maxT)
     
-    start = 0
-    dataList = []
-    while True:
-        try:
-            start = data.index('=', start)
-        except ValueError:
-            break
-        
-        end = data.index('\n', start)
-        pointVal = data[start + 1:end]
-        dataList.append(float(pointVal))
-        start = end
-    
-    return PointObject(dataList, objectType, minT, maxT)
+    return data, objectType, minT, maxT
 
 
-def _parseShortPointObject(fn):
+def _getNextValue(data, start):
+    end = data.index('\n', start)
+    value = data[start + 1:end]
+    return value, end
+
+
+def _parseShortHeader(fn):
     data = open(fn, "rU").read()
     
     chunkedData = data.split("\n", 6)
@@ -113,7 +176,4 @@ def _parseShortPointObject(fn):
     
     minT, maxT = float(minT), float(maxT)
     
-    dataList = data.split('\n')
-    dataList = [float(val) for val in dataList if val.strip() != '']
-    
-    return PointObject(dataList, objectType, minT, maxT)
+    return data, objectType, minT, maxT
