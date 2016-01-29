@@ -53,14 +53,12 @@ def merge_adjacent_batch(inputPath, outputPath):
     for fn in os.listdir(inputPath):
         if '.TextGrid' in fn:
             combine_adjacent(inputPath, fn, outputPath)
-        
-        
-if __name__ == "__main__":
+
     
-    path = join(".", "files")
-    outputPath = join(path, "merged_textgrids")
-    
-    if not os.path.exists(outputPath):
-        os.mkdir(outputPath)
-    
-    merge_adjacent(path, "textgrid_to_merge.TextGrid", outputPath)
+path = join(".", "files")
+outputPath = join(path, "merged_textgrids")
+
+if not os.path.exists(outputPath):
+    os.mkdir(outputPath)
+
+merge_adjacent(path, "textgrid_to_merge.TextGrid", outputPath)
