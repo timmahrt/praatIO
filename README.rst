@@ -9,6 +9,9 @@ praatIO
 .. image:: https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?branch=master
     :target: https://coveralls.io/github/timmahrt/praatIO?branch=master
 
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg?
+   :target: http://opensource.org/licenses/MIT
+
 A library for working with praat and praat files *that comes with batteries included*.
 This isn't just a data struct for reading and writing textgrids--many utilities are
 provided to make it easy to work with textgrid data.
@@ -112,9 +115,11 @@ Ver 1.0 (August 31, 2014)
 Requirements
 ==============
 
-``Python 2.7.*`` or above
+``Python 2.6.*`` or above
 
 ``Python 3.3.*`` or above
+
+`Click here to see the specific versions of python that praatIO is tested under <https://travis-ci.org/timmahrt/praatIO>`_
 
 
 Usage
