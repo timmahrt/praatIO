@@ -75,14 +75,13 @@ class IntegrationTests(unittest.TestCase):
         endingDir = os.getcwd()
         rmList = [fn for fn in endingList if fn not in self.startingList]
         
-        if self.startingDir == endingDir:
+        if self.oldRoot == root:
             for fn in rmList:
                 fnFullPath = os.path.join(root, fn)
-                if os.path.isdir(fnFullpath):
-                     
-                    os.rmdir(fnFullpath)
+                if os.path.isdir(fnFullPath):
+                    os.rmdir(fnFullPath)
                 else:
-                    os.remove(fnFullpath)
+                    os.remove(fnFullPath)
         
         os.chdir(self.oldRoot)
         
