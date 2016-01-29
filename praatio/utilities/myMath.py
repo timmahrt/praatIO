@@ -13,7 +13,7 @@ def medianFilter(dist, window, useEdgePadding):
     length = len(dist)
 
     returnList = []
-    for x in xrange(length):
+    for x in range(length):
         dataToFilter = []
         # If using edge padding or if 0 <= context <= length
         if useEdgePadding or (((0 <= x - offset) and (x + offset < length))):
@@ -23,7 +23,7 @@ def medianFilter(dist, window, useEdgePadding):
             postContext = []
             
             lastKnownLargeIndex = 0
-            for y in xrange(1, offset + 1):  # 1-based
+            for y in range(1, offset + 1):  # 1-based
                 if x + y >= length:
                     if lastKnownLargeIndex == 0:
                         largeIndexValue = x

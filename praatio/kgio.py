@@ -283,7 +283,7 @@ def _openNormalKlattGrid(data):
     
     sectionIndexList.append(-1)
     
-    for i in xrange(len(sectionIndexList) - 1):
+    for i in range(len(sectionIndexList) - 1):
         dataTuple = _getSectionHeader(data, sectionIndexList, i)
         name, minT, maxT, sectionData, sectionTuple = dataTuple
         
@@ -354,7 +354,7 @@ def _proccessContainerTierInput(sectionData, name):
         if indexList == []:
             continue
         tierList = []
-        for j in xrange(len(indexList) - 1):
+        for j in range(len(indexList) - 1):
             try:
                 tmpTuple = _getSectionHeader(sectionData, indexList, j)
             except ValueError:
