@@ -79,6 +79,17 @@ What can you do with this library?
 Major revisions
 ================
 
+Ver 3.2 (January 29, 2016)
+
+- Float precision is now preserved in file I/O
+
+- Integration tests added; using Travis CI and Coveralls for build automation.
+
+- Lots of small bugfixes
+
+- Moved point processes into 1D and 2D point objects
+
+
 Ver 3.1 (December 16, 2015)
 
 - Support for reading/writing point processes
