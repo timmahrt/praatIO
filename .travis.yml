@@ -11,4 +11,4 @@ install:
 script:
   - nosetests --exe --with-coverage
 after_success:
-  - coveralls
+  - coveralls --config-file .coveragerc
