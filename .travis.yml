@@ -7,7 +7,8 @@ python:
   - "3.5"
 install:
   - python setup.py install
+  - pip install coveralls
 script:
-  - nosetests --exe
+  - nosetests --exe --with-coverage
 after_success:
   - coveralls
