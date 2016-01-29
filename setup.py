@@ -6,6 +6,7 @@ Created on Aug 29, 2014
 @author: tmahrt
 '''
 from distutils.core import setup
+import codecs
 setup(name='praatio',
       version='3.0.0',
       author='Tim Mahrt',
@@ -15,6 +16,6 @@ setup(name='praatio',
                 'praatio.utilities'],
       package_data={'praatio': ['praatScripts/*.praat', ]},
       license='LICENSE',
-      long_description=open('README.rst', 'r').read(),
+      long_description=codecs.open('README.rst', 'r', encoding="utf-8").read(),
 #       install_requires=[], # No requirements! # requires 'from setuptools import setup'
       )

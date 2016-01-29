@@ -9,4 +9,6 @@ python:
 install:
   - python setup.py install
 script:
-  - nosetests
+  - nosetests --exe
+after_success:
+  - coveralls
