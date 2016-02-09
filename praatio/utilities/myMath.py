@@ -7,6 +7,26 @@ Created on Jan 6, 2016
 import math
 
 
+def medianFilterTimeSeriesData(featureTimeList, filterAmount, index,
+                               useEdgePadding):
+    '''
+    Median filter time-stamped data values.
+    
+    It's ok to have other values in the list. eg
+    featureTimeList: [(time_0, .., featureA_0, ..),
+                      (time_1, .., featureA_1, ..),
+                      ..]
+    '''
+    featureTimeList = [list(row) for row in featureTimeList]
+    featValues = [row[index] for row in featureTimeList]
+    featValues = medianFilter(featValues, filterAmount,
+                              useEdgePadding)
+    outputList = [piRow[:index] + [f0Val, ] + piRow[index + 1:]
+                  for piRow, f0Val in zip(featureTimeList, featValues)]
+        
+    return outputList
+
+
 def medianFilter(dist, window, useEdgePadding):
     
     offset = int(math.floor(window / 2.0))

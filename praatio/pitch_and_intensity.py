@@ -28,7 +28,7 @@ class OverwriteException(Exception):
 
 def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
               minPitch, maxPitch, scriptFN=None,
-              sampleStep=0.01, forceRegenerate=True):
+              sampleStep=0.01, pitchFilterWindowSize=0, forceRegenerate=True):
     '''
     Extracts pitch and intensity values from an audio file
     
@@ -62,10 +62,11 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
         
         utils.runPraatScript(praatEXE, scriptFN,
                              [inputFullFN, outputFullFN, sampleStep,
-                              minPitch, maxPitch],
-                             exitOnError=False)
+                              minPitch, maxPitch])
 
-    return loadPIAndTime(outputPath, outputFN)
+    piList = loadPIAndTime(outputPath, outputFN)
+    
+    return piList
 
 
 def loadPIAndTime(rawPitchDir, fn):
@@ -104,23 +105,14 @@ def loadPIAndTime(rawPitchDir, fn):
     return dataList
 
 
-def generatePIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
-                       doPitch, outputSuffix="measures"):
+def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch):
     '''
     Generates processed values for the labeled intervals in a textgrid
 
     nullLabelList - labels to ignore in the textgrid.  Defaults to ["",]
-    
-    if 'outputSuffix' is a non-empty string, append it to the end of each
-      output fn (e.g. "audio1.txt" -> "audio1_measures.txt"
       
     if 'doPitch'=true get pitch measures; if =false get rms intensity
     '''
-    utils.makeDir(outputPath)
-    
-    dataList = loadPIAndTime(piPath, piFN)
-    
-    name = os.path.splitext(piFN)[0]
     
     tgFN = join(tgPath, tgFN)
     tg = tgio.openTextGrid(tgFN)
@@ -131,10 +123,9 @@ def generatePIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
         label = interval[0]
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entryList]
-            f0Measures = ["%f" % val for val in
-                          getPitchMeasures(tmpValList, tgFN, label,
-                                           True, True)]
-            appendStr = ",".join(f0Measures)
+            f0Measures = getPitchMeasures(tmpValList, tgFN, label,
+                                          True, True)
+            outputList.append(list(f0Measures))
         else:
             tmpValList = [intensityVal for _, _, intensityVal in entryList]
     
@@ -144,20 +135,9 @@ def generatePIMeasures(piPath, piFN, tgPath, tgFN, outputPath, tierName,
             rmsIntensity = 0
             if len(tmpValList) != 0:
                 rmsIntensity = myMath.rms(tmpValList)
-            appendStr = str(rmsIntensity)
-            
-        outputList.append(appendStr)
+            outputList.append([rmsIntensity, ])
     
-    if outputSuffix is not None and outputSuffix is not "":
-        name += "_" + outputSuffix
-    
-    # Ensure that this operation will not overwrite any data
-    if piPath == outputPath:
-        if (outputSuffix is None) or (outputSuffix == ""):
-            raise OverwriteException()
-    
-    open(join(outputPath, "%s.txt" % name),
-         "w").write("\n".join(outputList))
+    return outputList
 
 
 def getPitchMeasures(f0Values, name=None, label=None,
