@@ -185,3 +185,33 @@ def getPitchMeasures(f0Values, name=None, label=None,
         std = math.sqrt(variance)
             
     return (meanF0, maxF0, minF0, rangeF0, variance, std)
+
+
+def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
+    '''
+    Detect pitch halving and doubling errors.
+    
+    If a textgrid is passed in, it adds the markings to the textgrid
+    '''
+    assert(maxJumpThreshold >= 0.0 and maxJumpThreshold <= 1.0)
+    
+    errorList = []
+    for i in range(1, len(pitchList)):
+        lastPitch = pitchList[i - 1][1]
+        currentPitch = pitchList[i][1]
+        
+        ceilingCutoff = currentPitch / maxJumpThreshold
+        floorCutoff = currentPitch * maxJumpThreshold
+        if((lastPitch <= floorCutoff) or (lastPitch >= ceilingCutoff)):
+            currentTime = pitchList[i][0]
+            errorList.append(currentTime, currentPitch / lastPitch)
+    
+    if tgToMark is not None:
+        tierName = "pitch errors"
+        assert(tierName not in tgToMark.tierNameList)
+        pointTier = tgio.PointTier(tierName, errorList,
+                                   tgToMark.minTimestamp,
+                                   tgToMark.maxTimestamp)
+        tgToMark.addTier(pointTier)
+    
+    return errorList, tgToMark
