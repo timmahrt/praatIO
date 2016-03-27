@@ -443,7 +443,7 @@ class PointTier(TextgridTier):
         
         return returnList
     
-    def insert(self, entry, warnFlag, collisionCode=None):
+    def insertEntry(self, entry, warnFlag, collisionCode=None):
         '''
         inserts an interval into the tier
         
@@ -659,7 +659,72 @@ class IntervalTier(TextgridTier):
             newMax = self.maxTimestamp
         
         return IntervalTier(self.name, newEntryList, newMin, newMax)
-    
+
+    def eraseInterval(self, entry, collisionCode=None):
+        '''
+        Makes a region in a tier blank (removes all contained entries)
+        
+        collisionCode: in the event that intervals exist in the insertion area,
+                       one of three things may happen
+        - 'truncate' - partially contained entries will have the portion
+                       removed that overlaps with the target entry
+        - 'categorical' - all entries that overlap, even partially, with the
+                          target entry will be completely removed
+        - None or any other value - AssertionError is thrown
+        '''
+        startTime, endTime = entry[:2]
+        
+        matchList = self.getEntries(startTime, endTime)
+        
+        if len(matchList) == 0:
+            pass
+        else:
+            # There are matches but if the collisionCode is not properly set
+            #    it isn't clear what to do
+            assert(collisionCode == 'truncate' or
+                   collisionCode == 'categorical')
+            
+            # Remove all the matches from the entryList
+            # Go in reverse order because we're destructively altering
+            # the order of the list (messes up index order)
+            for tmpEntry in matchList[::-1]:
+                self.deleteEntry(tmpEntry)
+            
+            # If we're only truncating, reinsert entries on the left and
+            # right edges
+            if collisionCode == 'truncate':
+                
+                if len(matchList) > 1:
+                    # Check left edge
+                    if matchList[0][0] < startTime:
+                        newEntry = (matchList[0][0],
+                                    startTime,
+                                    matchList[0][-1])
+                        self.entryList.append(newEntry)
+                        
+                    # Check right edge
+                    if matchList[-1][1] > endTime:
+                        newEntry = (endTime,
+                                    matchList[-1][1],
+                                    matchList[-1][-1])
+                        self.entryList.append(newEntry)
+                else:
+                    newEntry = entry[:]
+                    # Check left edge
+                    if matchList[0][0] < startTime:
+                        newEntry = (matchList[0][0],
+                                    startTime,
+                                    matchList[0][-1])
+                    # Check right edge
+                    if matchList[-1][1] > endTime:
+                        newEntry = (endTime,
+                                    matchList[-1][1],
+                                    matchList[-1][-1])
+                    if not newEntry == entry:
+                        self.entryList.append(newEntry)
+
+        self.entryList.sort()
+
     def getEntries(self, start=None, stop=None, boundaryInclusive=False):
         
         if start is None:
@@ -668,10 +733,11 @@ class IntervalTier(TextgridTier):
         if stop is None:
             stop = self.maxTimestamp
         
+        targetEntry = (start, stop, "")
+        
         returnList = []
         for entry in self.entryList:
-            if intervalOverlapCheck(entry, (start, stop, ""),
-                                    boundaryInclusive=boundaryInclusive):
+            if intervalOverlapCheck(entry, targetEntry, boundaryInclusive):
                 returnList.append(entry)
         
         return returnList
@@ -727,7 +793,7 @@ class IntervalTier(TextgridTier):
             
         return invertedEntryList
     
-    def insert(self, entry, warnFlag, collisionCode=None):
+    def insertEntry(self, entry, warnFlag, collisionCode=None):
         '''
         inserts an interval into the tier
         
