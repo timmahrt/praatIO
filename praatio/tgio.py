@@ -230,7 +230,7 @@ class TextgridTier(object):
     
     def __eq__(self, other):
         def isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
-            return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+            return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
         
         isEqual = True
         isEqual &= self.name == other.name
@@ -331,10 +331,19 @@ class TextgridTier(object):
     def getDuration(self):
         '''Returns the duration of the tier'''
         return self.maxTimestamp - self.minTimestamp
-
-    def newTier(self, name, entryList, minTimestamp=None, maxTimestamp=None):
-        '''Returns a new instance of the same type of tier as self'''
-        raise NotImplementedError()
+    
+    def newTier(self, name=None, entryList=None,
+                minTimestamp=None, maxTimestamp=None):
+        '''Make a new interval tier derived from the current one'''
+        if name is None:
+            name = self.name
+        if entryList is None:
+            entryList = copy.deepcopy(self.entryList)
+        if minTimestamp is None:
+            minTimestamp = self.minTimestamp
+        if maxTimestamp is None:
+            maxTimestamp = self.maxTimestamp
+        return type(self)(name, entryList, minTimestamp, maxTimestamp)
     
     def sort(self):
         '''Sorts the entries in the entryList'''
@@ -478,13 +487,6 @@ class PointTier(TextgridTier):
         if len(matchList) != 0 and warnFlag is True:
             fmtStr = "Collision warning for %s with items %s of tier %s"
             print((fmtStr % (str(entry), str(matchList), self.name)))
-    
-    def newTier(self, name, entryList, minTimestamp=None, maxTimestamp=None):
-        if minTimestamp is None:
-            minTimestamp = self.minTimestamp
-        if maxTimestamp is None:
-            maxTimestamp = self.maxTimestamp
-        return PointTier(name, entryList, minTimestamp, maxTimestamp)
 
         
 class IntervalTier(TextgridTier):
@@ -784,14 +786,6 @@ class IntervalTier(TextgridTier):
         return _manipulate(self, functools.partial(_morphFunc,
                                                    self,
                                                    targetTier))
-    
-    def newTier(self, name, entryList, minTimestamp=None, maxTimestamp=None):
-        if minTimestamp is None:
-            minTimestamp = self.minTimestamp
-        if maxTimestamp is None:
-            maxTimestamp = self.maxTimestamp
-        return IntervalTier(name, entryList, minTimestamp, maxTimestamp)
-    
         
 class Textgrid():
     
@@ -1259,6 +1253,7 @@ def _parseShortTextGrid(data):
 
 def strToIntOrFloat(inputStr):
     return float(inputStr) if '.' in inputStr else int(inputStr)
+
 
 def _fetchRow(dataStr, searchStr, index):
     startIndex = dataStr.index(searchStr, index) + len(searchStr)
