@@ -347,6 +347,13 @@ class TextgridTier(object):
     
     def sort(self):
         '''Sorts the entries in the entryList'''
+        # A list containing tuples and lists will be sorted with tuples
+        # first and then lists.  To correctly sort, we need to make
+        # sure that all data structures inside the entry list are
+        # of the same data type.  The entry list is sorted whenever
+        # the entry list is modified, so this is probably the best
+        # place to enforce the data type
+        self.entryList = [tuple(entry) for entry in self.entryList]
         self.entryList.sort()
         
 
@@ -1130,6 +1137,8 @@ class Textgrid():
         self.addTier(oldTier.newTier(name, newTierEntryList), tierIndex)
             
     def save(self, fn):
+        
+        self.sort()
         
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
