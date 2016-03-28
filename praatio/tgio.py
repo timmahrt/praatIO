@@ -73,7 +73,7 @@ def _manipulate(tier, iterateFunc):
         
         adjustAmount += tmpAdjustAmount
         
-        adjustedEntryList.append([adjustedStart, adjustedEnd, fromLabel])
+        adjustedEntryList.append((adjustedStart, adjustedEnd, fromLabel))
     
     return tier.newTier(tier.name, adjustedEntryList)
 
@@ -489,7 +489,7 @@ class PointTier(TextgridTier):
         else:
             raise TextgridCollisionException(self.name, entry, matchList)
             
-        self.entryList.sort()
+        self.sort()
         
         if len(matchList) != 0 and warnFlag is True:
             fmtStr = "Collision warning for %s with items %s of tier %s"
@@ -607,7 +607,7 @@ class IntervalTier(TextgridTier):
                 firstIntervalKeptProportion = ((intervalEnd - cropStart) /
                                                (intervalEnd - intervalStart))
                 if not strictFlag:
-                    matchedEntry = [cropStart, intervalEnd, intervalLabel]
+                    matchedEntry = (cropStart, intervalEnd, intervalLabel)
                 else:
                     cutTWithin += cropEnd - cropStart
 
@@ -744,7 +744,7 @@ class IntervalTier(TextgridTier):
                     if not newEntry == entry:
                         self.entryList.append(newEntry)
 
-        self.entryList.sort()
+        self.sort()
 
     def getEntries(self, start=None, stop=None, boundaryInclusive=False):
         
@@ -845,15 +845,15 @@ class IntervalTier(TextgridTier):
             matchList.append(entry)
             matchList.sort()  # By starting time
             
-            newEntry = [min([entry[0] for entry in matchList]),
+            newEntry = (min([entry[0] for entry in matchList]),
                         max([entry[1] for entry in matchList]),
-                        "-".join([entry[2] for entry in matchList])]
+                        "-".join([entry[2] for entry in matchList]))
             self.entryList.append(newEntry)
             
         else:
             raise TextgridCollisionException(self.name, entry, matchList)
             
-        self.entryList.sort()
+        self.sort()
         
         if len(matchList) != 0 and warnFlag is True:
             fmtStr = "Collision warning for %s with items %s of tier %s"
