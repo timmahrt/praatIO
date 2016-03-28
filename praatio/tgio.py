@@ -625,7 +625,21 @@ class IntervalTier(TextgridTier):
         subTier = IntervalTier(self.name, newEntryList, 0, cropEnd - cropStart)
         return (subTier, cutTStart, cutTWithin, cutTEnd,
                 firstIntervalKeptProportion, lastIntervalKeptProportion)
-         
+    
+    def difference(self, tier):
+        '''
+        Takes the set difference of this tier and the given one
+        
+        Any overlapping portions of entries with entries in this textgrid
+        will be removed from the returned tier.
+        '''
+        retTier = self.newTier()
+        
+        for entry in tier.entryList:
+            retTier.eraseInterval(entry, collisionCode='truncate')
+        
+        return retTier
+
     def editTimestamps(self, startOffset, stopOffset, allowOvershoot=False):
         '''
         Modifies all timestamps by a constant amount
@@ -845,6 +859,32 @@ class IntervalTier(TextgridTier):
             fmtStr = "Collision warning for %s with items %s of tier %s"
             print((fmtStr % (str(entry), str(matchList), self.name)))
 
+    def intersection(self, tier):
+        '''
+        Takes the set intersection of this tier and the given one
+        
+        Only intervals that exist in both tiers will remain in the
+        returned tier.  If intervals partially overlap, only the overlapping
+        portion will be returned.
+        '''
+
+        retEntryList = []
+        for start, stop, label in tier.entryList:
+            subTier = self.crop(start, stop, False, False)[0]
+            
+            # Combine the labels in the two tiers
+            stub = "%s-%%s" % label
+            subEntryList = [(subEntry[0], subEntry[1], stub % subEntry[2])
+                            for subEntry in subTier.entryList]
+            
+            retEntryList.extend(subEntryList)
+        
+        newName = "%s-%s" % (self.name, tier.name)
+        
+        retTier = self.newTier(newName, retEntryList)
+        
+        return retTier
+
     def manipulate(self, modFunc, filterFunc):
         '''
         
@@ -859,6 +899,23 @@ class IntervalTier(TextgridTier):
         return _manipulate(self, functools.partial(_morphFunc,
                                                    self,
                                                    targetTier))
+
+    def union(self, tier):
+        '''
+        The given tier is set unioned to this tier.
+        
+        All entries in the given tier are added to the current tier.
+        Overlapping entries are merged.
+        '''
+        retTier = self.newTier()
+        
+        for entry in tier.entryList:
+            retTier.insertEntry(entry, False, collisionCode='merge')
+        
+        retTier.sort()
+        
+        return retTier
+
         
 class Textgrid():
     

@@ -57,6 +57,10 @@ class IntegrationTests(unittest.TestCase):
         print(os.getcwd())
         import merge_tiers
     
+    def test_set_operations(self):
+        """Running 'textgrid_set_operations.py'"""
+        import textgrid_set_operations
+    
     def setUp(self):
         unittest.TestCase.setUp(self)
 
