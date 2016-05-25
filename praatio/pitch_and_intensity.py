@@ -155,8 +155,14 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     return piList
 
 
+def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
     '''
     For reading the output of get_pitch_and_intensity
+    
+    If undefinedValue is not None, undefined pitch or intensity values
+    will be replaced with it.  Otherwise, if None, if either value is
+    undefined, both are discarded.
+    
     '''
     name = os.path.splitext(fn)[0]
     
@@ -174,12 +180,18 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     for time, f0Val, intensity in dataList:
         time = float(time)
         if '--' in f0Val:
-            f0Val = 0.0
+            if undefinedValue is not None:
+                f0Val = undefinedValue
+            else:
+                continue
         else:
             f0Val = float(f0Val)
             
         if '--' in intensity:
-            intensity = 0.0
+            if undefinedValue is not None:
+                intensity = undefinedValue
+            else:
+                continue
         else:
             intensity = float(intensity)
         
