@@ -78,8 +78,7 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
 
 
 def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
-                   minPitch, maxPitch, scriptFN=None,
-                   sampleStep=0.01, silenceThreshold=0.03,
+                   minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
                    forceRegenerate=True,
                    tgPath=None, tgFN=None, tierName=None):
     '''

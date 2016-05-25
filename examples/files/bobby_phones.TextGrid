@@ -15,7 +15,7 @@ item []:
         intervals [1]:
             xmin = 0.0124716553288 
             xmax = 0.06469123242311078 
-            text = "sp" 
+            text = "" 
         intervals [2]:
             xmin = 0.06469123242311078 
             xmax = 0.08438971390281873 
@@ -71,4 +71,4 @@ item []:
         intervals [15]:
             xmin = 1.1171482864527198 
             xmax = 1.18979591837 
-            text = "sp" 
+            text = "" 

@@ -10,7 +10,7 @@ praatIO
     :target: https://coveralls.io/github/timmahrt/praatIO?branch=master
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg?
-   :target: http://opensource.org/licenses/MIT
+    :target: http://opensource.org/licenses/MIT
 
 A library for working with praat and praat files *that comes with batteries included*.
 This isn't just a data struct for reading and writing textgrids--many utilities are

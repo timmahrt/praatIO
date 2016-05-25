@@ -30,6 +30,30 @@ bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
                                                "bobby.txt", praatEXE, 50, 350,
                                                forceRegenerate=False)
 
+# Here are two examples of the new functionality of extracting pitch
+# from only labeled intervals in a textgrid.  However, the example files
+# I have provided are too short and praat will not process them.
+
+# Extracts each labeled interval as a separate wave file, extracts the
+# pitch track from each of those, and then aggregates the result.
+# pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath, 
+#                              "bobby_segments.txt", praatEXE,
+#                              50, 350,
+#                              forceRegenerate=True,
+#                              tgPath=wavPath,
+#                              tgFN="bobby_words.TextGrid",
+#                              tierName="word")
+
+# Generates the entire pitch contour for the file, but only saves the
+# labeled sections.  Functionally the same as the commented-out code above.
+# pitch_and_intensity._audioToPIFile(wavPath, "bobby.wav", pitchPath, 
+#                                    "bobby_segments.txt", praatEXE,
+#                                    50, 350,
+#                                    forceRegenerate=True,
+#                                    tgPath=wavPath,
+#                                    tgFN="bobby_words.TextGrid",
+#                                    tierName="word")
+
 maryPitchData = pitch_and_intensity.audioToPI(wavPath, "mary.wav", pitchPath,
                                               "mary.txt", praatEXE, 75, 450,
                                               forceRegenerate=False)
@@ -43,20 +67,22 @@ maryFilteredPitchData = pitch_and_intensity.audioToPI(wavPath, filteredFN,
 # Generate pitch and intensity values for one file
 pitch_and_intensity.generatePIMeasures(bobbyPitchData, tgPath,
                                        "bobby_words.TextGrid", 
-                                       "word", doPitch=True)
+                                       "word", doPitch=True,
+                                       medianFilterWindowSize=9)
 
 pitch_and_intensity.generatePIMeasures(maryPitchData, tgPath,
                                        "mary.TextGrid", 
-                                       "word", doPitch=False)
+                                       "word", doPitch=False,
+                                       medianFilterWindowSize=9)
 
 tg = tgio.openTextGrid(join(tgPath, "bobby_words.TextGrid"))
-tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, 1.0, tg)[1]
+tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "bobby_errors.TextGrid"))
 
 tg = tgio.openTextGrid(join(tgPath, "mary.TextGrid"))
-tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, 1.0, tg)[1]
+tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_errors.TextGrid"))
 
 tg = tgio.openTextGrid(join(tgPath, "mary.TextGrid"))
-tg = pitch_and_intensity.detectPitchErrors(maryFilteredPitchData, 0.75, 1.0, tg)[1]
+tg = pitch_and_intensity.detectPitchErrors(maryFilteredPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_filtered_errors.TextGrid"))
