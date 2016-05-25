@@ -190,7 +190,8 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     return dataList
 
 
-def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch):
+def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch,
+                       medianFilterWindowSize=None):
     '''
     Generates processed values for the labeled intervals in a textgrid
 
@@ -209,7 +210,7 @@ def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch):
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entryList]
             f0Measures = getPitchMeasures(tmpValList, tgFN, label,
-                                          True, True)
+                                          medianFilterWindowSize, True)
             outputList.append(list(f0Measures))
         else:
             tmpValList = [intensityVal for _, _, intensityVal in entryList]
@@ -289,7 +290,7 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
         floorCutoff = currentPitch * maxJumpThreshold
         if((lastPitch <= floorCutoff) or (lastPitch >= ceilingCutoff)):
             currentTime = pitchList[i][0]
-            errorList.append(currentTime, currentPitch / lastPitch)
+            errorList.append([currentTime, currentPitch / lastPitch])
     
     if tgToMark is not None:
         tierName = "pitch errors"
