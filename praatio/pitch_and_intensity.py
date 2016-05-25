@@ -16,6 +16,7 @@ import math
 from praatio import tgio
 from praatio.utilities import utils
 from praatio.utilities import myMath
+from praatio import praatio_scripts
 
 
 class OverwriteException(Exception):
@@ -26,30 +27,72 @@ class OverwriteException(Exception):
                 "to an alternative location or add a suffix to the output. ")
 
 
-def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
-              minPitch, maxPitch, scriptFN=None,
-              sampleStep=0.01, pitchFilterWindowSize=0, forceRegenerate=True):
+def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
+                        minPitch, maxPitch, tgPath, tgFN, tierName,
+                        tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
+                        forceRegenerate=True):
+    '''
+    Extracts pitch and int from each labeled interval in a textgrid
+    
+    This has the benefit of being faster than using _audioToPIFile if only
+    labeled regions need to have their pitch values sampled, particularly
+    for longer files.
+    
+    Returns the result as a list.  Will load the serialized result
+    if this has already been called on the appropriate files before
+    '''
+    
+    inputFullFN = join(inputPath, inputFN)
+    tgFullFN = join(tgPath, tgFN)
+    outputFullFN = join(outputPath, outputFN)
+    
+    utils.makeDir(outputPath)
+    
+    assert(os.path.exists(inputFullFN))
+    firstTime = not os.path.exists(outputFullFN)
+    if firstTime or forceRegenerate is True:
+        
+        utils.makeDir(tmpOutputPath)
+        splitAudioList = praatio_scripts.splitAudioOnTier(inputFullFN,
+                                                          tgFullFN,
+                                                          tierName,
+                                                          tmpOutputPath,
+                                                          False)
+        allPIList = []
+        for start, _, fn in splitAudioList:
+            tmpTrackName = os.path.splitext(fn)[0] + ".txt"
+            piList = _audioToPIFile(tmpOutputPath, fn, tmpOutputPath,
+                                    tmpTrackName, praatEXE, minPitch, maxPitch,
+                                    sampleStep, silenceThreshold,
+                                    forceRegenerate=True)
+            piList = [("%0.3f" % (float(time) + start), str(pV), str(iV))
+                      for time, pV, iV in piList]
+            allPIList.extend(piList)
+            
+        allPIList = [",".join(row) for row in allPIList]
+        open(outputFullFN, "w").write("\n".join(allPIList) + "\n")
+
+    piList = loadPIAndTime(outputPath, outputFN)
+    
+    return piList
+
+
+def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
+                   minPitch, maxPitch, scriptFN=None,
+                   sampleStep=0.01, silenceThreshold=0.03,
+                   forceRegenerate=True,
+                   tgPath=None, tgFN=None, tierName=None):
     '''
     Extracts pitch and intensity values from an audio file
     
-    Results the result as a list.  Will load the serialized result
+    Returns the result as a list.  Will load the serialized result
     if this has already been called on the appropriate files before
-    
-    male: minPitch=50; maxPitch=350
-    female: minPitch=75; maxPitch=450
-    
-    mac: praatPath=/Applications/praat.App/Contents/MacOS/Praat
-    windows: praatPath="C:\
     '''
     
     inputFullFN = join(inputPath, inputFN)
     outputFullFN = join(outputPath, outputFN)
     
     utils.makeDir(outputPath)
-    
-    if scriptFN is None:
-        scriptFN = join(utils.scriptsPath,
-                        "get_pitch_and_intensity_via_python.praat")
     
     assert(os.path.exists(inputFullFN))
     firstTime = not os.path.exists(outputFullFN)
@@ -60,16 +103,58 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
         if os.path.exists(outputFullFN):
             os.remove(outputFullFN)
         
-        utils.runPraatScript(praatEXE, scriptFN,
-                             [inputFullFN, outputFullFN, sampleStep,
-                              minPitch, maxPitch])
+        if tgPath is None or tgFN is None or tierName is None:
+            argList = [inputFullFN, outputFullFN, sampleStep,
+                       minPitch, maxPitch, silenceThreshold, -1, -1]
+            
+            scriptName = "get_pitch_and_intensity_via_python.praat"
+            scriptFN = join(utils.scriptsPath, scriptName)
+            utils.runPraatScript(praatEXE, scriptFN, argList)
+            
+        else:
+            argList = [inputFullFN, outputFullFN,
+                       join(tgPath, tgFN), tierName, sampleStep,
+                       minPitch, maxPitch, silenceThreshold]
+            
+            scriptName = "get_pitch_and_intensity_segments_via_python.praat"
+            scriptFN = join(utils.scriptsPath, scriptName)
+            utils.runPraatScript(praatEXE, scriptFN, argList)
 
     piList = loadPIAndTime(outputPath, outputFN)
     
     return piList
 
 
-def loadPIAndTime(rawPitchDir, fn):
+def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
+              minPitch, maxPitch, sampleStep=0.01,
+              silenceThreshold=0.03, forceRegenerate=True, tgPath=None,
+              tgFN=None, tierName=None, tmpOutputPath=None):
+    '''
+    Extracts pitch and intensity from a file wholesale or piecewise
+
+    If the parameters for a tg are passed in, this will only extract labeled
+    segments in a tier of the tg.  Otherwise, pitch will be extracted from
+    the entire file.
+
+    male: minPitch=50; maxPitch=350
+    female: minPitch=75; maxPitch=450
+    '''
+    
+    if tgPath is None or tgFN is None or tierName is None:
+        piList = _audioToPIFile(inputPath, inputFN, outputPath, outputFN,
+                                praatEXE, minPitch, maxPitch,
+                                sampleStep, silenceThreshold, forceRegenerate)
+    else:
+        if tmpOutputPath is None:
+            tmpOutputPath = join(outputPath, "piecewise_output")
+        piList = _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN,
+                                     praatEXE, minPitch, maxPitch, tgPath,
+                                     tgFN, tierName, tmpOutputPath, sampleStep,
+                                     silenceThreshold, forceRegenerate)
+    
+    return piList
+
+
     '''
     For reading the output of get_pitch_and_intensity
     '''

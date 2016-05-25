@@ -57,11 +57,14 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     orderOfMagniture = int(math.floor(math.log10(len(entryList))))
     outputTemplate = "%s_%%0%dd" % (name, orderOfMagniture)
     
+    outputFNList = []
     for i, entry in enumerate(entryList):
         start, stop = entry[:2]
         
-        outputFN = join(outputPath, outputTemplate % i + ".wav")
-        _extractSubwav(wavFN, outputFN, start, stop)
+        outputFN = outputTemplate % i + ".wav"
+        outputFNFullPath = join(outputPath, outputFN)
+        _extractSubwav(wavFN, outputFNFullPath, start, stop)
+        outputFNList.append((start, stop, outputFN))
         
         if outputTGFlag is not False:
             subTG = tg.crop(True, False, start, stop)
@@ -77,3 +80,6 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
             subTG.maxTimestamp = stop - start
         
             subTG.save(join(outputPath, outputTemplate % i + ".TextGrid"))
+    
+    return outputFNList
+            
