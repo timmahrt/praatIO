@@ -2,8 +2,8 @@
 #
 
 form Soundfile to pitch and intensity
-    sentence Input_audio_file_name C:\Users\Tim\Dropbox\workspace\praatIO\test\files\bobby.wav
-    sentence Output_audio_file_name C:\Users\Tim\Dropbox\workspace\praatIO\test\files\pitch_extraction\pitch\bobby.txt
+    sentence Input_audio_file_name C:\Users\Tim\Dropbox\workspace\praatIO\examples\files\bobby.wav
+    sentence Output_data_file_name C:\Users\Tim\Dropbox\workspace\praatIO\examples\files\pitch_extraction\pitch\bobby.txt
     real Sample_step 0.01
     real Min_pitch 75
     real Max_pitch 450
@@ -36,31 +36,39 @@ endif
 
 
 # Get pitch and intensity tracks
-To Pitch (ac): sample_step, min_pitch, 15, "no", silence_threshold, 0.45, 0.01, 0.35, 0.14, max_pitch
-Rename: "pitch"
-
+pitch = To Pitch (ac): sample_step, min_pitch, 15, "no", silence_threshold, 0.45, 0.01, 0.35, 0.14, max_pitch
 selectObject: sound
-To Intensity: min_pitch, sample_step, 1
-Rename: "intensity"
+intensity = To Intensity: min_pitch, sample_step, 1
 
+table = Create Table with column names: "table", 0, "time pitch intensity"
 
 # Iterate over the pitch and intensity tracks, one sample at a time
 for i to (tmax - tmin) / sample_step
 	time = tmin + i * sample_step
-	selectObject: "Pitch pitch"
-	pitch = Get value at time: time, "Hertz", "Linear"
-	selectObject: "Intensity intensity"
-	intensity = Get value at time: time, "Cubic"
-	appendFileLine: output_data_file_name$, fixed$ (time, 3), ",", fixed$ (pitch, 3), ",", fixed$ (intensity, 3)
+	selectObject: pitch
+	pitchVal = Get value at time: time, "Hertz", "Linear"
+	selectObject: intensity
+	intensityVal = Get value at time: time, "Cubic"
+	
+	selectObject: table
+	Append row
+	current_row = Get number of rows
+  	Set numeric value: current_row, "time", time
+  	Set numeric value: current_row, "pitch", pitchVal
+  	Set numeric value: current_row, "intensity", intensityVal
 endfor
 
+Save as comma-separated file: output_data_file_name$
 
 # Cleanup
-selectObject: "Pitch pitch"
+selectObject: pitch
 Remove
 
-selectObject: "Intensity intensity"
+selectObject: intensity
 Remove
 
 selectObject: sound
+Remove
+
+selectObject: table
 Remove

@@ -175,6 +175,10 @@ def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
     
     dataList = [row.split(',') for row in dataList if row != '']
     
+    # The new praat script includes a header
+    if dataList[0][0] == "time":
+        dataList = dataList[1:]
+    
     newDataList = []
     for time, f0Val, intensity in dataList:
         time = float(time)
