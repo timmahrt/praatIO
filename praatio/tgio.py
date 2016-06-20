@@ -450,6 +450,26 @@ class PointTier(TextgridTier):
         
         return returnList
     
+    def eraseRegion(self, start, stop, collisionCode=None):
+        '''
+        Makes a region in a tier blank (removes all contained entries)
+        
+        collisionCode: Ignored for the moment (added for compatibility
+                       with eraseRegion() for Interval Tiers)
+        '''
+
+        matchList = self.getEntries(start, stop)
+        
+        if len(matchList) == 0:
+            pass
+        else:
+            
+            # Remove all the matches from the entryList
+            # Go in reverse order because we're destructively altering
+            # the order of the list (messes up index order)
+            for tmpEntry in matchList[::-1]:
+                self.deleteEntry(tmpEntry)
+                
     def insertEntry(self, entry, warnFlag, collisionCode=None):
         '''
         inserts an interval into the tier
@@ -636,7 +656,7 @@ class IntervalTier(TextgridTier):
         retTier = self.newTier()
         
         for entry in tier.entryList:
-            retTier.eraseInterval(entry, collisionCode='truncate')
+            retTier.eraseRegion(entry[0], entry[1], collisionCode='truncate')
         
         return retTier
 
@@ -681,7 +701,7 @@ class IntervalTier(TextgridTier):
         
         return IntervalTier(self.name, newEntryList, newMin, newMax)
 
-    def eraseInterval(self, entry, collisionCode=None):
+    def eraseRegion(self, start, stop, collisionCode=None):
         '''
         Makes a region in a tier blank (removes all contained entries)
         
@@ -693,9 +713,8 @@ class IntervalTier(TextgridTier):
                           target entry will be completely removed
         - None or any other value - AssertionError is thrown
         '''
-        startTime, endTime = entry[:2]
         
-        matchList = self.getEntries(startTime, endTime)
+        matchList = self.getEntries(start, stop)
         
         if len(matchList) == 0:
             pass
@@ -714,35 +733,20 @@ class IntervalTier(TextgridTier):
             # If we're only truncating, reinsert entries on the left and
             # right edges
             if collisionCode == 'truncate':
-                
-                if len(matchList) > 1:
-                    # Check left edge
-                    if matchList[0][0] < startTime:
-                        newEntry = (matchList[0][0],
-                                    startTime,
-                                    matchList[0][-1])
-                        self.entryList.append(newEntry)
-                        
-                    # Check right edge
-                    if matchList[-1][1] > endTime:
-                        newEntry = (endTime,
-                                    matchList[-1][1],
-                                    matchList[-1][-1])
-                        self.entryList.append(newEntry)
-                else:
-                    newEntry = entry[:]
-                    # Check left edge
-                    if matchList[0][0] < startTime:
-                        newEntry = (matchList[0][0],
-                                    startTime,
-                                    matchList[0][-1])
-                    # Check right edge
-                    if matchList[-1][1] > endTime:
-                        newEntry = (endTime,
-                                    matchList[-1][1],
-                                    matchList[-1][-1])
-                    if not newEntry == entry:
-                        self.entryList.append(newEntry)
+
+                # Check left edge
+                if matchList[0][0] < start:
+                    newEntry = (matchList[0][0],
+                                start,
+                                matchList[0][-1])
+                    self.entryList.append(newEntry)
+                    
+                # Check right edge
+                if matchList[-1][1] > stop:
+                    newEntry = (stop,
+                                matchList[-1][1],
+                                matchList[-1][-1])
+                    self.entryList.append(newEntry)
 
         self.sort()
 
@@ -1009,7 +1013,71 @@ class Textgrid():
             newTG.addTier(newTier)
         
         return newTG
+    
+    def eraseRegion(self, start, stop, doShrink=True):
+        '''
+        Makes a region in a tier blank (removes all contained entries)
+        
+        If 'doShrink' is True, all entries appearing after the erased interval
+        will be shifted to fill the void (ie the duration of the textgrid
+        will be reduced by start - stop)
+        '''
 
+        diff = stop - start
+
+        if doShrink is True:
+            self.maxTimestamp = self.maxTimestamp - diff
+        
+        for name in self.tierNameList:
+            tier = self.tierDict[name]
+            
+            # Erase the segments in question
+            tier.eraseRegion(start, stop, 'truncate')
+            
+            # Reduce segments after the interval by /diff/
+            if doShrink is True:
+                tier = self.tierDict[name]
+                entryList = tier.entryList
+                newEntryList = []
+                if isinstance(tier, PointTier):
+                    for timestamp, label in entryList:
+                        if timestamp < start:
+                            newEntryList.append((timestamp, label))
+                        elif timestamp > stop:
+                            newEntryList.append((timestamp - diff, label))
+                
+                else:
+                    for eStart, eStop, label in entryList:
+                        if eStop <= start:
+                            newEntryList.append((eStart, eStop, label))
+                        elif eStart >= stop:
+                            newEntryList.append((eStart - diff,
+                                                 eStop - diff,
+                                                 label))
+                    
+                    # Special case: an interval that spanned the deleted
+                    # section
+                    for i in xrange(0, len(newEntryList) - 1):
+                        rightEdge = newEntryList[i][1] == start
+                        leftEdge = newEntryList[i + 1][0] == start
+                        sameLabel = newEntryList[i][2] == newEntryList[i + 1][2]
+                        if rightEdge and leftEdge and sameLabel:
+                            newEntry = (newEntryList[i][0],
+                                        newEntryList[i + 1][1],
+                                        newEntryList[i][2])
+                        
+                            newEntryList.pop(i + 1)
+                            newEntryList.pop(i)
+                            newEntryList.insert(i, newEntry)
+                            
+                            # Only one interval can span the deleted section,
+                            # so if we've found it, move on
+                            break
+                
+                self.replaceTier(name, newEntryList)
+                tier = self.tierDict[name]
+                tier.maxTimestamp = tier.maxTimestamp - diff
+            
     def editTimestamps(self, startOffset, stopOffset, pointOffset,
                        allowOvershoot=False):
         
