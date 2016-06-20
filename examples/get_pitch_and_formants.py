@@ -31,7 +31,7 @@ utils.makeDir(pitchMeasuresPath)
 utils.makeDir(rmsIntensityPath)
 utils.makeDir(formantsPath)
 
-bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath, 
+bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
                                                "bobby.txt", praatEXE, 50, 350,
                                                forceRegenerate=False)
 
@@ -41,7 +41,7 @@ bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
 
 # Extracts each labeled interval as a separate wave file, extracts the
 # pitch track from each of those, and then aggregates the result.
-# pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath, 
+# pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
 #                              "bobby_segments.txt", praatEXE,
 #                              50, 350,
 #                              forceRegenerate=True,
@@ -51,7 +51,7 @@ bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
 
 # Generates the entire pitch contour for the file, but only saves the
 # labeled sections.  Functionally the same as the commented-out code above.
-# pitch_and_intensity._audioToPIFile(wavPath, "bobby.wav", pitchPath, 
+# pitch_and_intensity._audioToPIFile(wavPath, "bobby.wav", pitchPath,
 #                                    "bobby_segments.txt", praatEXE,
 #                                    50, 350,
 #                                    forceRegenerate=True,
@@ -71,12 +71,12 @@ maryFilteredPitchData = pitch_and_intensity.audioToPI(wavPath, filteredFN,
 
 # Generate pitch and intensity values for one file
 pitch_and_intensity.generatePIMeasures(bobbyPitchData, tgPath,
-                                       "bobby_words.TextGrid", 
+                                       "bobby_words.TextGrid",
                                        "word", doPitch=True,
                                        medianFilterWindowSize=9)
 
 pitch_and_intensity.generatePIMeasures(maryPitchData, tgPath,
-                                       "mary.TextGrid", 
+                                       "mary.TextGrid",
                                        "word", doPitch=False,
                                        medianFilterWindowSize=9)
 
