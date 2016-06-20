@@ -512,7 +512,7 @@ class IntervalTier(TextgridTier):
         
         # Prevent poorly-formed textgrids from being created
         for entry in entryList:
-            if entry[0] > entry[1]:
+            if entry[0] >= entry[1]:
                 fmtStr = "Anomaly: startTime=%f, stopTime=%f, label=%s"
                 print((fmtStr % (entry[0], entry[1], entry[2])))
             assert(entry[0] < entry[1])
