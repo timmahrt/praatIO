@@ -106,13 +106,16 @@ def deleteWavSections(fn, outputFN, deleteList, doShrink):
     
 
 def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
-                     outputTGFlag=False):
+                     outputTGFlag=False, nameStyle=None):
     '''
     Outputs one subwav for each entry in the tier of a textgrid
     
     outputTGFlag: If True, outputs paired, cropped textgrids
                   If is type str (a tier name), outputs a paired, cropped
                   textgrid with only the specified tier
+    nameStyle: if 'append': append interval label to output name
+               if 'label': output name is the same as label
+               if None: output name plus the interval number
     '''
     tg = tgio.openTextGrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
@@ -122,14 +125,33 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     orderOfMagniture = int(math.floor(math.log10(len(entryList))))
     outputTemplate = "%s_%%0%dd" % (name, orderOfMagniture)
     
+    firstWarning = True
+    
+    countList = [entryList.count(word) for word in entryList]
+    if nameStyle == 'label':
+        if sum(countList) / float(len(countList)) > 1:
+            print(("Overwriting wave files in: %s\n" +
+                  "Files existed before or intervals exist with the same name")
+                  % outputPath)
+    
     outputFNList = []
     for i, entry in enumerate(entryList):
-        start, stop = entry[:2]
+        start, stop, label = entry
         
-        outputFN = outputTemplate % i + ".wav"
-        outputFNFullPath = join(outputPath, outputFN)
+        outputName = outputTemplate % i
+        if nameStyle == "append":
+            outputName += "_" + label
+        elif nameStyle == "label":
+            outputName = label
+        
+        outputFNFullPath = join(outputPath, outputName + ".wav")
+
+        if os.path.exists(outputFNFullPath) and firstWarning:
+            print(("Overwriting wave files in: %s\n" +
+                  "Files existed before or intervals exist with the same ")
+                  % outputPath)
         _extractSubwav(wavFN, outputFNFullPath, start, stop)
-        outputFNList.append((start, stop, outputFN))
+        outputFNList.append((start, stop, outputName + ".wav"))
         
         if outputTGFlag is not False:
             subTG = tg.crop(True, False, start, stop)
@@ -143,8 +165,8 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
             subTG = subTG.editTimestamps(offset, offset, offset)
             subTG.minTimestamp = 0
             subTG.maxTimestamp = stop - start
-        
-            subTG.save(join(outputPath, outputTemplate % i + ".TextGrid"))
+            
+            subTG.save(join(outputPath, outputName + ".TextGrid"))
     
     return outputFNList
             
