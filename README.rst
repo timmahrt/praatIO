@@ -74,6 +74,14 @@ What can you do with this library?
     kg.tierDict["oral_formants"].modifySubtiers("formants",incrTwenty)
 
     kg.save(join(outputPath, "bobby_twenty_percent_less.KlattGrid"))
+    
+- replace labeled segments in a recording with silence or delete them
+
+    see /examples/deleteVowels.py
+    
+- use set operations (union, intersection, difference) on textgrid tiers
+
+    see /examples/textgrid_set_operations.py
 
 
 Major revisions
@@ -176,5 +184,8 @@ Tim Mahrt. PraatIO. https://github.com/timmahrt/praatIO, 2016.
 Acknowledgements
 ================
 
-Development of PraatIO was possible thanks to NSF grant **BCS 12-51343**
-to Jennifer Cole, José Hualde, and Caroline Smith.
+Development of PraatIO was possible thanks to NSF grant **BCS 12-51343** to
+Jennifer Cole, José I. Hualde, and Caroline Smith and to the A*MIDEX project
+(n° **ANR-11-IDEX-0001-02**) to James Sneed German funded by the
+Investissements d'Avenir French Government program,
+managed by the French National Research Agency (ANR).
