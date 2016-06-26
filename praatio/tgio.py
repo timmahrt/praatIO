@@ -1060,7 +1060,8 @@ class Textgrid():
                     for i in xrange(0, len(newEntryList) - 1):
                         rightEdge = newEntryList[i][1] == start
                         leftEdge = newEntryList[i + 1][0] == start
-                        sameLabel = newEntryList[i][2] == newEntryList[i + 1][2]
+                        sameLabel = (newEntryList[i][2] ==
+                                     newEntryList[i + 1][2])
                         if rightEdge and leftEdge and sameLabel:
                             newEntry = (newEntryList[i][0],
                                         newEntryList[i + 1][1],
@@ -1074,7 +1075,7 @@ class Textgrid():
                             # so if we've found it, move on
                             break
                 
-                self.replaceTier(name, newEntryList)
+                self.replaceTier(name, newEntryList, True)
                 tier = self.tierDict[name]
                 tier.maxTimestamp = tier.maxTimestamp - diff
             
@@ -1236,8 +1237,11 @@ class Textgrid():
         # Remove from all tiers if no tiers are specified
         if tierNameList is None:
             tierNameList = self.tierNameList
-        
+
         tg = Textgrid()
+        tg.minTimestamp = self.minTimestamp
+        tg.maxTimestamp = self.maxTimestamp
+        
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             
@@ -1255,11 +1259,19 @@ class Textgrid():
         self.tierNameList.pop(self.tierNameList.index(name))
         del self.tierDict[name]
 
-    def replaceTier(self, name, newTierEntryList):
+    def replaceTier(self, name, newTierEntryList, preserveTime=True):
         oldTier = self.tierDict[name]
         tierIndex = self.tierNameList.index(name)
         self.removeTier(name)
-        self.addTier(oldTier.newTier(name, newTierEntryList), tierIndex)
+        
+        if preserveTime is True:
+            newTier = oldTier.newTier(name, newTierEntryList,
+                                      oldTier.minTimestamp,
+                                      oldTier.maxTimestamp)
+        else:
+            newTier = oldTier.newTier(name, newTierEntryList)
+            
+        self.addTier(newTier, tierIndex)
             
     def save(self, fn):
         
@@ -1321,7 +1333,14 @@ def _parseNormalTextGrid(data):
     newTG = Textgrid()
     
     # Toss textgrid header
-    data = data.split("item", 1)[1]
+    header, data = data.split("item", 1)
+    
+    headerList = header.split("\n")
+    tgMin = float(headerList[3].split("=")[1].strip())
+    tgMax = float(headerList[4].split("=")[1].strip())
+    
+    newTG.minTimestamp = tgMin
+    newTG.maxTimestamp = tgMax
     
     # Process each tier individually (will be output to separate folders)
     tierList = data.split("item")[1:]
@@ -1399,6 +1418,16 @@ def _parseShortTextGrid(data):
     tupleList = [(indexList[i][0], indexList[i + 1][0], indexList[i][1])
                  for i in range(len(indexList) - 1)]
     
+    # Set the textgrid's min and max times
+    header = data[:tupleList[0][0]]
+    headerList = header.split("\n")
+    tgMin = float(headerList[3].strip())
+    tgMax = float(headerList[4].strip())
+    
+    newTG.minTimestamp = tgMin
+    newTG.maxTimestamp = tgMax
+
+    # Load the data for each tier
     for blockStartI, blockEndI, isInterval in tupleList:
         tierData = data[blockStartI:blockEndI]
         
