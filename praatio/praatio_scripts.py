@@ -17,8 +17,153 @@ import wave
 from praatio import tgio
 
 
-def _extractSubwav(fn, outputFN, startT, endT):
+class EndOfAudioData(Exception):
+    pass
+
+
+class FindZeroCrossingError(Exception):
     
+    def __init__(self, time, maxShiftAmount):
+        super(FindZeroCrossingError, self).__init__()
+        
+        self.time = time
+        self.maxShiftAmount = maxShiftAmount
+    
+    def __str__(self):
+        retString = "No zero crossing found near %f with max shift amount %f"
+        return retString % (self.time, self.maxShiftAmount)
+
+
+def sign(x):
+    retVal = 0
+    if x > 0:
+        retVal = 1
+    elif x < 0:
+        retVal = -1
+    return retVal
+
+
+def samplesAsNums(audiofile, numFrames, startFrame, safe=False):
+
+    sampWidthDict = {1: 'b', 2: 'h', 4: 'i', 8: 'q'}
+
+    params = audiofile.getparams()
+    sampwidth = params[1]
+    byteCode = sampWidthDict[sampwidth]
+    totalNumFrames = params[3]
+    
+    if safe is True:
+        if totalNumFrames < startFrame + numFrames:
+            numFrames = totalNumFrames - startFrame
+    
+    audiofile.setpos(startFrame)
+    waveData = audiofile.readframes(numFrames)
+
+    if len(waveData) == 0:
+        raise EndOfAudioData()
+
+    actualNumFrames = int(len(waveData) / float(sampwidth))
+    audioFrameList = struct.unpack("<" + byteCode * actualNumFrames, waveData)
+
+    return audioFrameList
+
+
+def findNearestZeroCrossing(audiofile, timeStamp, maxShiftAmount=0.0025,
+                            ignoreOnFailure=False):
+    '''
+    Finds the nearest zero crossing at the given time in an audio file
+    
+    maxShiftAmount specifies the search space (that amount before and
+        after the given time)
+    if ignoreOnFailure is true, a warning is printed to the screen and
+        the given timestamp is returned
+    '''
+    framerate = audiofile.getparams()[2]
+    numFrames = int(maxShiftAmount * framerate)
+    
+    anchorSample = int(framerate * timeStamp)
+    startFrame = anchorSample - numFrames
+        
+    frameList = samplesAsNums(audiofile, numFrames * 2, startFrame)
+    signList = [sign(val) for val in frameList]
+    
+    # Find zero crossings
+    # 1 did signs change?
+    changeList = [signList[i] != signList[i - 1]
+                  for i in range(len(frameList) - 1)]
+    
+    # 2 get samples where signs changed
+    zeroList = [i for i in range(len(frameList) - 1)
+                if changeList[i] == 1]
+    
+    # 3 find the distance from the center point
+    minDiffList = [(abs(numFrames - i), i) for i in zeroList]
+    
+    # 4 choose the closest sample to the center point
+    try:
+        smallestZeroedI = min(minDiffList)[1] - numFrames
+    except ValueError:
+        e = FindZeroCrossingError(timeStamp, maxShiftAmount)
+        if ignoreOnFailure is not True:
+            raise(e)
+        else:
+            print(e)
+            zeroCrossingTime = timeStamp
+    else:
+        # 5 calculate the time that index corresponds to
+        zeroCrossingSample = anchorSample + smallestZeroedI
+        zeroCrossingTime = zeroCrossingSample / float(framerate)
+
+    return zeroCrossingTime
+
+
+def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True,
+                                maxShiftAmount=0.0025, ignoreOnFailure=False):
+    '''
+    Makes all textgrid interval boundaries fall on pressure wave zero crossings
+    
+    maxShiftAmount specifies the search space in seconds (the amount before and
+        after the given time)
+    if ignoreOnFailure is true, a warning is printed to the screen and
+        the given timestamp is returned
+    '''
+    
+    audiofile = wave.open(wavFN, "r")
+    
+    tg = tgio.openTextGrid(tgFN)
+    
+    for tierName in tg.tierNameList[:]:
+        tier = tg.tierDict[tierName]
+        
+        newEntryList = []
+        if isinstance(tier, tgio.PointTier) and adjustPoints is True:
+            for start, label in tier.entryList:
+                newStart = findNearestZeroCrossing(audiofile, start,
+                                                   maxShiftAmount,
+                                                   ignoreOnFailure)
+                newEntryList.append((newStart, label))
+                
+        elif isinstance(tier, tgio.IntervalTier):
+            
+            for start, stop, label in tier.entryList:
+                newStart = findNearestZeroCrossing(audiofile, start,
+                                                   maxShiftAmount,
+                                                   ignoreOnFailure)
+                newStop = findNearestZeroCrossing(audiofile, stop,
+                                                  maxShiftAmount,
+                                                  ignoreOnFailure)
+                newEntryList.append((newStart, newStop, label))
+                print label, "\n"
+        
+        tg.replaceTier(tierName, newEntryList, True)
+                
+    tg.save(outputTGFN)
+
+    
+def _extractSubwav(fn, outputFN, startT, endT):
+    '''
+    Given a segment from a wav file
+    '''
     audiofile = wave.open(fn, "r")
     
     params = audiofile.getparams()
@@ -169,4 +314,3 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
             subTG.save(join(outputPath, outputName + ".TextGrid"))
     
     return outputFNList
-            
