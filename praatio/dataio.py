@@ -45,7 +45,8 @@ class PointObject(object):
         
         outputStr = "%s\n%s\n" % (header, strPoints)
         
-        open(fn, "w").write(outputStr)
+        with open(fn, "w") as fd:
+            fd.write(outputStr)
     
     def getPointsInInterval(self, start, stop, startIndex=0):
     
@@ -85,7 +86,8 @@ class PointObject2D(PointObject):
 
 
 def open1DPointObject(fn):
-    data = open(fn, "rU").read()
+    with open(fn, "rU") as fd:
+        data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
 
@@ -112,7 +114,8 @@ def open1DPointObject(fn):
 
 
 def open2DPointObject(fn):
-    data = open(fn, "rU").read()
+    with open(fn, "rU") as fd:
+        data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
 
@@ -141,7 +144,8 @@ def open2DPointObject(fn):
 
 
 def _parseNormalHeader(fn):
-    data = open(fn, "rU").read()
+    with open(fn, "rU") as fd:
+        data = fd.read()
     
     chunkedData = data.split("\n", 7)
     
@@ -163,7 +167,8 @@ def _getNextValue(data, start):
 
 
 def _parseShortHeader(fn):
-    data = open(fn, "rU").read()
+    with open(fn, "rU") as fd:
+        data = fd.read()
     
     chunkedData = data.split("\n", 6)
     

@@ -70,7 +70,8 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
             allPIList.extend(piList)
             
         allPIList = [",".join(row) for row in allPIList]
-        open(outputFullFN, "w").write("\n".join(allPIList) + "\n")
+        with open(outputFullFN, "w") as fd:
+            fd.write("\n".join(allPIList) + "\n")
 
     piList = loadPIAndTime(outputPath, outputFN)
     
@@ -166,7 +167,8 @@ def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
     name = os.path.splitext(fn)[0]
     
     try:
-        data = open(join(rawPitchDir, fn), "rU").read()
+        with open(join(rawPitchDir, fn), "rU") as fd:
+            data = fd.read()
     except IOError:
         print("No pitch track for: %s" % name)
         raise

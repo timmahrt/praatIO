@@ -1299,7 +1299,8 @@ class Textgrid():
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()
         
-        codecs.open(fn, "w", encoding="utf-8").write(outputTxt)
+        with codecs.open(fn, "w", encoding="utf-8") as fd:
+            fd.write(outputTxt)
     
     def sort(self):
         for name in self.tierNameList:
@@ -1309,9 +1310,11 @@ class Textgrid():
 def openTextGrid(fnFullPath):
     
     try:
-        data = codecs.open(fnFullPath, "rU", encoding="utf-16").read()
+        with codecs.open(fnFullPath, "rU", encoding="utf-16") as fd:
+            data = fd.read()
     except UnicodeError:
-        data = codecs.open(fnFullPath, "rU", encoding="utf-8").read()
+        with codecs.open(fnFullPath, "rU", encoding="utf-8") as fd:
+            data = fd.read()
     data = data.replace("\r\n", "\n")
     
     caseA = "ooTextFile short" in data
