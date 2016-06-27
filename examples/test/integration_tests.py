@@ -39,6 +39,11 @@ class IntegrationTests(unittest.TestCase):
         print(os.getcwd())
         print("bloop")
     
+    def test_merge_tiers(self):
+        """Running 'merge_tiers.py'"""
+        print(os.getcwd())
+        import deleteVowels
+        
     def test_extract_subwavs(self):
         """Running 'extract_subwavs.py'"""
         print(os.listdir("."))
@@ -56,7 +61,7 @@ class IntegrationTests(unittest.TestCase):
         """Running 'merge_tiers.py'"""
         print(os.getcwd())
         import merge_tiers
-    
+        
     def test_set_operations(self):
         """Running 'textgrid_set_operations.py'"""
         import textgrid_set_operations

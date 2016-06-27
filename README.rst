@@ -87,6 +87,33 @@ What can you do with this library?
 Major revisions
 ================
 
+Ver 3.3 (June 27, 2016)
+
+- Find zero-crossings in a wave file
+
+   for shifting all boundaries in a textgrid see *praatio_scripts.tgBoundariesToZeroCrossings()*
+   
+   for finding individual zero crossings, see *praatio_scripts.findNearestZeroCrossing()*
+
+- Pitch features
+
+   pitch extraction is now ten times faster
+   
+   automatic pitch halving/doubling detection
+   
+   median filtering
+
+- Textgrid features
+
+   set operations over two tiers (union, difference, or intersection)
+   
+   erase a section of a textgrid (and a section of the corresponding wave file)
+
+- Extraction of pitch formants using praat
+
+- Lots of small bugfixes
+
+
 Ver 3.2 (January 29, 2016)
 
 - Float precision is now preserved in file I/O
