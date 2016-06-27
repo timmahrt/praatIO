@@ -23,15 +23,15 @@ class EndOfAudioData(Exception):
 
 class FindZeroCrossingError(Exception):
     
-    def __init__(self, time, maxShiftAmount):
+    def __init__(self, startTime, endTime):
         super(FindZeroCrossingError, self).__init__()
         
-        self.time = time
-        self.maxShiftAmount = maxShiftAmount
+        self.startTime = startTime
+        self.endTime = endTime
     
     def __str__(self):
-        retString = "No zero crossing found near %f with max shift amount %f"
-        return retString % (self.time, self.maxShiftAmount)
+        retString = "No zero crossing found between %f and %f"
+        return retString % (self.startTime, self.endTime)
 
 
 def sign(x):
@@ -43,18 +43,13 @@ def sign(x):
     return retVal
 
 
-def samplesAsNums(audiofile, numFrames, startFrame, safe=False):
+def samplesAsNums(audiofile, numFrames, startFrame):
 
     sampWidthDict = {1: 'b', 2: 'h', 4: 'i', 8: 'q'}
 
     params = audiofile.getparams()
     sampwidth = params[1]
     byteCode = sampWidthDict[sampwidth]
-    totalNumFrames = params[3]
-    
-    if safe is True:
-        if totalNumFrames < startFrame + numFrames:
-            numFrames = totalNumFrames - startFrame
     
     audiofile.setpos(startFrame)
     waveData = audiofile.readframes(numFrames)
@@ -68,57 +63,145 @@ def samplesAsNums(audiofile, numFrames, startFrame, safe=False):
     return audioFrameList
 
 
-def findNearestZeroCrossing(audiofile, timeStamp, maxShiftAmount=0.0025,
-                            ignoreOnFailure=False):
+def findNextZeroCrossing(audiofile, targetTime, timeStep=0.002, reverse=False):
+    '''
+    Finds the nearest zero crossing, searching in one direction
+    
+    Can do a 'reverse' search by setting reverse to True.  In that case,
+    the sample list is searched from back to front.
+    
+    targetTime is the startTime if reverse=False and
+        the endTime if reverse=True
+    '''
+    framerate = audiofile.getparams()[2]
+    totalNumFrames = audiofile.getparams()[3]
+    
+    startFrame = int(targetTime * float(framerate))
+    numFrames = int(timeStep * float(framerate))
+    
+    if reverse is True:
+        startFrame = startFrame - numFrames
+    
+    startTime = startFrame / float(framerate)
+        
+    # Don't read over the edges
+    if startFrame < 0:
+        numFrames = numFrames + startFrame
+        startFrame = 0
+    elif startFrame + numFrames > totalNumFrames:
+        numFrames = totalNumFrames - startFrame
+    
+    fromTime = startFrame / float(framerate)
+    toTime = (startFrame + numFrames) / float(framerate)
+    
+    # 1 Get the acoustic information and the sign for each sample
+    frameList = samplesAsNums(audiofile, numFrames, startFrame)
+    signList = [sign(val) for val in frameList]
+    
+    # 2 did signs change?
+    changeList = [signList[i] != signList[i + 1]
+                  for i in range(len(frameList) - 1)]
+    
+    # 3 get samples where signs changed
+    # (iterate backwards if reverse is true)
+    if reverse is True:
+        start = len(changeList) - 1
+        stop = 0
+        step = -1
+    else:
+        start = 0
+        stop = len(changeList) - 1
+        step = 1
+    
+    changeIndexList = [i for i in range(start, stop, step)
+                       if changeList[i] == 1]
+    
+    # 4 return the zeroed frame closest to starting point
+    try:
+        zeroedFrame = changeIndexList[0]
+    except IndexError:
+        raise(FindZeroCrossingError(fromTime, toTime))
+    
+    # We found the zero by comparing points to the point adjacent to them.
+    # It is possible the adjacent point is closer to zero than this one,
+    # in which case, it is the better zeroedI
+    if abs(frameList[zeroedFrame]) > abs(frameList[zeroedFrame + 1]):
+        zeroedFrame = zeroedFrame + 1
+    
+    adjustTime = zeroedFrame / float(framerate)
+    
+    return startTime + adjustTime
+
+
+def findNearestZeroCrossing(audiofile, targetTime, timeStep=0.002):
     '''
     Finds the nearest zero crossing at the given time in an audio file
     
-    maxShiftAmount specifies the search space (that amount before and
-        after the given time)
-    if ignoreOnFailure is true, a warning is printed to the screen and
-        the given timestamp is returned
+    Looks both before and after the timeStamp
     '''
-    framerate = audiofile.getparams()[2]
-    numFrames = int(maxShiftAmount * framerate)
     
-    anchorSample = int(framerate * timeStamp)
-    startFrame = anchorSample - numFrames
-        
-    frameList = samplesAsNums(audiofile, numFrames * 2, startFrame)
-    signList = [sign(val) for val in frameList]
+    framerate = audiofile.getparams()[2]
+    totalNumFrames = audiofile.getparams()[3]
+    fileDuration = totalNumFrames / float(framerate)
+    
+    leftStartTime = rightStartTime = targetTime
     
     # Find zero crossings
-    # 1 did signs change?
-    changeList = [signList[i] != signList[i - 1]
-                  for i in range(len(frameList) - 1)]
-    
-    # 2 get samples where signs changed
-    zeroList = [i for i in range(len(frameList) - 1)
-                if changeList[i] == 1]
-    
-    # 3 find the distance from the center point
-    minDiffList = [(abs(numFrames - i), i) for i in zeroList]
-    
-    # 4 choose the closest sample to the center point
-    try:
-        smallestZeroedI = min(minDiffList)[1] - numFrames
-    except ValueError:
-        e = FindZeroCrossingError(timeStamp, maxShiftAmount)
-        if ignoreOnFailure is not True:
-            raise(e)
+    smallestLeft = None
+    smallestRight = None
+    while True:
+        try:
+            timeStamp = None
+            if leftStartTime > 0:
+                timeStamp = findNextZeroCrossing(audiofile,
+                                                 leftStartTime,
+                                                 timeStep,
+                                                 reverse=True)
+        except FindZeroCrossingError:
+            pass
         else:
-            print(e)
-            zeroCrossingTime = timeStamp
-    else:
-        # 5 calculate the time that index corresponds to
-        zeroCrossingSample = anchorSample + smallestZeroedI
-        zeroCrossingTime = zeroCrossingSample / float(framerate)
-
+            smallestLeft = timeStamp
+        
+        try:
+            timestamp = None
+            if rightStartTime < fileDuration:
+                timestamp = findNextZeroCrossing(audiofile,
+                                                 rightStartTime,
+                                                 timeStep,
+                                                 reverse=False)
+        except FindZeroCrossingError:
+            pass
+        else:
+            smallestRight = timestamp
+        
+        if smallestLeft is not None or smallestRight is not None:
+            break
+        elif leftStartTime < 0 and rightStartTime > fileDuration:
+            raise(FindZeroCrossingError(0, fileDuration))
+        else:
+            leftStartTime -= timeStep
+            rightStartTime += timeStep
+    
+    if smallestLeft is not None:
+        leftDiff = targetTime - smallestLeft
+        
+    if smallestRight is not None:
+        rightDiff = smallestRight - targetTime
+    
+    # Is left or right smaller?
+    if smallestLeft is None:
+        zeroCrossingTime = smallestRight
+    elif smallestRight is None:
+        zeroCrossingTime = smallestLeft
+    elif leftDiff <= rightDiff:
+        zeroCrossingTime = smallestLeft
+    elif leftDiff > rightDiff:
+        zeroCrossingTime = smallestRight
+    
     return zeroCrossingTime
 
 
-def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True,
-                                maxShiftAmount=0.0025, ignoreOnFailure=False):
+def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
     '''
     Makes all textgrid interval boundaries fall on pressure wave zero crossings
     
@@ -138,22 +221,15 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True,
         newEntryList = []
         if isinstance(tier, tgio.PointTier) and adjustPoints is True:
             for start, label in tier.entryList:
-                newStart = findNearestZeroCrossing(audiofile, start,
-                                                   maxShiftAmount,
-                                                   ignoreOnFailure)
+                newStart = findNearestZeroCrossing(audiofile, start)
                 newEntryList.append((newStart, label))
                 
         elif isinstance(tier, tgio.IntervalTier):
             
             for start, stop, label in tier.entryList:
-                newStart = findNearestZeroCrossing(audiofile, start,
-                                                   maxShiftAmount,
-                                                   ignoreOnFailure)
-                newStop = findNearestZeroCrossing(audiofile, stop,
-                                                  maxShiftAmount,
-                                                  ignoreOnFailure)
+                newStart = findNearestZeroCrossing(audiofile, start)
+                newStop = findNearestZeroCrossing(audiofile, stop)
                 newEntryList.append((newStart, newStop, label))
-                print label, "\n"
         
         tg.replaceTier(tierName, newEntryList, True)
                 
