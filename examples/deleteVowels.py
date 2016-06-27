@@ -54,7 +54,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
     tg.save(outputTGFN)
 
 # Shrink files
-root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
+root = join('.', 'files')
 zeroCrossingTGs = join(root, "zero_crossing_tgs")
 utils.makeDir(zeroCrossingTGs)
 
