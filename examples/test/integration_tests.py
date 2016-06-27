@@ -30,16 +30,14 @@ class IntegrationTests(unittest.TestCase):
         print(os.getcwd())
         import add_tiers
         print(os.getcwd())
-        print("bloop")
 
     def test_calculate_duration(self):
         """Running 'calculate_duration.py'"""
         print(os.getcwd())
         import calculate_duration
         print(os.getcwd())
-        print("bloop")
     
-    def test_merge_tiers(self):
+    def test_delete_vowels(self):
         """Running 'merge_tiers.py'"""
         print(os.getcwd())
         import deleteVowels
