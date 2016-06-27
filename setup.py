@@ -8,7 +8,7 @@ Created on Aug 29, 2014
 from distutils.core import setup
 import codecs
 setup(name='praatio',
-      version='3.2.0',
+      version='3.3.0',
       author='Tim Mahrt',
       author_email='timmahrt@gmail.com',
       package_dir={'praatio':'praatio'},
