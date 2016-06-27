@@ -54,10 +54,10 @@ item []:
             text = "DH" 
         intervals [11]:
             xmin = 1.0164729379083655 
-            xmax = 1.0392811632062913 
+            xmax = 1.063725623583 
             text = "AH0" 
         intervals [12]:
-            xmin = 1.0392811632062913 
+            xmin = 1.063725623583 
             xmax = 1.1152822781165286 
             text = "B" 
         intervals [13]:
