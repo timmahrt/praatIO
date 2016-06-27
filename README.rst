@@ -91,23 +91,23 @@ Ver 3.3 (June 27, 2016)
 
 - Find zero-crossings in a wave file
 
-   for shifting all boundaries in a textgrid see *praatio_scripts.tgBoundariesToZeroCrossings()*
+   - for shifting all boundaries in a textgrid see *praatio_scripts.tgBoundariesToZeroCrossings()*
    
-   for finding individual zero crossings, see *praatio_scripts.findNearestZeroCrossing()*
+   - for finding individual zero crossings, see *praatio_scripts.findNearestZeroCrossing()*
 
 - Pitch features
 
-   pitch extraction is now ten times faster
+   - pitch extraction is now ten times faster
    
-   automatic pitch halving/doubling detection
+   - automatic pitch halving/doubling detection
    
-   median filtering
+   - median filtering
 
 - Textgrid features
 
-   set operations over two tiers (union, difference, or intersection)
+   - set operations over two tiers (union, difference, or intersection)
    
-   erase a section of a textgrid (and a section of the corresponding wave file)
+   - erase a section of a textgrid (and a section of the corresponding wave file)
 
 - Extraction of pitch formants using praat
 
