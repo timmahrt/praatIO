@@ -1057,7 +1057,7 @@ class Textgrid():
                     
                     # Special case: an interval that spanned the deleted
                     # section
-                    for i in xrange(0, len(newEntryList) - 1):
+                    for i in range(0, len(newEntryList) - 1):
                         rightEdge = newEntryList[i][1] == start
                         leftEdge = newEntryList[i + 1][0] == start
                         sameLabel = (newEntryList[i][2] ==

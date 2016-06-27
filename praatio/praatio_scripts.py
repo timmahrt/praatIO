@@ -211,7 +211,7 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
         the given timestamp is returned
     '''
     
-    audiofile = wave.open(wavFN, "r")
+    audiofile = wave.open(wavFN, "rb")
     
     tg = tgio.openTextGrid(tgFN)
     
@@ -302,7 +302,7 @@ def deleteWavSections(fn, outputFN, deleteList, doShrink):
     zeroBinValue = struct.pack('h', 0)
     
     # Grab the sections to be kept
-    audioFrames = ""
+    audioFrames = b""
     for startT, stopT, label in iterList:
         diff = stopT - startT
         
