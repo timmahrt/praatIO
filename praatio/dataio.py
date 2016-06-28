@@ -45,10 +45,10 @@ class PointObject(object):
         tmp = [repr(val) for entry in self.pointList for val in entry]
         strPoints = "\n".join(tmp)
         
-        outputStr = "%s\n%s\n" % (header, strPoints)
+        outputStr = u"%s\n%s\n" % (header, strPoints)
         
         with io.open(fn, "w", encoding="utf-8") as fd:
-            fd.write(unicode(outputStr))
+            fd.write(outputStr)
     
     def getPointsInInterval(self, start, stop, startIndex=0):
     
