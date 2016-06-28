@@ -12,6 +12,7 @@ For brevity, 'pitch_and_intensity' is referred to as 'PI'
 import os
 from os.path import join
 import math
+import io
 
 from praatio import tgio
 from praatio.utilities import utils
@@ -167,7 +168,7 @@ def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
     name = os.path.splitext(fn)[0]
     
     try:
-        with open(join(rawPitchDir, fn), "rU") as fd:
+        with io.open(join(rawPitchDir, fn), "r") as fd:
             data = fd.read()
     except IOError:
         print("No pitch track for: %s" % name)

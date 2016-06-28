@@ -8,7 +8,7 @@ import os
 from os.path import join
 import subprocess
 import functools
-import codecs
+import io
 
 import inspect
 
@@ -148,7 +148,7 @@ def openCSV(path, fn, valueIndex=None, encoding="ascii"):
     '''
     
     # Load CSV file
-    with codecs.open(join(path, fn), "rU", encoding=encoding) as fd:
+    with io.open(join(path, fn), "r", encoding=encoding) as fd:
         featureList = fd.read().splitlines()
     featureList = [row.split(",") for row in featureList]
     

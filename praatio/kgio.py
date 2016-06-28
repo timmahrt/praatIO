@@ -24,7 +24,7 @@ contains a list of KlattSubPointTiers.  Only the KlattSubPointTiers contain
 any points
 '''
 
-import codecs
+import io
 from os.path import join
 
 from praatio.utilities import utils
@@ -207,17 +207,17 @@ class Klattgrid(tgio.Textgrid):
         
         outputTxt = _cleanNumericValues(outputTxt)
         
-        with codecs.open(fn, "w", encoding="utf-8") as fd:
+        with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputTxt)
     
 
 def openKlattGrid(fnFullPath):
 
     try:
-        with codecs.open(fnFullPath, "rU", encoding="utf-16") as fd:
+        with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
     except UnicodeError:
-        with codecs.open(fnFullPath, "rU", encoding="utf-8") as fd:
+        with io.open(fnFullPath, "r", encoding="utf-8") as fd:
             data = fd.read()
     data = data.replace("\r\n", "\n")
 

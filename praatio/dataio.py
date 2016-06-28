@@ -6,11 +6,13 @@ Created on Nov 26, 2015
 @author: tmahrt
 '''
 
+import io
+
 POINT = "PointProcess"
 PITCH = "PitchTier"
 DURATION = "DurationTier"
  
- 
+
 class PointObject(object):
     
     def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
@@ -45,8 +47,8 @@ class PointObject(object):
         
         outputStr = "%s\n%s\n" % (header, strPoints)
         
-        with open(fn, "w") as fd:
-            fd.write(outputStr)
+        with io.open(fn, "w", encoding="utf-8") as fd:
+            fd.write(unicode(outputStr))
     
     def getPointsInInterval(self, start, stop, startIndex=0):
     
@@ -86,7 +88,7 @@ class PointObject2D(PointObject):
 
 
 def open1DPointObject(fn):
-    with open(fn, "rU") as fd:
+    with io.open(fn, "r") as fd:
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
@@ -114,7 +116,7 @@ def open1DPointObject(fn):
 
 
 def open2DPointObject(fn):
-    with open(fn, "rU") as fd:
+    with open(fn, "r") as fd:
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
@@ -144,7 +146,7 @@ def open2DPointObject(fn):
 
 
 def _parseNormalHeader(fn):
-    with open(fn, "rU") as fd:
+    with io.open(fn, "r") as fd:
         data = fd.read()
     
     chunkedData = data.split("\n", 7)
@@ -167,7 +169,7 @@ def _getNextValue(data, start):
 
 
 def _parseShortHeader(fn):
-    with open(fn, "rU") as fd:
+    with io.open(fn, "r") as fd:
         data = fd.read()
     
     chunkedData = data.split("\n", 6)

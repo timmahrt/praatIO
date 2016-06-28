@@ -9,8 +9,7 @@ Created on Apr 15, 2013
 import re
 import copy
 import functools
-
-import codecs
+import io
 
 from praatio.utilities import utils
 
@@ -1299,7 +1298,7 @@ class Textgrid():
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()
         
-        with codecs.open(fn, "w", encoding="utf-8") as fd:
+        with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputTxt)
     
     def sort(self):
@@ -1310,10 +1309,10 @@ class Textgrid():
 def openTextGrid(fnFullPath):
     
     try:
-        with codecs.open(fnFullPath, "rU", encoding="utf-16") as fd:
+        with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
     except UnicodeError:
-        with codecs.open(fnFullPath, "rU", encoding="utf-8") as fd:
+        with io.open(fnFullPath, "r", encoding="utf-8") as fd:
             data = fd.read()
     data = data.replace("\r\n", "\n")
     
