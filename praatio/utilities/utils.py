@@ -59,7 +59,7 @@ class PraatExecutionFailed(Exception):
     
 def runPraatScript(praatEXE, scriptFN, argList):
     
-    # Popen gives a not-very-transparent error 
+    # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
         raise FileNotFound(praatEXE)
     if not os.path.exists(scriptFN):
@@ -136,7 +136,7 @@ def findFiles(path, filterPaths=False, filterExt=None, filterPattern=None,
     return fnList
 
 
-def openCSV(path, fn, valueIndex=None, encoding="ascii"):
+def openCSV(path, fn, valueIndex=None, encoding="utf-8"):
     '''
     Load a feature
     

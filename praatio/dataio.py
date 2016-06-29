@@ -88,7 +88,7 @@ class PointObject2D(PointObject):
 
 
 def open1DPointObject(fn):
-    with io.open(fn, "r") as fd:
+    with io.open(fn, "r", encoding='utf-8') as fd:
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
@@ -116,7 +116,7 @@ def open1DPointObject(fn):
 
 
 def open2DPointObject(fn):
-    with open(fn, "r") as fd:
+    with io.open(fn, "r", encoding='utf-8') as fd:
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
@@ -146,7 +146,7 @@ def open2DPointObject(fn):
 
 
 def _parseNormalHeader(fn):
-    with io.open(fn, "r") as fd:
+    with io.open(fn, "r", encoding='utf-8') as fd:
         data = fd.read()
     
     chunkedData = data.split("\n", 7)
@@ -169,7 +169,7 @@ def _getNextValue(data, start):
 
 
 def _parseShortHeader(fn):
-    with io.open(fn, "r") as fd:
+    with io.open(fn, "r", encoding='utf-8') as fd:
         data = fd.read()
     
     chunkedData = data.split("\n", 6)

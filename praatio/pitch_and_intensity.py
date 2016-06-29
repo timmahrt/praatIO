@@ -168,7 +168,7 @@ def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
     name = os.path.splitext(fn)[0]
     
     try:
-        with io.open(join(rawPitchDir, fn), "r") as fd:
+        with io.open(join(rawPitchDir, fn), "r", encoding='utf-8') as fd:
             data = fd.read()
     except IOError:
         print("No pitch track for: %s" % name)
