@@ -17,64 +17,6 @@ INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
 
 
-def _morphFunc(fromTier, toTier):
-    for fromEntry, toEntry in zip(fromTier.entryList, toTier.entryList):
-        
-        fromStart, fromEnd, fromLabel = fromEntry
-        toStart, toEnd = toEntry[:2]
-        
-        # Silent pauses are not manipulated to the target destination
-        if fromLabel == 'sp' or fromLabel == '':
-            tmpStart = fromStart
-            tmpEnd = fromEnd
-        else:
-            tmpStart = toStart
-            tmpEnd = toEnd
-
-        yield tmpStart, tmpEnd, fromLabel
-
-
-def _manipulateFunc(fromTier, modFunc, filterFunc):
-    for fromEntry in fromTier.entryList:
-        
-        fromStart, fromEnd, fromLabel = fromEntry
-        
-        # Silent pauses are not manipulated to the target destination
-        if fromLabel == 'sp' or fromLabel == '' or not filterFunc(fromLabel):
-            tmpStart = fromStart
-            tmpEnd = fromEnd
-        else:
-            tmpStart, tmpEnd = modFunc(fromStart, fromEnd)
-            
-        yield tmpStart, tmpEnd, fromLabel
-
-
-def _manipulate(tier, iterateFunc):
-    '''
-    A generic function for manipulating tiers
-    
-    The provided /iterateFunc/ specifies the new values for old textgrid
-    regions
-    
-    The job of this function is to determine the new location of each textgrid
-    intervals (taking into account the other textgrid intervals)
-    '''
-    # Chains adjustments from prior manipulations onto later ones
-    adjustAmount = 0.0
-    
-    adjustedEntryList = []
-    for tmpStart, tmpEnd, fromLabel in iterateFunc():
-
-        tmpAdjustAmount = (tmpEnd - tmpStart)
-        
-        adjustedStart = adjustAmount
-        adjustedEnd = adjustAmount + tmpAdjustAmount
-        
-        adjustAmount += tmpAdjustAmount
-        
-        adjustedEntryList.append((adjustedStart, adjustedEnd, fromLabel))
-    
-    return tier.newTier(tier.name, adjustedEntryList)
 def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
                          timeThreshold=0, boundaryInclusive=False):
     '''
@@ -859,7 +801,6 @@ class IntervalTier(TextgridTier):
         returned tier.  If intervals partially overlap, only the overlapping
         portion will be returned.
         '''
-
         retEntryList = []
         for start, stop, label in tier.entryList:
             subTier = self.crop(start, stop, False, False)[0]
@@ -877,20 +818,76 @@ class IntervalTier(TextgridTier):
         
         return retTier
 
-    def manipulate(self, modFunc, filterFunc):
+    def manipulate(self, modFunc, filterFunc=None):
         '''
+        Manipulates each relevant label by modFunc
         
+        For example: manipulate(lambda x: x*2, lambda x: 'a' in x)
+        will double the length of all intervals that contain an 'a'.
+
+        by default, all labels are affected
         '''
-        return _manipulate(self, functools.partial(_manipulateFunc, self,
-                                                   modFunc, filterFunc))
+        cumulativeAdjustAmount = 0
+        lastFromEnd = 0
+        newEntryList = []
+        for fromEntry in self.entryList:
+
+            fromStart, fromEnd, fromLabel = fromEntry
+                     
+            # fromStart - lastFromEnd -> was this interval and the
+            # last one adjacent?
+            toStart = (fromStart - lastFromEnd) + cumulativeAdjustAmount
+            
+            currAdjustAmount = (fromEnd - fromStart)
+            if filterFunc is None or filterFunc(fromLabel):
+                currAdjustAmount = modFunc(currAdjustAmount)
+            
+            toEnd = cumulativeAdjustAmount = toStart + currAdjustAmount
+            newEntryList.append((toStart, toEnd, fromLabel))
+            
+            lastFromEnd = fromEnd
+        
+        # The new max time is the old max time plus the cumulative difference
+        # of all interval adjustments--which is the same thing as the
+        # difference between the last boundary in the original entry list
+        # and the new one
+        newMin = self.minTimestamp
+        cumulativeDifference = (newEntryList[-1][1] - self.entryList[-1][1])
+        newMax = self.maxTimestamp + cumulativeDifference
+            
+        return IntervalTier(self.name, newEntryList, newMin, newMax)
     
-    def morph(self, targetTier):
+    def morph(self, targetTier, filterFunc=None):
         '''
         Makes one interval tier look more like another
         '''
-        return _manipulate(self, functools.partial(_morphFunc,
-                                                   self,
-                                                   targetTier))
+        cumulativeAdjustAmount = 0
+        lastFromEnd = 0
+        newEntryList = []
+        for fromEntry, targetEntry in zip(self.entryList,
+                                          targetTier.entryList):
+            
+            fromStart, fromEnd, fromLabel = fromEntry
+            targetStart, targetEnd = targetEntry[:2]
+            
+            # fromStart - lastFromEnd -> was this interval and the
+            # last one adjacent?
+            toStart = (fromStart - lastFromEnd) + cumulativeAdjustAmount
+
+            currAdjustAmount = (fromEnd - fromStart)
+            if filterFunc is None or filterFunc(fromLabel):
+                currAdjustAmount = (targetEnd - targetStart)
+            
+            toEnd = cumulativeAdjustAmount = toStart + currAdjustAmount
+            newEntryList.append((toStart, toEnd, fromLabel))
+            
+            lastFromEnd = fromEnd
+            
+        newMin = self.minTimestamp
+        cumulativeDifference = (newEntryList[-1][1] - self.entryList[-1][1])
+        newMax = self.maxTimestamp + cumulativeDifference
+            
+        return IntervalTier(self.name, newEntryList, newMin, newMax)
 
     def union(self, tier):
         '''
