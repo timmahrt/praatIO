@@ -75,64 +75,6 @@ def _manipulate(tier, iterateFunc):
         adjustedEntryList.append((adjustedStart, adjustedEnd, fromLabel))
     
     return tier.newTier(tier.name, adjustedEntryList)
-
-
-def _fillInBlanks(intervalTier, blankLabel="", startTime=None, endTime=None):
-    '''
-    Fills in the space between intervals with empty space
-    
-    This is necessary to do when saving to create a well-formed textgrid
-    '''
-    if startTime is None:
-        startTime = intervalTier.minTimestamp
-        
-    if endTime is None:
-        endTime = intervalTier.maxTimestamp
-    
-    # Special case: empty textgrid
-    if len(intervalTier.entryList) == 0:
-        intervalTier.entryList.append((startTime, endTime, blankLabel))
-    
-    newEntryList = fillInBlanks(intervalTier.entryList, blankLabel,
-                                startTime, endTime)
-
-    return IntervalTier(intervalTier.name, newEntryList)
-
-
-def fillInBlanks(entryList, blankLabel="", startTime=0, endTime=None):
-    '''
-    Fills in an entry list with empty entries-gaps between contentful entries
-    '''
-    # Create a new entry list
-    entry = entryList[0]
-    prevEnd = float(entry[1])
-    newEntryList = [entry]
-    for entry in entryList[1:]:
-        newStart = float(entry[0])
-        newEnd = float(entry[1])
-        
-        if prevEnd < newStart:
-            newEntryList.append((prevEnd, newStart, blankLabel))
-        newEntryList.append(entry)
-        
-        prevEnd = newEnd
-    
-    # Special case: If there is a gap at the start of the file
-    assert(float(newEntryList[0][0]) >= float(startTime))
-    if float(newEntryList[0][0]) > float(startTime):
-        newEntryList.insert(0, (startTime, newEntryList[0][0], blankLabel))
-    
-    # Special case -- if there is a gap at the end of the file
-    if endTime is not None:
-        assert(float(newEntryList[-1][1]) <= float(endTime))
-        if float(newEntryList[-1][1]) < float(endTime):
-            newEntryList.append((newEntryList[-1][1], endTime, blankLabel))
-
-    newEntryList.sort()
-
-    return newEntryList
-
-
 def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
                          timeThreshold=0, boundaryInclusive=False):
     '''
@@ -749,6 +691,53 @@ class IntervalTier(TextgridTier):
 
         self.sort()
 
+    def fillInBlanks(self, blankLabel="", startTime=None, endTime=None):
+        '''
+        Fills in the space between intervals with empty space
+        
+        This is necessary to do when saving to create a well-formed textgrid
+        '''
+        if startTime is None:
+            startTime = self.minTimestamp
+            
+        if endTime is None:
+            endTime = self.maxTimestamp
+        
+        # Special case: empty textgrid
+        if len(self.entryList) == 0:
+            self.entryList.append((startTime, endTime, blankLabel))
+        
+        # Create a new entry list
+        entryList = self.entryList[:]
+        entry = entryList[0]
+        prevEnd = float(entry[1])
+        newEntryList = [entry]
+        for entry in entryList[1:]:
+            newStart = float(entry[0])
+            newEnd = float(entry[1])
+            
+            if prevEnd < newStart:
+                newEntryList.append((prevEnd, newStart, blankLabel))
+            newEntryList.append(entry)
+            
+            prevEnd = newEnd
+        
+        # Special case: If there is a gap at the start of the file
+        assert(float(newEntryList[0][0]) >= float(startTime))
+        if float(newEntryList[0][0]) > float(startTime):
+            newEntryList.insert(0, (startTime, newEntryList[0][0], blankLabel))
+        
+        # Special case -- if there is a gap at the end of the file
+        if endTime is not None:
+            assert(float(newEntryList[-1][1]) <= float(endTime))
+            if float(newEntryList[-1][1]) < float(endTime):
+                newEntryList.append((newEntryList[-1][1], endTime, blankLabel))
+    
+        newEntryList.sort()
+    
+        return IntervalTier(self.name, newEntryList,
+                            self.minTimestamp, self.maxTimestamp)
+
     def getEntries(self, start=None, stop=None, boundaryInclusive=False):
         
         if start is None:
@@ -1279,11 +1268,10 @@ class Textgrid():
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
             tier = self.tierDict[name]
-            if isinstance(tier, IntervalTier):
-                self.tierDict[name] = _fillInBlanks(tier,
-                                                    "",
-                                                    self.minTimestamp,
-                                                    self.maxTimestamp)
+            if hasattr(tier, "fillInBlanks"):
+                self.tierDict[name] = tier.fillInBlanks("",
+                                                        self.minTimestamp,
+                                                        self.maxTimestamp)
         
         self.sort()
         
