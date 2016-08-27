@@ -15,8 +15,50 @@ from praatio.utilities import utils
 
 INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
+MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
 
 
+def _removeUltrashortIntervals(tier, minLength):
+    '''
+    Remove intervals that are very tiny
+    
+    Doing many small manipulations on intervals can lead to the creation
+    of ultrashort intervals (e.g. 1*10^-15 seconds long).  This function
+    removes such intervals.
+    '''
+    
+    # First, remove tiny intervals
+    newEntryList = []
+    j = 0  # index to newEntryList
+    for start, stop, label in tier.entryList:
+        
+        if stop - start < minLength:
+            # Correct ultra-short entries
+            if len(newEntryList) > 0:
+                lastStart, _, lastLabel = newEntryList[j - 1]
+                newEntryList[j - 1] = (lastStart, stop, lastLabel)
+        else:
+            # Special case: the first entry in oldEntryList was ultra-short
+            if len(newEntryList) == 0 and start != 0:
+                newEntryList.append((0, stop, label))
+            # Normal case
+            else:
+                newEntryList.append((start, stop, label))
+            j += 1
+    
+    # Next, shift near equivalent tiny boundaries
+    j = 0
+    while j < len(newEntryList) - 1:
+        diff = abs(newEntryList[j][1] - newEntryList[j + 1][0])
+        if diff > 0 and diff < MIN_INTERVAL_LENGTH:
+            newEntryList[j] = (newEntryList[j][0],
+                               newEntryList[j + 1][0],
+                               newEntryList[j][2])
+        j += 1
+    
+    return tier.newTier(entryList=newEntryList)
+
+     
 def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
                          timeThreshold=0, boundaryInclusive=False):
     '''
@@ -1258,7 +1300,7 @@ class Textgrid():
             
         self.addTier(newTier, tierIndex)
             
-    def save(self, fn):
+    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH):
         
         self.sort()
         
@@ -1266,9 +1308,14 @@ class Textgrid():
         for name in self.tierNameList:
             tier = self.tierDict[name]
             if hasattr(tier, "fillInBlanks"):
-                self.tierDict[name] = tier.fillInBlanks("",
-                                                        self.minTimestamp,
-                                                        self.maxTimestamp)
+                
+                tier = tier.fillInBlanks("",
+                                         self.minTimestamp,
+                                         self.maxTimestamp)
+                if minimumIntervalLength is not None:
+                    tier = _removeUltrashortIntervals(tier,
+                                                      minimumIntervalLength)
+                self.tierDict[name] = tier
         
         self.sort()
         
@@ -1282,6 +1329,7 @@ class Textgrid():
         
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()
+            
         
         with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputTxt)
