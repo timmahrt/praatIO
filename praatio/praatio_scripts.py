@@ -16,6 +16,8 @@ import wave
 
 from praatio import tgio
 
+sampWidthDict = {1: 'b', 2: 'h', 4: 'i', 8: 'q'}
+
 
 class EndOfAudioData(Exception):
     pass
@@ -45,8 +47,6 @@ def sign(x):
 
 def samplesAsNums(audiofile, numFrames, startFrame):
 
-    sampWidthDict = {1: 'b', 2: 'h', 4: 'i', 8: 'q'}
-
     params = audiofile.getparams()
     sampwidth = params[1]
     byteCode = sampWidthDict[sampwidth]
@@ -62,6 +62,14 @@ def samplesAsNums(audiofile, numFrames, startFrame):
 
     return audioFrameList
 
+
+def numsAsSamples(sampwidth, numList):
+    
+    byteCode = sampWidthDict[sampwidth]
+    byteStr = struct.pack("<" + byteCode * len(numList), *numList)
+    
+    return byteStr
+    
 
 def findNextZeroCrossing(audiofile, targetTime, timeStep=0.002, reverse=False):
     '''
