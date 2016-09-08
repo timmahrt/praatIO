@@ -299,7 +299,7 @@ def deleteWavSections(fn, outputFN, deleteList, doShrink):
     deleteList = [[row[0], row[1], "delete"] for row in deleteList]
     iterList = sorted(keepList + deleteList)
     
-    zeroBinValue = struct.pack('h', 0)
+    zeroBinValue = struct.pack(sampWidthDict[sampwidth], 0)
     
     # Grab the sections to be kept
     audioFrames = b""
