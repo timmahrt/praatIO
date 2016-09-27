@@ -352,6 +352,8 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     # Build the output name template
     name = os.path.splitext(os.path.split(wavFN)[1])[0]
     orderOfMagnitude = int(math.floor(math.log10(len(entryList))))
+    
+    # We want one more zero in the output than the order of magnitude
     outputTemplate = "%s_%%0%dd" % (name, orderOfMagnitude + 1)
     
     firstWarning = True
