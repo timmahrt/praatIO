@@ -343,6 +343,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                   If is type str (a tier name), outputs a paired, cropped
                   textgrid with only the specified tier
     nameStyle: if 'append': append interval label to output name
+               if 'append_no_i': append label but not interval to output name
                if 'label': output name is the same as label
                if None: output name plus the interval number
     '''
@@ -372,6 +373,8 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
         outputName = outputTemplate % i
         if nameStyle == "append":
             outputName += "_" + label
+        elif nameStyle == "append_no_i":
+            outputName = name + "_" + label
         elif nameStyle == "label":
             outputName = label
         
