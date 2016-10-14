@@ -99,3 +99,19 @@ def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
     utils.runPraatScript(praatEXE, scriptFN,
                          [inputWavFN, durationTierFN, outputWavFN,
                           minPitch, maxPitch])
+    
+
+def annotateSilences(praatEXE, inputWavPath, outputTGPath,
+                     minPitch=100, timeStep=0.0, silenceThreshold=-25.0,
+                     minSilDur=0.1, minSoundDur=0.1,
+                     silentLabel='silence', soundLabel='sound', scriptFN=None):
+    '''
+    Marks the silences and non-silences of an audio file
+    '''
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, "annotate_silences.praat")
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavPath, outputTGPath, minPitch, timeStep,
+                          silenceThreshold, minSilDur, minSoundDur,
+                          silentLabel, soundLabel])
