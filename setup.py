@@ -5,12 +5,13 @@ Created on Aug 29, 2014
 
 @author: tmahrt
 '''
-from distutils.core import setup
+from setuptools import setup
 import codecs
 setup(name='praatio',
-      version='3.3.0',
+      version='3.3.1',
       author='Tim Mahrt',
       author_email='timmahrt@gmail.com',
+      url='https://github.com/timmahrt/praatIO',
       package_dir={'praatio':'praatio'},
       packages=['praatio',
                 'praatio.utilities'],

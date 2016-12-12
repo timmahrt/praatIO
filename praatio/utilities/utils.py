@@ -9,13 +9,10 @@ from os.path import join
 import subprocess
 import functools
 import io
-
-import inspect
+from pkg_resources import resource_filename
 
 # Get the folder one level above the current folder
-praatioPath = os.path.split(inspect.getfile(inspect.currentframe()))[0]
-praatioPath = os.path.split(praatioPath)[0]
-scriptsPath = join(praatioPath, "praatScripts")
+scriptsPath = resource_filename("praatio", "praatScripts", )
 
 
 def makeDir(path):
