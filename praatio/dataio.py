@@ -92,7 +92,7 @@ def open1DPointObject(fn):
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
-
+        
         start = 0
         dataList = []
         while True:
@@ -101,11 +101,11 @@ def open1DPointObject(fn):
             except ValueError:
                 break
             
-            timeVal, start = _getNextValue(data, start)
             pointVal, start = _getNextValue(data, start)
-            dataList.append([float(timeVal), float(pointVal), ])
+            dataList.append([float(pointVal), ])
         
         po = PointObject2D(dataList, objectType, minT, maxT)
+
     else:
         data, objectType, minT, maxT = _parseShortHeader(fn)
         dataList = data.split('\n')
@@ -120,7 +120,7 @@ def open2DPointObject(fn):
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
         data, objectType, minT, maxT = _parseNormalHeader(fn)
-
+        
         start = 0
         dataList = []
         while True:
@@ -129,8 +129,15 @@ def open2DPointObject(fn):
             except ValueError:
                 break
             
+            timeVal, start = _getNextValue(data, start)
+            
+            try:
+                start = data.index('=', start)
+            except ValueError:
+                break
+            
             pointVal, start = _getNextValue(data, start)
-            dataList.append([float(pointVal), ])
+            dataList.append([float(timeVal), float(pointVal), ])
         
         po = PointObject2D(dataList, objectType, minT, maxT)
         
