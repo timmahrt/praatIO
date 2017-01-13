@@ -335,7 +335,8 @@ def deleteWavSections(fn, outputFN, deleteList, doShrink):
     
 
 def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
-                     outputTGFlag=False, nameStyle=None):
+                     outputTGFlag=False, nameStyle=None,
+                     noPartialIntervals=False):
     '''
     Outputs one subwav for each entry in the tier of a textgrid
     
@@ -346,6 +347,10 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                if 'append_no_i': append label but not interval to output name
                if 'label': output name is the same as label
                if None: output name plus the interval number
+    noPartialIntervals: if True: intervals in non-target tiers that are
+                                  not wholly contained by an interval in
+                                  the target tier will not be included in
+                                  the output textgrids
     '''
     tg = tgio.openTextGrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
@@ -388,7 +393,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
         outputFNList.append((start, stop, outputName + ".wav"))
         
         if outputTGFlag is not False:
-            subTG = tg.crop(True, False, start, stop)
+            subTG = tg.crop(noPartialIntervals, False, start, stop)
             
             if isinstance(outputTGFlag, str):
                 for tierName in subTG.tierNameList:
