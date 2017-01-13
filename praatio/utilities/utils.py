@@ -47,14 +47,25 @@ class FileNotFound(Exception):
 
 class PraatExecutionFailed(Exception):
     
+    def __init__(self, cmdList):
+        super(PraatExecutionFailed, self).__init__()
+        self.cmdList = cmdList
+    
     def __str__(self):
-        return ("Praat Execution Failed.  Please check the following:\n"
-                "- Praat exists in the location specified"
-                "- Praat script can execute ok outside of praat"
-                "- script arguments are correct")
+        errorStr = ("\nPraat Execution Failed.  Please check the following:\n"
+                    "- Praat exists in the location specified\n"
+                    "- Praat script can execute ok outside of praat\n"
+                    "- script arguments are correct\n\n"
+                    "If you can't locate the problem, I recommend using "
+                    "absolute paths rather than relative "
+                    "paths and using paths without spaces in any folder "
+                    "or file names\n\n"
+                    "Here is the command that python attempted to run:\n")
+        cmdTxt = " ".join(self.cmdList)
+        return errorStr + cmdTxt
     
     
-def runPraatScript(praatEXE, scriptFN, argList):
+def runPraatScript(praatEXE, scriptFN, argList, cwd=None):
     
     # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
@@ -64,10 +75,11 @@ def runPraatScript(praatEXE, scriptFN, argList):
     
     argList = ["%s" % arg for arg in argList]
     cmdList = [praatEXE, '--run', scriptFN] + argList
-    myProcess = subprocess.Popen(cmdList)
- 
+    
+    myProcess = subprocess.Popen(cmdList, cwd=cwd)
+    
     if myProcess.wait():
-        raise PraatExecutionFailed()
+        raise PraatExecutionFailed(cmdList)
 
 
 def _getMatchFunc(pattern):

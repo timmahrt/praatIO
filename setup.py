@@ -8,7 +8,7 @@ Created on Aug 29, 2014
 from setuptools import setup
 import codecs
 setup(name='praatio',
-      version='3.3.1',
+      version='3.3.2',
       author='Tim Mahrt',
       author_email='timmahrt@gmail.com',
       url='https://github.com/timmahrt/praatIO',
