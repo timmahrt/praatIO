@@ -268,6 +268,15 @@ def _extractSubwav(fn, outputFN, startT, endT):
     outWave.setparams(outParams)
     outWave.writeframes(audioFrames)
     
+def getDuration(fn):
+    audiofile = wave.open(fn, "r")
+    params = audiofile.getparams()
+    
+    framerate = params[2]
+    nframes = params[3]
+
+    duration = float(nframes) / framerate
+    return duration
 
 def deleteWavSections(fn, outputFN, deleteList, doShrink):
     '''
