@@ -278,6 +278,7 @@ def getDuration(fn):
     duration = float(nframes) / framerate
     return duration
 
+
 def deleteWavSections(fn, outputFN, deleteList, doShrink):
     '''
     Remove from the audio all of the intervals
@@ -373,17 +374,29 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     
     firstWarning = True
     
-    countList = [entryList.count(word) for word in entryList]
+    # If we're using the 'label' namestyle for outputs, all of the
+    # interval labels have to be unique, or wave files with those
+    # labels as names, will be overwritten
     if nameStyle == 'label':
-        if sum(countList) / float(len(countList)) > 1:
+        wordList = [word for _, _, word in entryList]
+        multipleInstList = []
+        for word in set(wordList):
+            if wordList.count(word) > 1:
+                multipleInstList.append(word)
+        
+        if len(multipleInstList) > 0:
+            instListTxt = "\n".join(multipleInstList)
             print(("Overwriting wave files in: %s\n" +
-                  "Files existed before or intervals exist with the same name")
-                  % outputPath)
+                  "Intervals exist with the same name:\n%s")
+                  % (outputPath, instListTxt))
+            firstWarning = False
     
+    # Output wave files
     outputFNList = []
     for i, entry in enumerate(entryList):
         start, stop, label = entry
         
+        # Resolve output name
         outputName = outputTemplate % i
         if nameStyle == "append":
             outputName += "_" + label
@@ -396,11 +409,13 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
 
         if os.path.exists(outputFNFullPath) and firstWarning:
             print(("Overwriting wave files in: %s\n" +
-                  "Files existed before or intervals exist with the same ")
-                  % outputPath)
+                   "Files existed before or intervals exist with " +
+                   "the same name:\n%s")
+                  % (outputPath, outputName))
         _extractSubwav(wavFN, outputFNFullPath, start, stop)
         outputFNList.append((start, stop, outputName + ".wav"))
         
+        # Output the textgrid if requested
         if outputTGFlag is not False:
             subTG = tg.crop(noPartialIntervals, False, start, stop)
             
