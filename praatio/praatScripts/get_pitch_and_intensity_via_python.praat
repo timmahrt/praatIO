@@ -10,6 +10,7 @@ form Soundfile to pitch and intensity
     real Silence_threshold 0.03
     real Start_time -1 (= start of the file)
     real End_time -1 (= end of the file)
+    boolean Do_pitch_quadratic_interpolation 0
 endform
 
 # Pitch and intensity parameters
@@ -35,8 +36,26 @@ else
 endif
 
 
-# Get pitch and intensity tracks
+# Get pitch track
 pitch = To Pitch (ac): sample_step, min_pitch, 15, "no", silence_threshold, 0.45, 0.01, 0.35, 0.14, max_pitch
+
+# Do quadratic interpolation if requested
+if do_pitch_quadratic_interpolation == 1
+    old_pitch = pitch
+    selectObject: pitch
+    pitchTier = Down to PitchTier
+    
+    selectObject: pitchTier
+    Interpolate quadratically: 4, "Hz"
+    pitch = To Pitch: sample_step, min_pitch, max_pitch
+    
+    selectObject: pitchTier
+    Remove
+    selectObject: old_pitch
+    Remove
+endif
+
+# Get intensity track
 selectObject: sound
 intensity = To Intensity: min_pitch, sample_step, 1
 

@@ -31,7 +31,8 @@ class OverwriteException(Exception):
 def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
                         minPitch, maxPitch, tgPath, tgFN, tierName,
                         tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
-                        forceRegenerate=True, undefinedValue=None):
+                        forceRegenerate=True, undefinedValue=None,
+                        pitchQuadInterp=False):
     '''
     Extracts pitch and int from each labeled interval in a textgrid
     
@@ -65,7 +66,8 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
             piList = _audioToPIFile(tmpOutputPath, fn, tmpOutputPath,
                                     tmpTrackName, praatEXE, minPitch, maxPitch,
                                     sampleStep, silenceThreshold,
-                                    forceRegenerate=True)
+                                    forceRegenerate=True,
+                                    pitchQuadInterp=pitchQuadInterp)
             piList = [("%0.3f" % (float(time) + start), str(pV), str(iV))
                       for time, pV, iV in piList]
             allPIList.extend(piList)
@@ -82,7 +84,8 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
 def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
                    minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
                    forceRegenerate=True,
-                   tgPath=None, tgFN=None, tierName=None, undefinedValue=None):
+                   tgPath=None, tgFN=None, tierName=None, undefinedValue=None,
+                   pitchQuadInterp=False):
     '''
     Extracts pitch and intensity values from an audio file
     
@@ -104,9 +107,15 @@ def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
         if os.path.exists(outputFullFN):
             os.remove(outputFullFN)
         
+        if pitchQuadInterp is True:
+            doInterpolation = 1
+        else:
+            doInterpolation = 0
+        
         if tgPath is None or tgFN is None or tierName is None:
             argList = [inputFullFN, outputFullFN, sampleStep,
-                       minPitch, maxPitch, silenceThreshold, -1, -1]
+                       minPitch, maxPitch, silenceThreshold, -1, -1,
+                       doInterpolation]
             
             scriptName = "get_pitch_and_intensity_via_python.praat"
             scriptFN = join(utils.scriptsPath, scriptName)
@@ -115,7 +124,8 @@ def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
         else:
             argList = [inputFullFN, outputFullFN,
                        join(tgPath, tgFN), tierName, sampleStep,
-                       minPitch, maxPitch, silenceThreshold]
+                       minPitch, maxPitch, silenceThreshold,
+                       doInterpolation]
             
             scriptName = "get_pitch_and_intensity_segments_via_python.praat"
             scriptFN = join(utils.scriptsPath, scriptName)
@@ -130,7 +140,7 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
               silenceThreshold=0.03, forceRegenerate=True, tgPath=None,
               tgFN=None, tierName=None, tmpOutputPath=None,
-              undefinedValue=None):
+              undefinedValue=None, pitchQuadInterp=False):
     '''
     Extracts pitch and intensity from a file wholesale or piecewise
 
@@ -146,7 +156,8 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
         piList = _audioToPIFile(inputPath, inputFN, outputPath, outputFN,
                                 praatEXE, minPitch, maxPitch,
                                 sampleStep, silenceThreshold, forceRegenerate,
-                                undefinedValue=undefinedValue)
+                                undefinedValue=undefinedValue,
+                                pitchQuadInterp=pitchQuadInterp)
     else:
         if tmpOutputPath is None:
             tmpOutputPath = join(outputPath, "piecewise_output")
@@ -154,7 +165,8 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
                                      praatEXE, minPitch, maxPitch, tgPath,
                                      tgFN, tierName, tmpOutputPath, sampleStep,
                                      silenceThreshold, forceRegenerate,
-                                     undefinedValue=undefinedValue)
+                                     undefinedValue=undefinedValue,
+                                     pitchQuadInterp=pitchQuadInterp)
     
     return piList
 
