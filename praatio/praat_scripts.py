@@ -11,6 +11,8 @@ Created on Dec 9, 2015
 import os
 from os.path import join
 
+from praatio import praatio_scripts
+from praatio import dataio
 from praatio.utilities import utils
 
 
@@ -76,12 +78,23 @@ def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
 
 
 def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
-                      minPitch, maxPitch, scriptFN=None):
+                      minPitch, maxPitch, scriptFN=None, pointList=None):
     '''
-    Resynthesizes the pitch in a wav file with the given pitch contour
+    Resynthesizes the pitch in a wav file with the given pitch contour file
+    
+    The pitch track to use can optionally be passed in as pointList.  If
+    so, it will be saved as pitchFN for praat to be able to use.
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
+
+    if pointList is not None:
+        dur = praatio_scripts.getDuration(inputWavFN)
+        pointObj = dataio.PointObject2D(pointList,
+                                        dataio.PITCH,
+                                        0,
+                                        dur)
+        pointObj.save(pitchFN)
 
     utils.runPraatScript(praatEXE, scriptFN,
                          [inputWavFN, pitchFN, outputWavFN,
