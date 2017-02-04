@@ -87,6 +87,15 @@ What can you do with this library?
 Major revisions
 ================
 
+Ver 3.4 (February 04, 2017)
+
+- Added place for very specific scripts (praatio.applied_scripts)
+
+    - added code for using with input and output textgrids to SPPAS, a forced aligner
+
+- Lots of minor features and bugfixes
+
+
 Ver 3.3 (June 27, 2016)
 
 - Find zero-crossings in a wave file
