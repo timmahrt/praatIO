@@ -1,0 +1,184 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0.0
+xmax = 1.194625
+tiers? <exists>
+size = 6
+item []:
+    item [1]:
+        class = "IntervalTier"
+        name = "Tokenization"
+        xmin = 0.000000
+        xmax = 1.194625
+        intervals: size = 1
+        intervals [1]:
+            xmin = 0.0
+            xmax = 1.194625
+            text = "+ bobby ripped the ledger +"
+    item [2]:
+        class = "IntervalTier"
+        name = "Phonetization"
+        xmin = 0.000000
+        xmax = 1.194625
+        intervals: size = 1
+        intervals [1]:
+            xmin = 0.0
+            xmax = 1.194625
+            text = "sil b-A-b-i: r-I-p-t D-@|D-V|D-i: l-E-dZ-3:r sil"
+    item [3]:
+        class = "IntervalTier"
+        name = "PhonAlign"
+        xmin = 0.000000
+        xmax = 1.194625
+        intervals: size = 16
+        intervals [1]:
+            xmin = 0.0
+            xmax = 0.03
+            text = "#"
+        intervals [2]:
+            xmin = 0.03
+            xmax = 0.07
+            text = "b"
+        intervals [3]:
+            xmin = 0.07
+            xmax = 0.2
+            text = "A"
+        intervals [4]:
+            xmin = 0.2
+            xmax = 0.29
+            text = "b"
+        intervals [5]:
+            xmin = 0.29
+            xmax = 0.4
+            text = "i:"
+        intervals [6]:
+            xmin = 0.4
+            xmax = 0.43
+            text = "r"
+        intervals [7]:
+            xmin = 0.43
+            xmax = 0.51
+            text = "I"
+        intervals [8]:
+            xmin = 0.51
+            xmax = 0.57
+            text = "p"
+        intervals [9]:
+            xmin = 0.57
+            xmax = 0.62
+            text = "t"
+        intervals [10]:
+            xmin = 0.62
+            xmax = 0.67
+            text = "D"
+        intervals [11]:
+            xmin = 0.67
+            xmax = 0.72
+            text = "@"
+        intervals [12]:
+            xmin = 0.72
+            xmax = 0.81
+            text = "l"
+        intervals [13]:
+            xmin = 0.81
+            xmax = 0.89
+            text = "E"
+        intervals [14]:
+            xmin = 0.89
+            xmax = 0.96
+            text = "dZ"
+        intervals [15]:
+            xmin = 0.96
+            xmax = 1.15
+            text = "3:r"
+        intervals [16]:
+            xmin = 1.15
+            xmax = 1.194625
+            text = "#"
+    item [4]:
+        class = "IntervalTier"
+        name = "TokensAlign"
+        xmin = 0.000000
+        xmax = 1.194625
+        intervals: size = 6
+        intervals [1]:
+            xmin = 0.0
+            xmax = 0.03
+            text = "+"
+        intervals [2]:
+            xmin = 0.03
+            xmax = 0.4
+            text = "bobby"
+        intervals [3]:
+            xmin = 0.4
+            xmax = 0.62
+            text = "ripped"
+        intervals [4]:
+            xmin = 0.62
+            xmax = 0.72
+            text = "the"
+        intervals [5]:
+            xmin = 0.72
+            xmax = 1.15
+            text = "ledger"
+        intervals [6]:
+            xmin = 1.15
+            xmax = 1.194625
+            text = "+"
+    item [5]:
+        class = "IntervalTier"
+        name = "Activity"
+        xmin = 0.000000
+        xmax = 1.194625
+        intervals: size = 3
+        intervals [1]:
+            xmin = 0.0
+            xmax = 0.03
+            text = "pause"
+        intervals [2]:
+            xmin = 0.03
+            xmax = 1.15
+            text = "speech"
+        intervals [3]:
+            xmin = 1.15
+            xmax = 1.194625
+            text = "pause"
+    item [6]:
+        class = "IntervalTier"
+        name = "MetaInformation"
+        xmin = 0.000000
+        xmax = 1.194625
+        intervals: size = 8
+        intervals [1]:
+            xmin = 0.0
+            xmax = 0.149328125
+            text = "author=Brigitte Bigi"
+        intervals [2]:
+            xmin = 0.149328125
+            xmax = 0.29865625
+            text = "contact=brigite.bigi@gmail.com"
+        intervals [3]:
+            xmin = 0.29865625
+            xmax = 0.447984375
+            text = "program=SPPAS"
+        intervals [4]:
+            xmin = 0.447984375
+            xmax = 0.5973125
+            text = "version=1.8.1"
+        intervals [5]:
+            xmin = 0.5973125
+            xmax = 0.746640625
+            text = "copyright=Copyright (C) 2011-2016 Brigitte Bigi"
+        intervals [6]:
+            xmin = 0.746640625
+            xmax = 0.89596875
+            text = "url=http://www.sppas.org/"
+        intervals [7]:
+            xmin = 0.89596875
+            xmax = 1.045296875
+            text = "license=GNU Public License, version 3"
+        intervals [8]:
+            xmin = 1.045296875
+            xmax = 1.194625
+            text = "date=2017-02-04"
