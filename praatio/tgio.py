@@ -559,7 +559,10 @@ class IntervalTier(TextgridTier):
             # The current interval contains the new interval completely
             elif intervalStart <= cropStart and intervalEnd >= cropEnd:
                 if not strictFlag:
-                    matchedEntry = (cropStart, cropEnd, intervalLabel)
+                    if softFlag:
+                        matchedEntry = entry
+                    else:
+                        matchedEntry = (cropStart, cropEnd, intervalLabel)
                 else:
                     cutTWithin += cropEnd - cropStart
                         
