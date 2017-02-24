@@ -375,6 +375,73 @@ class PointTier(TextgridTier):
         
         return returnList
     
+    def getValuesAtPoints(self, dataTupleList, fuzzyMatching=False):
+        '''
+        Get the values that occur at points in the point tier
+        
+        If fuzzyMatching is True, if there is not a feature value
+        at a point, the nearest feature value will be taken.
+        
+        The procedure assumes that all data is ordered in time.
+        dataTupleList should be in the form
+        [(t1, v1a, v1b, ..), (t2, v2a, v2b, ..), ..]
+        
+        The procedure makes one pass through dataTupleList and one
+        pass through self.entryList.  If the data is not sequentially
+        ordered, the incorrect response will be returned.
+        '''
+        
+        i = 0
+        retList = []
+        
+        # Only find exact timestamp matches
+        if fuzzyMatching is False:
+            for timestamp, label in self.entryList:
+                while True:
+                    try:
+                        dataTuple = dataTupleList[i]
+                    except IndexError:
+                        currTime = timestamp
+                        currVal = "--"
+                        break
+
+                    currTime = dataTuple[0]
+                    currVal = dataTuple[1]
+                    if timestamp == currTime:
+                        break
+                    i += 1
+                retList.append((currTime, label, currVal))
+        
+        # Find the closest timestamp
+        else:
+            sortedDataTupleList = dataTupleList.sorted()
+            for timestamp, label in self.entryList:
+                bestTime = sortedDataTupleList[i][0]
+                bestVal = sortedDataTupleList[i][1]
+                i += 1
+                while True:
+                    try:
+                        dataTuple = sortedDataTupleList[i]
+                    except IndexError:
+                        break  # Last known value is the closest one
+
+                    currTime = dataTuple[0]
+                    currVal = dataTuple[1]
+
+                    currDiff = abs(currTime - timestamp)
+                    bestDiff = abs(bestTime - timestamp)
+                    if currDiff < bestDiff:  # We're closer to the target val
+                        bestTime = currTime
+                        bestVal = currVal
+                        if currDiff == 0:
+                            break  # Can't do better than a perfect match
+                    elif currDiff > bestDiff:
+                        break  # We've past the best value.
+                    i += 1
+                retList.append((bestTime, label, bestVal))
+    
+        return retList
+        
     def eraseRegion(self, start, stop, collisionCode=None):
         '''
         Makes a region in a tier blank (removes all contained entries)
