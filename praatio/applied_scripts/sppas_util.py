@@ -61,8 +61,7 @@ def _xsampaToIPATier(tg, tierName):
 
 
 def sppasPostProcess(tgPath, outputPath, removeTierList=None,
-                     renameTierList=None, deleteIntermediateFiles=False,
-                     replaceOrigTextgrids=False):
+                     renameTierList=None, deleteIntermediateFiles=False):
     '''
     Cleanup SPPAS output files. Remove unused tier names.  Rename tier names.
     
@@ -95,13 +94,6 @@ def sppasPostProcess(tgPath, outputPath, removeTierList=None,
     tgFNList = utils.findFiles(tgPath, filterExt=".TextGrid")
     tgFNList = [fn for fn in tgFNList
                 if '-merge' in fn]
-    if replaceOrigTextgrids is True:
-        newTGFNList = []
-        for fn in tgFNList:
-            outputFN = fn.replace("-merge", "")
-            newTGFNList.append(outputFN)
-            shutil.move(join(tgPath, fn), join(tgPath, outputFN))
-        tgFNList = newTGFNList
     
     # Clean up the textgrids output by SPPAS
     # Rename tiers, delete tiers, and convert the phonetic tier
