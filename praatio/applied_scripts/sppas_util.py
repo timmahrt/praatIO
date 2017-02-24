@@ -98,17 +98,18 @@ def sppasPostProcess(tgPath, outputPath, removeTierList=None,
     # Clean up the textgrids output by SPPAS
     # Rename tiers, delete tiers, and convert the phonetic tier
     # from xsampa to IPA
-    for fn in tgFNList:
+    for mergeFN in tgFNList:
         
-        name = os.path.splitext(fn)[0]
-        if not os.path.exists(join(outputPath, name + ".wav")):
-            shutil.copy(join(tgPath, name + ".wav"),
-                        join(outputPath, name + ".wav"))
-        if os.path.exists(join(outputPath, fn)):
-            print("Skipping %s -- already exists" % fn)
+        mergeName = os.path.splitext(mergeFN)[0]
+        nonMergeName = mergeName.split('-merge')[0]
+        if not os.path.exists(join(outputPath, nonMergeName + ".wav")):
+            shutil.copy(join(tgPath, nonMergeName + ".wav"),
+                        join(outputPath, nonMergeName + ".wav"))
+        if os.path.exists(join(outputPath, nonMergeName + ".TextGrid")):
+            print("Skipping %s -- already exists" % mergeName + ".TextGrid")
             continue
         
-        tg = tgio.openTextGrid(join(tgPath, fn))
+        tg = tgio.openTextGrid(join(tgPath, mergeFN))
         
         # Remove tiers
         for name in removeTierList:
@@ -138,7 +139,7 @@ def sppasPostProcess(tgPath, outputPath, removeTierList=None,
 #             if decimalEqual(stop, duration) and start < duration - 0.01:
 #                 tier.entryList[-1] = (start, duration - 0.01, label)
         
-        tg.save(join(outputPath, fn))
+        tg.save(join(outputPath, nonMergeName + ".TextGrid"))
         
 
 def generateSingleIPUTextgrids(wavPath, txtPath, outputPath, nameMod=None,
