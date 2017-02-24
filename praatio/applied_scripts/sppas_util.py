@@ -29,7 +29,7 @@ from praatio.applied_scripts import xsampa
 REMOVE_TIER_LIST = ["Information", "PhnTokAlign",
                     "Phonetization", "Transcription",
                     "Information-2", "MetaInformation",
-                    "Activity",
+                    "Activity", "Tokenization-Standard",
                     ]
 
 # The SPPAS-produced tiers to rename
