@@ -424,10 +424,16 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
         
+            # Adjust the new time on the intervals, the textgrid,
+            # and the textgrid tiers
+            # the crop start time becomes the new '0' value
             offset = -1 * start
             subTG = subTG.editTimestamps(offset, offset, offset)
             subTG.minTimestamp = 0
             subTG.maxTimestamp = stop - start
+            for tierName in subTG.tierNameList:
+                subTG.tierDict[tierName].minTimestamp = 0
+                subTG.tierDict[tierName].maxTimestamp = stop - start
             
             subTG.save(join(outputPath, outputName + ".TextGrid"))
     
