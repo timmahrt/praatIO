@@ -267,7 +267,8 @@ def _extractSubwav(fn, outputFN, startT, endT):
     outWave = wave.open(outputFN, "w")
     outWave.setparams(outParams)
     outWave.writeframes(audioFrames)
-    
+
+
 def getDuration(fn):
     audiofile = wave.open(fn, "r")
     params = audiofile.getparams()
