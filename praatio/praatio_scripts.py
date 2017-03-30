@@ -299,21 +299,13 @@ def deleteWavSections(fn, outputFN, deleteList, doShrink):
 
     duration = float(nframes) / framerate
     
-    # Invert list (delete list -> keep list)
-    deleteList = sorted(deleteList)
     
-    keepList = [[deleteList[i][1], deleteList[i + 1][0]]
-                for i in range(0, len(deleteList) - 1)]
     
-    if len(deleteList) > 0:
-        if deleteList[0][0] != 0:
-            keepList.insert(0, [0, deleteList[0][0]])
-            
-        if deleteList[-1][1] != duration:
-            keepList.append([deleteList[-1][1], duration])
+    if keepList is None:
+        keepList = [(0, duration), ]
+        deleteList = []
     else:
-        keepList.append([0, duration])
-    
+        deleteList = utils.invertIntervalList(keepList, duration)
     keepList = [[row[0], row[1], "keep"] for row in keepList]
     deleteList = [[row[0], row[1], "delete"] for row in deleteList]
     iterList = sorted(keepList + deleteList)

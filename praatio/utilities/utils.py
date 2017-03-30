@@ -15,6 +15,32 @@ from pkg_resources import resource_filename
 scriptsPath = resource_filename("praatio", "praatScripts", )
 
 
+def invertIntervalList(inputList, maxValue=None):
+    '''
+    Inverts the segments of a list of intervals
+    
+    e.g.
+    [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
+    '''
+    inputList = sorted(inputList)
+    
+    invList = [[inputList[i][1], inputList[i + 1][0]]
+               for i in range(0, len(inputList) - 1)]
+    
+    if len(invList) > 0:
+        if inputList[0][0] != 0:
+            invList.insert(0, [0, inputList[0][0]])
+            
+        if maxValue is not None:
+            if inputList[-1][1] != maxValue:
+                invList.append([inputList[-1][1], maxValue])
+    else:
+        if maxValue is not None:
+            invList.append([0, maxValue])
+    
+    return invList
+
+
 def makeDir(path):
     if not os.path.exists(path):
         os.mkdir(path)
