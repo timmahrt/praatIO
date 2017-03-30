@@ -13,8 +13,10 @@ from os.path import join
 import struct
 import math
 import wave
+import copy
 
 from praatio import tgio
+from praatio.utilities import utils
 
 sampWidthDict = {1: 'b', 2: 'h', 4: 'i', 8: 'q'}
 
@@ -431,3 +433,122 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
             subTG.save(join(outputPath, outputName + ".TextGrid"))
     
     return outputFNList
+
+
+def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
+    '''
+    Aligns boundaries or points in a textgrid that suffer from 'jitter'
+    
+    Often times, boundaries in different tiers are meant to line up.
+    For example the boundary of the first phone in a word and the start
+    of the word.  If manually annotated, however, those values might
+    not be the same, even if they were intended to be the same.
+    
+    This script will force all boundaries within /maxDifference/ amount
+    to be the same value.
+    '''
+    tg = tgio.openTextGrid(tgFN)
+    
+    for tierName in tg.tierNameList:
+        altNameList = [tmpName for tmpName in tg.tierNameList
+                       if tmpName != tierName]
+        
+        tier = tg.tierDict[tierName]
+        for entry in tier.entryList:
+            # Interval tier left boundary or point tier point
+            _findMisalignments(tg, entry[0], maxDifference,
+                               altNameList, tierName, entry, 0)
+            
+            # Interval tier right boundary
+            if tier.tierType == tgio.INTERVAL_TIER:
+                _findMisalignments(tg, entry[1], maxDifference,
+                                   altNameList, tierName, entry, 1)
+
+    return tg
+
+            
+def _findMisalignments(tg, timeV, maxDifference, tierNameList,
+                       tierName, entry, orderID):
+    
+    # Get the start time
+    filterStartT = timeV - maxDifference
+    if filterStartT < 0:
+        filterStartT = 0
+    
+    # Get the end time
+    filterStopT = timeV + maxDifference
+    if filterStopT > tg.maxTimestamp:
+        filterStopT = tg.maxTimestamp
+
+    croppedTG = tg.crop(False, True, filterStartT, filterStopT)
+
+    matchList = [(tierName, timeV, entry, orderID)]
+    for subTierName in tierNameList:
+        subCroppedTier = croppedTG.tierDict[subTierName]
+        
+        # For each item that exists in the search span, find the boundary
+        # that lies in the search span
+        for subCroppedEntry in subCroppedTier.entryList:
+            
+            if subCroppedTier.tierType == tgio.INTERVAL_TIER:
+                subStart, subEnd, _ = subCroppedEntry
+                
+                # Left boundary?
+                leftMatchVal = None
+                if subStart >= filterStartT and subStart <= filterStopT:
+                    leftMatchVal = subStart
+
+                # Right boundary?
+                rightMatchVal = None
+                if subEnd >= filterStartT and subEnd <= filterStopT:
+                    rightMatchVal = subEnd
+                    
+                # There should be at most one matching boundary
+                assert(leftMatchVal is None or rightMatchVal is None)
+                
+                # Set the matching boundary info
+                if leftMatchVal is not None:
+                    matchVal = leftMatchVal
+                    subOrderID = 0
+                else:
+                    matchVal = rightMatchVal
+                    subOrderID = 1
+            
+                # Match value could be none if, for an interval tier,
+                # no boundary sits inside the search span (the search span
+                # is wholly inside the interval)
+                if matchVal is None:
+                    continue
+            
+            elif subCroppedTier.tierType == tgio.POINT_TIER:
+                subStart, _ = subCroppedEntry
+                if subStart >= filterStartT and subStart <= filterStopT:
+                    matchVal = subStart
+                    subOrderID = 0
+
+            matchList.append((subTierName, matchVal, subCroppedEntry,
+                              subOrderID))
+    
+    # Find the number of different values that are almost the same
+    valList = [row[1] for row in matchList]
+    valUniqueList = []
+    for val in valList:
+        if val not in valUniqueList:
+            valUniqueList.append(val)
+            
+    # If they're all the same, there is nothing to do
+    # If some are different, take the most common value (or else the first
+    # one) and set all similar times to that value
+    if len(valUniqueList) > 1:
+        countList = [valList.count(val) for val in valUniqueList]
+        bestVal = valUniqueList[countList.index(max(countList))]
+        assert(bestVal is not None)
+        for tierName, _, oldEntry, orderID in matchList:
+
+            newEntry = list(copy.deepcopy(oldEntry))
+            newEntry[orderID] = bestVal
+            newEntry = tuple(newEntry)
+        
+            tg.tierDict[tierName].deleteEntry(oldEntry)
+            tg.tierDict[tierName].entryList.append(newEntry)
+            tg.tierDict[tierName].entryList.sort()
