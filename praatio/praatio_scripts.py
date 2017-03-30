@@ -47,18 +47,8 @@ def sign(x):
     return retVal
 
 
-def samplesAsNums(audiofile, numFrames, startFrame):
-
-    params = audiofile.getparams()
-    sampwidth = params[1]
+def samplesAsNums(waveData, sampwidth):
     byteCode = sampWidthDict[sampwidth]
-    
-    audiofile.setpos(startFrame)
-    waveData = audiofile.readframes(numFrames)
-
-    if len(waveData) == 0:
-        raise EndOfAudioData()
-
     actualNumFrames = int(len(waveData) / float(sampwidth))
     audioFrameList = struct.unpack("<" + byteCode * actualNumFrames, waveData)
 
@@ -71,144 +61,6 @@ def numsAsSamples(sampwidth, numList):
     byteStr = struct.pack("<" + byteCode * len(numList), *numList)
     
     return byteStr
-    
-
-def findNextZeroCrossing(audiofile, targetTime, timeStep=0.002, reverse=False):
-    '''
-    Finds the nearest zero crossing, searching in one direction
-    
-    Can do a 'reverse' search by setting reverse to True.  In that case,
-    the sample list is searched from back to front.
-    
-    targetTime is the startTime if reverse=False and
-        the endTime if reverse=True
-    '''
-    framerate = audiofile.getparams()[2]
-    totalNumFrames = audiofile.getparams()[3]
-    
-    startFrame = int(targetTime * float(framerate))
-    numFrames = int(timeStep * float(framerate))
-    
-    if reverse is True:
-        startFrame = startFrame - numFrames
-    
-    startTime = startFrame / float(framerate)
-        
-    # Don't read over the edges
-    if startFrame < 0:
-        numFrames = numFrames + startFrame
-        startFrame = 0
-    elif startFrame + numFrames > totalNumFrames:
-        numFrames = totalNumFrames - startFrame
-    
-    fromTime = startFrame / float(framerate)
-    toTime = (startFrame + numFrames) / float(framerate)
-    
-    # 1 Get the acoustic information and the sign for each sample
-    frameList = samplesAsNums(audiofile, numFrames, startFrame)
-    signList = [sign(val) for val in frameList]
-    
-    # 2 did signs change?
-    changeList = [signList[i] != signList[i + 1]
-                  for i in range(len(frameList) - 1)]
-    
-    # 3 get samples where signs changed
-    # (iterate backwards if reverse is true)
-    if reverse is True:
-        start = len(changeList) - 1
-        stop = 0
-        step = -1
-    else:
-        start = 0
-        stop = len(changeList) - 1
-        step = 1
-    
-    changeIndexList = [i for i in range(start, stop, step)
-                       if changeList[i] == 1]
-    
-    # 4 return the zeroed frame closest to starting point
-    try:
-        zeroedFrame = changeIndexList[0]
-    except IndexError:
-        raise(FindZeroCrossingError(fromTime, toTime))
-    
-    # We found the zero by comparing points to the point adjacent to them.
-    # It is possible the adjacent point is closer to zero than this one,
-    # in which case, it is the better zeroedI
-    if abs(frameList[zeroedFrame]) > abs(frameList[zeroedFrame + 1]):
-        zeroedFrame = zeroedFrame + 1
-    
-    adjustTime = zeroedFrame / float(framerate)
-    
-    return startTime + adjustTime
-
-
-def findNearestZeroCrossing(audiofile, targetTime, timeStep=0.002):
-    '''
-    Finds the nearest zero crossing at the given time in an audio file
-    
-    Looks both before and after the timeStamp
-    '''
-    
-    framerate = audiofile.getparams()[2]
-    totalNumFrames = audiofile.getparams()[3]
-    fileDuration = totalNumFrames / float(framerate)
-    
-    leftStartTime = rightStartTime = targetTime
-    
-    # Find zero crossings
-    smallestLeft = None
-    smallestRight = None
-    while True:
-        try:
-            timeStamp = None
-            if leftStartTime > 0:
-                timeStamp = findNextZeroCrossing(audiofile,
-                                                 leftStartTime,
-                                                 timeStep,
-                                                 reverse=True)
-        except FindZeroCrossingError:
-            pass
-        else:
-            smallestLeft = timeStamp
-        
-        try:
-            timestamp = None
-            if rightStartTime < fileDuration:
-                timestamp = findNextZeroCrossing(audiofile,
-                                                 rightStartTime,
-                                                 timeStep,
-                                                 reverse=False)
-        except FindZeroCrossingError:
-            pass
-        else:
-            smallestRight = timestamp
-        
-        if smallestLeft is not None or smallestRight is not None:
-            break
-        elif leftStartTime < 0 and rightStartTime > fileDuration:
-            raise(FindZeroCrossingError(0, fileDuration))
-        else:
-            leftStartTime -= timeStep
-            rightStartTime += timeStep
-    
-    if smallestLeft is not None:
-        leftDiff = targetTime - smallestLeft
-        
-    if smallestRight is not None:
-        rightDiff = smallestRight - targetTime
-    
-    # Is left or right smaller?
-    if smallestLeft is None:
-        zeroCrossingTime = smallestRight
-    elif smallestRight is None:
-        zeroCrossingTime = smallestLeft
-    elif leftDiff <= rightDiff:
-        zeroCrossingTime = smallestLeft
-    elif leftDiff > rightDiff:
-        zeroCrossingTime = smallestRight
-    
-    return zeroCrossingTime
 
 
 def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
@@ -221,7 +73,7 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
         the given timestamp is returned
     '''
     
-    audiofile = wave.open(wavFN, "rb")
+    wavQObj = WavQueryObj(wavFN)
     
     tg = tgio.openTextGrid(tgFN)
     
@@ -231,14 +83,14 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
         newEntryList = []
         if isinstance(tier, tgio.PointTier) and adjustPoints is True:
             for start, label in tier.entryList:
-                newStart = findNearestZeroCrossing(audiofile, start)
+                newStart = wavQObj.findNearestZeroCrossing(start)
                 newEntryList.append((newStart, label))
                 
         elif isinstance(tier, tgio.IntervalTier):
             
             for start, stop, label in tier.entryList:
-                newStart = findNearestZeroCrossing(audiofile, start)
-                newStop = findNearestZeroCrossing(audiofile, stop)
+                newStart = wavQObj.findNearestZeroCrossing(start)
+                newStop = wavQObj.findNearestZeroCrossing(stop)
                 newEntryList.append((newStart, newStop, label))
         
         tg.replaceTier(tierName, newEntryList, True)
@@ -250,94 +102,269 @@ def _extractSubwav(fn, outputFN, startT, endT):
     '''
     Given a segment from a wav file
     '''
-    audiofile = wave.open(fn, "r")
+    audioObj = openAudioFile(fn, [(startT, endT), ], True)
+    audioObj.save(outputFN)
+
+
+class WavQueryObj(object):
+    '''
+    A class for getting information about a wave file
     
-    params = audiofile.getparams()
-    nchannels = params[0]
-    sampwidth = params[1]
-    framerate = params[2]
-    comptype = params[4]
-    compname = params[5]
-
-    # Extract the audio frames
-    audiofile.setpos(int(framerate * startT))
-    audioFrames = audiofile.readframes(int(framerate * (endT - startT)))
+    The wave file is never loaded--we only keep a reference to the
+    fd.
+    '''
     
-    outParams = [nchannels, sampwidth, framerate,
-                 len(audioFrames), comptype, compname]
+    def __init__(self, fn):
+        self.audiofile = wave.open(fn, "r")
+        self.params = self.audiofile.getparams()
     
-    outWave = wave.open(outputFN, "w")
-    outWave.setparams(outParams)
-    outWave.writeframes(audioFrames)
-
-
-def getDuration(fn):
-    audiofile = wave.open(fn, "r")
-    params = audiofile.getparams()
+        self.nchannels = self.params[0]
+        self.sampwidth = self.params[1]
+        self.framerate = self.params[2]
+        self.nframes = self.params[3]
+        self.comptype = self.params[4]
+        self.compname = self.params[5]
     
-    framerate = params[2]
-    nframes = params[3]
+    def getDuration(self):
+        duration = float(self.nframes) / self.framerate
+        return duration
+    
+    def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
+        '''
+        Finds the nearest zero crossing at the given time in an audio file
+        
+        Looks both before and after the timeStamp
+        '''
+        
+        leftStartTime = rightStartTime = targetTime
+        fileDuration = self.getDuration()
+        
+        # Find zero crossings
+        smallestLeft = None
+        smallestRight = None
+        while True:
+            try:
+                timeStamp = None
+                if leftStartTime > 0:
+                    timeStamp = self.findNextZeroCrossing(leftStartTime,
+                                                          timeStep,
+                                                          reverse=True)
+            except FindZeroCrossingError:
+                pass
+            else:
+                smallestLeft = timeStamp
+            
+            try:
+                timestamp = None
+                if rightStartTime < fileDuration:
+                    timestamp = self.findNextZeroCrossing(rightStartTime,
+                                                          timeStep,
+                                                          reverse=False)
+            except FindZeroCrossingError:
+                pass
+            else:
+                smallestRight = timestamp
+            
+            if smallestLeft is not None or smallestRight is not None:
+                break
+            elif leftStartTime < 0 and rightStartTime > fileDuration:
+                raise(FindZeroCrossingError(0, fileDuration))
+            else:
+                leftStartTime -= timeStep
+                rightStartTime += timeStep
+        
+        if smallestLeft is not None:
+            leftDiff = targetTime - smallestLeft
+            
+        if smallestRight is not None:
+            rightDiff = smallestRight - targetTime
+        
+        # Is left or right smaller?
+        if smallestLeft is None:
+            zeroCrossingTime = smallestRight
+        elif smallestRight is None:
+            zeroCrossingTime = smallestLeft
+        elif leftDiff <= rightDiff:
+            zeroCrossingTime = smallestLeft
+        elif leftDiff > rightDiff:
+            zeroCrossingTime = smallestRight
+        
+        return zeroCrossingTime
 
-    duration = float(nframes) / framerate
-    return duration
+    def findNextZeroCrossing(self, targetTime, timeStep=0.002,
+                             reverse=False):
+        '''
+        Finds the nearest zero crossing, searching in one direction
+        
+        Can do a 'reverse' search by setting reverse to True.  In that case,
+        the sample list is searched from back to front.
+        
+        targetTime is the startTime if reverse=False and
+            the endTime if reverse=True
+        '''
+        
+        startFrame = int(targetTime * float(self.framerate))
+        numFrames = int(timeStep * float(self.framerate))
+        
+        if reverse is True:
+            startFrame = startFrame - numFrames
+        
+        startTime = startFrame / float(self.framerate)
+            
+        # Don't read over the edges
+        if startFrame < 0:
+            numFrames = numFrames + startFrame
+            startFrame = 0
+        elif startFrame + numFrames > self.nframes:
+            numFrames = self.nframes - startFrame
+        
+        fromTime = startFrame / float(self.framerate)
+        toTime = (startFrame + numFrames) / float(self.framerate)
+        
+        # 1 Get the acoustic information and the sign for each sample
+        frameList = self.samplesAsNums(numFrames, startFrame)
+        signList = [sign(val) for val in frameList]
+        
+        # 2 did signs change?
+        changeList = [signList[i] != signList[i + 1]
+                      for i in range(len(frameList) - 1)]
+        
+        # 3 get samples where signs changed
+        # (iterate backwards if reverse is true)
+        if reverse is True:
+            start = len(changeList) - 1
+            stop = 0
+            step = -1
+        else:
+            start = 0
+            stop = len(changeList) - 1
+            step = 1
+        
+        changeIndexList = [i for i in range(start, stop, step)
+                           if changeList[i] == 1]
+        
+        # 4 return the zeroed frame closest to starting point
+        try:
+            zeroedFrame = changeIndexList[0]
+        except IndexError:
+            raise(FindZeroCrossingError(fromTime, toTime))
+        
+        # We found the zero by comparing points to the point adjacent to them.
+        # It is possible the adjacent point is closer to zero than this one,
+        # in which case, it is the better zeroedI
+        if abs(frameList[zeroedFrame]) > abs(frameList[zeroedFrame + 1]):
+            zeroedFrame = zeroedFrame + 1
+        
+        adjustTime = zeroedFrame / float(self.framerate)
+        
+        return startTime + adjustTime
+    
+    def samplesAsNums(self, startTime, duration):
+        startFrame = int(startTime * float(self.framerate))
+        numFrames = int(duration * float(self.framerate))
+        self.audiofile.setpos(startFrame)
+        waveData = self.audiofile.readframes(numFrames)
+        
+        if len(waveData) == 0:
+            raise EndOfAudioData()
+     
+        audioFrameList = samplesAsNums(waveData, self.sampwidth)
+     
+        return audioFrameList
 
 
-def deleteWavSections(fn, outputFN, deleteList, doShrink):
+class WavObj(object):
+    '''
+    A class for manipulating audio files
+    
+    The wav file is represented by its wavform as a series of signed
+    integers.
+    '''
+    
+    def __init__(self, frameList, params):
+
+        self.frameList = frameList
+        self.params = params
+        self.nchannels = params[0]
+        self.sampwidth = params[1]
+        self.framerate = params[2]
+        self.comptype = params[4]
+        self.compname = params[5]
+    
+    def getIndexAtTime(self, startTime):
+        return int(startTime * self.framerate)
+    
+    def insertSilence(self, startTime, silenceDuration):
+        i = self.getIndexAtTime(startTime)
+        frames = [0, ] * int(self.framerate * silenceDuration)
+        self.frameList = self.frameList[:i] + frames + self.frameList[i:]
+    
+    def getDuration(self):
+        return len(self.frameList) / self.framerate
+    
+    def save(self, outputFN):
+        # Output resulting wav file
+        outParams = [self.nchannels, self.sampwidth, self.framerate,
+                     len(self.frameList), self.comptype, self.compname]
+        
+        byteCode = sampWidthDict[self.sampwidth]
+        byteStr = struct.pack("<" + byteCode * len(self.frameList),
+                              *self.frameList)
+        
+        outWave = wave.open(outputFN, "w")
+        outWave.setparams(outParams)
+        outWave.writeframes(byteStr)
+
+
+def openAudioFile(fn, keepList=None, doShrink=True):
     '''
     Remove from the audio all of the intervals
     
-    DeleteList can easily be constructed from a textgrid tier
-    e.g. deleteList = tg.tierDict["targetTier"].entryList
+    keepList - specifies the segments to keep; by default, everything is kept
+    doShrink - if False, segments not kept are replaced by silence
     '''
+    
     audiofile = wave.open(fn, "r")
     
     params = audiofile.getparams()
-    nchannels = params[0]
     sampwidth = params[1]
     framerate = params[2]
     nframes = params[3]
-    comptype = params[4]
-    compname = params[5]
-
-    duration = float(nframes) / framerate
     
-    
+    duration = nframes / float(framerate)
     
     if keepList is None:
         keepList = [(0, duration), ]
         deleteList = []
     else:
         deleteList = utils.invertIntervalList(keepList, duration)
+        
     keepList = [[row[0], row[1], "keep"] for row in keepList]
     deleteList = [[row[0], row[1], "delete"] for row in deleteList]
     iterList = sorted(keepList + deleteList)
     
-    zeroBinValue = struct.pack(sampWidthDict[sampwidth], 0)
-    
     # Grab the sections to be kept
-    audioFrames = b""
+    audioFrames = []
+    byteCode = sampWidthDict[sampwidth]
     for startT, stopT, label in iterList:
         diff = stopT - startT
         
         if label == "keep":
             audiofile.setpos(int(framerate * startT))
             frames = audiofile.readframes(int(framerate * diff))
-            audioFrames += frames
+            
+            actualNumFrames = int(len(frames) / float(sampwidth))
+            audioFrameList = struct.unpack("<" + byteCode * actualNumFrames,
+                                           frames)
+            audioFrames.extend(audioFrameList)
         
-        # If we are not keeping a region and we're not shrinking the duration,
-        # fill in the deleted portions with zeros
+        # If we are not keeping a region and we're not shrinking the
+        # duration, fill in the deleted portions with zeros
         elif label == "delete" and doShrink is False:
-            frames = zeroBinValue * int(framerate * diff)
-            audioFrames += frames
+            audioFrames.extend([0, ] * int(framerate * diff))
 
-    # Output resulting wav file
-    outParams = [nchannels, sampwidth, framerate,
-                 len(audioFrames), comptype, compname]
-    
-    outWave = wave.open(outputFN, "w")
-    outWave.setparams(outParams)
-    outWave.writeframes(audioFrames)
-    
+    return WavObj(audioFrames, params)
+
 
 def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                      outputTGFlag=False, nameStyle=None,
@@ -407,7 +434,9 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                    "Files existed before or intervals exist with " +
                    "the same name:\n%s")
                   % (outputPath, outputName))
-        _extractSubwav(wavFN, outputFNFullPath, start, stop)
+        
+        audioObj = openAudioFile(wavFN, [(start, stop), ], True)
+        audioObj.save(outputFNFullPath)
         outputFNList.append((start, stop, outputName + ".wav"))
         
         # Output the textgrid if requested
