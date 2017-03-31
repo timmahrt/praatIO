@@ -8,6 +8,7 @@ Deletes the vowels from the textgrids and audio files
 
 import os
 from os.path import join
+import copy
 
 from praatio import tgio
 from praatio import praatio_scripts
@@ -39,19 +40,19 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
     else:
         tg = tgio.openTextGrid(inputTGFN)
     
-    deleteList = tg.tierDict["phone"].entryList
-    deleteList = [entry for entry in deleteList
-                  if not isVowel(entry[2])]
+    keepList = tg.tierDict["phone"].entryList
+    keepList = [entry for entry in keepList
+                if not isVowel(entry[2])]
+    deleteList = utils.invertIntervalList(keepList, tg.maxTimestamp)
     
-    praatio_scripts.deleteWavSections(inputWavFN,
-                                      outputWavFN,
-                                      deleteList,
-                                      doShrink)
+    wavObj = praatio_scripts.openAudioFile(inputWavFN, keepList, doShrink)
+    wavObj.save(outputWavFN)
     
-    for start, stop, _ in sorted(deleteList, reverse=True):
-        tg.eraseRegion(start, stop, doShrink=doShrink)
+    shrunkTG = copy.deepcopy(tg)
+    for start, stop in sorted(deleteList, reverse=True):
+        shrunkTG = shrunkTG.eraseRegion(start, stop, doShrink=doShrink)
     
-    tg.save(outputTGFN)
+    shrunkTG.save(outputTGFN)
 
 # Shrink files
 root = join('.', 'files')

@@ -48,6 +48,10 @@ def sign(x):
 
 
 def samplesAsNums(waveData, sampwidth):
+    
+    if len(waveData) == 0:
+        raise EndOfAudioData()
+    
     byteCode = sampWidthDict[sampwidth]
     actualNumFrames = int(len(waveData) / float(sampwidth))
     audioFrameList = struct.unpack("<" + byteCode * actualNumFrames, waveData)
@@ -202,27 +206,22 @@ class WavQueryObj(object):
         targetTime is the startTime if reverse=False and
             the endTime if reverse=True
         '''
-        
-        startFrame = int(targetTime * float(self.framerate))
-        numFrames = int(timeStep * float(self.framerate))
-        
+
+        startTime = targetTime
         if reverse is True:
-            startFrame = startFrame - numFrames
-        
-        startTime = startFrame / float(self.framerate)
+            startTime = targetTime - timeStep
             
         # Don't read over the edges
-        if startFrame < 0:
-            numFrames = numFrames + startFrame
-            startFrame = 0
-        elif startFrame + numFrames > self.nframes:
-            numFrames = self.nframes - startFrame
+        if startTime < 0:
+            timeStep = startTime + timeStep
+            startTime = 0
+        elif startTime + timeStep > self.getDuration():
+            timeStep = self.getDuration() - startTime
         
-        fromTime = startFrame / float(self.framerate)
-        toTime = (startFrame + numFrames) / float(self.framerate)
+        endTime = startTime + timeStep
         
         # 1 Get the acoustic information and the sign for each sample
-        frameList = self.samplesAsNums(numFrames, startFrame)
+        frameList = self.samplesAsNums(startTime, timeStep)
         signList = [sign(val) for val in frameList]
         
         # 2 did signs change?
@@ -247,7 +246,7 @@ class WavQueryObj(object):
         try:
             zeroedFrame = changeIndexList[0]
         except IndexError:
-            raise(FindZeroCrossingError(fromTime, toTime))
+            raise(FindZeroCrossingError(startTime, endTime))
         
         # We found the zero by comparing points to the point adjacent to them.
         # It is possible the adjacent point is closer to zero than this one,
@@ -264,9 +263,6 @@ class WavQueryObj(object):
         numFrames = int(duration * float(self.framerate))
         self.audiofile.setpos(startFrame)
         waveData = self.audiofile.readframes(numFrames)
-        
-        if len(waveData) == 0:
-            raise EndOfAudioData()
      
         audioFrameList = samplesAsNums(waveData, self.sampwidth)
      
