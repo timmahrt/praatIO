@@ -483,9 +483,10 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
             # Interval tier left boundary or point tier point
             _findMisalignments(tg, entry[0], maxDifference,
                                altNameList, tierName, entry, 0)
-            
-            # Interval tier right boundary
-            if tier.tierType == tgio.INTERVAL_TIER:
+        
+        # Interval tier right boundary
+        if tier.tierType == tgio.INTERVAL_TIER:
+            for entry in tier.entryList:
                 _findMisalignments(tg, entry[1], maxDifference,
                                    altNameList, tierName, entry, 1)
 
