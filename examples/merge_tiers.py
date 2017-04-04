@@ -20,8 +20,8 @@ bobbyPhoneTG = tgio.openTextGrid(join(path, "bobby_phones.TextGrid"))
 
 bobbyTG = tgio.Textgrid()
 bobbyTG.addTier(bobbyPhoneTG.tierDict["phone"])
-bobbyTG.addTier(tgio.IntervalTier("nouns", [entryList[1],]))
-bobbyTG.addTier(tgio.IntervalTier("verbs", [entryList[2],]))
+bobbyTG.addTier(tgio.IntervalTier("nouns", [entryList[1], ]))
+bobbyTG.addTier(tgio.IntervalTier("verbs", [entryList[2], ]))
 bobbyTG.addTier(tgio.IntervalTier("subjects", entryList[3:5]))
 
 # Let's save it, in case you want to see it
@@ -35,8 +35,8 @@ entryList = wordTier.entryList
 
 maryTG = tgio.Textgrid()
 maryTG.addTier(tg.tierDict["phone"])
-maryTG.addTier(tgio.IntervalTier("nouns", [entryList[0],]))
-maryTG.addTier(tgio.IntervalTier("verbs", [entryList[1],]))
+maryTG.addTier(tgio.IntervalTier("nouns", [entryList[0], ]))
+maryTG.addTier(tgio.IntervalTier("verbs", [entryList[1], ]))
 maryTG.addTier(tgio.IntervalTier("subjects", entryList[2:4]))
 
 maryTG.save(join(outputPath, "mergeExample_mary_words_split.TextGrid"))
@@ -47,14 +47,11 @@ combinedTG.save(join(outputPath,
                      "mergeExample_mary_and_bob_words_split.TextGrid"))
 
 # And now let's merge their tiers together
-# We'll go with the default merge function which accepts all labels, 
+# We'll go with the default merge function which accepts all labels,
 # except silence. Any non-silent intervals that overlap will be merged
 # together into a super interval
-mergedTG = combinedTG.mergeTiers(tierList=["nouns", "verbs", "subjects"], 
+mergedTG = combinedTG.mergeTiers(tierList=["nouns", "verbs", "subjects"],
                                  preserveOtherTiers=True)
 
 mergedTG.save(join(outputPath,
                    "mergeExample_mary_and_bob_words_joined.TextGrid"))
-
-
-

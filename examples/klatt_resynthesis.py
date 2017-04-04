@@ -21,7 +21,7 @@ wavFN = join(path, name + ".wav")
 mainKlaatFN = join(outputPath, name + ".KlattGrid")
 
 # Wav to klaatgrid
-praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat" # Example for Mac
+praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"  # Example for Mac
 # praatEXE = r"C:\Praat.exe" # Example for Windows
 kgio.wavToKlattGrid(praatEXE, wavFN, mainKlaatFN, maxFormantFreq=3500,
                     pitchFloor=50, pitchCeiling=350)
@@ -37,7 +37,7 @@ for subTierName in subFormantTier.tierNameList:
 
 outputName = name + "_twenty_percent_more"
 klattFN = join(outputPath, outputName + ".KlattGrid")
-outputWavFN = join(outputPath, outputName + ".wav") 
+outputWavFN = join(outputPath, outputName + ".wav")
 kg.save(klattFN)
 kgio.resynthesize(praatEXE, wavFN, klattFN, outputWavFN)
 
@@ -45,7 +45,7 @@ kgio.resynthesize(praatEXE, wavFN, klattFN, outputWavFN)
 # (also less flexible)
 decrTwenty = lambda x: x * 0.8
 kg = kgio.openKlattGrid(mainKlaatFN)
-kg.tierDict["oral_formants"].modifySubtiers("formants",decrTwenty)
+kg.tierDict["oral_formants"].modifySubtiers("formants", decrTwenty)
 
 outputName = name + "_twenty_percent_less"
 klattFN = join(outputPath, outputName + ".KlattGrid")
@@ -56,4 +56,3 @@ kgio.resynthesize(praatEXE, wavFN, klattFN, outputWavFN)
 # Decrease formants by 20% using praat's changeGender function
 outputWavFN = join(outputPath, outputName + "_changeGender.wav")
 praat_scripts.changeGender(praatEXE, wavFN, outputWavFN, 75, 600, 0.8)
-

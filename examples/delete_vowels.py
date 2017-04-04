@@ -12,6 +12,7 @@ import copy
 
 from praatio import tgio
 from praatio import praatio_scripts
+from praatio import audioio
 from praatio.utilities import utils
 
 
@@ -45,7 +46,9 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
                 if not isVowel(entry[2])]
     deleteList = utils.invertIntervalList(keepList, tg.maxTimestamp)
     
-    wavObj = praatio_scripts.openAudioFile(inputWavFN, keepList, doShrink)
+    wavObj = audioio.openAudioFile(inputWavFN,
+                                   keepList=keepList,
+                                   doShrink=doShrink)
     wavObj.save(outputWavFN)
     
     shrunkTG = copy.deepcopy(tg)

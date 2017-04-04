@@ -32,6 +32,16 @@ class IntegrationTests(unittest.TestCase):
         print(os.getcwd())
         import add_tiers
         print(os.getcwd())
+        
+    def test_anonymize_recordings(self):
+        """Running 'anonymize_recording'"""
+        import anonymize_recording
+        
+    def test_auto_segment_speech(self):
+        """Running 'auto_segment_speech.py'"""
+        print(os.getcwd())
+        import auto_segment_speech
+        print(os.getcwd())
 
     def test_calculate_duration(self):
         """Running 'calculate_duration.py'"""
@@ -40,9 +50,10 @@ class IntegrationTests(unittest.TestCase):
         print(os.getcwd())
     
     def test_delete_vowels(self):
-        """Running 'merge_tiers.py'"""
+        """Running 'delete_vowels.py'"""
         print(os.getcwd())
-        import deleteVowels
+        import delete_vowels
+        print(os.getcwd())
         
     def test_extract_subwavs(self):
         """Running 'extract_subwavs.py'"""

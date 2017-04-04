@@ -6,8 +6,8 @@ Created on Mar 27, 2016
 The following example is derived from real code.  It was the reason the set
 operations were added to the praatio library.
 
-The original code.  Suppose you have two tiers and want to use one tier to 
-filter the results of another tier.  In my case, I had textgrids with 
+The original code.  Suppose you have two tiers and want to use one tier to
+filter the results of another tier.  In my case, I had textgrids with
 stressed syllable and stressed vowels marked.  I wanted to extract pitch
 information using this tier.  But the pitch contour contained some pitch
 doubling and halving--afflicted areas were marked on a separate tier.
@@ -45,10 +45,10 @@ def doSetOperations(fromFN, toFN):
     phoneTier2 = phoneTier.difference(filterTier)
     phoneTier2.name = 'vowel_difference'
     syllableTier2 = syllableTier.difference(filterTier)
-    syllableTier2.name = 'syllable_difference'    
+    syllableTier2.name = 'syllable_difference'
 
     tg.addTier(phoneTier2)
-    tg.addTier(syllableTier2)    
+    tg.addTier(syllableTier2)
 
     # Union
     phoneTier3 = phoneTier.union(filterTier)
@@ -72,4 +72,3 @@ if not os.path.exists(toPath):
     os.mkdir(toPath)
 
 doSetOperations(fromFN, toFN)
-    

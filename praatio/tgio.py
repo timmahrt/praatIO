@@ -1508,7 +1508,6 @@ class Textgrid():
         
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()
-            
         
         with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputTxt)

@@ -71,8 +71,10 @@ maryPitchData = pitch_and_intensity.audioToPI(wavPath, "mary.wav", pitchPath,
 
 
 filteredFN = "mary_300hz_high_pass_filtered.wav"
-maryFilteredPitchData = pitch_and_intensity.audioToPI(wavPath, filteredFN,
-                                                      pitchPath, "mary_filtered.txt",
+maryFilteredPitchData = pitch_and_intensity.audioToPI(wavPath,
+                                                      filteredFN,
+                                                      pitchPath,
+                                                      "mary_filtered.txt",
                                                       praatEXE, 75, 450,
                                                       forceRegenerate=False)
 

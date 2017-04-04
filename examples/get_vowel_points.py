@@ -28,5 +28,6 @@ for start, stop, label in tier.entryList:
         continue
     newPoints.extend([pp.getPointsInInterval(start, stop), ])
 
-outputPP = dataio.PointObject1D(newPoints, dataio.POINT, pp.minTime, pp.maxTime)
+outputPP = dataio.PointObject1D(newPoints, dataio.POINT,
+                                pp.minTime, pp.maxTime)
 outputPP.save(join(outputPath, "bobby_vowels.PointProcess"))

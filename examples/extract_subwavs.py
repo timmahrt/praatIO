@@ -17,13 +17,13 @@ outputPath = join(path, "sub_wavs")
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-for wavFN, tgFN in [("bobby.wav", "bobby_words.TextGrid"),
+for wavFN, tgFN in [#("bobby.wav", "bobby_words.TextGrid"),
                     ("mary.wav", "mary.TextGrid")]:
     praatio_scripts.splitAudioOnTier(join(path, wavFN), 
                                      join(path, tgFN),
-                                     "word",
+                                     "phone",
                                      outputPath,
-                                     "word")
+                                     True)
 
     
     

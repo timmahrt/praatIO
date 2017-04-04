@@ -188,7 +188,9 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
             
 def _findMisalignments(tg, timeV, maxDifference, tierNameList,
                        tierName, entry, orderID):
-    
+    '''
+    This is just used by alignBoundariesAcrossTiers()
+    '''
     # Get the start time
     filterStartT = timeV - maxDifference
     if filterStartT < 0:

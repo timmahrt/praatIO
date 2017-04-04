@@ -41,9 +41,10 @@ def merge_adjacent(path, fn, outputPath):
                 
         newEntryList.append(currentEntry)
         
-        replacementTier = tgio.IntervalTier(tierName, newEntryList,
-                                               tier.minTimestamp,
-                                               tier.maxTimestamp)
+        replacementTier = tgio.IntervalTier(tierName,
+                                            newEntryList,
+                                            tier.minTimestamp,
+                                            tier.maxTimestamp)
         outputTG.addTier(replacementTier)
     
     outputTG.save(join(outputPath, fn))
@@ -52,7 +53,7 @@ def merge_adjacent(path, fn, outputPath):
 def merge_adjacent_batch(inputPath, outputPath):
     for fn in os.listdir(inputPath):
         if '.TextGrid' in fn:
-            combine_adjacent(inputPath, fn, outputPath)
+            merge_adjacent(inputPath, fn, outputPath)
 
     
 path = join(".", "files")

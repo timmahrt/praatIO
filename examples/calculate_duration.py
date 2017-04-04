@@ -10,8 +10,6 @@ and outputs the data in a csv friendly format
 import os
 from os.path import join
 
-import codecs
-
 from praatio import tgio
 
 path = join(".", "files")
@@ -24,8 +22,6 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid",
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
         for start, stop, label in tier.entryList:
-            print((u"%s,%s,%s,%0.2f" % (name, tierName, label, 
-                                       float(stop) - float(start))).encode('utf-8'))
-    
-        
-    
+            txt = u"%s,%s,%s,%0.2f" % (name, tierName, label,
+                                       float(stop) - float(start))
+            print(txt.encode('utf-8'))
