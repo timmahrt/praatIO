@@ -36,12 +36,6 @@ class IntegrationTests(unittest.TestCase):
     def test_anonymize_recordings(self):
         """Running 'anonymize_recording'"""
         import anonymize_recording
-        
-    def test_auto_segment_speech(self):
-        """Running 'auto_segment_speech.py'"""
-        print(os.getcwd())
-        import auto_segment_speech
-        print(os.getcwd())
 
     def test_calculate_duration(self):
         """Running 'calculate_duration.py'"""

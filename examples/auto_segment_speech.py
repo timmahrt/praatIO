@@ -80,7 +80,7 @@ def autoSegmentSpeech(praatEXE, inputWavPath, rawTGPath, finalTGPath):
 
 
 _praatEXE = r"C:\praat.exe"
-_root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
+_root = join(".", "files")
 _inputWavPath = _root
 _rawTGPath = join(_root, "silence_marked_textgrids")
 _finalTGPath = join(_root, "ready-to-transcribe_textgrids")
