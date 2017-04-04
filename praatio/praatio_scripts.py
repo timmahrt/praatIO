@@ -269,6 +269,67 @@ class WavQueryObj(object):
      
         return audioFrameList
 
+    def deleteWavSections(self, outputFN, keepList=None,
+                          deleteList=None, operation="shrink"):
+        '''
+        Remove from the audio all of the intervals
+        
+        DeleteList can easily be constructed from a textgrid tier
+        e.g. deleteList = tg.tierDict["targetTier"].entryList
+        '''
+    
+        assert(operation in ["shrink", "silence", "sine wave"])
+    
+        duration = float(self.nframes) / self.framerate
+        
+        # Need to specify what to keep or what to delete, but can't
+        # specify both
+        assert(keepList is not None or deleteList is not None)
+        assert(keepList is None or deleteList is None)
+        
+        if keepList is None:
+            keepList = utils.invertIntervalList(deleteList, duration)
+        else:
+            deleteList = utils.invertIntervalList(keepList, duration)
+        keepList = [[row[0], row[1], "keep"] for row in keepList]
+        deleteList = [[row[0], row[1], "delete"] for row in deleteList]
+        iterList = sorted(keepList + deleteList)
+        
+        zeroBinValue = struct.pack(sampWidthDict[self.sampwidth], 0)
+        
+        # Grab the sections to be kept
+        audioFrames = b""
+        for startT, stopT, label in iterList:
+            diff = stopT - startT
+            
+            if label == "keep":
+                self.audiofile.setpos(int(self.framerate * startT))
+                frames = self.audiofile.readframes(int(self.framerate * diff))
+                audioFrames += frames
+            
+            # If we are not keeping a region and we're not shrinking the
+            # duration, fill in the deleted portions with zeros
+            elif label == "delete" and operation == "silence":
+                frames = zeroBinValue * int(self.framerate * diff)
+                audioFrames += frames
+            # Or fill it with a sine wave
+            elif label == "delete" and operation == "sine wave":
+                frequency = 200
+                amplitude = getMaxAmplitude(self.sampwidth)
+                sineWave = generateSineWave(diff,
+                                            frequency,
+                                            self.framerate,
+                                            amplitude)
+                frames = numsAsSamples(self.sampwidth, sineWave)
+                audioFrames += frames
+    
+        # Output resulting wav file
+        outParams = [self.nchannels, self.sampwidth, self.framerate,
+                     len(audioFrames), self.comptype, self.compname]
+        
+        outWave = wave.open(outputFN, "w")
+        outWave.setparams(outParams)
+        outWave.writeframes(audioFrames)
 
 class WavObj(object):
     '''
@@ -314,7 +375,7 @@ class WavObj(object):
         outWave.writeframes(byteStr)
 
 
-def openAudioFile(fn, keepList=None, doShrink=True):
+def openAudioFile(fn, keepList=None, deleteList=None, doShrink=True):
     '''
     Remove from the audio all of the intervals
     
@@ -331,9 +392,14 @@ def openAudioFile(fn, keepList=None, doShrink=True):
     
     duration = nframes / float(framerate)
     
-    if keepList is None:
+    # Can't specify both the keepList and the deleteList
+    assert(keepList is None or deleteList is None)
+    
+    if keepList is None and deleteList is None:
         keepList = [(0, duration), ]
         deleteList = []
+    elif keepList is None:
+        keepList = utils.invertIntervalList(deleteList, duration)
     else:
         deleteList = utils.invertIntervalList(keepList, duration)
         
@@ -342,7 +408,7 @@ def openAudioFile(fn, keepList=None, doShrink=True):
     iterList = sorted(keepList + deleteList)
     
     # Grab the sections to be kept
-    audioFrames = []
+    audioSampleList = []
     byteCode = sampWidthDict[sampwidth]
     for startT, stopT, label in iterList:
         diff = stopT - startT
@@ -352,16 +418,16 @@ def openAudioFile(fn, keepList=None, doShrink=True):
             frames = audiofile.readframes(int(framerate * diff))
             
             actualNumFrames = int(len(frames) / float(sampwidth))
-            audioFrameList = struct.unpack("<" + byteCode * actualNumFrames,
-                                           frames)
-            audioFrames.extend(audioFrameList)
+            audioSamples = struct.unpack("<" + byteCode * actualNumFrames,
+                                         frames)
+            audioSampleList.extend(audioSamples)
         
         # If we are not keeping a region and we're not shrinking the
         # duration, fill in the deleted portions with zeros
         elif label == "delete" and doShrink is False:
-            audioFrames.extend([0, ] * int(framerate * diff))
+            audioSampleList.extend([0, ] * int(framerate * diff))
 
-    return WavObj(audioFrames, params)
+    return WavObj(audioSampleList, params)
 
 
 def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
