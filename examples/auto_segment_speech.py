@@ -79,11 +79,9 @@ def autoSegmentSpeech(praatEXE, inputWavPath, rawTGPath, finalTGPath):
                                      join(finalTGPath, tgFN))
 
 
-if __name__ == "__main__":
-    
-    _praatEXE = r"C:\praat.exe"
-    _root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
-    _inputWavPath = _root
-    _rawTGPath = join(_root, "silence_marked_textgrids")
-    _finalTGPath = join(_root, "ready-to-transcribe_textgrids")
-    autoSegmentSpeech(_praatEXE, _inputWavPath, _rawTGPath, _finalTGPath)
+_praatEXE = r"C:\praat.exe"
+_root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
+_inputWavPath = _root
+_rawTGPath = join(_root, "silence_marked_textgrids")
+_finalTGPath = join(_root, "ready-to-transcribe_textgrids")
+autoSegmentSpeech(_praatEXE, _inputWavPath, _rawTGPath, _finalTGPath)

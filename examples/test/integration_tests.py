@@ -49,6 +49,12 @@ class IntegrationTests(unittest.TestCase):
         import calculate_duration
         print(os.getcwd())
     
+    def test_correct_misaligned_tiers(self):
+        """Running 'correct_misaligned_tiers.py'"""
+        print(os.getcwd())
+        import correct_misaligned_tiers
+        print(os.getcwd())
+        
     def test_delete_vowels(self):
         """Running 'delete_vowels.py'"""
         print(os.getcwd())
