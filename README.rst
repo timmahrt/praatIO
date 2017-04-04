@@ -12,11 +12,13 @@ praatIO
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg?
     :target: http://opensource.org/licenses/MIT
 
-A library for working with praat and praat files *that comes with batteries included*.
-This isn't just a data struct for reading and writing textgrids--many utilities are
-provided to make it easy to work with textgrid data.
+A library for working with praat, time aligned audio transcripts, and audio files *that comes with batteries included*.
+Praat uses a file format called textgrids, which are time aligned speech transcripts.
+This library isn't just a data struct for reading and writing textgrids--many utilities are
+provided to make it easy to work with with transcripts and associated audio files.
+This library also provides some other tools for use with praat.
 
-Praat is a software program for doing phonetic analysis and annotation 
+Praat is an open source software program for doing phonetic analysis and annotation 
 of speech.  `Praat can be downloaded here <http://www.fon.hum.uva.nl/praat/>`_
 
 .. sectnum::

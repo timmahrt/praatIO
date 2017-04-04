@@ -47,21 +47,21 @@ def sign(x):
     return retVal
 
 
-def samplesAsNums(waveData, sampwidth):
+def samplesAsNums(waveData, sampleWidth):
     
     if len(waveData) == 0:
         raise EndOfAudioData()
     
-    byteCode = sampWidthDict[sampwidth]
-    actualNumFrames = int(len(waveData) / float(sampwidth))
+    byteCode = sampWidthDict[sampleWidth]
+    actualNumFrames = int(len(waveData) / float(sampleWidth))
     audioFrameList = struct.unpack("<" + byteCode * actualNumFrames, waveData)
 
     return audioFrameList
 
 
-def numsAsSamples(sampwidth, numList):
+def numsAsSamples(sampleWidth, numList):
     
-    byteCode = sampWidthDict[sampwidth]
+    byteCode = sampWidthDict[sampleWidth]
     byteStr = struct.pack("<" + byteCode * len(numList), *numList)
     
     return byteStr
@@ -115,9 +115,10 @@ class WavQueryObj(object):
     A class for getting information about a wave file
     
     The wave file is never loaded--we only keep a reference to the
-    fd.
+    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don't
+    (shouldn't) change state.  For doing multiple modifications,
+    use a WavObj.
     '''
-    
     def __init__(self, fn):
         self.audiofile = wave.open(fn, "r")
         self.params = self.audiofile.getparams()
@@ -274,7 +275,8 @@ class WavObj(object):
     A class for manipulating audio files
     
     The wav file is represented by its wavform as a series of signed
-    integers.
+    integers.  This can be very slow and take up lots of memory with
+    large files.
     '''
     
     def __init__(self, frameList, params):
@@ -470,7 +472,9 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
     not be the same, even if they were intended to be the same.
     
     This script will force all boundaries within /maxDifference/ amount
-    to be the same value.
+    to be the same value.  The replacement value is either the majority
+    value found within /maxDifference/ or, if no majority exists, than
+    the value used in the search query.
     '''
     tg = tgio.openTextGrid(tgFN)
     

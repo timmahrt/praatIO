@@ -18,7 +18,7 @@ setup(name='praatio',
                 'praatio.utilities'],
       package_data={'praatio': ['praatScripts/*.praat', ]},
       license='LICENSE',
-      description='A library for working with praat and praat files *that comes with batteries included*',
+      description='A library for working with praat, time aligned audio transcripts, and audio files.',
       long_description=codecs.open('README.rst', 'r', encoding="utf-8").read(),
 #       install_requires=[], # No requirements! # requires 'from setuptools import setup'
       )
