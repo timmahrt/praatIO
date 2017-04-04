@@ -67,6 +67,18 @@ def numsAsSamples(sampleWidth, numList):
     return byteStr
 
 
+def getMaxAmplitude(sampleWidth):
+    return 2 ** (sampleWidth * 8 - 1) - 1
+
+
+def generateSineWave(duration, freq, samplingFreq, amplitude):
+    nSamples = int(duration * samplingFreq)
+    wavSpec = 2 * math.pi * freq / float(samplingFreq)
+    sinWave = [int(amplitude * math.sin(wavSpec * i))
+               for i in range(nSamples)]
+    return sinWave
+
+
 def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
     '''
     Makes all textgrid interval boundaries fall on pressure wave zero crossings
@@ -331,6 +343,7 @@ class WavQueryObj(object):
         outWave.setparams(outParams)
         outWave.writeframes(audioFrames)
 
+
 class WavObj(object):
     '''
     A class for manipulating audio files
@@ -340,9 +353,9 @@ class WavObj(object):
     large files.
     '''
     
-    def __init__(self, frameList, params):
+    def __init__(self, audioSamples, params):
 
-        self.frameList = frameList
+        self.audioSamples = audioSamples
         self.params = params
         self.nchannels = params[0]
         self.sampwidth = params[1]
@@ -354,21 +367,30 @@ class WavObj(object):
         return int(startTime * self.framerate)
     
     def insertSilence(self, startTime, silenceDuration):
+        audioSamples = [0, ] * int(self.framerate * silenceDuration)
+        self.insertSegment(startTime, audioSamples)
+    
+    def insertSegment(self, startTime, valueList):
         i = self.getIndexAtTime(startTime)
-        frames = [0, ] * int(self.framerate * silenceDuration)
-        self.frameList = self.frameList[:i] + frames + self.frameList[i:]
+        self.audioSamples = (self.audioSamples[:i] + valueList +
+                             self.audioSamples[i:])
+    
+    def deleteSegment(self, startTime, endTime):
+        i = self.getIndexAtTime(startTime)
+        j = self.getIndexAtTime(endTime)
+        self.audioSamples = self.audioSamples[:i] + self.audioSamples[j:]
     
     def getDuration(self):
-        return len(self.frameList) / self.framerate
+        return len(self.audioSamples) / self.framerate
     
     def save(self, outputFN):
         # Output resulting wav file
         outParams = [self.nchannels, self.sampwidth, self.framerate,
-                     len(self.frameList), self.comptype, self.compname]
+                     len(self.audioSamples), self.comptype, self.compname]
         
         byteCode = sampWidthDict[self.sampwidth]
-        byteStr = struct.pack("<" + byteCode * len(self.frameList),
-                              *self.frameList)
+        byteStr = struct.pack("<" + byteCode * len(self.audioSamples),
+                              *self.audioSamples)
         
         outWave = wave.open(outputFN, "w")
         outWave.setparams(outParams)
