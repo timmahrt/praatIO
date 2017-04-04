@@ -15,6 +15,16 @@ from pkg_resources import resource_filename
 scriptsPath = resource_filename("praatio", "praatScripts", )
 
 
+def sign(x):
+    '''Returns 1 if x is positive, 0 if x is 0, and -1 otherwise'''
+    retVal = 0
+    if x > 0:
+        retVal = 1
+    elif x < 0:
+        retVal = -1
+    return retVal
+
+
 def invertIntervalList(inputList, maxValue=None):
     '''
     Inverts the segments of a list of intervals
