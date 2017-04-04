@@ -24,19 +24,16 @@ def invertIntervalList(inputList, maxValue=None):
     '''
     inputList = sorted(inputList)
     
+    # Insert in a garbage head and tail value for the purpose
+    # of inverting, in the range does not start and end at the
+    # smallest and largest values
+    if inputList[0][0] != 0:
+        inputList.insert(0, ['', 0])
+    if maxValue is not None and inputList[-1][1] < maxValue:
+        inputList.append((maxValue, ''))
+    
     invList = [[inputList[i][1], inputList[i + 1][0]]
                for i in range(0, len(inputList) - 1)]
-    
-    if len(invList) > 0:
-        if inputList[0][0] != 0:
-            invList.insert(0, [0, inputList[0][0]])
-            
-        if maxValue is not None:
-            if inputList[-1][1] != maxValue:
-                invList.append([inputList[-1][1], maxValue])
-    else:
-        if maxValue is not None:
-            invList.append([0, maxValue])
     
     return invList
 
