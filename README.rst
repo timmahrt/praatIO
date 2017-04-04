@@ -89,6 +89,13 @@ What can you do with this library?
 Major revisions
 ================
 
+Ver 3.5 (April 04, 2017)
+
+- Added code for reading, writing, and manipulating audio files (praatio.audioio)
+
+- eraseRegion() and insertRegion() added to textgrids and textgrid tiers
+
+
 Ver 3.4 (February 04, 2017)
 
 - Added place for very specific scripts (praatio.applied_scripts)
