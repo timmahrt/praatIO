@@ -53,7 +53,7 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
 
 def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                      outputTGFlag=False, nameStyle=None,
-                     noPartialIntervals=False):
+                     noPartialIntervals=False, silenceLabel=None):
     '''
     Outputs one subwav for each entry in the tier of a textgrid
     
@@ -68,9 +68,20 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                                   not wholly contained by an interval in
                                   the target tier will not be included in
                                   the output textgrids
+    silenceLabel: the label for silent regions.  If silences are unlabeled
+                  intervals (i.e. blank) then leave this alone.  If silences
+                  are labeled using praat's "annotate >> to silences"
+                  then this value should be "silences"
     '''
+    if not os.path.exists(outputPath):
+        os.mkdir(outputPath)
+    
     tg = tgio.openTextGrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
+    
+    if silenceLabel is not None:
+        entryList = [entry for entry in entryList
+                     if entry[2] != silenceLabel]
     
     # Build the output name template
     name = os.path.splitext(os.path.split(wavFN)[1])[0]
