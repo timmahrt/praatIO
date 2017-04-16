@@ -16,6 +16,118 @@ from praatio import tgio
 from praatio import audioio
 
 
+def spellCheckEntries(tg, targetTierName, newTierName, checkFunction,
+                      printEntries=False):
+    '''
+    Spell checks words in a textgrid
+    
+    Entries can contain one or more words, separated by whitespace.
+    If a mispelling is found, it is noted in a special tier and optionally
+    printed to the screen.
+    
+    checkFunction is user-defined.  There are robust spell check libraries
+    for python like woosh or pyenchant.  I have already written a naive
+    spell checker in the pysle.praattools library.
+    
+    checkFunction: should return True if a word is spelled correctly and
+                   False otherwise
+    '''
+    punctuationList = ['_', ',', "'", '"', '!', '?', '.', ';', ]
+    
+    tg = tg.new()
+    tier = tg.tierDict[targetTierName]
+    
+    mispelledEntryList = []
+    for startT, stopT, label in tier.entryList:
+        
+        # Remove punctuation
+        for char in punctuationList:
+            label = label.replace(char, "")
+        
+        wordList = label.split()
+        mispelledList = []
+        for word in wordList:
+            if not checkFunction(word):
+                mispelledList.append(word)
+        
+        if len(mispelledList) > 0:
+            mispelledTxt = u", ".join(mispelledList)
+            mispelledEntryList.append((startT, stopT, mispelledTxt))
+            
+            if printEntries is True:
+                print((startT, stopT, mispelledTxt))
+    
+    tier = tgio.IntervalTier(newTierName, mispelledEntryList,
+                             tg.minTimestamp, tg.maxTimestamp)
+    tg.addTier(tier)
+    
+    return tg
+
+
+def splitTierEntries(tg, sourceTierName, targetTierName,
+                     startT=None, endT=None):
+    '''
+    Split each entry in a tier by space
+    
+    The split entries will be placed on a new tier.  The split entries
+    are equally allocated a subsegment of the interval occupied by the
+    source tier.  e.g. [(63, 66, 'the blue cat'), ] would become
+    [(63, 64, 'the'), (64, 65, 'blue'), (65, 66, 'cat'), ]
+    
+    This could be used to decompose utterances into words or, with pysle,
+    words into phones.
+    '''
+    minT = tg.minTimestamp
+    maxT = tg.maxTimestamp
+    
+    sourceTier = tg.tierDict[sourceTierName]
+    targetTier = None
+    
+    # Examine a subset of the source tier?
+    if startT is not None or endT is not None:
+        if startT is None:
+            startT = minT
+        if endT is None:
+            endT = maxT
+        
+        sourceTier = sourceTier.crop(startT, endT, False, False)[0]
+        
+        if targetTierName in tg.tierNameList:
+            targetTier = tg.tierDict[targetTierName]
+            targetTier = targetTier.eraseRegion(startT, endT,
+                                                'truncate', False)
+    
+    # Split the entries in the source tier
+    newEntryList = []
+    for start, stop, label in sourceTier.entryList:
+        labelList = label.split()
+        intervalLength = (stop - start) / float(len(labelList))
+        
+        newSubEntryList = [(start + intervalLength * i,
+                            start + intervalLength * (i + 1),
+                            label)
+                           for i, label in enumerate(labelList)]
+        newEntryList.extend(newSubEntryList)
+    
+    # Create a new tier
+    if targetTier is None:
+        targetTier = tgio.IntervalTier(targetTierName, newEntryList,
+                                       minT, maxT)
+    
+    # Or insert new entries into existing target tier
+    else:
+
+        for entry in newEntryList:
+            targetTier.insertEntry(entry, True)
+    
+    # Insert the tier into the textgrid
+    if targetTierName in tg.tierNameList:
+        tg.removeTier(targetTierName)
+    tg.addTier(targetTier)
+    
+    return tg
+    
+    
 def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
     '''
     Makes all textgrid interval boundaries fall on pressure wave zero crossings
