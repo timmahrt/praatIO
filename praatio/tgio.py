@@ -1055,45 +1055,6 @@ class IntervalTier(TextgridTier):
         retTier = self.newTier(newName, retEntryList)
         
         return retTier
-
-    def manipulate(self, modFunc, filterFunc=None):
-        '''
-        Manipulates each relevant label by modFunc
-        
-        For example: manipulate(lambda x: x*2, lambda x: 'a' in x)
-        will double the length of all intervals that contain an 'a'.
-
-        by default, all labels are affected
-        '''
-        cumulativeAdjustAmount = 0
-        lastFromEnd = 0
-        newEntryList = []
-        for fromEntry in self.entryList:
-
-            fromStart, fromEnd, fromLabel = fromEntry
-                     
-            # fromStart - lastFromEnd -> was this interval and the
-            # last one adjacent?
-            toStart = (fromStart - lastFromEnd) + cumulativeAdjustAmount
-            
-            currAdjustAmount = (fromEnd - fromStart)
-            if filterFunc is None or filterFunc(fromLabel):
-                currAdjustAmount = modFunc(currAdjustAmount)
-            
-            toEnd = cumulativeAdjustAmount = toStart + currAdjustAmount
-            newEntryList.append((toStart, toEnd, fromLabel))
-            
-            lastFromEnd = fromEnd
-        
-        # The new max time is the old max time plus the cumulative difference
-        # of all interval adjustments--which is the same thing as the
-        # difference between the last boundary in the original entry list
-        # and the new one
-        newMin = self.minTimestamp
-        cumulativeDifference = (newEntryList[-1][1] - self.entryList[-1][1])
-        newMax = self.maxTimestamp + cumulativeDifference
-            
-        return IntervalTier(self.name, newEntryList, newMin, newMax)
     
     def morph(self, targetTier, filterFunc=None):
         '''
@@ -1430,6 +1391,9 @@ class Textgrid():
         tg.addTier(mergedTier)
         
         return tg
+    
+    def new(self):
+        return copy.deepcopy(self)
 
     def renameTier(self, oldName, newName):
         oldTier = self.tierDict[oldName]
