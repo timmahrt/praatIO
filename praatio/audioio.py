@@ -91,6 +91,16 @@ class WavQueryObj(object):
         self.comptype = self.params[4]
         self.compname = self.params[5]
     
+    def concatenate(self, targetFrames, outputFN, prepend=False):
+        sourceFrames = self.getFrames()
+        
+        if prepend is True:
+            newFrames = targetFrames + sourceFrames
+        else:
+            newFrames = sourceFrames + targetFrames
+        
+        self.outputModifiedWav(newFrames, outputFN)
+    
     def getDuration(self):
         duration = float(self.nframes) / self.framerate
         return duration
