@@ -3,8 +3,8 @@
 ####################################
 
 form Batch annotate sound files for silence
-    sentence Input_audio_path C:\Users\Tim\Dropbox\workspace\praatIO\examples\files
-    sentence Output_audio_path C:\Users\Tim\Dropbox\workspace\praatIO\examples\files\silence_marked_textgrids
+    sentence Input_audio_fn C:\Users\Tim\Desktop\gen_specs\sirl_project_recordings\whole_speech_recordings_raw\sirl_en_03_synced.wav
+    sentence Output_audio_fn C:\Users\Tim\Desktop\gen_specs\sirl_project_recordings\whole_speech_recordings_raw\sirl_en_03_synced_silence.TextGrid
     real Min_pitch_(Hz) 100
     real Time_step_(s) 0.0 (= auto)
     real Sil_threshold_(dB) -25.0
@@ -14,19 +14,8 @@ form Batch annotate sound files for silence
     sentence Sounding_interval_label sound
 endform
 
-createDirectory: output_audio_path$
-
-strings = Create Strings as file list... list 'input_audio_path$'/*.wav
-numberOfFiles = Get number of strings
-
-
-# BEGIN LOOP
-for ifile to numberOfFiles
-select strings
-filename$ = Get string... ifile
-
 # Load audio file
-sound = Read from file: input_audio_path$ + "/" + filename$
+sound = Read from file: input_audio_fn$
 selectObject: sound
 
 # Annotation
@@ -34,19 +23,11 @@ textgrid = To TextGrid (silences): min_pitch, time_step, sil_threshold, min_sil_
 selectObject: textgrid
 
 # Output textgrid
-Save as text file: output_audio_path$ + "/" + filename$ - ".wav" + ".TextGrid"
+Save as text file: output_audio_fn$
 
-# Loop cleanup
+# Cleanup
 selectObject: sound
 Remove
 
 selectObject: textgrid
-Remove
-
-endfor
-# END LOOP
-
-
-# Final cleanup
-selectObject: strings
 Remove
