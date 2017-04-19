@@ -115,9 +115,9 @@ class WavQueryObj(object):
         
         if endTime is not None:
             duration = endTime - startTime
-            nFrames = self.framerate * duration
+            nFrames = int(self.framerate * duration)
         else:
-            nFrames = self.nframes - startFrame
+            nFrames = int(self.nframes - startFrame)
         
         self.audiofile.setpos(startFrame)
         frames = self.audiofile.readframes(nFrames)
@@ -310,7 +310,7 @@ class WavQueryObj(object):
                 frames = numsAsSamples(self.sampwidth, sineWave)
                 audioFrames += frames
     
-            self._outputModifiedWav(audioFrames, outputFN)
+            self.outputModifiedWav(audioFrames, outputFN)
             
     def outputModifiedWav(self, audioFrames, outputFN):
         '''
