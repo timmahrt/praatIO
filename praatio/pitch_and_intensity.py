@@ -138,6 +138,37 @@ def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
     return piList
 
 
+def audioToI(inputPath, inputFN, outputPath, outputFN, praatEXE,
+             minPitch, sampleStep=0.01, forceRegenerate=True,
+             undefinedValue=None):
+
+    inputFullFN = join(inputPath, inputFN)
+    outputFullFN = join(outputPath, outputFN)
+    
+    utils.makeDir(outputPath)
+    
+    assert(os.path.exists(inputFullFN))
+    firstTime = not os.path.exists(outputFullFN)
+    if firstTime or forceRegenerate is True:
+        
+        # The praat script uses append mode, so we need to clear any prior
+        # result
+        if os.path.exists(outputFullFN):
+            os.remove(outputFullFN)
+        
+        argList = [inputFullFN, outputFullFN, sampleStep,
+                   minPitch, -1, -1]
+        
+        scriptName = "get_intensity_via_python.praat"
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+            
+    iList = loadTimeSeriesData(outputPath, outputFN,
+                               undefinedValue=undefinedValue)
+    
+    return iList
+
+
 def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
               silenceThreshold=0.03, forceRegenerate=True, tgPath=None,
