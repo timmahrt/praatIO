@@ -61,6 +61,11 @@ def generateSineWave(duration, freq, samplingFreq, amplitude):
     return sinWave
 
 
+def generateSilence(duration, samplingFreq):
+    silence = [0, ] * int(duration * samplingFreq)
+    return silence
+
+
 def extractSubwav(fn, outputFN, startT, endT):
     audioObj = openAudioFile(fn, [(startT, endT), ], True)
     audioObj.save(outputFN)
@@ -89,6 +94,25 @@ class WavQueryObj(object):
     def getDuration(self):
         duration = float(self.nframes) / self.framerate
         return duration
+    
+    def getFrames(self, startTime=None, endTime=None):
+        '''
+        Get frames with respect to time
+        '''
+        if startTime is None:
+            startTime = 0
+        startFrame = int(startTime * float(self.framerate))
+        
+        if endTime is not None:
+            duration = endTime - startTime
+            nFrames = self.framerate * duration
+        else:
+            nFrames = self.nframes - startFrame
+        
+        self.audiofile.setpos(startFrame)
+        frames = self.audiofile.readframes(nFrames)
+        
+        return frames
     
     def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
         '''
@@ -178,7 +202,7 @@ class WavQueryObj(object):
         endTime = startTime + timeStep
         
         # 1 Get the acoustic information and the sign for each sample
-        frameList = self.samplesAsNums(startTime, timeStep)
+        frameList = self.samplesAsNums(startTime, endTime)
         signList = [utils.sign(val) for val in frameList]
         
         # 2 did signs change?
@@ -215,13 +239,10 @@ class WavQueryObj(object):
         
         return startTime + adjustTime
     
-    def samplesAsNums(self, startTime, duration):
-        startFrame = int(startTime * float(self.framerate))
-        numFrames = int(duration * float(self.framerate))
-        self.audiofile.setpos(startFrame)
-        waveData = self.audiofile.readframes(numFrames)
-     
-        audioFrameList = samplesAsNums(waveData, self.sampwidth)
+    def samplesAsNums(self, startTime, endTime):
+        
+        frames = self.getFrames(startTime, endTime)
+        audioFrameList = samplesAsNums(frames, self.sampwidth)
      
         return audioFrameList
 
@@ -279,6 +300,13 @@ class WavQueryObj(object):
                 frames = numsAsSamples(self.sampwidth, sineWave)
                 audioFrames += frames
     
+            self._outputModifiedWav(audioFrames, outputFN)
+            
+    def outputModifiedWav(self, audioFrames, outputFN):
+        '''
+        Output frames using the same parameters as this WavQueryObj
+        '''
+        
         # Output resulting wav file
         outParams = [self.nchannels, self.sampwidth, self.framerate,
                      len(audioFrames), self.comptype, self.compname]
@@ -311,7 +339,7 @@ class WavObj(object):
         return int(startTime * self.framerate)
     
     def insertSilence(self, startTime, silenceDuration):
-        audioSamples = [0, ] * int(self.framerate * silenceDuration)
+        audioSamples = generateSilence(silenceDuration, self.framerate)
         self.insertSegment(startTime, audioSamples)
     
     def insertSegment(self, startTime, valueList):
