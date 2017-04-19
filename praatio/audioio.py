@@ -257,12 +257,19 @@ class WavQueryObj(object):
         return audioFrameList
 
     def deleteWavSections(self, outputFN, keepList=None,
-                          deleteList=None, operation="shrink"):
+                          deleteList=None, operation="shrink",
+                          sineWaveAmplitude=None):
         '''
         Remove from the audio all of the intervals
         
         DeleteList can easily be constructed from a textgrid tier
         e.g. deleteList = tg.tierDict["targetTier"].entryList
+        
+        operation: "shrink" to shrink the file length or "silence or
+                   "sine wave" to replace the segment with silence or
+                   a sine wave
+        sineWaveAmplitude: if None and operation is "sine wave"
+                           use max amplitude.
         '''
     
         assert(operation in ["shrink", "silence", "sine wave"])
@@ -302,11 +309,12 @@ class WavQueryObj(object):
             # Or fill it with a sine wave
             elif label == "delete" and operation == "sine wave":
                 frequency = 200
-                amplitude = getMaxAmplitude(self.sampwidth)
+                if sineWaveAmplitude is None:
+                    sineWaveAmplitude = getMaxAmplitude(self.sampwidth)
                 sineWave = generateSineWave(diff,
                                             frequency,
                                             self.framerate,
-                                            amplitude)
+                                            sineWaveAmplitude)
                 frames = numsAsSamples(self.sampwidth, sineWave)
                 audioFrames += frames
     
