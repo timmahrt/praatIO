@@ -223,6 +223,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     
     # Output wave files
     outputFNList = []
+    wavQObj = audioio.WavQueryObj(wavFN)
     for i, entry in enumerate(entryList):
         start, stop, label = entry
         
@@ -243,10 +244,9 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
                    "the same name:\n%s")
                   % (outputPath, outputName))
         
-        audioObj = audioio.openAudioFile(wavFN,
-                                         keepList=[(start, stop), ],
-                                         doShrink=True)
-        audioObj.save(outputFNFullPath)
+        frames = wavQObj.getFrames(start, stop)
+        wavQObj.outputModifiedWav(frames, outputFNFullPath)
+        
         outputFNList.append((start, stop, outputName + ".wav"))
         
         # Output the textgrid if requested

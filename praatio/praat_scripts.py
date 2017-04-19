@@ -11,7 +11,7 @@ Created on Dec 9, 2015
 import os
 from os.path import join
 
-from praatio import praatio_scripts
+from praatio import audioio
 from praatio import dataio
 from praatio.utilities import utils
 
@@ -89,7 +89,7 @@ def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
         scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
 
     if pointList is not None:
-        dur = praatio_scripts.getDuration(inputWavFN)
+        dur = audioio.WavQueryObj(inputWavFN).getDuration()
         pointObj = dataio.PointObject2D(pointList,
                                         dataio.PITCH,
                                         0,
