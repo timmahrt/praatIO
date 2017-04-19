@@ -76,7 +76,8 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
         with open(outputFullFN, "w") as fd:
             fd.write("\n".join(allPIList) + "\n")
 
-    piList = loadPIAndTime(outputPath, outputFN, undefinedValue=undefinedValue)
+    piList = loadTimeSeriesData(outputPath, outputFN,
+                                undefinedValue=undefinedValue)
     
     return piList
 
@@ -131,7 +132,8 @@ def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
             scriptFN = join(utils.scriptsPath, scriptName)
             utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    piList = loadPIAndTime(outputPath, outputFN, undefinedValue=undefinedValue)
+    piList = loadTimeSeriesData(outputPath, outputFN,
+                                undefinedValue=undefinedValue)
     
     return piList
 
@@ -171,14 +173,13 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     return piList
 
 
-def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
+def loadTimeSeriesData(rawPitchDir, fn, undefinedValue=None):
     '''
-    For reading the output of get_pitch_and_intensity
+    For reading the output of get_pitch_and_intensity or get_intensity
     
-    If undefinedValue is not None, undefined pitch or intensity values
-    will be replaced with it.  Otherwise, if None, if either value is
-    undefined, both are discarded.
-    
+    Data should be of the form
+    [(time1, value1a, value1b, ...),
+     (time2, value2a, value2b, ...), ]
     '''
     name = os.path.splitext(fn)[0]
     
@@ -198,25 +199,22 @@ def loadPIAndTime(rawPitchDir, fn, undefinedValue=None):
         dataList = dataList[1:]
     
     newDataList = []
-    for time, f0Val, intensity in dataList:
-        time = float(time)
-        if '--' in f0Val:
-            if undefinedValue is not None:
-                f0Val = undefinedValue
-            else:
-                continue
-        else:
-            f0Val = float(f0Val)
-            
-        if '--' in intensity:
-            if undefinedValue is not None:
-                intensity = undefinedValue
-            else:
-                continue
-        else:
-            intensity = float(intensity)
+    for row in dataList:
+        time = row.pop(0)
+        entry = [time, ]
+        doSkip = False
+        for value in row:
+            if '--' in value:
+                if undefinedValue is None:
+                    value = undefinedValue
+                    entry.append(value)
+                else:
+                    doSkip = True
         
-        newDataList.append((time, f0Val, intensity))
+        if doSkip is True:
+            continue
+        
+        newDataList.append(entry)
 
     dataList = newDataList
 
