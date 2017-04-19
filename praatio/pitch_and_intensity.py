@@ -236,11 +236,15 @@ def loadTimeSeriesData(rawPitchDir, fn, undefinedValue=None):
         doSkip = False
         for value in row:
             if '--' in value:
-                if undefinedValue is None:
+                if undefinedValue is not None:
                     value = undefinedValue
-                    entry.append(value)
                 else:
                     doSkip = True
+                    break
+            else:
+                value = float(value)
+            
+            entry.append(value)
         
         if doSkip is True:
             continue

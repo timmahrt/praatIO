@@ -41,8 +41,6 @@ table = Create Table with column names: "table", 0, "time intensity"
 # Iterate over the intensity tracks, one sample at a time
 for i to (tmax - tmin) / sample_step
 	time = tmin + i * sample_step
-	selectObject: pitch
-	pitchVal = Get value at time: time, "Hertz", "Linear"
 	selectObject: intensity
 	intensityVal = Get value at time: time, "Cubic"
 	

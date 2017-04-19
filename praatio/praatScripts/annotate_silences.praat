@@ -2,7 +2,7 @@
 # Splits a file into sound and silence segments
 ####################################
 
-form Batch annotate sound files for silence
+form Annotate sound files for silence
     sentence Input_audio_fn C:\Users\Tim\Desktop\gen_specs\sirl_project_recordings\whole_speech_recordings_raw\sirl_en_03_synced.wav
     sentence Output_audio_fn C:\Users\Tim\Desktop\gen_specs\sirl_project_recordings\whole_speech_recordings_raw\sirl_en_03_synced_silence.TextGrid
     real Min_pitch_(Hz) 100
