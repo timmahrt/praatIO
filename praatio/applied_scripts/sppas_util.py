@@ -20,6 +20,7 @@ import shutil
 
 from praatio import tgio
 from praatio import praatio_scripts
+from praatio import audioio
 from praatio.utilities import utils
 from praatio.applied_scripts import xsampa
 
@@ -177,7 +178,8 @@ def generateSingleIPUTextgrids(wavPath, txtPath, outputPath, nameMod=None,
         if addPause is True:
             txt = "+ %s +" % txt.lower()
 
-        dur = praatio_scripts.getDuration(join(wavPath, wavName + ".wav"))
+        wavFN = join(wavPath, wavName + ".wav")
+        dur = praatio_scripts.audioio.WavQueryObj(wavFN).getDuration()
         tg = tgio.Textgrid()
         tier = tgio.IntervalTier("ipu", [(0, dur, txt), ], 0, dur)
         
