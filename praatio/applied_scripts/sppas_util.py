@@ -110,8 +110,9 @@ def sppasPostProcess(tgPath, outputPath, removeTierList=None,
             print("Skipping %s -- already exists" % mergeName + ".TextGrid")
             continue
         
-        tg = tgio.openTextGrid(join(tgPath, mergeFN))
-        
+        # Open tg file and remove jittered boundaries
+        tg = praatio_scripts.alignBoundariesAcrossTiers(join(tgPath, mergeFN),
+                                                        maxDifference=0.001)
         # Remove tiers
         for name in removeTierList:
             if name in tg.tierNameList:
