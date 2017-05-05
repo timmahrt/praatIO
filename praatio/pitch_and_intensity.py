@@ -231,7 +231,7 @@ def loadTimeSeriesData(rawPitchDir, fn, undefinedValue=None):
     
     newDataList = []
     for row in dataList:
-        time = row.pop(0)
+        time = float(row.pop(0))
         entry = [time, ]
         doSkip = False
         for value in row:
