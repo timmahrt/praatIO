@@ -15,6 +15,94 @@ from pkg_resources import resource_filename
 scriptsPath = resource_filename("praatio", "praatScripts", )
 
 
+def getValueAtTime(timestamp, sortedDataTupleList, fuzzyMatching=False,
+                   startI=0):
+    '''
+    Get the value in the data list (sorted by time) that occurs at this point
+    
+    If fuzzyMatching is True, if there is not a value
+    at the requested timestamp, the nearest feature value will be taken.
+    
+    The procedure assumes that all data is ordered in time.
+    dataTupleList should be in the form
+    [(t1, v1a, v1b, ..), (t2, v2a, v2b, ..), ..]
+    
+    The procedure makes one pass through dataTupleList and one
+    pass through self.entryList.  If the data is not sequentially
+    ordered, the incorrect response will be returned.
+    
+    For efficiency purposes, it takes a starting index and returns the ending
+    index.
+    '''
+    
+    i = startI
+    
+    # Only find exact timestamp matches
+    if fuzzyMatching is False:
+        while True:
+            try:
+                dataTuple = sortedDataTupleList[i]
+            except IndexError:
+                currTime = timestamp
+                currVal = "--"
+                break
+
+            currTime = dataTuple[0]
+            currVal = dataTuple[1]
+            if timestamp == currTime:
+                break
+            i += 1
+        retTime = currTime
+        retVal = currVal
+    
+    # Find the closest timestamp
+    else:
+        bestTime = sortedDataTupleList[i][0]
+        bestVal = sortedDataTupleList[i][1]
+        i += 1
+        while True:
+            try:
+                dataTuple = sortedDataTupleList[i]
+            except IndexError:
+                break  # Last known value is the closest one
+
+            currTime = dataTuple[0]
+            currVal = dataTuple[1]
+
+            currDiff = abs(currTime - timestamp)
+            bestDiff = abs(bestTime - timestamp)
+            if currDiff < bestDiff:  # We're closer to the target val
+                bestTime = currTime
+                bestVal = currVal
+                if currDiff == 0:
+                    break  # Can't do better than a perfect match
+            elif currDiff > bestDiff:
+                break  # We've past the best value.
+            i += 1
+        
+        retTime = bestTime
+        retVal = bestVal
+
+    return retTime, retVal, i
+
+
+def getValuesInInterval(dataTupleList, start, stop):
+    '''
+    Gets the values that exist within an interval
+    
+    The function assumes that the data is formated as
+    [(t1, v1a, v1b, ...), (t2, v2a, v2b, ...)]
+    '''
+            
+    intervalDataList = []
+    for dataTuple in dataTupleList:
+        time = dataTuple[0]
+        if start <= time and stop >= time:
+            intervalDataList.append(dataTuple)
+    
+    return intervalDataList
+
+
 def sign(x):
     '''Returns 1 if x is positive, 0 if x is 0, and -1 otherwise'''
     retVal = 0

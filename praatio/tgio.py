@@ -393,51 +393,14 @@ class PointTier(TextgridTier):
         i = 0
         retList = []
         
-        # Only find exact timestamp matches
-        if fuzzyMatching is False:
-            for timestamp, label in self.entryList:
-                while True:
-                    try:
-                        dataTuple = dataTupleList[i]
-                    except IndexError:
-                        currTime = timestamp
-                        currVal = "--"
-                        break
-
-                    currTime = dataTuple[0]
-                    currVal = dataTuple[1]
-                    if timestamp == currTime:
-                        break
-                    i += 1
-                retList.append((currTime, label, currVal))
-        
-        # Find the closest timestamp
-        else:
-            sortedDataTupleList = dataTupleList.sorted()
-            for timestamp, label in self.entryList:
-                bestTime = sortedDataTupleList[i][0]
-                bestVal = sortedDataTupleList[i][1]
-                i += 1
-                while True:
-                    try:
-                        dataTuple = sortedDataTupleList[i]
-                    except IndexError:
-                        break  # Last known value is the closest one
-
-                    currTime = dataTuple[0]
-                    currVal = dataTuple[1]
-
-                    currDiff = abs(currTime - timestamp)
-                    bestDiff = abs(bestTime - timestamp)
-                    if currDiff < bestDiff:  # We're closer to the target val
-                        bestTime = currTime
-                        bestVal = currVal
-                        if currDiff == 0:
-                            break  # Can't do better than a perfect match
-                    elif currDiff > bestDiff:
-                        break  # We've past the best value.
-                    i += 1
-                retList.append((bestTime, label, bestVal))
+        sortedDataTupleList = dataTupleList.sorted()
+        for timestamp, label in self.entryList:
+            retTuple = utils.getValueAtTime(timestamp,
+                                            sortedDataTupleList,
+                                            fuzzyMatching=fuzzyMatching,
+                                            startI=i)
+            retTime, retVal, i = retTuple
+            retList.append((retTime, label, retVal))
     
         return retList
         
@@ -888,26 +851,20 @@ class IntervalTier(TextgridTier):
         return [float(subList[1]) - float(subList[0])
                 for subList in self.entryList]
     
-    def getValuesInIntervals(self, dataTupleList, getTimeFunc=None):
+    def getValuesInIntervals(self, dataTupleList):
         '''
         Returns data from dataTupleList contained in labeled intervals
         
         dataTupleList should be of the form:
         [(time1, value1a, value1b,...), (time2, value2a, value2b...), ...]
-        but you can change how time is determined using the getTimeFunc()
         '''
         
         returnList = []
         
-        if getTimeFunc is None:
-            getTimeFunc = lambda x: x[0]  # Get the first element
-        
         for interval in self.entryList:
-            intervalDataList = []
-            for dataTuple in dataTupleList:
-                time = getTimeFunc(dataTuple)
-                if interval[0] <= time and interval[1] >= time:
-                    intervalDataList.append(dataTuple)
+            intervalDataList = utils.getValuesInInterval(dataTupleList,
+                                                         interval[0],
+                                                         interval[1])
             returnList.append((interval, intervalDataList))
         
         return returnList
