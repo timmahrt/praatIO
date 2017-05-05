@@ -205,28 +205,30 @@ class TextgridTier(object):
     
     def find(self, matchLabel, substrMatchFlag=False):
         '''
-        Returns all intervals that match the given label
+        Returns the index of all intervals that match the given label
         '''
         returnList = []
-        for entry in self.entryList:
+        for i, entry in enumerate(self.entryList):
             if not substrMatchFlag:
                 if entry[-1] == matchLabel:
-                    returnList.append(entry)
+                    returnList.append(i)
             else:
                 if matchLabel in entry[-1]:
-                    returnList.append(entry)
+                    returnList.append(i)
         
         return returnList
     
-    def findRE(self, matchLabel):
+    def findRE(self, matchLabelRE):
         '''
-        Returns all intervals that match the given label, using reg. exps.
+        Returns the index of all intervals that match the given label
+        
+        Uses regular expressions
         '''
         returnList = []
-        for entry in self.entryList:
-            matchList = re.findall(matchLabel, entry[-1], re.I)
+        for i, entry in enumerate(self.entryList):
+            matchList = re.findall(matchLabelRE, entry[-1], re.I)
             if matchList != []:
-                returnList.append(entry)
+                returnList.append(i)
         
         return returnList
     
