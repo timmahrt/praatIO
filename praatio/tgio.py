@@ -1451,7 +1451,7 @@ def openTextGrid(fnFullPath):
     data = data.replace("\r\n", "\n")
     
     caseA = "ooTextFile short" in data
-    caseB = "item" not in data
+    caseB = "item [" not in data
     if caseA or caseB:
         textgrid = _parseShortTextGrid(data)
     else:
@@ -1469,7 +1469,7 @@ def _parseNormalTextGrid(data):
     newTG = Textgrid()
     
     # Toss textgrid header
-    header, data = data.split("item", 1)
+    header, data = data.split("item [", 1)
     
     headerList = header.split("\n")
     tgMin = float(headerList[3].split("=")[1].strip())
@@ -1479,15 +1479,15 @@ def _parseNormalTextGrid(data):
     newTG.maxTimestamp = tgMax
     
     # Process each tier individually (will be output to separate folders)
-    tierList = data.split("item")[1:]
+    tierList = data.split("item [")[1:]
     for tierTxt in tierList:
         
         if 'class = "IntervalTier"' in tierTxt:
             tierType = INTERVAL_TIER
-            searchWord = "intervals"
+            searchWord = "intervals ["
         else:
             tierType = POINT_TIER
-            searchWord = "points"
+            searchWord = "points ["
         
         # Get tier meta-information
         header, tierData = tierTxt.split(searchWord, 1)
@@ -1518,7 +1518,7 @@ def _parseNormalTextGrid(data):
                 tierEntryList.append((timeStart, timeEnd, label))
             tier = IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
         else:
-            header, tierData = tierTxt.split("points", 1)
+            header, tierData = tierTxt.split("points [", 1)
             while True:
                 try:
                     time, timeI = _fetchRow(tierData, "number = ", labelI)
