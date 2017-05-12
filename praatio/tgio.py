@@ -9,12 +9,24 @@ Created on Apr 15, 2013
 import re
 import copy
 import io
+import wave
 
 from praatio.utilities import utils
 
 INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
 MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
+
+
+def _getWavDuration(wavFN):
+    "For internal use.  See praatio.audioio.WavQueryObj() for general use."
+    audiofile = wave.open(wavFN, "r")
+    params = audiofile.getparams()
+    framerate = params[2]
+    nframes = params[3]
+    duration = float(nframes) / framerate
+    
+    return duration
 
 
 def _removeUltrashortIntervals(tier, minLength):
@@ -147,6 +159,7 @@ class TextgridTier(object):
     tierType = None
     
     def __init__(self, name, entryList, minT, maxT):
+        '''See PointTier or IntervalTier'''
         self.name = name
         self.entryList = entryList
         self.minTimestamp = minT
@@ -287,7 +300,19 @@ class PointTier(TextgridTier):
     
     tierType = POINT_TIER
     
-    def __init__(self, name, entryList, minT=None, maxT=None):
+    def __init__(self, name, entryList, minT=None, maxT=None,
+                 pairedWav=None):
+        '''
+        A point tier is for annotating instaneous events
+        
+        The entryList is of the form:
+        [(timeVal1, label1), (timeVal2, label2), ]
+        
+        The data stored in the labels can be anything but will
+        be interpreted as text by praatio (the label could be descriptive
+        text e.g. ('peak point here') or numerical data e.g. (pitch values
+        like '132'))
+        '''
         
         entryList = [(float(time), label) for time, label in entryList]
         
@@ -297,6 +322,9 @@ class PointTier(TextgridTier):
             timeList.append(float(minT))
         if maxT is not None:
             timeList.append(float(maxT))
+            
+        if maxT is None and pairedWav is not None:
+            maxT = _getWavDuration(pairedWav)
         
         try:
             minT = min(timeList)
@@ -514,8 +542,19 @@ class IntervalTier(TextgridTier):
     
     tierType = INTERVAL_TIER
     
-    def __init__(self, name, entryList, minT=None, maxT=None):
+    def __init__(self, name, entryList, minT=None, maxT=None,
+                 pairedWav=None):
+        '''
+        An interval tier is for annotating events that have duration
         
+        The entryList is of the form:
+        [(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]
+        
+        The data stored in the labels can be anything but will
+        be interpreted as text by praatio (the label could be descriptive
+        text e.g. ('erase this region') or numerical data e.g. (average pitch
+        values like '132'))
+        '''
         entryList = [(float(start), float(stop), label)
                      for start, stop, label in entryList]
         
@@ -523,6 +562,9 @@ class IntervalTier(TextgridTier):
             minT = float(minT)
         if maxT is not None:
             maxT = float(maxT)
+        
+        if maxT is None and pairedWav is not None:
+            maxT = _getWavDuration(pairedWav)
         
         # Prevent poorly-formed textgrids from being created
         for entry in entryList:
@@ -1067,6 +1109,7 @@ class IntervalTier(TextgridTier):
 class Textgrid():
     
     def __init__(self):
+        'A container that stores and operates over interval and point tiers'
         self.tierNameList = []  # Preserves the order of the tiers
         self.tierDict = {}
     

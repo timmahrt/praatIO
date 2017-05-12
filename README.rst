@@ -181,7 +181,7 @@ Requirements
 
 ``Python 2.6.*`` or above
 
-``Python 3.3.*`` or above
+``Python 3.3.*`` or above (actually, probably any version of python 3)
 
 `Click here to see the specific versions of python that praatIO is tested under <https://travis-ci.org/timmahrt/praatIO>`_
 
@@ -208,7 +208,7 @@ Installation
 If you on Windows, you can use the installer found here (check that it is up to date though)
 `Windows installer <http://www.timmahrt.com/python_installers>`_
 
-PraatIO is on pypi and can be installed or upgraded from the command-line shell with pip like so
+PraatIO is on pypi and can be installed or upgraded from the command-line shell with pip like so::
 
     pip install praatio --upgrade
 
