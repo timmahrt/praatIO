@@ -516,6 +516,31 @@ class PointTier(TextgridTier):
                            maxTimestamp=self.maxTimestamp + duration)
         
         return newTier
+    
+    def merge(self, tier, mergeTierName='merge', mergeLabelFmt='%s / %s'):
+        '''Combines this tier with another'''
+        mergedEntryList = self.entryList + tier.entryList
+        mergedEntryList.sort()
+        
+        # Combine points that occur at the same time
+        i = 0
+        while i < len(mergedEntryList) - 1:
+            if mergedEntryList[i][0] == mergedEntryList[i + 1][0]:
+                entry = mergedEntryList.pop(i + 1)
+                mergedLabel = mergeLabelFmt % (mergedEntryList[i][1], entry)
+                mergedEntryList[i] = (entry[0], mergedLabel)
+                
+            i += 1
+        
+        minTime = self.minTimestamp
+        if minTime > tier.minTimestamp:
+            minTime = tier.minTimestamp
+        
+        maxTime = self.maxTimestamp
+        if maxTime < tier.maxTimestamp:
+            maxTime = tier.maxTimestamp
+        
+        return PointTier(mergeTierName, mergedEntryList, minTime, maxTime)
 
         
 class IntervalTier(TextgridTier):
@@ -1216,10 +1241,10 @@ class Textgrid():
     def mergeTiers(self, includeFunc=None,
                    tierList=None, preserveOtherTiers=True):
         '''
-        Combine tiers.
+        Combine tiers
         
         /includeFunc/ regulates which intervals to include in the merging
-          with all others being tossed (default tosses silent labels: '')
+          with all others being tossed (default accepts all)
           
         If /tierList/ is none, combine all tiers.
         '''
@@ -1228,53 +1253,40 @@ class Textgrid():
             tierList = self.tierNameList
             
         if includeFunc is None:
-            includeFunc = lambda entryList: not entryList[-1] == ''
+            includeFunc = lambda entryList: True
            
-        # Merge tiers
-        superEntryList = []
+        # Determine the tiers to merge
+        intervalTierNameList = []
+        pointTierNameList = []
         for tierName in tierList:
             tier = self.tierDict[tierName]
-            superEntryList.extend(tier.entryList)
+            if isinstance(tier, IntervalTier):
+                intervalTierNameList.append(tierName)
+            elif isinstance(tier, PointTier):
+                pointTierNameList.append(tierName)
         
-        superEntryList = [entry for entry in superEntryList
-                          if includeFunc(entry)]
-            
-        superEntryList.sort()
-        
-        # Combine overlapping intervals
-        i = 0
-        while i < len(superEntryList) - 1:
-            currentEntry = superEntryList[i]
-            nextEntry = superEntryList[i + 1]
-            
-            if intervalOverlapCheck(currentEntry, nextEntry):
-                currentStart, currentStop, currentLabel = superEntryList[i]
-                nextStop, nextLabel = superEntryList.pop(i + 1)[1:]
-                
-                newStop = max([currentStop, nextStop])
-                newLabel = "%s / %s" % (currentLabel, nextLabel)
-                
-                superEntryList[i] = (currentStart, newStop, newLabel)
-                
-            else:
-                i += 1
-            
-        # Create the final textgrid
-        tg = Textgrid()
-            
-        # Preserve non-merged tiers
-        if preserveOtherTiers is True:
-            for tierName in self.tierNameList:
-                if tierName not in tierList:
-                    tg.addTier(self.tierDict[tierName])
+        # Merge the interval tiers
+        intervalTier = None
+        if len(intervalTierNameList) > 0:
+            intervalTier = self.tierDict[intervalTierNameList.pop(0)]
+        for tierName in intervalTierNameList:
+            intervalTier = intervalTier.merge(self.tierDict[tierName])
 
-        # Add merged tier
-        # (For this we can use any of the tiers involved
-        # in the merge to determine the tier type)
-        tierName = "/".join(tierList)
-        mergedTier = self.tierDict[tierList[0]].new(tierName,
-                                                        superEntryList)
-        tg.addTier(mergedTier)
+        # Merge the point tiers
+        pointTier = None
+        if len(pointTierNameList) > 0:
+            pointTier = self.tierDict[pointTierNameList.pop(0)]
+        for tierName in pointTierNameList:
+            pointTier = pointTier.merge(self.tierDict[tierName])
+        
+        # Create the final textgrid to output
+        tg = Textgrid()
+        
+        if intervalTier is not None:
+            tg.addTier(intervalTier)
+        
+        if pointTier is not None:
+            tg.addTier(pointTier)
         
         return tg
     
