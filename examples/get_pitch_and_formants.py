@@ -89,15 +89,15 @@ pitch_and_intensity.generatePIMeasures(maryPitchData, tgPath,
                                        "word", doPitch=False,
                                        medianFilterWindowSize=9)
 
-tg = tgio.openTextGrid(join(tgPath, "bobby_words.TextGrid"))
+tg = tgio.openTextgrid(join(tgPath, "bobby_words.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "bobby_errors.TextGrid"))
 
-tg = tgio.openTextGrid(join(tgPath, "mary.TextGrid"))
+tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_errors.TextGrid"))
 
-tg = tgio.openTextGrid(join(tgPath, "mary.TextGrid"))
+tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(maryFilteredPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_filtered_errors.TextGrid"))
 

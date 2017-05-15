@@ -37,9 +37,9 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
         praatio_scripts.tgBoundariesToZeroCrossings(inputTGFN,
                                                     inputWavFN,
                                                     zeroCrossingTGFN)
-        tg = tgio.openTextGrid(zeroCrossingTGFN)
+        tg = tgio.openTextgrid(zeroCrossingTGFN)
     else:
-        tg = tgio.openTextGrid(inputTGFN)
+        tg = tgio.openTextgrid(inputTGFN)
     
     keepList = tg.tierDict["phone"].entryList
     keepList = [entry for entry in keepList

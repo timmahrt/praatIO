@@ -267,7 +267,7 @@ def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch,
     '''
     
     tgFN = join(tgPath, tgFN)
-    tg = tgio.openTextGrid(tgFN)
+    tg = tgio.openTextgrid(tgFN)
     piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
     
     outputList = []

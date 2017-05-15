@@ -18,7 +18,7 @@ outputPath = join(path, "point_process_output")
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-tg = tgio.openTextGrid(join(path, "bobby_phones.TextGrid"))
+tg = tgio.openTextgrid(join(path, "bobby_phones.TextGrid"))
 pp = dataio.open1DPointObject(join(path, "bobby.PointProcess"))
 
 newPoints = []

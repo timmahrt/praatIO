@@ -1483,7 +1483,7 @@ class Textgrid():
             self.tierDict[name].sort()
 
 
-def openTextGrid(fnFullPath):
+def openTextgrid(fnFullPath):
     
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
@@ -1496,16 +1496,16 @@ def openTextGrid(fnFullPath):
     caseA = "ooTextFile short" in data
     caseB = "item [" not in data
     if caseA or caseB:
-        textgrid = _parseShortTextGrid(data)
+        textgrid = _parseShortTextgrid(data)
     else:
-        textgrid = _parseNormalTextGrid(data)
+        textgrid = _parseNormalTextgrid(data)
     
     textgrid = textgrid.removeLabels("")
     
     return textgrid
 
 
-def _parseNormalTextGrid(data):
+def _parseNormalTextgrid(data):
     '''
     Reads a normal textgrid
     '''
@@ -1580,7 +1580,7 @@ def _parseNormalTextGrid(data):
     return newTG
 
 
-def _parseShortTextGrid(data):
+def _parseShortTextgrid(data):
     '''
     Reads a short textgrid file
     '''

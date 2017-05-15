@@ -61,10 +61,10 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
         
-        tg = tgio.openTextGrid(inputFN)
+        tg = tgio.openTextgrid(inputFN)
         tg.save(outputFN)
         
-        self.assertTrue(areTheSame(inputFN, outputFN, tgio.openTextGrid))
+        self.assertTrue(areTheSame(inputFN, outputFN, tgio.openTextgrid))
     
     def test_duration_tier_io(self):
         '''Tests for reading/writing duration tiers'''

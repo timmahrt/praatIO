@@ -16,8 +16,8 @@ outputPath = join(path, "merged_textgrids")
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-tgPhones = tgio.openTextGrid(join(path, "bobby_phones.TextGrid"))
-tgWords = tgio.openTextGrid(join(path, "bobby_words.TextGrid"))
+tgPhones = tgio.openTextgrid(join(path, "bobby_phones.TextGrid"))
+tgWords = tgio.openTextgrid(join(path, "bobby_words.TextGrid"))
 
 tgPhones.addTier(tgWords.tierDict["word"])
 tgPhones.save(join(outputPath, "bobby.TextGrid"))

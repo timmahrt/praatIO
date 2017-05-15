@@ -140,7 +140,7 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
     
     wavQObj = audioio.WavQueryObj(wavFN)
     
-    tg = tgio.openTextGrid(tgFN)
+    tg = tgio.openTextgrid(tgFN)
     
     for tierName in tg.tierNameList[:]:
         tier = tg.tierDict[tierName]
@@ -188,7 +188,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
     
-    tg = tgio.openTextGrid(tgFN)
+    tg = tgio.openTextgrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
     
     if silenceLabel is not None:
@@ -288,7 +288,7 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
     value found within /maxDifference/ or, if no majority exists, than
     the value used in the search query.
     '''
-    tg = tgio.openTextGrid(tgFN)
+    tg = tgio.openTextgrid(tgFN)
     
     for tierName in tg.tierNameList:
         altNameList = [tmpName for tmpName in tg.tierNameList

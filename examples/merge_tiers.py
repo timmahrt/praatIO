@@ -11,11 +11,11 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 # Let's use praatio to construct some hypothetical textgrids
-tg = tgio.openTextGrid(join(path, "bobby_words.TextGrid"))
+tg = tgio.openTextgrid(join(path, "bobby_words.TextGrid"))
 wordTier = tg.tierDict["word"]
 entryList = wordTier.entryList
 
-bobbyPhoneTG = tgio.openTextGrid(join(path, "bobby_phones.TextGrid"))
+bobbyPhoneTG = tgio.openTextgrid(join(path, "bobby_phones.TextGrid"))
 
 
 bobbyTG = tgio.Textgrid()
@@ -29,7 +29,7 @@ bobbyTG.save(join(outputPath, "mergeExample_bobby_words_split.TextGrid"))
 
 
 # And we'll do the same for mary's textgrid
-tg = tgio.openTextGrid(join(path, "mary.TextGrid"))
+tg = tgio.openTextgrid(join(path, "mary.TextGrid"))
 wordTier = tg.tierDict["word"]
 entryList = wordTier.entryList
 

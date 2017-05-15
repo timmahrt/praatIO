@@ -26,7 +26,7 @@ from praatio import tgio
 
 def doSetOperations(fromFN, toFN):
     
-    tg = tgio.openTextGrid(fromFN)
+    tg = tgio.openTextgrid(fromFN)
     
     syllableTier = tg.tierDict['tonicSyllable']
     phoneTier = tg.tierDict['tonicVowel']

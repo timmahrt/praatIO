@@ -31,7 +31,7 @@ for wavFN, tgFN in (("mary.wav", "mary.TextGrid"),
     # some sort of code ('section-to-anonymize') rather than what I have
     # done here.
     deleteList = []
-    tg = tgio.openTextGrid(join(path, tgFN))
+    tg = tgio.openTextgrid(join(path, tgFN))
     deleteList.append(tg.tierDict['word'].entryList[0])
     
     # Get only time information from entries (i.e. remove label information)

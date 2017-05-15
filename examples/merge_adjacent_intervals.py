@@ -22,7 +22,7 @@ def merge_adjacent(path, fn, outputPath):
     
     outputTG = tgio.Textgrid()
     
-    tg = tgio.openTextGrid(join(path, fn))
+    tg = tgio.openTextgrid(join(path, fn))
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
         

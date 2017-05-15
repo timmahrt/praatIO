@@ -29,7 +29,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN,
     
     Assumes the speaker is speaking for most of the recording.
     '''
-    tg = tgio.openTextGrid(tgFN)
+    tg = tgio.openTextgrid(tgFN)
     
     duration = tg.maxTimestamp
     numEntries = int(math.ceil(duration * proportion))
