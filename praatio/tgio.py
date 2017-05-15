@@ -231,21 +231,26 @@ class TextgridTier(object):
         
         return isEqual
     
-    def appendTier(self, tier, timeRelativeFlag):
+    def appendTier(self, tier):
         
-        if timeRelativeFlag is True:
-            appendTier = tier.editTimestamps(self.maxTimestamp,
-                                             self.maxTimestamp,
-                                             allowOvershoot=True)
-        else:
-            appendTier = tier
-            
+        minTime = self.minTimestamp
+        if tier.minTimestamp < minTime:
+            minTime = tier.minTimestamp
+        
+        maxTime = self.maxTimestamp + tier.maxTimestamp
+        
+        appendTier = tier.editTimestamps(self.maxTimestamp,
+                                         allowOvershoot=True)
+        
         assert(self.tierType == tier.tierType)
         
         entryList = self.entryList + appendTier.entryList
         entryList.sort()
         
-        return self.new(self.name, entryList)
+        return self.new(self.name,
+                        entryList,
+                        minTimestamp=minTime,
+                        maxTimestamp=maxTime)
 
     def deleteEntry(self, entry):
         '''Removes an entry from the entryList'''
@@ -1173,25 +1178,55 @@ class Textgrid():
         '''
         retTG = Textgrid()
         
-        # First add tiers that are in this tg or both tgs
-        for name in self.tierNameList:
-            sourceTier = self.tierDict[name]
-            
-            if name in self.tierNameList:
-                tier = tg.tierDict[name]
-                tier = sourceTier.appendTier(tier, timeRelativeFlag=True)
-                retTG.addTier(tier)
-            
-            elif onlyMatchingNames is False:
+        minTime = self.minTimestamp
+        maxTime = self.maxTimestamp + tg.maxTimestamp
+        
+        # Get all tier names.  Ordered first by this textgrid and
+        # then by the other textgrid.
+        combinedTierNameList = self.tierNameList
+        for tierName in tg.tierNameList:
+            if tierName not in combinedTierNameList:
+                combinedTierNameList.append(tierName)
+        
+        # Determine the tier names that will be in the final textgrid
+        finalTierNameList = []
+        if onlyMatchingNames is False:
+            finalTierNameList = combinedTierNameList
+        else:
+            for tierName in combinedTierNameList:
+                if tierName in self.tierNameList:
+                    if tierName in tg.tierNameList:
+                        finalTierNameList.append(tierName)
+        
+        # Add tiers from this textgrid
+        for tierName in self.tierNameList:
+            if tierName in finalTierNameList:
+                tier = self.tierDict[tierName]
                 retTG.addTier(tier)
         
-        # Second add tiers that are only in the input tg
-        if onlyMatchingNames is False:
-            for name in tg.tierNameList:
+        # Add tiers from the given textgrid
+        for tierName in tg.tierNameList:
+            if tierName in finalTierNameList:
+                appendTier = tg.tierDict[tierName]
+                appendTier = appendTier.new(minTimestamp=minTime,
+                                            maxTimestamp=maxTime)
                 
-                if name not in retTG.tierNameList:
-                    tier = tier.offsetTimestamps(self.maxTimestamp,
-                                                 self.maxTimestamp)
+                appendTier = appendTier.editTimestamps(self.maxTimestamp)
+                
+                if tierName in retTG.tierNameList:
+                    tier = retTG.tierDict[tierName]
+                    newEntryList = retTG.tierDict[tierName].entryList
+                    newEntryList += appendTier.entryList
+                    
+                    tier = tier.new(entryList=newEntryList,
+                                    minTimestamp=minTime,
+                                    maxTimestamp=maxTime)
+                    retTG.replaceTier(tierName, tier)
+                    
+                else:
+                    tier = appendTier
+                    tier = tier.new(minTimestamp=minTime,
+                                    maxTimestamp=maxTime)
                     retTG.addTier(tier)
         
         return retTG
