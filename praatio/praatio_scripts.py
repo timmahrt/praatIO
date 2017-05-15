@@ -262,7 +262,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
             # and the textgrid tiers
             # the crop start time becomes the new '0' value
             offset = -1 * start
-            subTG = subTG.editTimestamps(offset, offset, offset)
+            subTG = subTG.editTimestamps(offset)
             subTG.minTimestamp = 0
             subTG.maxTimestamp = stop - start
             for tierName in subTG.tierNameList:

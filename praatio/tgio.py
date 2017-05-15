@@ -714,7 +714,7 @@ class IntervalTier(TextgridTier):
         
         return retTier
 
-    def editTimestamps(self, startOffset, stopOffset, allowOvershoot=False):
+    def editTimestamps(self, offset, allowOvershoot=False):
         '''
         Modifies all timestamps by a constant amount
         
@@ -727,8 +727,8 @@ class IntervalTier(TextgridTier):
         newEntryList = []
         for start, stop, label in self.entryList:
             
-            newStart = startOffset + start
-            newStop = stopOffset + stop
+            newStart = offset + start
+            newStop = offset + stop
             if allowOvershoot is not True:
                 assert(newStart >= self.minTimestamp)
                 assert(newStop <= self.maxTimestamp)
@@ -1210,19 +1210,16 @@ class Textgrid():
 
         return newTG
             
-    def editTimestamps(self, startOffset, stopOffset, pointOffset,
-                       allowOvershoot=False):
+    def editTimestamps(self, offset, allowOvershoot=False):
+        '''
+        Modifies all timestamps by a constant amount
+        '''
         
         tg = Textgrid()
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             if len(tier.entryList) > 0:
-                if isinstance(tier, IntervalTier):
-                    tier = tier.editTimestamps(startOffset, stopOffset,
-                                               allowOvershoot)
-                elif isinstance(tier, PointTier):
-                    tier = tier.editTimestamps(pointOffset,
-                                               allowOvershoot)
+                tier = tier.editTimestamps(offset, allowOvershoot)
             
             tg.addTier(tier)
         
