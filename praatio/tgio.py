@@ -1371,7 +1371,7 @@ class Textgrid():
             tg.addTier(pointTier)
         
         return tg
-    
+
     def new(self):
         '''Returns a copy of this Textgrid'''
         return copy.deepcopy(self)
@@ -1384,25 +1384,17 @@ class Textgrid():
     
     def removeTier(self, name):
         self.tierNameList.pop(self.tierNameList.index(name))
-        del self.tierDict[name]
+        return self.tierDict.pop(name)
 
-    def replaceTier(self, name, newTierEntryList, preserveTime=True):
-        oldTier = self.tierDict[name]
+    def replaceTier(self, name, newTier):
         tierIndex = self.tierNameList.index(name)
         self.removeTier(name)
-        
-        if preserveTime is True:
-            newTier = oldTier.new(name, newTierEntryList,
-                                      oldTier.minTimestamp,
-                                      oldTier.maxTimestamp)
-        else:
-            newTier = oldTier.new(name, newTierEntryList)
-            
         self.addTier(newTier, tierIndex)
             
     def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH):
         
-        self.sort()
+        for tier in self.tierDict.values():
+            tier.sort()
         
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
@@ -1418,7 +1410,8 @@ class Textgrid():
                                                       minimumIntervalLength)
                 self.tierDict[name] = tier
         
-        self.sort()
+        for tier in self.tierDict.values():
+            tier.sort()
         
         # Header
         outputTxt = ""
@@ -1451,8 +1444,6 @@ def openTextgrid(fnFullPath):
         textgrid = _parseShortTextgrid(data)
     else:
         textgrid = _parseNormalTextgrid(data)
-    
-    textgrid = textgrid.removeLabels("")
     
     return textgrid
 
