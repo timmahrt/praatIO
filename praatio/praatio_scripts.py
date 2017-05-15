@@ -90,7 +90,7 @@ def splitTierEntries(tg, sourceTierName, targetTierName,
         if endT is None:
             endT = maxT
         
-        sourceTier = sourceTier.crop(startT, endT, False, False)[0]
+        sourceTier = sourceTier.crop(startT, endT, False, False)
         
         if targetTierName in tg.tierNameList:
             targetTier = tg.tierDict[targetTierName]

@@ -314,9 +314,12 @@ class PointTier(TextgridTier):
 
         super(PointTier, self).__init__(name, entryList, minT, maxT)
 
-    def crop(self, cropStart, cropEnd):
+    def crop(self, cropStart, cropEnd, strictFlag=None, softFlag=None):
         '''
         Creates a new tier containing all entries inside the new interval
+        
+        strictFlag and softFlag are ignored.  These parameters are kept
+        for compatibility with IntervalTier.crop()
         '''
         newEntryList = []
         
@@ -614,13 +617,15 @@ class IntervalTier(TextgridTier):
         If both strictFlag and softFlag are set to false, partially contained
             tiers will be truncated in the output tier.
         '''
-        newEntryList = []
+        
+        # Debugging variables
         cutTStart = 0
         cutTWithin = 0
         cutTEnd = 0
         firstIntervalKeptProportion = 0
         lastIntervalKeptProportion = 0
         
+        newEntryList = []
         for entry in self.entryList:
             matchedEntry = None
             
@@ -686,9 +691,14 @@ class IntervalTier(TextgridTier):
                 newEntryList.append(matchedEntry)
 
         # Create subtier
-        subTier = IntervalTier(self.name, newEntryList, 0, cropEnd - cropStart)
-        return (subTier, cutTStart, cutTWithin, cutTEnd,
-                firstIntervalKeptProportion, lastIntervalKeptProportion)
+        croppedTier = IntervalTier(self.name, newEntryList,
+                                   0, cropEnd - cropStart)
+        
+        # DEBUG info
+#         debugInfo = (subTier, cutTStart, cutTWithin, cutTEnd,
+#                      firstIntervalKeptProportion, lastIntervalKeptProportion)
+    
+        return croppedTier
     
     def difference(self, tier):
         '''
@@ -1042,7 +1052,7 @@ class IntervalTier(TextgridTier):
         '''
         retEntryList = []
         for start, stop, label in tier.entryList:
-            subTier = self.crop(start, stop, False, False)[0]
+            subTier = self.crop(start, stop, False, False)
             
             # Combine the labels in the two tiers
             stub = "%s-%%s" % label
@@ -1150,24 +1160,28 @@ class Textgrid():
         
         return retTG
 
-    def crop(self, strictFlag, softFlag, startTime=None, endTime=None):
+    def crop(self, cropStart, cropEnd, strictFlag, softFlag):
+        '''
+        Creates a textgrid where all intervals fit within the crop region
         
-        if startTime is None:
-            startTime = self.minTimestamp
+        If strictFlag = True, only intervals wholly contained by the crop
+            period will be kept
             
-        if startTime is None:
-            endTime = self.maxTimestamp
+        If softFlag = True, the crop period will be stretched to the ends of
+            intervals that are only partially contained by the crop period
             
+        If both strictFlag and softFlag are set to false, partially contained
+            tiers will be truncated in the output tier.
+        '''
         newTG = Textgrid()
         newTG.minTimestamp = 0
-        newTG.maxTimestamp = endTime - startTime
+        newTG.maxTimestamp = cropEnd - cropStart
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             if isinstance(tier, IntervalTier):
-                newTier = tier.crop(startTime, endTime,
-                                    strictFlag, softFlag)[0]
+                newTier = tier.crop(cropStart, cropEnd, strictFlag, softFlag)
             elif isinstance(tier, PointTier):
-                newTier = tier.crop(startTime, endTime)
+                newTier = tier.crop(cropStart, cropEnd)
             
             newTG.addTier(newTier)
         
