@@ -1070,10 +1070,42 @@ class IntervalTier(TextgridTier):
         retTier = self.new(newName, retEntryList)
         
         return retTier
+
+    def merge(self, tier, mergeTierName='merge', mergeLabelFmt='%s / %s'):
         '''
+        Combines this tier with another.  Overlapping entries are combined.
         '''
+        
+        superEntryList = self.entryList + tier.entryList
+        superEntryList.sort()
+        
+        # Combine overlapping intervals
+        i = 0
+        while i < len(superEntryList) - 1:
+            currentEntry = superEntryList[i]
+            nextEntry = superEntryList[i + 1]
             
+            if intervalOverlapCheck(currentEntry, nextEntry):
+                currentStart, currentStop, currentLabel = superEntryList[i]
+                nextStop, nextLabel = superEntryList.pop(i + 1)[1:]
+                
+                newStop = max([currentStop, nextStop])
+                newLabel = mergeLabelFmt % (currentLabel, nextLabel)
+                
+                superEntryList[i] = (currentStart, newStop, newLabel)
+                
+            else:
+                i += 1
+        
+        minTime = self.minTimestamp
+        if minTime > tier.minTimestamp:
+            minTime = tier.minTimestamp
             
+        maxTime = self.maxTimestamp
+        if maxTime < tier.maxTimestamp:
+            maxTime = tier.maxTimestamp
+        
+        return IntervalTier(mergeTierName, superEntryList, minTime, maxTime)
 
     def union(self, tier):
         '''
