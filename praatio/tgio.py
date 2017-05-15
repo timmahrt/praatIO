@@ -67,7 +67,7 @@ def _removeUltrashortIntervals(tier, minLength):
                                newEntryList[j][2])
         j += 1
     
-    return tier.newTier(entryList=newEntryList)
+    return tier.new(entryList=newEntryList)
 
      
 def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
@@ -197,7 +197,7 @@ class TextgridTier(object):
         entryList = self.entryList + appendTier.entryList
         entryList.sort()
         
-        return self.newTier(self.name, entryList)
+        return self.new(self.name, entryList)
 
     def deleteEntry(self, entry):
         '''Removes an entry from the entryList'''
@@ -212,8 +212,8 @@ class TextgridTier(object):
                 continue
             newEntryList.append(entry)
     
-        newTier = self.newTier(self.name, newEntryList)
-            
+        newTier = self.new(self.name, newEntryList)
+        
         return newTier
     
     def find(self, matchLabel, substrMatchFlag=False):
@@ -271,9 +271,9 @@ class TextgridTier(object):
         '''Returns the duration of the tier'''
         return self.maxTimestamp - self.minTimestamp
     
-    def newTier(self, name=None, entryList=None,
+    def new(self, name=None, entryList=None,
                 minTimestamp=None, maxTimestamp=None):
-        '''Make a new interval tier derived from the current one'''
+        '''Make a new tier derived from the current one'''
         if name is None:
             name = self.name
         if entryList is None:
@@ -444,7 +444,7 @@ class PointTier(TextgridTier):
                   all points to the right of /stop/
         '''
 
-        newTier = self.newTier()
+        newTier = self.new()
         matchList = newTier.getEntries(start, stop)
         
         if len(matchList) == 0:
@@ -467,8 +467,8 @@ class PointTier(TextgridTier):
                     newEntryList.append((timestamp - diff, label))
             
             newMax = newTier.maxTimestamp - diff
-            newTier = newTier.newTier(entryList=newEntryList,
-                                      maxTimestamp=newMax)
+            newTier = newTier.new(entryList=newEntryList,
+                                  maxTimestamp=newMax)
                     
         return newTier
                 
@@ -532,8 +532,8 @@ class PointTier(TextgridTier):
             elif entry[0] > start:
                 newEntryList.append((entry[0] + duration, entry[1]))
                 
-        newTier = self.newTier(entryList=newEntryList,
-                               maxTimestamp=self.maxTimestamp + duration)
+        newTier = self.new(entryList=newEntryList,
+                           maxTimestamp=self.maxTimestamp + duration)
         
         return newTier
 
@@ -692,7 +692,7 @@ class IntervalTier(TextgridTier):
         Any overlapping portions of entries with entries in this textgrid
         will be removed from the returned tier.
         '''
-        retTier = self.newTier()
+        retTier = self.new()
         
         for entry in tier.entryList:
             retTier.eraseRegion(entry[0], entry[1], collisionCode='truncate')
@@ -757,7 +757,7 @@ class IntervalTier(TextgridTier):
         '''
         
         matchList = self.getEntries(start, stop)
-        newTier = self.newTier()
+        newTier = self.new()
 
         # if the collisionCode is not properly set it isn't clear what to do
         assert(collisionCode == 'truncate' or
@@ -822,8 +822,8 @@ class IntervalTier(TextgridTier):
                     break
             
             newMax = newTier.maxTimestamp - diff
-            newTier = newTier.newTier(entryList=newEntryList,
-                                      maxTimestamp=newMax)
+            newTier = newTier.new(entryList=newEntryList,
+                                  maxTimestamp=newMax)
             
         return newTier
 
@@ -1027,7 +1027,7 @@ class IntervalTier(TextgridTier):
                 elif collisionCode == 'no change':
                     newEntryList.append(entry)
         
-        newTier = self.newTier(entryList=newEntryList,
+        newTier = self.new(entryList=newEntryList,
                                maxTimestamp=self.maxTimestamp + duration)
                     
         return newTier
@@ -1053,7 +1053,7 @@ class IntervalTier(TextgridTier):
         
         newName = "%s-%s" % (self.name, tier.name)
         
-        retTier = self.newTier(newName, retEntryList)
+        retTier = self.new(newName, retEntryList)
         
         return retTier
     
@@ -1096,7 +1096,7 @@ class IntervalTier(TextgridTier):
         All entries in the given tier are added to the current tier.
         Overlapping entries are merged.
         '''
-        retTier = self.newTier()
+        retTier = self.new()
         
         for entry in tier.entryList:
             retTier.insertEntry(entry, False, collisionCode='merge')
@@ -1388,20 +1388,21 @@ class Textgrid():
         # (For this we can use any of the tiers involved
         # in the merge to determine the tier type)
         tierName = "/".join(tierList)
-        mergedTier = self.tierDict[tierList[0]].newTier(tierName,
+        mergedTier = self.tierDict[tierList[0]].new(tierName,
                                                         superEntryList)
         tg.addTier(mergedTier)
         
         return tg
     
     def new(self):
+        '''Returns a copy of this Textgrid'''
         return copy.deepcopy(self)
 
     def renameTier(self, oldName, newName):
         oldTier = self.tierDict[oldName]
         tierIndex = self.tierNameList.index(oldName)
         self.removeTier(oldName)
-        self.addTier(oldTier.newTier(newName, oldTier.entryList), tierIndex)
+        self.addTier(oldTier.new(newName, oldTier.entryList), tierIndex)
 
     def removeLabels(self, label, tierNameList=None):
         '''Remove labels from tiers'''
@@ -1420,7 +1421,7 @@ class Textgrid():
             if tierName in tierNameList:
                 newEntryList = [entry for entry in tier.entryList
                                 if entry[-1] != label]
-                tier = tier.newTier(tierName, newEntryList,
+                tier = tier.new(tierName, newEntryList,
                                     tier.minTimestamp, tier.maxTimestamp)
             
             tg.addTier(tier)
@@ -1437,11 +1438,11 @@ class Textgrid():
         self.removeTier(name)
         
         if preserveTime is True:
-            newTier = oldTier.newTier(name, newTierEntryList,
+            newTier = oldTier.new(name, newTierEntryList,
                                       oldTier.minTimestamp,
                                       oldTier.maxTimestamp)
         else:
-            newTier = oldTier.newTier(name, newTierEntryList)
+            newTier = oldTier.new(name, newTierEntryList)
             
         self.addTier(newTier, tierIndex)
             
