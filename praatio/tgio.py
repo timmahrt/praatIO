@@ -271,8 +271,8 @@ class TextgridTier(object):
         '''Returns the duration of the tier'''
         return self.maxTimestamp - self.minTimestamp
     
-    def new(self, name=None, entryList=None,
-                minTimestamp=None, maxTimestamp=None):
+    def new(self, name=None, entryList=None, minTimestamp=None,
+            maxTimestamp=None, pairedWav=None):
         '''Make a new tier derived from the current one'''
         if name is None:
             name = self.name
@@ -280,9 +280,10 @@ class TextgridTier(object):
             entryList = copy.deepcopy(self.entryList)
         if minTimestamp is None:
             minTimestamp = self.minTimestamp
-        if maxTimestamp is None:
+        if maxTimestamp is None and pairedWav is None:
             maxTimestamp = self.maxTimestamp
-        return type(self)(name, entryList, minTimestamp, maxTimestamp)
+        return type(self)(name, entryList, minTimestamp, maxTimestamp,
+                          pairedWav)
     
     def sort(self):
         '''Sorts the entries in the entryList'''
