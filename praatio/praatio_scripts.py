@@ -158,7 +158,8 @@ def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
                 newStop = wavQObj.findNearestZeroCrossing(stop)
                 newEntryList.append((newStart, newStop, label))
         
-        tg.replaceTier(tierName, newEntryList, True)
+        newTier = tier.new(entryList=newEntryList)
+        tg.replaceTier(tierName, newTier)
                 
     tg.save(outputTGFN)
 

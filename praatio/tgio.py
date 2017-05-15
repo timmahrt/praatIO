@@ -422,6 +422,9 @@ class PointTier(TextgridTier):
     def getEntries(self, start=None, stop=None, boundaryInclusive=True):
         '''
         Get all entries for the included range
+        
+        If boundaryInclusive, points at the boundary are included in
+        the search.
         '''
         
         if start is None:
@@ -430,15 +433,15 @@ class PointTier(TextgridTier):
         if stop is None:
             stop = self.maxTimestamp
         
-        returnList = []
+        entryList = []
         for entry in self.entryList:
             if (boundaryInclusive is True and (entry[0] == start or
                                                entry[0] == stop)):
-                returnList.append(entry)
+                entryList.append(entry)
             elif entry[0] > start and entry[0] < stop:
-                returnList.append(entry)
+                entryList.append(entry)
         
-        return returnList
+        return entryList
     
     def getValuesAtPoints(self, dataTupleList, fuzzyMatching=False):
         '''
@@ -553,12 +556,12 @@ class PointTier(TextgridTier):
             fmtStr = "Collision warning for %s with items %s of tier %s"
             print((fmtStr % (str(entry), str(matchList), self.name)))
     
-    def insertRegion(self, start, duration, collisionCode=None):
+    def insertSpace(self, start, duration, collisionCode=None):
         '''
         Inserts a region into the tier
         
         collisionCode: Ignored for the moment (added for compatibility
-                       with insertRegion() for Interval Tiers)
+                       with insertSpace() for Interval Tiers)
         '''
         
         newEntryList = []
@@ -895,10 +898,15 @@ class IntervalTier(TextgridTier):
             
         return newTier
 
-        '''
-        
     def getEntries(self, start=None, stop=None, boundaryInclusive=False):
+        '''
+        Get all entries.
         
+        If start or stop is specified, it bounds the search space.
+        
+        if boundaryInclusive is True, two intervals match even if they
+            only share a boundary
+        '''
         if start is None:
             start = self.minTimestamp
         
@@ -1000,7 +1008,7 @@ class IntervalTier(TextgridTier):
             fmtStr = "Collision warning for %s with items %s of tier %s"
             print((fmtStr % (str(entry), str(matchList), self.name)))
     
-    def insertRegion(self, start, duration, collisionCode=None):
+    def insertSpace(self, start, duration, collisionCode=None):
         '''
         Inserts a blank region into the tier
         
@@ -1047,7 +1055,7 @@ class IntervalTier(TextgridTier):
                     newEntryList.append(entry)
         
         newTier = self.new(entryList=newEntryList,
-                               maxTimestamp=self.maxTimestamp + duration)
+                           maxTimestamp=self.maxTimestamp + duration)
                     
         return newTier
        
@@ -1296,7 +1304,7 @@ class Textgrid():
         
         return tg
     
-    def insertRegion(self, start, duration, collisionCode=None):
+    def insertSpace(self, start, duration, collisionCode=None):
         '''
         Inserts a blank region into a textgrid
         
@@ -1315,7 +1323,7 @@ class Textgrid():
         
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
-            newTier = tier.insertRegion(start, duration, collisionCode)
+            newTier = tier.insertSpace(start, duration, collisionCode)
             newTG.addTier(newTier)
         
         return newTG
