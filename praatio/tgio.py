@@ -203,32 +203,28 @@ class TextgridTier(object):
         '''Removes an entry from the entryList'''
         self.entryList.pop(self.entryList.index(entry))
     
-    def find(self, matchLabel, substrMatchFlag=False):
-        '''
-        Returns the index of all intervals that match the given label
-        '''
-        returnList = []
-        for i, entry in enumerate(self.entryList):
-            if not substrMatchFlag:
-                if entry[-1] == matchLabel:
-                    returnList.append(i)
-            else:
-                if matchLabel in entry[-1]:
-                    returnList.append(i)
-        
-        return returnList
-    
-    def findRE(self, matchLabelRE):
+    def find(self, matchLabel, substrMatchFlag=False, usingRE=False):
         '''
         Returns the index of all intervals that match the given label
         
-        Uses regular expressions
+        substrMatchFlag: if True, match any label containing matchLabel.
+                         if False, label must be the same as matchLabel.
+        usingRE: if True, matchLabel is interpreted as a regular expression
         '''
         returnList = []
-        for i, entry in enumerate(self.entryList):
-            matchList = re.findall(matchLabelRE, entry[-1], re.I)
-            if matchList != []:
-                returnList.append(i)
+        if usingRE is True:
+            for i, entry in enumerate(self.entryList):
+                matchList = re.findall(matchLabel, entry[-1], re.I)
+                if matchList != []:
+                    returnList.append(i)
+        else:
+            for i, entry in enumerate(self.entryList):
+                if not substrMatchFlag:
+                    if entry[-1] == matchLabel:
+                        returnList.append(i)
+                else:
+                    if matchLabel in entry[-1]:
+                        returnList.append(i)
         
         return returnList
     
