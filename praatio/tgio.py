@@ -332,6 +332,22 @@ class TextgridTier(object):
         self.entryList = [tuple(entry) for entry in self.entryList]
         self.entryList.sort()
         
+    def union(self, tier):
+        '''
+        The given tier is set unioned to this tier.
+        
+        All entries in the given tier are added to the current tier.
+        Overlapping entries are merged.
+        '''
+        retTier = self.new()
+        
+        for entry in tier.entryList:
+            retTier.insertEntry(entry, False, collisionCode='merge')
+        
+        retTier.sort()
+        
+        return retTier
+        
 
 class PointTier(TextgridTier):
     
@@ -589,31 +605,6 @@ class PointTier(TextgridTier):
                            maxTimestamp=self.maxTimestamp + duration)
         
         return newTier
-    
-    def merge(self, tier, mergeTierName='merge', mergeLabelFmt='%s / %s'):
-        '''Combines this tier with another'''
-        mergedEntryList = self.entryList + tier.entryList
-        mergedEntryList.sort()
-        
-        # Combine points that occur at the same time
-        i = 0
-        while i < len(mergedEntryList) - 1:
-            if mergedEntryList[i][0] == mergedEntryList[i + 1][0]:
-                entry = mergedEntryList.pop(i + 1)
-                mergedLabel = mergeLabelFmt % (mergedEntryList[i][1], entry)
-                mergedEntryList[i] = (entry[0], mergedLabel)
-                
-            i += 1
-        
-        minTime = self.minTimestamp
-        if minTime > tier.minTimestamp:
-            minTime = tier.minTimestamp
-        
-        maxTime = self.maxTimestamp
-        if maxTime < tier.maxTimestamp:
-            maxTime = tier.maxTimestamp
-        
-        return PointTier(mergeTierName, mergedEntryList, minTime, maxTime)
 
         
 class IntervalTier(TextgridTier):
@@ -1113,42 +1104,6 @@ class IntervalTier(TextgridTier):
         
         return retTier
 
-    def merge(self, tier, mergeTierName='merge', mergeLabelFmt='%s / %s'):
-        '''
-        Combines this tier with another.  Overlapping entries are combined.
-        '''
-        
-        superEntryList = self.entryList + tier.entryList
-        superEntryList.sort()
-        
-        # Combine overlapping intervals
-        i = 0
-        while i < len(superEntryList) - 1:
-            currentEntry = superEntryList[i]
-            nextEntry = superEntryList[i + 1]
-            
-            if intervalOverlapCheck(currentEntry, nextEntry):
-                currentStart, currentStop, currentLabel = superEntryList[i]
-                nextStop, nextLabel = superEntryList.pop(i + 1)[1:]
-                
-                newStop = max([currentStop, nextStop])
-                newLabel = mergeLabelFmt % (currentLabel, nextLabel)
-                
-                superEntryList[i] = (currentStart, newStop, newLabel)
-                
-            else:
-                i += 1
-        
-        minTime = self.minTimestamp
-        if minTime > tier.minTimestamp:
-            minTime = tier.minTimestamp
-            
-        maxTime = self.maxTimestamp
-        if maxTime < tier.maxTimestamp:
-            maxTime = tier.maxTimestamp
-        
-        return IntervalTier(mergeTierName, superEntryList, minTime, maxTime)
-
     def morph(self, targetTier, filterFunc=None):
         '''
         Morphs the duration of segments in this tier to those in another
@@ -1183,22 +1138,6 @@ class IntervalTier(TextgridTier):
         newMax = self.maxTimestamp + cumulativeDifference
             
         return IntervalTier(self.name, newEntryList, newMin, newMax)
-    
-    def union(self, tier):
-        '''
-        The given tier is set unioned to this tier.
-        
-        All entries in the given tier are added to the current tier.
-        Overlapping entries are merged.
-        '''
-        retTier = self.new()
-        
-        for entry in tier.entryList:
-            retTier.insertEntry(entry, False, collisionCode='merge')
-        
-        retTier.sort()
-        
-        return retTier
 
         
 class Textgrid():
@@ -1433,7 +1372,7 @@ class Textgrid():
         if len(intervalTierNameList) > 0:
             intervalTier = self.tierDict[intervalTierNameList.pop(0)]
         for tierName in intervalTierNameList:
-            intervalTier = intervalTier.merge(self.tierDict[tierName])
+            intervalTier = intervalTier.union(self.tierDict[tierName])
 
         # Merge the point tiers
         pointTier = None
