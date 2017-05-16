@@ -90,7 +90,7 @@ def splitTierEntries(tg, sourceTierName, targetTierName,
         if endT is None:
             endT = maxT
         
-        sourceTier = sourceTier.crop(startT, endT, False, False)
+        sourceTier = sourceTier.crop(startT, endT, False, False, False)
         
         if targetTierName in tg.tierNameList:
             targetTier = tg.tierDict[targetTierName]
@@ -252,23 +252,12 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
         
         # Output the textgrid if requested
         if outputTGFlag is not False:
-            subTG = tg.crop(noPartialIntervals, False, start, stop)
+            subTG = tg.crop(start, stop, noPartialIntervals, False, True)
             
             if isinstance(outputTGFlag, str):
                 for tierName in subTG.tierNameList:
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
-        
-            # Adjust the new time on the intervals, the textgrid,
-            # and the textgrid tiers
-            # the crop start time becomes the new '0' value
-            offset = -1 * start
-            subTG = subTG.editTimestamps(offset)
-            subTG.minTimestamp = 0
-            subTG.maxTimestamp = stop - start
-            for tierName in subTG.tierNameList:
-                subTG.tierDict[tierName].minTimestamp = 0
-                subTG.tierDict[tierName].maxTimestamp = stop - start
             
             subTG.save(join(outputPath, outputName + ".TextGrid"))
     
@@ -325,7 +314,7 @@ def _findMisalignments(tg, timeV, maxDifference, tierNameList,
     if filterStopT > tg.maxTimestamp:
         filterStopT = tg.maxTimestamp
 
-    croppedTG = tg.crop(False, True, filterStartT, filterStopT)
+    croppedTG = tg.crop(filterStartT, filterStopT, False, True, False)
 
     matchList = [(tierName, timeV, entry, orderID)]
     for subTierName in tierNameList:

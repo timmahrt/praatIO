@@ -1268,12 +1268,8 @@ class Textgrid():
         newTG.maxTimestamp = maxT
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
-            if isinstance(tier, IntervalTier):
-                newTier = tier.crop(cropStart, cropEnd, strictFlag, softFlag,
-                                    rebaseToZero)
-            elif isinstance(tier, PointTier):
-                newTier = tier.crop(cropStart, cropEnd, rebaseToZero)
-            
+            newTier = tier.crop(cropStart, cropEnd, strictFlag, softFlag,
+                                rebaseToZero)
             newTG.addTier(newTier)
         
         return newTG
