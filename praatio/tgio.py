@@ -208,6 +208,8 @@ class TextgridTier(object):
     
     def __init__(self, name, entryList, minT, maxT):
         '''See PointTier or IntervalTier'''
+        entryList.sort()
+        
         self.name = name
         self.entryList = entryList
         self.minTimestamp = minT
@@ -673,7 +675,7 @@ class IntervalTier(TextgridTier):
         super(IntervalTier, self).__init__(name, entryList, minT, maxT)
         
     def crop(self, cropStart, cropEnd, strictFlag, softFlag,
-             rebaseToZero=True):
+             rebaseToZero):
         '''
         Creates a new tier with all entries that fit inside the new interval
         
@@ -790,7 +792,10 @@ class IntervalTier(TextgridTier):
         retTier = self.new()
         
         for entry in tier.entryList:
-            retTier.eraseRegion(entry[0], entry[1], collisionCode='truncate')
+            retTier = retTier.eraseRegion(entry[0],
+                                          entry[1],
+                                          collisionCode='truncate',
+                                          doShrink=False)
         
         return retTier
 
@@ -1093,7 +1098,7 @@ class IntervalTier(TextgridTier):
         '''
         retEntryList = []
         for start, stop, label in tier.entryList:
-            subTier = self.crop(start, stop, False, False)
+            subTier = self.crop(start, stop, False, False, False)
             
             # Combine the labels in the two tiers
             stub = "%s-%%s" % label
@@ -1299,7 +1304,7 @@ class Textgrid():
         return retTG
 
     def crop(self, cropStart, cropEnd, strictFlag, softFlag,
-             rebaseToZero=True):
+             rebaseToZero):
         '''
         Creates a textgrid where all intervals fit within the crop region
         
