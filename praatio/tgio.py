@@ -1144,6 +1144,41 @@ class IntervalTier(TextgridTier):
         
         return IntervalTier(mergeTierName, superEntryList, minTime, maxTime)
 
+    def morph(self, targetTier, filterFunc=None):
+        '''
+        Morphs the duration of segments in this tier to those in another
+        
+        This preserves the labels and the duration of silence in
+        this tier while changing the duration of labeled segments.
+        '''
+        cumulativeAdjustAmount = 0
+        lastFromEnd = 0
+        newEntryList = []
+        for fromEntry, targetEntry in zip(self.entryList,
+                                          targetTier.entryList):
+            
+            fromStart, fromEnd, fromLabel = fromEntry
+            targetStart, targetEnd = targetEntry[:2]
+            
+            # fromStart - lastFromEnd -> was this interval and the
+            # last one adjacent?
+            toStart = (fromStart - lastFromEnd) + cumulativeAdjustAmount
+
+            currAdjustAmount = (fromEnd - fromStart)
+            if filterFunc is None or filterFunc(fromLabel):
+                currAdjustAmount = (targetEnd - targetStart)
+            
+            toEnd = cumulativeAdjustAmount = toStart + currAdjustAmount
+            newEntryList.append((toStart, toEnd, fromLabel))
+            
+            lastFromEnd = fromEnd
+            
+        newMin = self.minTimestamp
+        cumulativeDifference = (newEntryList[-1][1] - self.entryList[-1][1])
+        newMax = self.maxTimestamp + cumulativeDifference
+            
+        return IntervalTier(self.name, newEntryList, newMin, newMax)
+    
     def union(self, tier):
         '''
         The given tier is set unioned to this tier.
