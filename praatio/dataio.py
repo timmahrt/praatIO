@@ -29,9 +29,11 @@ class PointObject(object):
         isEqual &= self.objectClass == other.objectClass
         isEqual &= self.minTime == other.minTime
         isEqual &= self.maxTime == other.maxTime
+        isEqual &= len(self.pointList) == len(other.pointList)
         
-        for selfEntry, otherEntry in zip(self.pointList, other.pointList):
-            isEqual &= selfEntry == otherEntry
+        if isEqual:
+            for selfEntry, otherEntry in zip(self.pointList, other.pointList):
+                isEqual &= selfEntry == otherEntry
         
         return isEqual
     

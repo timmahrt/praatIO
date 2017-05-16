@@ -221,13 +221,15 @@ class TextgridTier(object):
         isEqual &= self.name == other.name
         isEqual &= self.minTimestamp == other.minTimestamp
         isEqual &= self.maxTimestamp == other.maxTimestamp
+        isEqual &= len(self.entryList) == len(self.entryList)
         
-        for selfEntry, otherEntry in zip(self.entryList, other.entryList):
-            for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
-                try:
-                    isEqual &= isclose(selfSubEntry, otherSubEntry)
-                except TypeError:
-                    isEqual &= selfSubEntry == otherSubEntry
+        if isEqual:
+            for selfEntry, otherEntry in zip(self.entryList, other.entryList):
+                for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
+                    try:
+                        isEqual &= isclose(selfSubEntry, otherSubEntry)
+                    except TypeError:
+                        isEqual &= selfSubEntry == otherSubEntry
         
         return isEqual
     
@@ -367,7 +369,8 @@ class PointTier(TextgridTier):
 
         super(PointTier, self).__init__(name, entryList, minT, maxT)
 
-    def crop(self, cropStart, cropEnd, strictFlag=None, softFlag=None):
+    def crop(self, cropStart, cropEnd, strictFlag=None, softFlag=None,
+             rebaseToZero=True):
         '''
         Creates a new tier containing all entries inside the new interval
         
@@ -382,8 +385,17 @@ class PointTier(TextgridTier):
             if timestamp >= cropStart and timestamp <= cropEnd:
                 newEntryList.append(entry)
 
+        if rebaseToZero is True:
+            newEntryList = [(timeV - cropStart, label)
+                            for timeV, label in newEntryList]
+            minT = 0
+            maxT = cropEnd - cropStart
+        else:
+            minT = cropStart
+            maxT = cropEnd
+
         # Create subtier
-        subTier = PointTier(self.name, newEntryList, cropStart, cropEnd)
+        subTier = PointTier(self.name, newEntryList, minT, maxT)
         return subTier
 
     def editTimestamps(self, offset, allowOvershoot=False):
@@ -660,7 +672,8 @@ class IntervalTier(TextgridTier):
         
         super(IntervalTier, self).__init__(name, entryList, minT, maxT)
         
-    def crop(self, cropStart, cropEnd, strictFlag, softFlag):
+    def crop(self, cropStart, cropEnd, strictFlag, softFlag,
+             rebaseToZero=True):
         '''
         Creates a new tier with all entries that fit inside the new interval
         
@@ -672,6 +685,9 @@ class IntervalTier(TextgridTier):
             
         If both strictFlag and softFlag are set to false, partially contained
             tiers will be truncated in the output tier.
+        
+        If rebaseToZero is True, the cropped textgrid values will be
+            subtracted by the cropStart
         '''
         
         # Debugging variables
@@ -746,9 +762,17 @@ class IntervalTier(TextgridTier):
             if matchedEntry is not None:
                 newEntryList.append(matchedEntry)
 
+        if rebaseToZero is True:
+            newEntryList = [(startT - cropStart, stopT - cropStart, label)
+                            for startT, stopT, label in newEntryList]
+            minT = 0
+            maxT = cropEnd - cropStart
+        else:
+            minT = cropStart
+            maxT = cropEnd
+
         # Create subtier
-        croppedTier = IntervalTier(self.name, newEntryList,
-                                   0, cropEnd - cropStart)
+        croppedTier = IntervalTier(self.name, newEntryList, minT, maxT)
         
         # DEBUG info
 #         debugInfo = (subTier, cutTStart, cutTWithin, cutTEnd,
@@ -1239,7 +1263,8 @@ class Textgrid():
         
         return retTG
 
-    def crop(self, cropStart, cropEnd, strictFlag, softFlag):
+    def crop(self, cropStart, cropEnd, strictFlag, softFlag,
+             rebaseToZero=True):
         '''
         Creates a textgrid where all intervals fit within the crop region
         
@@ -1253,14 +1278,22 @@ class Textgrid():
             tiers will be truncated in the output tier.
         '''
         newTG = Textgrid()
-        newTG.minTimestamp = 0
-        newTG.maxTimestamp = cropEnd - cropStart
+        
+        if rebaseToZero is True:
+            minT = 0
+            maxT = cropEnd - cropStart
+        else:
+            minT = cropStart
+            maxT = cropEnd
+        newTG.minTimestamp = minT
+        newTG.maxTimestamp = maxT
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             if isinstance(tier, IntervalTier):
-                newTier = tier.crop(cropStart, cropEnd, strictFlag, softFlag)
+                newTier = tier.crop(cropStart, cropEnd, strictFlag, softFlag,
+                                    rebaseToZero)
             elif isinstance(tier, PointTier):
-                newTier = tier.crop(cropStart, cropEnd)
+                newTier = tier.crop(cropStart, cropEnd, rebaseToZero)
             
             newTG.addTier(newTier)
         

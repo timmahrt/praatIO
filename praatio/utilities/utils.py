@@ -8,6 +8,7 @@ import os
 from os.path import join
 import subprocess
 import functools
+import itertools
 import io
 from pkg_resources import resource_filename
 
@@ -286,3 +287,12 @@ def openCSV(path, fn, valueIndex=None, encoding="utf-8"):
         featureList = [row[valueIndex] for row in featureList]
     
     return featureList
+
+
+def safeZip(listOfLists, enforceLength):
+    "A safe version of python's zip()"
+    if enforceLength is True:
+        length = len(listOfLists[0])
+        assert(all([length == len(subList) for subList in listOfLists]))
+    
+    return itertools.izip_longest(*listOfLists)

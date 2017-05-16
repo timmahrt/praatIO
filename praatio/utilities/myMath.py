@@ -21,6 +21,7 @@ def medianFilterTimeSeriesData(featureTimeList, filterAmount, index,
     featValues = [row[index] for row in featureTimeList]
     featValues = medianFilter(featValues, filterAmount,
                               useEdgePadding)
+    assert(len(featureTimeList) == len(featValues))
     outputList = [piRow[:index] + [f0Val, ] + piRow[index + 1:]
                   for piRow, f0Val in zip(featureTimeList, featValues)]
         
