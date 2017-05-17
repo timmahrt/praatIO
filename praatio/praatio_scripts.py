@@ -192,7 +192,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     if noPartialIntervals is True:
         mode = 'strict'
     else:
-        mode = 'lax'
+        mode = 'truncated'
     
     tg = tgio.openTextgrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
