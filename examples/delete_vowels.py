@@ -59,8 +59,6 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
 
 # Shrink files
 root = join('.', 'files')
-zeroCrossingTGs = join(root, "zero_crossing_tgs")
-utils.makeDir(zeroCrossingTGs)
 
 inputTGFN = join(root, "bobby_phones.TextGrid")
 inputWavFN = join(root, "bobby.wav")
