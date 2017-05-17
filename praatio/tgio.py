@@ -387,13 +387,13 @@ class PointTier(TextgridTier):
 
         super(PointTier, self).__init__(name, entryList, minT, maxT)
 
-    def crop(self, cropStart, cropEnd, strictFlag=None, softFlag=None,
+    def crop(self, cropStart, cropEnd, mode=None,
              rebaseToZero=True):
         '''
         Creates a new tier containing all entries inside the new interval
         
-        strictFlag and softFlag are ignored.  These parameters are kept
-        for compatibility with IntervalTier.crop()
+        mode is ignored.  This parameter is kept for compatibility with
+        IntervalTier.crop()
         '''
         newEntryList = []
         
@@ -449,30 +449,6 @@ class PointTier(TextgridTier):
         
         return PointTier(self.name, newEntryList, newMin, newMax)
     
-    def getEntries(self, start=None, stop=None, boundaryInclusive=True):
-        '''
-        Get all entries for the included range
-        
-        If boundaryInclusive, points at the boundary are included in
-        the search.
-        '''
-        
-        if start is None:
-            start = self.minTimestamp
-        
-        if stop is None:
-            stop = self.maxTimestamp
-        
-        entryList = []
-        for entry in self.entryList:
-            if (boundaryInclusive is True and (entry[0] == start or
-                                               entry[0] == stop)):
-                entryList.append(entry)
-            elif entry[0] > start and entry[0] < stop:
-                entryList.append(entry)
-        
-        return entryList
-    
     def getValuesAtPoints(self, dataTupleList, fuzzyMatching=False):
         '''
         Get the values that occur at points in the point tier
@@ -514,7 +490,7 @@ class PointTier(TextgridTier):
         '''
 
         newTier = self.new()
-        matchList = newTier.getEntries(start, stop)
+        matchList = newTier.crop(start, stop, "truncated", False)
         
         if len(matchList) == 0:
             pass
@@ -557,9 +533,8 @@ class PointTier(TextgridTier):
         timestamp, label = entry
         
         matchList = []
-        entryList = self.getEntries()
         i = None
-        for i, searchEntry in entryList:
+        for i, searchEntry in self.entryList:
             if searchEntry[0] == entry[0]:
                 matchList.append(searchEntry)
                 break
@@ -665,23 +640,22 @@ class IntervalTier(TextgridTier):
         
         super(IntervalTier, self).__init__(name, entryList, minT, maxT)
         
-    def crop(self, cropStart, cropEnd, strictFlag, softFlag,
-             rebaseToZero):
+    def crop(self, cropStart, cropEnd, mode, rebaseToZero):
         '''
         Creates a new tier with all entries that fit inside the new interval
         
-        If strictFlag = True, only intervals wholly contained by the crop
-            period will be kept
-            
-        If softFlag = True, the crop period will be stretched to the ends of
-            intervals that are only partially contained by the crop period
-            
-        If both strictFlag and softFlag are set to false, partially contained
-            tiers will be truncated in the output tier.
+        mode = {'strict', 'lax', 'truncated'}
+            If 'strict', only intervals wholly contained by the crop
+                interval will be kept
+            If 'lax', partially contained intervals will be kept
+            If 'truncated', partially contained intervals will be 
+                truncated to fit within the crop region.
         
         If rebaseToZero is True, the cropped textgrid values will be
             subtracted by the cropStart
         '''
+        
+        assert(mode in ['strict', 'lax', 'truncated'])
         
         # Debugging variables
         cutTStart = 0
@@ -710,8 +684,8 @@ class IntervalTier(TextgridTier):
             
             # If it is only partially contained within the superEntry AND
             # inclusion is 'soft', include it anyways
-            elif softFlag and (intervalStart >= cropStart or
-                               intervalEnd <= cropEnd):
+            elif mode == 'lax' and (intervalStart >= cropStart or
+                                            intervalEnd <= cropEnd):
                 matchedEntry = entry
             
             # If not strict, include partial tiers on the edges
@@ -726,7 +700,7 @@ class IntervalTier(TextgridTier):
                 lastIntervalKeptProportion = ((cropEnd - intervalStart) /
                                               (intervalEnd - intervalStart))
 
-                if not strictFlag:
+                if mode == "truncated":
                     matchedEntry = (intervalStart, cropEnd, intervalLabel)
                     
                 else:
@@ -737,18 +711,18 @@ class IntervalTier(TextgridTier):
                 cutTStart = cropStart - intervalStart
                 firstIntervalKeptProportion = ((intervalEnd - cropStart) /
                                                (intervalEnd - intervalStart))
-                if not strictFlag:
+                if mode == "truncated":
                     matchedEntry = (cropStart, intervalEnd, intervalLabel)
                 else:
                     cutTWithin += cropEnd - cropStart
 
             # The current interval contains the new interval completely
             elif intervalStart <= cropStart and intervalEnd >= cropEnd:
-                if not strictFlag:
-                    if softFlag:
-                        matchedEntry = entry
-                    else:
-                        matchedEntry = (cropStart, cropEnd, intervalLabel)
+
+                if mode == "lax":
+                    matchedEntry = entry
+                elif mode == "truncated":
+                    matchedEntry = (cropStart, cropEnd, intervalLabel)
                 else:
                     cutTWithin += cropEnd - cropStart
                         
@@ -847,7 +821,7 @@ class IntervalTier(TextgridTier):
                   each item that occurs after /stop/
         '''
         
-        matchList = self.getEntries(start, stop)
+        matchList = self.crop(start, stop, 'lax', False).entryList
         newTier = self.new()
 
         # if the collisionCode is not properly set it isn't clear what to do
@@ -917,30 +891,6 @@ class IntervalTier(TextgridTier):
                                   maxTimestamp=newMax)
             
         return newTier
-
-    def getEntries(self, start=None, stop=None, boundaryInclusive=False):
-        '''
-        Get all entries.
-        
-        If start or stop is specified, it bounds the search space.
-        
-        if boundaryInclusive is True, two intervals match even if they
-            only share a boundary
-        '''
-        if start is None:
-            start = self.minTimestamp
-        
-        if stop is None:
-            stop = self.maxTimestamp
-        
-        targetEntry = (start, stop, "")
-        
-        returnList = []
-        for entry in self.entryList:
-            if intervalOverlapCheck(entry, targetEntry, boundaryInclusive):
-                returnList.append(entry)
-        
-        return returnList
     
     def getValuesInIntervals(self, dataTupleList):
         '''
@@ -966,7 +916,7 @@ class IntervalTier(TextgridTier):
         
         This can include unlabeled segments and regions marked as silent.
         '''
-        entryList = self.getEntries()
+        entryList = self.entryList
         invertedEntryList = [(entryList[i][1], entryList[i + 1][0], "")
                              for i in range(len(entryList) - 1)]
         
@@ -998,7 +948,7 @@ class IntervalTier(TextgridTier):
         '''
         startTime, endTime = entry[:2]
         
-        matchList = self.getEntries(startTime, endTime)
+        matchList = self.crop(startTime, endTime, 'lax', False).entryList
         
         if len(matchList) == 0:
             self.entryList.append(entry)
@@ -1089,7 +1039,7 @@ class IntervalTier(TextgridTier):
         '''
         retEntryList = []
         for start, stop, label in tier.entryList:
-            subTier = self.crop(start, stop, False, False, False)
+            subTier = self.crop(start, stop, "truncated", False)
             
             # Combine the labels in the two tiers
             stub = "%s-%%s" % label
@@ -1242,20 +1192,23 @@ class Textgrid():
         
         return retTG
 
-    def crop(self, cropStart, cropEnd, strictFlag, softFlag,
-             rebaseToZero):
+    def crop(self, cropStart, cropEnd, mode, rebaseToZero):
         '''
         Creates a textgrid where all intervals fit within the crop region
         
-        If strictFlag = True, only intervals wholly contained by the crop
-            period will be kept
+        mode = {'strict', 'lax', 'truncated'}
+            If 'strict', only intervals wholly contained by the crop
+                interval will be kept
+            If 'lax', partially contained intervals will be kept
+            If 'truncated', partially contained intervals will be 
+                truncated to fit within the crop region.
             
-        If softFlag = True, the crop period will be stretched to the ends of
-            intervals that are only partially contained by the crop period
-            
-        If both strictFlag and softFlag are set to false, partially contained
-            tiers will be truncated in the output tier.
+        If rebaseToZero is True, the cropped textgrid values will be
+            subtracted by the cropStart
         '''
+        
+        assert(mode in ['strict', 'lax', 'truncated'])
+        
         newTG = Textgrid()
         
         if rebaseToZero is True:
@@ -1268,8 +1221,7 @@ class Textgrid():
         newTG.maxTimestamp = maxT
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
-            newTier = tier.crop(cropStart, cropEnd, strictFlag, softFlag,
-                                rebaseToZero)
+            newTier = tier.crop(cropStart, cropEnd, mode, rebaseToZero)
             newTG.addTier(newTier)
         
         return newTG

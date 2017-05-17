@@ -90,7 +90,7 @@ def splitTierEntries(tg, sourceTierName, targetTierName,
         if endT is None:
             endT = maxT
         
-        sourceTier = sourceTier.crop(startT, endT, False, False, False)
+        sourceTier = sourceTier.crop(startT, endT, "truncated", False)
         
         if targetTierName in tg.tierNameList:
             targetTier = tg.tierDict[targetTierName]
@@ -189,6 +189,11 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
     
+    if noPartialIntervals is True:
+        mode = 'strict'
+    else:
+        mode = 'lax'
+    
     tg = tgio.openTextgrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
     
@@ -252,7 +257,7 @@ def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
         
         # Output the textgrid if requested
         if outputTGFlag is not False:
-            subTG = tg.crop(start, stop, noPartialIntervals, False, True)
+            subTG = tg.crop(start, stop, mode, True)
             
             if isinstance(outputTGFlag, str):
                 for tierName in subTG.tierNameList:
@@ -314,7 +319,7 @@ def _findMisalignments(tg, timeV, maxDifference, tierNameList,
     if filterStopT > tg.maxTimestamp:
         filterStopT = tg.maxTimestamp
 
-    croppedTG = tg.crop(filterStartT, filterStopT, False, True, False)
+    croppedTG = tg.crop(filterStartT, filterStopT, "lax", False)
 
     matchList = [(tierName, timeV, entry, orderID)]
     for subTierName in tierNameList:
