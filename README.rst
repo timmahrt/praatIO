@@ -105,7 +105,11 @@ Ver 3.6 (May 05, 2017)
 
 - Major clean up of tgio
 
+    - Ver 3.6 is **not** backwards compatible with previous versions of PraatIO.  Lots of changes to tgio.
+
 - Tutorials folder added
+
+
 
 
 Ver 3.5 (April 04, 2017)
