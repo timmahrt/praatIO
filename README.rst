@@ -86,8 +86,27 @@ What can you do with this library?
     see /examples/textgrid_set_operations.py
 
 
+Tutorials
+================
+
+There are tutorials available for learning how to use PraatIO.  These
+are in the form of IPython Notebooks which can be found in the /tutorials/
+folder distributed with PraatIO.
+
+You can view them online using the external website Jupyter:
+
+`Tutorial 1: An introduction and tutorial <https://nbviewer.jupyter.org/github/timmahrt/praatIO/blob/master/tutorials/tutorial1_intro_to_praatio.ipynb>`_
+    
+    
 Major revisions
 ================
+
+Ver 3.6 (May 05, 2017)
+
+- Major clean up of tgio
+
+- Tutorials folder added
+
 
 Ver 3.5 (April 04, 2017)
 
