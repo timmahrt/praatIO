@@ -517,7 +517,7 @@ class PointTier(TextgridTier):
                     
         return newTier
                 
-    def insertEntry(self, entry, warnFlag, collisionCode=None):
+    def insertEntry(self, entry, warnFlag=True, collisionCode=None):
         '''
         inserts an interval into the tier
         
@@ -933,7 +933,7 @@ class IntervalTier(TextgridTier):
             
         return invertedEntryList
     
-    def insertEntry(self, entry, warnFlag, collisionCode=None):
+    def insertEntry(self, entry, warnFlag=True, collisionCode=None):
         '''
         inserts an interval into the tier
         
@@ -1200,7 +1200,7 @@ class Textgrid():
             If 'strict', only intervals wholly contained by the crop
                 interval will be kept
             If 'lax', partially contained intervals will be kept
-            If 'truncated', partially contained intervals will be 
+            If 'truncated', partially contained intervals will be
                 truncated to fit within the crop region.
             
         If rebaseToZero is True, the cropped textgrid values will be
