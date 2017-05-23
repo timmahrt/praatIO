@@ -56,7 +56,8 @@ def _xsampaToIPATier(tg, tierName):
             pass
         entryList.append((start, stop, label))
     
-    tg.replaceTier(tierName, entryList)
+    tier = tgio.IntervalTier(tierName, entryList, 0, tg.maxTimestamp)
+    tg.replaceTier(tierName, tier)
     
     return tg
 
