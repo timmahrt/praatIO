@@ -490,7 +490,8 @@ class PointTier(TextgridTier):
         '''
 
         newTier = self.new()
-        matchList = newTier.crop(start, stop, "truncated", False)
+        croppedTier = newTier.crop(start, stop, "truncated", False)
+        matchList = croppedTier.entryList
         
         if len(matchList) == 0:
             pass
@@ -648,7 +649,7 @@ class IntervalTier(TextgridTier):
             If 'strict', only intervals wholly contained by the crop
                 interval will be kept
             If 'lax', partially contained intervals will be kept
-            If 'truncated', partially contained intervals will be 
+            If 'truncated', partially contained intervals will be
                 truncated to fit within the crop region.
         
         If rebaseToZero is True, the cropped textgrid values will be
