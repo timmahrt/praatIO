@@ -157,7 +157,40 @@ def audioToIntensity(inputFN, outputFN, praatEXE,
     return iList
 
 
-def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
+def audioToPitch(inputFN, outputFN, praatEXE,
+                 minPitch, maxPitch, sampleStep=0.01,
+                 silenceThreshold=0.03, forceRegenerate=True,
+                 undefinedValue=None, pitchQuadInterp=False):
+
+    outputPath = os.path.split(outputFN)[0]
+    
+    utils.makeDir(outputPath)
+    
+    if pitchQuadInterp is True:
+        doInterpolation = 1
+    else:
+        doInterpolation = 0
+    
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        
+        # The praat script uses append mode, so we need to clear any prior
+        # result
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [inputFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold, -1, -1,
+                   doInterpolation]
+        
+        scriptName = "get_pitch.praat"
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+            
+    pList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+    
+    return pList
 
 
 def audioToPI(inputFN, outputFN, praatEXE,
