@@ -28,7 +28,7 @@ class OverwriteException(Exception):
                 "to an alternative location or add a suffix to the output. ")
 
 
-def _audioToPIPiecewise(inputFN, outputFN, praatEXE,
+def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                         minPitch, maxPitch, tgFN, tierName,
                         tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
                         forceRegenerate=True, undefinedValue=None,
@@ -36,7 +36,7 @@ def _audioToPIPiecewise(inputFN, outputFN, praatEXE,
     '''
     Extracts pitch and int from each labeled interval in a textgrid
     
-    This has the benefit of being faster than using _audioToPIFile if only
+    This has the benefit of being faster than using _extractPIFile if only
     labeled regions need to have their pitch values sampled, particularly
     for longer files.
     
@@ -59,7 +59,7 @@ def _audioToPIPiecewise(inputFN, outputFN, praatEXE,
         allPIList = []
         for start, _, fn in splitAudioList:
             tmpTrackName = os.path.splitext(fn)[0] + ".txt"
-            piList = _audioToPIFile(join(tmpOutputPath, fn),
+            piList = _extractPIFile(join(tmpOutputPath, fn),
                                     join(tmpOutputPath, tmpTrackName),
                                     praatEXE, minPitch, maxPitch,
                                     sampleStep, silenceThreshold,
@@ -79,7 +79,7 @@ def _audioToPIPiecewise(inputFN, outputFN, praatEXE,
     return piList
 
 
-def _audioToPIFile(inputFN, outputFN, praatEXE,
+def _extractPIFile(inputFN, outputFN, praatEXE,
                    minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
                    forceRegenerate=True, tgFN=None, tierName=None,
                    undefinedValue=None, pitchQuadInterp=False):
@@ -130,7 +130,7 @@ def _audioToPIFile(inputFN, outputFN, praatEXE,
     return piList
 
 
-def audioToIntensity(inputFN, outputFN, praatEXE,
+def extractIntensity(inputFN, outputFN, praatEXE,
                      minPitch, sampleStep=0.01, forceRegenerate=True,
                      undefinedValue=None):
     outputPath = os.path.split(outputFN)[0]
@@ -157,7 +157,7 @@ def audioToIntensity(inputFN, outputFN, praatEXE,
     return iList
 
 
-def audioToPitch(inputFN, outputFN, praatEXE,
+def extractPitch(inputFN, outputFN, praatEXE,
                  minPitch, maxPitch, sampleStep=0.01,
                  silenceThreshold=0.03, forceRegenerate=True,
                  undefinedValue=None, pitchQuadInterp=False):
@@ -193,7 +193,7 @@ def audioToPitch(inputFN, outputFN, praatEXE,
     return pList
 
 
-def audioToPI(inputFN, outputFN, praatEXE,
+def extractPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
               silenceThreshold=0.03, forceRegenerate=True,
               tgFN=None, tierName=None, tmpOutputPath=None,
@@ -212,7 +212,7 @@ def audioToPI(inputFN, outputFN, praatEXE,
     outputPath = os.path.split(outputFN)[0]
     
     if tgFN is None or tierName is None:
-        piList = _audioToPIFile(inputFN, outputFN,
+        piList = _extractPIFile(inputFN, outputFN,
                                 praatEXE, minPitch, maxPitch,
                                 sampleStep, silenceThreshold, forceRegenerate,
                                 undefinedValue=undefinedValue,
@@ -220,7 +220,7 @@ def audioToPI(inputFN, outputFN, praatEXE,
     else:
         if tmpOutputPath is None:
             tmpOutputPath = join(outputPath, "piecewise_output")
-        piList = _audioToPIPiecewise(inputFN, outputFN,
+        piList = _extractPIPiecewise(inputFN, outputFN,
                                      praatEXE, minPitch, maxPitch,
                                      tgFN, tierName, tmpOutputPath, sampleStep,
                                      silenceThreshold, forceRegenerate,

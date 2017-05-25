@@ -31,7 +31,7 @@ utils.makeDir(pitchMeasuresPath)
 utils.makeDir(rmsIntensityPath)
 utils.makeDir(formantsPath)
 
-bobbyPitchData = pitch_and_intensity.audioToPI(join(wavPath, "bobby.wav"),
+bobbyPitchData = pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
                                                join(pitchPath, "bobby.txt"),
                                                praatEXE, 50, 350,
                                                forceRegenerate=False)
@@ -42,30 +42,28 @@ bobbyPitchData = pitch_and_intensity.audioToPI(join(wavPath, "bobby.wav"),
 
 # Extracts each labeled interval as a separate wave file, extracts the
 # pitch track from each of those, and then aggregates the result.
-# pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
-#                              "bobby_segments.txt", praatEXE,
-#                              50, 350,
-#                              forceRegenerate=True,
-#                              tgPath=wavPath,
-#                              tgFN="bobby_words.TextGrid",
-#                              tierName="word")
+# pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
+#                               join(pitchPath, "bobby_segments.txt"),
+#                               praatEXE, 50, 350,
+#                               forceRegenerate=True,
+#                               tgFN=join(wavPath, "bobby_words.TextGrid"),
+#                               tierName="word")
 
 # Generates the entire pitch contour for the file, but only saves the
 # labeled sections.  Functionally the same as the commented-out code above.
-# pitch_and_intensity._audioToPIFile(wavPath, "bobby.wav", pitchPath,
-#                                    "bobby_segments.txt", praatEXE,
-#                                    50, 350,
+# pitch_and_intensity._extractPIFile(join(wavPath, "bobby.wav"),
+#                                    join(pitchPath, "bobby_segments.txt"),
+#                                    praatEXE, 50, 350,
 #                                    forceRegenerate=True,
-#                                    tgPath=wavPath,
-#                                    tgFN="bobby_words.TextGrid",
+#                                    tgFN=join(wavPath, "bobby_words.TextGrid"),
 #                                    tierName="word")
 
-maryPitchData = pitch_and_intensity.audioToPI(join(wavPath, "mary.wav"),
+maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
                                               join(pitchPath, "mary.txt"),
                                               praatEXE, 75, 450,
                                               forceRegenerate=False)
 
-maryPitchData = pitch_and_intensity.audioToPI(join(wavPath, "mary.wav"),
+maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
                                               join(pitchPath, "mary_interpolated.txt"),
                                               praatEXE, 75, 450,
                                               forceRegenerate=False,
@@ -73,7 +71,7 @@ maryPitchData = pitch_and_intensity.audioToPI(join(wavPath, "mary.wav"),
 
 
 filteredFN = "mary_300hz_high_pass_filtered.wav"
-maryFilteredPitchData = pitch_and_intensity.audioToPitch(join(wavPath, filteredFN),
+maryFilteredPitchData = pitch_and_intensity.extractPitch(join(wavPath, filteredFN),
                                                          join(pitchPath, "mary_filtered.txt"),
                                                          praatEXE, 75, 450,
                                                          forceRegenerate=False)
