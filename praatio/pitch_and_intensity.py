@@ -28,8 +28,8 @@ class OverwriteException(Exception):
                 "to an alternative location or add a suffix to the output. ")
 
 
-def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
-                        minPitch, maxPitch, tgPath, tgFN, tierName,
+def _audioToPIPiecewise(inputFN, outputFN, praatEXE,
+                        minPitch, maxPitch, tgFN, tierName,
                         tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
                         forceRegenerate=True, undefinedValue=None,
                         pitchQuadInterp=False):
@@ -43,28 +43,25 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
     Returns the result as a list.  Will load the serialized result
     if this has already been called on the appropriate files before
     '''
-    
-    inputFullFN = join(inputPath, inputFN)
-    tgFullFN = join(tgPath, tgFN)
-    outputFullFN = join(outputPath, outputFN)
-    
+    outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
     
-    assert(os.path.exists(inputFullFN))
-    firstTime = not os.path.exists(outputFullFN)
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         
         utils.makeDir(tmpOutputPath)
-        splitAudioList = praatio_scripts.splitAudioOnTier(inputFullFN,
-                                                          tgFullFN,
+        splitAudioList = praatio_scripts.splitAudioOnTier(inputFN,
+                                                          tgFN,
                                                           tierName,
                                                           tmpOutputPath,
                                                           False)
         allPIList = []
         for start, _, fn in splitAudioList:
             tmpTrackName = os.path.splitext(fn)[0] + ".txt"
-            piList = _audioToPIFile(tmpOutputPath, fn, tmpOutputPath,
-                                    tmpTrackName, praatEXE, minPitch, maxPitch,
+            piList = _audioToPIFile(join(tmpOutputPath, fn),
+                                    join(tmpOutputPath, tmpTrackName),
+                                    praatEXE, minPitch, maxPitch,
                                     sampleStep, silenceThreshold,
                                     forceRegenerate=True,
                                     pitchQuadInterp=pitchQuadInterp)
@@ -73,7 +70,7 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
             allPIList.extend(piList)
             
         allPIList = [",".join(row) for row in allPIList]
-        with open(outputFullFN, "w") as fd:
+        with open(outputFN, "w") as fd:
             fd.write("\n".join(allPIList) + "\n")
 
     piList = loadTimeSeriesData(outputPath, outputFN,
@@ -82,96 +79,90 @@ def _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN, praatEXE,
     return piList
 
 
-def _audioToPIFile(inputPath, inputFN, outputPath, outputFN, praatEXE,
+def _audioToPIFile(inputFN, outputFN, praatEXE,
                    minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
-                   forceRegenerate=True,
-                   tgPath=None, tgFN=None, tierName=None, undefinedValue=None,
-                   pitchQuadInterp=False):
+                   forceRegenerate=True, tgFN=None, tierName=None,
+                   undefinedValue=None, pitchQuadInterp=False):
     '''
     Extracts pitch and intensity values from an audio file
     
     Returns the result as a list.  Will load the serialized result
     if this has already been called on the appropriate files before
     '''
-    
-    inputFullFN = join(inputPath, inputFN)
-    outputFullFN = join(outputPath, outputFN)
-    
+    outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
     
-    assert(os.path.exists(inputFullFN))
-    firstTime = not os.path.exists(outputFullFN)
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         
         # The praat script uses append mode, so we need to clear any prior
         # result
-        if os.path.exists(outputFullFN):
-            os.remove(outputFullFN)
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
         
         if pitchQuadInterp is True:
             doInterpolation = 1
         else:
             doInterpolation = 0
         
-        if tgPath is None or tgFN is None or tierName is None:
-            argList = [inputFullFN, outputFullFN, sampleStep,
+        if tgFN is None or tierName is None:
+            argList = [inputFN, outputFN, sampleStep,
                        minPitch, maxPitch, silenceThreshold, -1, -1,
                        doInterpolation]
             
-            scriptName = "get_pitch_and_intensity_via_python.praat"
+            scriptName = "get_pitch_and_intensity.praat"
             scriptFN = join(utils.scriptsPath, scriptName)
             utils.runPraatScript(praatEXE, scriptFN, argList)
             
         else:
-            argList = [inputFullFN, outputFullFN,
-                       join(tgPath, tgFN), tierName, sampleStep,
+            argList = [inputFN, outputFN, tgFN, tierName, sampleStep,
                        minPitch, maxPitch, silenceThreshold,
                        doInterpolation]
             
-            scriptName = "get_pitch_and_intensity_segments_via_python.praat"
+            scriptName = "get_pitch_and_intensity.praat"
             scriptFN = join(utils.scriptsPath, scriptName)
             utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    piList = loadTimeSeriesData(outputPath, outputFN,
+    piList = loadTimeSeriesData(join(outputPath, outputFN),
                                 undefinedValue=undefinedValue)
     
     return piList
 
 
-def audioToI(inputPath, inputFN, outputPath, outputFN, praatEXE,
-             minPitch, sampleStep=0.01, forceRegenerate=True,
-             undefinedValue=None):
-
-    inputFullFN = join(inputPath, inputFN)
-    outputFullFN = join(outputPath, outputFN)
-    
+def audioToIntensity(inputFN, outputFN, praatEXE,
+                     minPitch, sampleStep=0.01, forceRegenerate=True,
+                     undefinedValue=None):
+    outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
     
-    assert(os.path.exists(inputFullFN))
-    firstTime = not os.path.exists(outputFullFN)
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         
         # The praat script uses append mode, so we need to clear any prior
         # result
-        if os.path.exists(outputFullFN):
-            os.remove(outputFullFN)
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
         
-        argList = [inputFullFN, outputFullFN, sampleStep,
+        argList = [inputFN, outputFN, sampleStep,
                    minPitch, -1, -1]
         
-        scriptName = "get_intensity_via_python.praat"
+        scriptName = "get_intensity.praat"
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
             
-    iList = loadTimeSeriesData(outputPath, outputFN,
-                               undefinedValue=undefinedValue)
+    iList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
     
     return iList
 
 
 def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
+
+
+def audioToPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
-              silenceThreshold=0.03, forceRegenerate=True, tgPath=None,
+              silenceThreshold=0.03, forceRegenerate=True,
               tgFN=None, tierName=None, tmpOutputPath=None,
               undefinedValue=None, pitchQuadInterp=False):
     '''
@@ -185,8 +176,10 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     female: minPitch=75; maxPitch=450
     '''
     
-    if tgPath is None or tgFN is None or tierName is None:
-        piList = _audioToPIFile(inputPath, inputFN, outputPath, outputFN,
+    outputPath = os.path.split(outputFN)[0]
+    
+    if tgFN is None or tierName is None:
+        piList = _audioToPIFile(inputFN, outputFN,
                                 praatEXE, minPitch, maxPitch,
                                 sampleStep, silenceThreshold, forceRegenerate,
                                 undefinedValue=undefinedValue,
@@ -194,8 +187,8 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     else:
         if tmpOutputPath is None:
             tmpOutputPath = join(outputPath, "piecewise_output")
-        piList = _audioToPIPiecewise(inputPath, inputFN, outputPath, outputFN,
-                                     praatEXE, minPitch, maxPitch, tgPath,
+        piList = _audioToPIPiecewise(inputFN, outputFN,
+                                     praatEXE, minPitch, maxPitch,
                                      tgFN, tierName, tmpOutputPath, sampleStep,
                                      silenceThreshold, forceRegenerate,
                                      undefinedValue=undefinedValue,
@@ -204,7 +197,7 @@ def audioToPI(inputPath, inputFN, outputPath, outputFN, praatEXE,
     return piList
 
 
-def loadTimeSeriesData(rawPitchDir, fn, undefinedValue=None):
+def loadTimeSeriesData(fn, undefinedValue=None):
     '''
     For reading the output of get_pitch_and_intensity or get_intensity
     
@@ -212,10 +205,10 @@ def loadTimeSeriesData(rawPitchDir, fn, undefinedValue=None):
     [(time1, value1a, value1b, ...),
      (time2, value2a, value2b, ...), ]
     '''
-    name = os.path.splitext(fn)[0]
+    name = os.path.splitext(os.path.split(fn)[1])[0]
     
     try:
-        with io.open(join(rawPitchDir, fn), "r", encoding='utf-8') as fd:
+        with io.open(fn, "r", encoding='utf-8') as fd:
             data = fd.read()
     except IOError:
         print("No pitch track for: %s" % name)
@@ -256,7 +249,7 @@ def loadTimeSeriesData(rawPitchDir, fn, undefinedValue=None):
     return dataList
 
 
-def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch,
+def generatePIMeasures(dataList, tgFN, tierName, doPitch,
                        medianFilterWindowSize=None):
     '''
     Generates processed values for the labeled intervals in a textgrid
@@ -266,7 +259,6 @@ def generatePIMeasures(dataList, tgPath, tgFN, tierName, doPitch,
     if 'doPitch'=true get pitch measures; if =false get rms intensity
     '''
     
-    tgFN = join(tgPath, tgFN)
     tg = tgio.openTextgrid(tgFN)
     piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
     

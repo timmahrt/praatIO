@@ -31,8 +31,9 @@ utils.makeDir(pitchMeasuresPath)
 utils.makeDir(rmsIntensityPath)
 utils.makeDir(formantsPath)
 
-bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
-                                               "bobby.txt", praatEXE, 50, 350,
+bobbyPitchData = pitch_and_intensity.audioToPI(join(wavPath, "bobby.wav"),
+                                               join(pitchPath, "bobby.txt"),
+                                               praatEXE, 50, 350,
                                                forceRegenerate=False)
 
 # Here are two examples of the new functionality of extracting pitch
@@ -59,33 +60,32 @@ bobbyPitchData = pitch_and_intensity.audioToPI(wavPath, "bobby.wav", pitchPath,
 #                                    tgFN="bobby_words.TextGrid",
 #                                    tierName="word")
 
-maryPitchData = pitch_and_intensity.audioToPI(wavPath, "mary.wav", pitchPath,
-                                              "mary.txt", praatEXE, 75, 450,
+maryPitchData = pitch_and_intensity.audioToPI(join(wavPath, "mary.wav"),
+                                              join(pitchPath, "mary.txt"),
+                                              praatEXE, 75, 450,
                                               forceRegenerate=False)
 
-maryPitchData = pitch_and_intensity.audioToPI(wavPath, "mary.wav", pitchPath,
-                                              "mary_interpolated.txt",
+maryPitchData = pitch_and_intensity.audioToPI(join(wavPath, "mary.wav"),
+                                              join(pitchPath, "mary_interpolated.txt"),
                                               praatEXE, 75, 450,
                                               forceRegenerate=False,
                                               pitchQuadInterp=True)
 
 
 filteredFN = "mary_300hz_high_pass_filtered.wav"
-maryFilteredPitchData = pitch_and_intensity.audioToPI(wavPath,
-                                                      filteredFN,
-                                                      pitchPath,
-                                                      "mary_filtered.txt",
-                                                      praatEXE, 75, 450,
-                                                      forceRegenerate=False)
+maryFilteredPitchData = pitch_and_intensity.audioToPitch(join(wavPath, filteredFN),
+                                                         join(pitchPath, "mary_filtered.txt"),
+                                                         praatEXE, 75, 450,
+                                                         forceRegenerate=False)
 
 # Generate pitch and intensity values for one file
-pitch_and_intensity.generatePIMeasures(bobbyPitchData, tgPath,
-                                       "bobby_words.TextGrid",
+pitch_and_intensity.generatePIMeasures(bobbyPitchData,
+                                       join(tgPath, "bobby_words.TextGrid"),
                                        "word", doPitch=True,
                                        medianFilterWindowSize=9)
 
-pitch_and_intensity.generatePIMeasures(maryPitchData, tgPath,
-                                       "mary.TextGrid",
+pitch_and_intensity.generatePIMeasures(maryPitchData,
+                                       join(tgPath, "mary.TextGrid"),
                                        "word", doPitch=False,
                                        medianFilterWindowSize=9)
 

@@ -19,7 +19,7 @@ if not os.path.exists(outputPath):
 
 for wavFN, tgFN in [#("bobby.wav", "bobby_words.TextGrid"),
                     ("mary.wav", "mary.TextGrid")]:
-    praatio_scripts.splitAudioOnTier(join(path, wavFN), 
+    praatio_scripts.splitAudioOnTier(join(path, wavFN),
                                      join(path, tgFN),
                                      "phone",
                                      outputPath,
