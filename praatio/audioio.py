@@ -48,6 +48,10 @@ def numsAsSamples(sampleWidth, numList):
     return byteStr
 
 
+def getDuration(wavFN):
+    return WavQueryObj(wavFN).getDuration()
+
+    
 def getMaxAmplitude(sampleWidth):
     '''Gets the maximum possible amplitude for a given sample width'''
     return 2 ** (sampleWidth * 8 - 1) - 1
