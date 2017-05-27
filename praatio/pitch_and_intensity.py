@@ -32,7 +32,7 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                         minPitch, maxPitch, tgFN, tierName,
                         tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
                         forceRegenerate=True, undefinedValue=None,
-                        pitchQuadInterp=False):
+                        medianFilterWindowSize=0, pitchQuadInterp=False):
     '''
     Extracts pitch and int from each labeled interval in a textgrid
     
@@ -45,6 +45,8 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
     '''
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
+    
+    windowSize = medianFilterWindowSize
     
     assert(os.path.exists(inputFN))
     firstTime = not os.path.exists(outputFN)
@@ -64,6 +66,7 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                                     praatEXE, minPitch, maxPitch,
                                     sampleStep, silenceThreshold,
                                     forceRegenerate=True,
+                                    medianFilterWindowSize=windowSize,
                                     pitchQuadInterp=pitchQuadInterp)
             piList = [("%0.3f" % (float(time) + start), str(pV), str(iV))
                       for time, pV, iV in piList]
@@ -81,7 +84,8 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
 def _extractPIFile(inputFN, outputFN, praatEXE,
                    minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
                    forceRegenerate=True, tgFN=None, tierName=None,
-                   undefinedValue=None, pitchQuadInterp=False):
+                   undefinedValue=None, medianFilterWindowSize=0,
+                   pitchQuadInterp=False):
     '''
     Extracts pitch and intensity values from an audio file
     
@@ -108,7 +112,7 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
         if tgFN is None or tierName is None:
             argList = [inputFN, outputFN, sampleStep,
                        minPitch, maxPitch, silenceThreshold, -1, -1,
-                       doInterpolation]
+                       medianFilterWindowSize, doInterpolation]
             
             scriptName = "get_pitch_and_intensity.praat"
             scriptFN = join(utils.scriptsPath, scriptName)
@@ -117,7 +121,7 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
         else:
             argList = [inputFN, outputFN, tgFN, tierName, sampleStep,
                        minPitch, maxPitch, silenceThreshold,
-                       doInterpolation]
+                       medianFilterWindowSize, doInterpolation]
             
             scriptName = "get_pitch_and_intensity.praat"
             scriptFN = join(utils.scriptsPath, scriptName)
@@ -195,7 +199,8 @@ def extractPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
               silenceThreshold=0.03, forceRegenerate=True,
               tgFN=None, tierName=None, tmpOutputPath=None,
-              undefinedValue=None, pitchQuadInterp=False):
+              undefinedValue=None, medianFilterWindowSize=0,
+              pitchQuadInterp=False):
     '''
     Extracts pitch and intensity from a file wholesale or piecewise
 
@@ -209,11 +214,14 @@ def extractPI(inputFN, outputFN, praatEXE,
     
     outputPath = os.path.split(outputFN)[0]
     
+    windowSize = medianFilterWindowSize
+    
     if tgFN is None or tierName is None:
         piList = _extractPIFile(inputFN, outputFN,
                                 praatEXE, minPitch, maxPitch,
                                 sampleStep, silenceThreshold, forceRegenerate,
                                 undefinedValue=undefinedValue,
+                                medianFilterWindowSize=windowSize,
                                 pitchQuadInterp=pitchQuadInterp)
     else:
         if tmpOutputPath is None:
@@ -223,6 +231,7 @@ def extractPI(inputFN, outputFN, praatEXE,
                                      tgFN, tierName, tmpOutputPath, sampleStep,
                                      silenceThreshold, forceRegenerate,
                                      undefinedValue=undefinedValue,
+                                     medianFilterWindowSize=windowSize,
                                      pitchQuadInterp=pitchQuadInterp)
     
     return piList

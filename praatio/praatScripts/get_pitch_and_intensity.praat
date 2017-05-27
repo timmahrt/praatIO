@@ -10,6 +10,7 @@ form Soundfile to pitch and intensity
     real Silence_threshold 0.03
     real Start_time -1 (= start of the file)
     real End_time -1 (= end of the file)
+    real Median_filter_window_size 0
     boolean Do_pitch_quadratic_interpolation 0
 endform
 
@@ -38,6 +39,69 @@ endif
 
 # Get pitch track
 pitch = To Pitch (ac): sample_step, min_pitch, 15, "no", silence_threshold, 0.45, 0.01, 0.35, 0.14, max_pitch
+
+
+# Do median filtering
+if median_filter_window_size > 0
+    old_pitch = pitch
+    selectObject: pitch
+    pitchTier = Down to PitchTier
+
+    selectObject: pitchTier
+    num_points = Get number of points
+
+    half_num_samples = floor(median_filter_window_size / 2)
+    starting_index = 1 + half_num_samples
+    ending_index = num_points - half_num_samples
+    
+    # We'll reuse the table, rewriting over old values with each pass
+    data_table = Create TableOfReal: "table", median_filter_window_size, 1
+        
+    for point_i from starting_index to ending_index
+        
+        sub_starting_index = point_i - half_num_samples
+        sub_ending_index = point_i + half_num_samples
+        
+        # Get values
+        table_i = 1
+        for sub_point_i from sub_starting_index to sub_ending_index
+            selectObject: pitchTier
+            tmpVal = Get value at index: sub_point_i
+            
+            selectObject: data_table
+            Set value: table_i, 1, tmpVal
+            table_i = table_i + 1
+        endfor
+        
+        # Sort values
+        selectObject: data_table
+        Sort by label: 1, 0
+        
+        # Get the median
+        median_i = half_num_samples + 1
+        selectObject: data_table
+        median_value = Get value: median_i, 1
+        
+        # Replace original value
+        selectObject: pitchTier
+        point_time = Get time from index: point_i
+        Remove point: point_i
+        Add point: point_time, median_value
+        
+    endfor
+    
+    selectObject: pitchTier
+    pitch = To Pitch: sample_step, min_pitch, max_pitch
+
+    # Cleanup
+    selectObject: data_table
+    Remove
+    selectObject: pitchTier
+    Remove
+    selectObject: old_pitch
+    Remove
+endif
+
 
 # Do quadratic interpolation if requested
 if do_pitch_quadratic_interpolation == 1
