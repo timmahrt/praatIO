@@ -14,6 +14,7 @@ from os.path import join
 import math
 import io
 
+from praatio import dataio
 from praatio import tgio
 from praatio.utilities import utils
 from praatio.utilities import myMath
@@ -159,11 +160,24 @@ def extractIntensity(inputFN, outputFN, praatEXE,
     return iList
 
 
-def extractPitch(inputFN, outputFN, praatEXE,
-                 minPitch, maxPitch, sampleStep=0.01,
-                 silenceThreshold=0.03, forceRegenerate=True,
-                 undefinedValue=None, pitchQuadInterp=False):
-
+def extractPitchTier(wavFN, outputFN, praatEXE,
+                     minPitch, maxPitch, sampleStep=0.01,
+                     silenceThreshold=0.03, forceRegenerate=True,
+                     medianFilterWindowSize=0,
+                     pitchQuadInterp=False):
+    '''
+    Extract pitch at regular intervals from the input wav file
+    
+    Data is output to a text file and then returned in a list in the form
+    [(timeV1, pitchV1), (timeV2, pitchV2), ...]
+    
+    sampleStep - the frequency to sample pitch at
+    silenceThreshold - segments with lower intensity won't be analyzed
+                       for pitch
+    forceRegenerate - if running this function for the same file, if False
+                      just read in the existing pitch file
+    pitchQuadInterp - if True, quadratically interpolate pitch
+    '''
     outputPath = os.path.split(outputFN)[0]
     
     utils.makeDir(outputPath)
@@ -173,26 +187,71 @@ def extractPitch(inputFN, outputFN, praatEXE,
     else:
         doInterpolation = 0
     
-    assert(os.path.exists(inputFN))
+    assert(os.path.exists(wavFN))
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
-        
-        # The praat script uses append mode, so we need to clear any prior
-        # result
         if os.path.exists(outputFN):
             os.remove(outputFN)
         
-        argList = [inputFN, outputFN, sampleStep,
+        argList = [wavFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold,
+                   medianFilterWindowSize, doInterpolation]
+        
+        scriptName = "get_pitchtier.praat"
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    pitchTier = dataio.open2DPointObject(outputFN)
+    
+    return pitchTier
+
+
+def extractPitch(wavFN, outputFN, praatEXE,
+                 minPitch, maxPitch, sampleStep=0.01,
+                 silenceThreshold=0.03, forceRegenerate=True,
+                 undefinedValue=None, medianFilterWindowSize=0,
+                 pitchQuadInterp=False):
+    '''
+    Extract pitch at regular intervals from the input wav file
+    
+    Data is output to a text file and then returned in a list in the form
+    [(timeV1, pitchV1), (timeV2, pitchV2), ...]
+    
+    sampleStep - the frequency to sample pitch at
+    silenceThreshold - segments with lower intensity won't be analyzed
+                       for pitch
+    forceRegenerate - if running this function for the same file, if False
+                      just read in the existing pitch file
+    undefinedValue - if None remove from the dataset, otherset set to
+                     undefinedValue
+    pitchQuadInterp - if True, quadratically interpolate pitch
+    '''
+    outputPath = os.path.split(outputFN)[0]
+    
+    utils.makeDir(outputPath)
+    
+    if pitchQuadInterp is True:
+        doInterpolation = 1
+    else:
+        doInterpolation = 0
+    
+    assert(os.path.exists(wavFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [wavFN, outputFN, sampleStep,
                    minPitch, maxPitch, silenceThreshold, -1, -1,
-                   doInterpolation]
+                   medianFilterWindowSize, doInterpolation]
         
         scriptName = "get_pitch.praat"
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
-            
-    pList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
-    
-    return pList
+
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+
+    return piList
 
 
 def extractPI(inputFN, outputFN, praatEXE,
