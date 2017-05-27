@@ -16,6 +16,108 @@ from praatio import tgio
 from praatio import audioio
 
 
+def _shiftTimes(tg, timeV, newTimeV):
+    '''
+    Change all instances of timeV in the textgrid to newTimeV
+    
+    These are meant to be small changes.  No checks are done to see
+    if the new interval steps on other intervals
+    '''
+    tg = tg.new()
+    for tierName in tg.tierNameList:
+        tier = tg.tierDict[tierName]
+        
+        if isinstance(tier, tgio.IntervalTier):
+            entryList = [entry for entry in tier.entryList
+                         if entry[0] == timeV or entry[1] == timeV]
+            insertEntryList = []
+            for entry in entryList:
+                if entry[0] == timeV:
+                    newStart, newStop = newTimeV, entry[1]
+                elif entry[1] == timeV:
+                    newStart, newStop = entry[0], newTimeV
+                tier.deleteEntry(entry)
+                insertEntryList.append((newStart, newStop, entry[2]))
+            
+            for entry in insertEntryList:
+                tier.insertEntry(entry)
+        
+        elif isinstance(tier, tgio.PointTier):
+            entryList = [entry for entry in tier.entryList
+                         if entry[0] == timeV]
+            for entry in entryList:
+                tier.deleteEntry(entry)
+                tier.insertEntry((newTimeV, entry[1]))
+    
+    return tg
+
+
+def audioSplice(audioObj, spliceSegment, tg, tierName, newLabel,
+                insertStart, insertStop=None, alignToZeroCrossing=True):
+    '''
+    Splices a segment into an audio file and corresponding textgrid
+    
+    audioObj - the audio to splice into
+    spliceSegment - the audio segment that will be placed into a larger audio
+                    file
+    tg - the textgrid to splice into
+    tierName - the tier that will receive the new label
+    newLabel - the label for the splice interval on the tier with name tierName
+    insertStart - the time to insert the splice
+    insertStop - if not None, will erase the region between sourceSpStart
+                 and sourceSpEnd.  (In practice this means audioSplice
+                 removes one segment and inserts another in its place)
+    alignToZeroCrossing - if True, moves all involved times to the nearest
+                          zero crossing in the audio.  Generally results
+                          in better sounding output
+    '''
+
+    retTG = tg.new()
+
+    # Ensure all time points involved in splicing fall on zero crossings
+    if alignToZeroCrossing is True:
+        
+        # Cut the splice segment to zero crossings
+        spliceDuration = spliceSegment.getDuration()
+        spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
+        spliceZeroEnd = spliceSegment.findNearestZeroCrossing(spliceDuration)
+        spliceSegment = spliceSegment.getSubsegment(spliceZeroStart,
+                                                    spliceZeroEnd)
+            
+        # Move the textgrid borders to zero crossings
+        oldInsertStart = insertStart
+        insertStart = audioObj.findNearestZeroCrossing(oldInsertStart)
+        retTG = _shiftTimes(retTG, oldInsertStart, insertStart)
+        
+        if insertStop is not None:
+            oldInsertStop = insertStop
+            insertStop = audioObj.findNearestZeroCrossing(oldInsertStop)
+            retTG = _shiftTimes(retTG, oldInsertStop, insertStop)
+    
+    # Get the start time
+    insertTime = insertStart
+    if insertStop is not None:
+        insertTime = insertStop
+    
+    # Insert into the audio file
+    audioObj.insert(insertTime, spliceSegment.audioSamples)
+    
+    # Insert a blank region into the textgrid on all tiers
+    targetDuration = spliceSegment.getDuration()
+    retTG = retTG.insertSpace(insertTime, targetDuration, 'stretch')
+    
+    # Insert the splice entry into the target tier
+    newEntry = (insertTime, insertTime + targetDuration, newLabel)
+    retTG.tierDict[tierName].insertEntry(newEntry)
+    
+    # Finally, delete the old section if requested
+    if insertStop is not None:
+        audioObj.deleteSegment(insertStart, insertStop)
+        retTG = retTG.eraseRegion(insertStart, insertStop, doShrink=True)
+        
+    return audioObj, retTG
+        
+    
 def spellCheckEntries(tg, targetTierName, newTierName, checkFunction,
                       printEntries=False):
     '''
