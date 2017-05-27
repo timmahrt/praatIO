@@ -686,7 +686,7 @@ class IntervalTier(TextgridTier):
             # If it is only partially contained within the superEntry AND
             # inclusion is 'soft', include it anyways
             elif mode == 'lax' and (intervalStart >= cropStart or
-                                            intervalEnd <= cropEnd):
+                                    intervalEnd <= cropEnd):
                 matchedEntry = entry
             
             # If not strict, include partial tiers on the edges
@@ -986,8 +986,8 @@ class IntervalTier(TextgridTier):
         collisionCode: in the event that an interval stradles the
                        starting point
         - 'stretch' - stretches the interval by /duration/ amount
-        - 'split' - splits the interval into two--with a portion
-                    on either side of the starting point
+        - 'split' - splits the interval into two--everything to the
+                    right of 'start' will be advanced by 'duration' seconds
         - 'no change' - leaves the interval as is with no change
         - None or any other value - AssertionError is thrown
         '''
@@ -1272,10 +1272,13 @@ class Textgrid():
         Every item that occurs after /start/ will be pushed back by
         /duration/ seconds
         
-        For intervals that stradle the start point, if
-        /stretchStradledIntervals/ is true, they will be stretched
-        out over the entire region.  If false, their original duration
-        will be maintained.
+        collisionCode: in the event that an interval stradles the
+                       starting point
+        - 'stretch' - stretches the interval by /duration/ amount
+        - 'split' - splits the interval into two--everything to the
+                    right of 'start' will be advanced by 'duration' seconds
+        - 'no change' - leaves the interval as is with no change
+        - None or any other value - AssertionError is thrown
         '''
         
         newTG = Textgrid()
