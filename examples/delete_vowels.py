@@ -34,10 +34,14 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
         zeroCrossingTGPath = join(outputPath, "zero_crossing_tgs")
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
-        praatio_scripts.tgBoundariesToZeroCrossings(inputTGFN,
-                                                    inputWavFN,
+        
+        tg = tgio.openTextgrid(inputTGFN)
+        wavObj = audioio.WavQueryObj(inputWavFN)
+        
+        praatio_scripts.tgBoundariesToZeroCrossings(tg,
+                                                    wavObj,
                                                     zeroCrossingTGFN)
-        tg = tgio.openTextgrid(zeroCrossingTGFN)
+
     else:
         tg = tgio.openTextgrid(inputTGFN)
     

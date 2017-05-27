@@ -128,40 +128,34 @@ def splitTierEntries(tg, sourceTierName, targetTierName,
     return tg
     
     
-def tgBoundariesToZeroCrossings(tgFN, wavFN, outputTGFN, adjustPoints=True):
+def tgBoundariesToZeroCrossings(tg, wavObj, adjustPointTiers=True):
     '''
     Makes all textgrid interval boundaries fall on pressure wave zero crossings
     
-    maxShiftAmount specifies the search space in seconds (the amount before and
-        after the given time)
-    if ignoreOnFailure is true, a warning is printed to the screen and
-        the given timestamp is returned
+    adjustPointTiers: if True, point tiers will be adjusted too.  Otherwise,
+                      only interval tiers are adjusted.
     '''
-    
-    wavQObj = audioio.WavQueryObj(wavFN)
-    
-    tg = tgio.openTextgrid(tgFN)
     
     for tierName in tg.tierNameList[:]:
         tier = tg.tierDict[tierName]
         
         newEntryList = []
-        if isinstance(tier, tgio.PointTier) and adjustPoints is True:
+        if isinstance(tier, tgio.PointTier) and adjustPointTiers is True:
             for start, label in tier.entryList:
-                newStart = wavQObj.findNearestZeroCrossing(start)
+                newStart = wavObj.findNearestZeroCrossing(start)
                 newEntryList.append((newStart, label))
                 
         elif isinstance(tier, tgio.IntervalTier):
             
             for start, stop, label in tier.entryList:
-                newStart = wavQObj.findNearestZeroCrossing(start)
-                newStop = wavQObj.findNearestZeroCrossing(stop)
+                newStart = wavObj.findNearestZeroCrossing(start)
+                newStop = wavObj.findNearestZeroCrossing(stop)
                 newEntryList.append((newStart, newStop, label))
         
         newTier = tier.new(entryList=newEntryList)
         tg.replaceTier(tierName, newTier)
                 
-    tg.save(outputTGFN)
+    return tg
 
 
 def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
