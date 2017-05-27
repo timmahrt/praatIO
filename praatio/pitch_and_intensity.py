@@ -73,8 +73,7 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
         with open(outputFN, "w") as fd:
             fd.write("\n".join(allPIList) + "\n")
 
-    piList = loadTimeSeriesData(outputPath, outputFN,
-                                undefinedValue=undefinedValue)
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
     
     return piList
 
@@ -124,8 +123,7 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
             scriptFN = join(utils.scriptsPath, scriptName)
             utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    piList = loadTimeSeriesData(join(outputPath, outputFN),
-                                undefinedValue=undefinedValue)
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
     
     return piList
 
