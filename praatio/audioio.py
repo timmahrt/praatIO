@@ -7,6 +7,7 @@ Created on Apr 4, 2017
 import math
 import wave
 import struct
+import copy
 
 from praatio.utilities import utils
 
@@ -75,58 +76,7 @@ def extractSubwav(fn, outputFN, startT, endT):
     audioObj.save(outputFN)
     
 
-class WavQueryObj(object):
-    '''
-    A class for getting information about a wave file
-    
-    The wave file is never loaded--we only keep a reference to the
-    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don't
-    (shouldn't) change state.  For doing multiple modifications,
-    use a WavObj.
-    '''
-    def __init__(self, fn):
-        self.audiofile = wave.open(fn, "r")
-        self.params = self.audiofile.getparams()
-    
-        self.nchannels = self.params[0]
-        self.sampwidth = self.params[1]
-        self.framerate = self.params[2]
-        self.nframes = self.params[3]
-        self.comptype = self.params[4]
-        self.compname = self.params[5]
-    
-    def concatenate(self, targetFrames, outputFN, prepend=False):
-        sourceFrames = self.getFrames()
-        
-        if prepend is True:
-            newFrames = targetFrames + sourceFrames
-        else:
-            newFrames = sourceFrames + targetFrames
-        
-        self.outputModifiedWav(newFrames, outputFN)
-    
-    def getDuration(self):
-        duration = float(self.nframes) / self.framerate
-        return duration
-    
-    def getFrames(self, startTime=None, endTime=None):
-        '''
-        Get frames with respect to time
-        '''
-        if startTime is None:
-            startTime = 0
-        startFrame = int(startTime * float(self.framerate))
-        
-        if endTime is not None:
-            duration = endTime - startTime
-            nFrames = int(self.framerate * duration)
-        else:
-            nFrames = int(self.nframes - startFrame)
-        
-        self.audiofile.setpos(startFrame)
-        frames = self.audiofile.readframes(nFrames)
-        
-        return frames
+class AbstractWav(object):
     
     def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
         '''
@@ -216,7 +166,7 @@ class WavQueryObj(object):
         endTime = startTime + timeStep
         
         # 1 Get the acoustic information and the sign for each sample
-        frameList = self.samplesAsNums(startTime, endTime)
+        frameList = self.getSamples(startTime, endTime)
         signList = [utils.sign(val) for val in frameList]
         
         # 2 did signs change?
@@ -252,8 +202,62 @@ class WavQueryObj(object):
         adjustTime = zeroedFrame / float(self.framerate)
         
         return startTime + adjustTime
+
     
-    def samplesAsNums(self, startTime, endTime):
+class WavQueryObj(AbstractWav):
+    '''
+    A class for getting information about a wave file
+    
+    The wave file is never loaded--we only keep a reference to the
+    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don't
+    (shouldn't) change state.  For doing multiple modifications,
+    use a WavObj.
+    '''
+    def __init__(self, fn):
+        self.audiofile = wave.open(fn, "r")
+        self.params = self.audiofile.getparams()
+    
+        self.nchannels = self.params[0]
+        self.sampwidth = self.params[1]
+        self.framerate = self.params[2]
+        self.nframes = self.params[3]
+        self.comptype = self.params[4]
+        self.compname = self.params[5]
+    
+    def concatenate(self, targetFrames, outputFN, prepend=False):
+        sourceFrames = self.getFrames()
+        
+        if prepend is True:
+            newFrames = targetFrames + sourceFrames
+        else:
+            newFrames = sourceFrames + targetFrames
+        
+        self.outputModifiedWav(newFrames, outputFN)
+    
+    def getDuration(self):
+        duration = float(self.nframes) / self.framerate
+        return duration
+    
+    def getFrames(self, startTime=None, endTime=None):
+        '''
+        Get frames with respect to time
+        '''
+        if startTime is None:
+            startTime = 0
+        startFrame = int(startTime * float(self.framerate))
+        
+        if endTime is not None:
+            duration = endTime - startTime
+            nFrames = int(self.framerate * duration)
+        else:
+            nFrames = int(self.nframes - startFrame)
+        
+        self.audiofile.setpos(startFrame)
+        frames = self.audiofile.readframes(nFrames)
+        
+        return frames
+
+    def getSamples(self, startTime, endTime):
         
         frames = self.getFrames(startTime, endTime)
         audioFrameList = samplesAsNums(frames, self.sampwidth)
@@ -338,7 +342,7 @@ class WavQueryObj(object):
         outWave.writeframes(audioFrames)
 
 
-class WavObj(object):
+class WavObj(AbstractWav):
     '''
     A class for manipulating audio files
     
@@ -364,7 +368,7 @@ class WavObj(object):
         audioSamples = generateSilence(silenceDuration, self.framerate)
         self.insertSegment(startTime, audioSamples)
     
-    def insertSegment(self, startTime, valueList):
+    def insert(self, startTime, valueList):
         i = self.getIndexAtTime(startTime)
         self.audioSamples = (self.audioSamples[:i] + valueList +
                              self.audioSamples[i:])
@@ -373,10 +377,22 @@ class WavObj(object):
         i = self.getIndexAtTime(startTime)
         j = self.getIndexAtTime(endTime)
         self.audioSamples = self.audioSamples[:i] + self.audioSamples[j:]
-    
+
     def getDuration(self):
-        return len(self.audioSamples) / self.framerate
+        return float(len(self.audioSamples)) / self.framerate
     
+    def getSamples(self, startTime, endTime):
+        i = self.getIndexAtTime(startTime)
+        j = self.getIndexAtTime(endTime)
+        return self.audioSamples[i:j]
+
+    def getSubsegment(self, startTime, endTime):
+        samples = self.getSamples(startTime, endTime)
+        return WavObj(samples, self.params)
+
+    def new(self):
+        return copy.deepcopy(self)
+
     def save(self, outputFN):
         # Output resulting wav file
         outParams = [self.nchannels, self.sampwidth, self.framerate,
