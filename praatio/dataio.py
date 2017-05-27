@@ -16,9 +16,10 @@ DURATION = "DurationTier"
 class PointObject(object):
     
     def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
-        if maxTime is None:
-            maxTime = max(pointList)
-            
+        
+        # Sanitize input
+        pointList = [tuple(row) for row in pointList]
+        
         self.pointList = pointList
         self.objectClass = objectClass
         self.minTime = minTime if minTime > 0 else 0
@@ -73,6 +74,9 @@ class PointObject1D(PointObject):
 
         assert(objectClass != PITCH)
         assert(objectClass != DURATION)
+    
+        if maxTime is None:
+            maxTime = max(pointList)
         
         super(PointObject1D, self).__init__(pointList, objectClass,
                                             minTime, maxTime)
@@ -84,7 +88,10 @@ class PointObject2D(PointObject):
     def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
 
         assert(objectClass != POINT)
-
+        
+        if maxTime is None:
+            maxTime = max([timeV for timeV, _ in pointList])
+        
         super(PointObject2D, self).__init__(pointList, objectClass,
                                             minTime, maxTime)
 
