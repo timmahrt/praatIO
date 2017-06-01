@@ -61,6 +61,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink,
     
     shrunkTG.save(outputTGFN)
 
+
 # Shrink files
 root = join('.', 'files')
 

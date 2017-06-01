@@ -11,7 +11,6 @@ of the recording.
 import os
 from os.path import join
 
-import wave
 from praatio import tgio
 from praatio import audioio
 
@@ -42,5 +41,3 @@ for wavFN, tgFN in (("mary.wav", "mary.TextGrid"),
     wavQObj.deleteWavSections(outputWavFN,
                               deleteList=deleteList,
                               operation="sine wave")
-
-

@@ -34,7 +34,7 @@ def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
                          [wavFN, outputWavFN, pitchFloor, pitchCeiling,
                           formantShiftRatio, pitchMedian, pitchRange,
                           duration])
-    
+
 
 def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
                 stepSize=0.01, window_length=0.025, preemphasis=50,

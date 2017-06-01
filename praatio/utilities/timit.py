@@ -62,7 +62,7 @@ timitToIPA = {u"ng": u"ŋ",
               u"ayn": u"ɑɪn",
               u"uhn": u"ən",
               u"ehn": u"ɛn",
-              u"ehn": u"ɛm",
+              u"ehm": u"ɛm",
               u"em": u"ɛm",
               u"aan": u"ɑn",
               }

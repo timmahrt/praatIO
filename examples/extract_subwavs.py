@@ -24,6 +24,3 @@ for wavFN, tgFN in [#("bobby.wav", "bobby_words.TextGrid"),
                                      "phone",
                                      outputPath,
                                      True)
-
-    
-    

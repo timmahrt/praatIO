@@ -20,7 +20,6 @@ import shutil
 
 from praatio import tgio
 from praatio import praatio_scripts
-from praatio import audioio
 from praatio.utilities import utils
 from praatio.applied_scripts import xsampa
 

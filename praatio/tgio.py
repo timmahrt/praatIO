@@ -206,7 +206,8 @@ class TextgridTier(object):
     
     tierType = None
     
-    def __init__(self, name, entryList, minT, maxT):
+    def __init__(self, name, entryList, minT, maxT,
+                 pairedWav=None):
         '''See PointTier or IntervalTier'''
         entryList.sort()
         

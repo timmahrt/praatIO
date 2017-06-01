@@ -11,7 +11,7 @@ import io
 POINT = "PointProcess"
 PITCH = "PitchTier"
 DURATION = "DurationTier"
- 
+
 
 class PointObject(object):
     

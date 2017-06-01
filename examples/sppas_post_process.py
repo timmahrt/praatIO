@@ -22,5 +22,4 @@ shutil.copy(join(".", "files", "bobby.txt"), join(rootPath, "bobby.txt"))
 # 3rd, run this to clean up the results of SPPAS
 sppas_util.sppasPostProcess(rootPath,
                             outputPath,
-                            deleteIntermediateFiles=False,
-                            replaceOrigTextgrids=True)
+                            deleteIntermediateFiles=False)
