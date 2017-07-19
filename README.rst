@@ -12,6 +12,14 @@ praatIO
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg?
     :target: http://opensource.org/licenses/MIT
 
+*Questions?  Comments?  Feedback?  Chat with us on gitter!*
+
+.. image:: https://badges.gitter.im/praatio/Lobby.svg?
+   :alt: Join the chat at https://gitter.im/praatio/Lobby
+   :target: https://gitter.im/praatio/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+-----
+
 A library for working with praat, time aligned audio transcripts, and audio files *that comes with batteries included*.
 Praat uses a file format called textgrids, which are time aligned speech transcripts.
 This library isn't just a data struct for reading and writing textgrids--many utilities are
