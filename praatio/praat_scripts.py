@@ -36,6 +36,19 @@ def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
                           duration])
 
 
+def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
+    '''
+    Changes the intensity of the wavFN (in db)
+    '''
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        "change_intensity.praat")
+
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, outputWavFN, newIntensity])
+    
+
 def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
                 stepSize=0.01, window_length=0.025, preemphasis=50,
                 scriptFN=None, undefinedValue=None):
