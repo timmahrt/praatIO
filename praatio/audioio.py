@@ -72,7 +72,7 @@ def generateSilence(duration, samplingFreq):
 
 
 def extractSubwav(fn, outputFN, startT, endT):
-    audioObj = openAudioFile(fn, [(startT, endT), ], True)
+    audioObj = openAudioFile(fn, [(startT, endT), ], doShrink=True)
     audioObj.save(outputFN)
     
 
