@@ -18,7 +18,7 @@ INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
 MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
 
-Interval = namedtuple('Interval', ['start', 'stop', 'label']) # interval entry
+Interval = namedtuple('Interval', ['start', 'end', 'label']) # interval entry
 Point = namedtuple('Point', ['time', 'label']) # point entry
 
 
