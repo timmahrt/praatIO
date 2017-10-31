@@ -10,12 +10,16 @@ import re
 import copy
 import io
 import wave
+from collections import namedtuple
 
 from praatio.utilities import utils
 
 INTERVAL_TIER = "IntervalTier"
 POINT_TIER = "TextTier"
 MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
+
+Interval = namedtuple('Interval', ['start', 'stop', 'label']) # interval entry
+Point = namedtuple('Point', ['time', 'label']) # point entry
 
 
 def _getWavDuration(wavFN):
@@ -205,6 +209,7 @@ class BadIntervalError(Exception):
 class TextgridTier(object):
     
     tierType = None
+    entryType = Interval
     
     def __init__(self, name, entryList, minT, maxT,
                  pairedWav=None):
@@ -315,6 +320,9 @@ class TextgridTier(object):
             name = self.name
         if entryList is None:
             entryList = copy.deepcopy(self.entryList)
+            entryList = [self.entryType(*entry) if isinstance(entry, tuple)
+                         else entry
+                         for entry in entryList]
         if minTimestamp is None:
             minTimestamp = self.minTimestamp
         if maxTimestamp is None and pairedWav is None:
@@ -330,7 +338,8 @@ class TextgridTier(object):
         # of the same data type.  The entry list is sorted whenever
         # the entry list is modified, so this is probably the best
         # place to enforce the data type
-        self.entryList = [tuple(entry) for entry in self.entryList]
+        self.entryList = [entry if isinstance(entry, self.entryType) else
+                          self.entryType(*entry) for entry in self.entryList]
         self.entryList.sort()
         
     def union(self, tier):
@@ -353,6 +362,7 @@ class TextgridTier(object):
 class PointTier(TextgridTier):
     
     tierType = POINT_TIER
+    entryType = Point
     
     def __init__(self, name, entryList, minT=None, maxT=None,
                  pairedWav=None):
@@ -368,7 +378,7 @@ class PointTier(TextgridTier):
         like '132'))
         '''
         
-        entryList = [(float(time), label) for time, label in entryList]
+        entryList = [Point(float(time), label) for time, label in entryList]
         
         # Determine the min and max timestamps
         timeList = [time for time, label in entryList]
@@ -534,6 +544,9 @@ class PointTier(TextgridTier):
         '''
         timestamp, label = entry
         
+        if not isinstance(entry, Point):
+            entry = Point(timestamp, label)
+        
         matchList = []
         i = None
         for i, searchEntry in self.entryList:
@@ -550,7 +563,7 @@ class PointTier(TextgridTier):
             
         elif collisionCode.lower() == "merge":
             oldEntry = self.entryList[i]
-            newEntry = (timestamp, "-".join([oldEntry[-1], label]))
+            newEntry = Point(timestamp, "-".join([oldEntry[-1], label]))
             self.deleteEntry(self.entryList[i])
             self.entryList.append(newEntry)
             
@@ -587,6 +600,7 @@ class PointTier(TextgridTier):
 class IntervalTier(TextgridTier):
     
     tierType = INTERVAL_TIER
+    entryType = Interval
     
     def __init__(self, name, entryList, minT=None, maxT=None,
                  pairedWav=None):
@@ -622,7 +636,7 @@ class IntervalTier(TextgridTier):
         # Remove whitespace
         tmpEntryList = []
         for start, stop, label in entryList:
-            tmpEntryList.append((start, stop, label.strip()))
+            tmpEntryList.append(Interval(start, stop, label.strip()))
         entryList = tmpEntryList
         
         # Determine the minimum and maximum timestampes
@@ -685,7 +699,7 @@ class IntervalTier(TextgridTier):
                 matchedEntry = entry
             
             # If it is only partially contained within the superEntry AND
-            # inclusion is 'soft', include it anyways
+            # inclusion is 'lax', include it anyways
             elif mode == 'lax' and (intervalStart >= cropStart or
                                     intervalEnd <= cropEnd):
                 matchedEntry = entry
@@ -845,16 +859,12 @@ class IntervalTier(TextgridTier):
 
                 # Check left edge
                 if matchList[0][0] < start:
-                    newEntry = (matchList[0][0],
-                                start,
-                                matchList[0][-1])
+                    newEntry = (matchList[0][0], start, matchList[0][-1])
                     newTier.entryList.append(newEntry)
                     
                 # Check right edge
                 if matchList[-1][1] > stop:
-                    newEntry = (stop,
-                                matchList[-1][1],
-                                matchList[-1][-1])
+                    newEntry = (stop, matchList[-1][1], matchList[-1][-1])
                     newTier.entryList.append(newEntry)
         
         if doShrink is True:
@@ -932,7 +942,11 @@ class IntervalTier(TextgridTier):
         
         if entryList[-1][1] < self.maxTimestamp:
             invertedEntryList.append((entryList[-1][1], self.maxTimestamp, ""))
-            
+        
+        invertedEntryList = [entry if isinstance(entry, Interval)
+                             else Interval(*entry)
+                             for entry in invertedEntryList]
+        
         return invertedEntryList
     
     def insertEntry(self, entry, warnFlag=True, collisionCode=None):
@@ -969,7 +983,7 @@ class IntervalTier(TextgridTier):
             newEntry = (min([entry[0] for entry in matchList]),
                         max([entry[1] for entry in matchList]),
                         "-".join([entry[2] for entry in matchList]))
-            self.entryList.append(newEntry)
+            self.entryList.append(Interval(*newEntry))
             
         else:
             raise TextgridCollisionException(self.name, entry, matchList)
