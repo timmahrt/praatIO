@@ -1130,12 +1130,13 @@ class Textgrid():
     
     def addTier(self, tier, tierIndex=None):
         
+        assert(tier.name not in list(self.tierDict.keys()))
+
         if tierIndex is None:
             self.tierNameList.append(tier.name)
         else:
             self.tierNameList.insert(tierIndex, tier.name)
             
-        assert(tier.name not in list(self.tierDict.keys()))
         self.tierDict[tier.name] = tier
         
         minV = tier.minTimestamp
