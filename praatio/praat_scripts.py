@@ -10,6 +10,7 @@ Created on Dec 9, 2015
 
 import os
 from os.path import join
+import io
 
 from praatio import audioio
 from praatio import dataio
@@ -88,6 +89,42 @@ def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
             returnList.append([float(val) for val in row])
     
     return returnList
+
+
+def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
+              scriptFN=None):
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, "get_pulses.praat")
+    
+    argList = [inputWavFN, outputPointTierFN, minPitch, maxPitch]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    pointObj = dataio.open1DPointObject(outputPointTierFN)
+    
+    return pointObj
+
+
+def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
+                    spectralPower=2, spectralMoment=3, scriptFN=None):
+
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, "get_spectral_info.praat")
+    
+    argList = [inputWavFN, inputTGFN, outputCSVFN, tierName,
+               spectralPower, spectralMoment]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    with io.open(outputCSVFN, "r", encoding="utf-8") as fd:
+        data = fd.read()
+    
+    dataList = data.rstrip().split("\n")
+    dataList = [row.split(",") for row in dataList]
+    titleRow, dataList = dataList[0], dataList[1:]
+    
+    return titleRow, dataList
 
 
 def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
