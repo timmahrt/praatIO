@@ -41,7 +41,7 @@ What can you do with this library?
 
     tg = tgio.openTextGrid("path_to_textgrid")
 
-    entryList = tg.tierDict["speaker_1_tier"].getEntries() # Get all intervals
+    entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
 
     entryList = tg.tierDict["phone_tier"].find("a") # Get all instances of 'a'
 
