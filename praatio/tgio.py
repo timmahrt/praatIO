@@ -1081,8 +1081,8 @@ class IntervalTier(TextgridTier):
         cumulativeAdjustAmount = 0
         lastFromEnd = 0
         newEntryList = []
-        for fromEntry, targetEntry in zip(self.entryList,
-                                          targetTier.entryList):
+        allPoints = [self.entryList, targetTier.entryList]
+        for fromEntry, targetEntry in utils.safeZip(allPoints, True):
             
             fromStart, fromEnd, fromLabel = fromEntry
             targetStart, targetEnd = targetEntry[:2]
