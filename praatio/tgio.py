@@ -22,6 +22,10 @@ Interval = namedtuple('Interval', ['start', 'end', 'label']) # interval entry
 Point = namedtuple('Point', ['time', 'label']) # point entry
 
 
+def _isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+  
 def _getWavDuration(wavFN):
     "For internal use.  See praatio.audioio.WavQueryObj() for general use."
     audiofile = wave.open(wavFN, "r")
@@ -222,20 +226,17 @@ class TextgridTier(object):
         self.maxTimestamp = maxT
     
     def __eq__(self, other):
-        def isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
-            return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-        
         isEqual = True
         isEqual &= self.name == other.name
-        isEqual &= self.minTimestamp == other.minTimestamp
-        isEqual &= self.maxTimestamp == other.maxTimestamp
+        isEqual &= _isclose(self.minTimestamp, other.minTimestamp)
+        isEqual &= _isclose(self.maxTimestamp, other.maxTimestamp)
         isEqual &= len(self.entryList) == len(self.entryList)
         
         if isEqual:
             for selfEntry, otherEntry in zip(self.entryList, other.entryList):
                 for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
                     try:
-                        isEqual &= isclose(selfSubEntry, otherSubEntry)
+                        isEqual &= _isclose(selfSubEntry, otherSubEntry)
                     except TypeError:
                         isEqual &= selfSubEntry == otherSubEntry
         
@@ -1118,8 +1119,8 @@ class Textgrid():
     
     def __eq__(self, other):
         isEqual = True
-        isEqual &= self.minTimestamp == other.minTimestamp
-        isEqual &= self.maxTimestamp == other.maxTimestamp
+        isEqual &= _isclose(self.minTimestamp, other.minTimestamp)
+        isEqual &= _isclose(self.maxTimestamp, other.maxTimestamp)
 
         isEqual &= self.tierNameList == other.tierNameList
         if isEqual:
