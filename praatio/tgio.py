@@ -1259,12 +1259,14 @@ class Textgrid():
         maxTimestamp = self.maxTimestamp
         if doShrink is True:
             maxTimestamp -= diff
-        
+            
         newTG = Textgrid()
         for name in self.tierNameList:
             tier = self.tierDict[name]
             tier = tier.eraseRegion(start, stop, 'truncate', doShrink)
             newTG.addTier(tier)
+
+        self.maxTimestamp = maxTimestamp
 
         return newTG
             
