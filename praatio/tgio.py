@@ -450,8 +450,9 @@ class PointTier(TextgridTier):
             newEntryList.append((newTimestamp, label))
         
         # Determine new min and max timestamps
-        newMin = min([float(subList[0]) for subList in newEntryList])
-        newMax = max([float(subList[1]) for subList in newEntryList])
+        timeList = [float(subList[0]) for subList in newEntryList]
+        newMin = min(timeList)
+        newMax = max(timeList)
         
         if newMin > self.minTimestamp:
             newMin = self.minTimestamp
@@ -618,7 +619,7 @@ class IntervalTier(TextgridTier):
         '''
         entryList = [(float(start), float(stop), label)
                      for start, stop, label in entryList]
-        
+
         if minT is not None:
             minT = float(minT)
         if maxT is not None:
