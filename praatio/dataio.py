@@ -113,7 +113,7 @@ def open1DPointObject(fn):
             pointVal, start = _getNextValue(data, start)
             dataList.append([float(pointVal), ])
         
-        po = PointObject2D(dataList, objectType, minT, maxT)
+        po = PointObject1D(dataList, objectType, minT, maxT)
 
     else:
         data, objectType, minT, maxT = _parseShortHeader(fn)
