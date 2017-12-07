@@ -21,6 +21,8 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid",
     # Get the durations for each tier
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
+        if not isinstance(tier, tgio.IntervalTier):
+            continue
         for start, stop, label in tier.entryList:
             txt = u"%s,%s,%s,%0.2f" % (name, tierName, label,
                                        float(stop) - float(start))
