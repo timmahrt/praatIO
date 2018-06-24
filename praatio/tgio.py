@@ -1460,6 +1460,8 @@ def _parseNormalTextgrid(data):
     tierList = data.split("item [")[1:]
     for tierTxt in tierList:
         
+        hasData = True
+        
         if 'class = "IntervalTier"' in tierTxt:
             tierType = INTERVAL_TIER
             searchWord = "intervals ["
@@ -1468,13 +1470,23 @@ def _parseNormalTextgrid(data):
             searchWord = "points ["
         
         # Get tier meta-information
-        header, tierData = tierTxt.split(searchWord, 1)
+        try:
+            header, tierData = tierTxt.split(searchWord, 1)
+        except ValueError:
+            # A tier with no entries
+            if "size = 0" in tierTxt:
+                header = tierTxt
+                tierData = ""
+                hadData = False
+            else:
+                raise
         tierName = header.split("name = ")[1].split("\n", 1)[0]
         tierStart = header.split("xmin = ")[1].split("\n", 1)[0]
         tierStart = strToIntOrFloat(tierStart)
         tierEnd = header.split("xmax = ")[1].split("\n", 1)[0]
         tierEnd = strToIntOrFloat(tierEnd)
         tierName = tierName.strip()[1:-1]
+        
         
         # Get the tier entry list
         tierEntryList = []
@@ -1496,7 +1508,6 @@ def _parseNormalTextgrid(data):
                 tierEntryList.append((timeStart, timeEnd, label))
             tier = IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
         else:
-            header, tierData = tierTxt.split("points [", 1)
             while True:
                 try:
                     time, timeI = _fetchRow(tierData, "number = ", labelI)
