@@ -299,4 +299,9 @@ def safeZip(listOfLists, enforceLength):
         length = len(listOfLists[0])
         assert(all([length == len(subList) for subList in listOfLists]))
     
-    return itertools.izip_longest(*listOfLists)
+    try:
+        zipFunc = itertools.izip_longest # Python 2.x
+    except AttributeError:
+        zipFunc = itertools.zip_longest # Python 3.x
+    
+    return zipFunc(*listOfLists)
