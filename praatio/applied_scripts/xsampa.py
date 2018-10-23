@@ -263,7 +263,7 @@ for _line in xsdata.split('\n'):
         continue
     _key, _val = _line.split()
     try:
-        assert not xs.has_key(_key)
+        assert _key not in xs
     except:
         sys.stderr.write(_key + '\n')
         sys.stderr.flush()
