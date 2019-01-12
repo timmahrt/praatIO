@@ -195,7 +195,7 @@ class Klattgrid(tgio.Textgrid):
     def save(self, fn, minimumIntervalLength=None):
         '''
         
-        minimumIntervalLength is used for compatibility with TextGrid.save()
+        minimumIntervalLength is used for compatibility with Textgrid.save()
             but it has no impact on a Klattgrid
         '''
         
