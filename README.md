@@ -27,7 +27,7 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 7. [Citing praatIO](#citing-praatio)
 8. [Acknowledgements](#acknowledgements)
 
-## Common Use Cases <a name="commonusecases"></a>
+## Common Use Cases
 
 What can you do with this library?
 
@@ -150,19 +150,19 @@ Ver 1.0 (August 31, 2014)
 
 ## Usage
 
-99% of the time you're going to want to run::
+99% of the time you're going to want to run
 
-    ```python
-    from praatio import tgio
-    tg = tgio.openTextgrid(r"C:\Users\tim\Documents\transcript.TextGrid")
-    ```
+```python
+from praatio import tgio
+tg = tgio.openTextgrid(r"C:\Users\tim\Documents\transcript.TextGrid")
+```
 
-Or if you want to work with KlaatGrid files::
+Or if you want to work with KlaatGrid files
 
-    ```python
-    from praatio import kgio
-    kg = kgio.openKlattGrid(r"C:\Users\tim\Documents\transcript.KlattGrid")
-    ```
+```python
+from praatio import kgio
+kg = kgio.openKlattGrid(r"C:\Users\tim\Documents\transcript.KlattGrid")
+```
 
 See /test for example usages
 
