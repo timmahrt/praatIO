@@ -39,45 +39,25 @@ What can you do with this library?
 
 - query a textgrid to get information about the tiers or intervals contained within::
 
-    tg = tgio.openTextGrid("path_to_textgrid")
+    tg = tgio.openTextgrid("path_to_textgrid")
 
     entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
 
-    entryList = tg.tierDict["phone_tier"].find("a") # Get all instances of 'a'
+    entryList = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
 
 - create or augment textgrids using data from other sources
 
 - found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid::
 
-    tg = tgio.openTextGrid("path_to_textgrid")
+    tg = tgio.openTextgrid("path_to_textgrid")
 
-    moddedTG = tg.editTimestamps(5, 5, 5)
+    moddedTG = tg.editTimestamps(5)
 
     moddedTG.save('output_path_to_textgrid')
     
-- manipulate an audio file based on information in a textgrid::
-
-    see splitAudioOnTier() in /praatio/praatio_scripts.py
-    
-- remove all intervals (and associated intervals in other tiers) that don't match a query.::
-
-    # This would remove all words that are not content words from the word_tier 
-
-    # and also remove their associated phone listings in the phone_tier
-
-    tg = tgio.openTextGrid("path_to_textgrid")
-
-    print(tg.tierNameList)
-
-    >> ["word_tier", "phone_tier"]
-
-    subTG = tg.getSubtextgrid("word_tier", isContentWord, True)
-
-    subTG.save('output_path_to_textgrid')
-    
 - utilize the klattgrid interface to raise all speech formants by 20% (among other possible manipulations)::
 
-    tg = tgio.openTextGrid("path_to_textgrid")
+    kg = kgio.openKlaatGrid("path_to_klaatgrid")
     
     incrTwenty = lambda x: x * 1.2
     
@@ -93,6 +73,15 @@ What can you do with this library?
 
     see /examples/textgrid_set_operations.py
 
+- see /praatio/praatio_scripts.py for various ready-to-use functions such as::
+
+    splitAudioOnTier(): split an audio file into chunks specified by intervals in one tier
+
+    spellCheckEntries(): spellcheck a textgrid tier
+
+    tgBoundariesToZeroCrossings(): adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
+
+    alignBoundariesAcrossTiers(): for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
 
 Tutorials
 ================
@@ -116,8 +105,6 @@ Ver 3.6 (May 05, 2017)
     - Ver 3.6 is **not** backwards compatible with previous versions of PraatIO.  Lots of changes to tgio.
 
 - Tutorials folder added
-
-
 
 
 Ver 3.5 (April 04, 2017)
@@ -223,7 +210,7 @@ Usage
 99% of the time you're going to want to run::
 
     from praatio import tgio
-    tg = tgio.openTextGrid(r"C:\Users\tim\Documents\transcript.TextGrid")
+    tg = tgio.openTextgrid(r"C:\Users\tim\Documents\transcript.TextGrid")
 
 Or if you want to work with KlaatGrid files::
 
