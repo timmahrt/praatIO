@@ -31,7 +31,7 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 
 What can you do with this library?
 
-- query a textgrid to get information about the tiers or intervals contained within::
+- query a textgrid to get information about the tiers or intervals contained within
     ```python
     tg = tgio.openTextgrid("path_to_textgrid")
     entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
@@ -40,14 +40,14 @@ What can you do with this library?
 
 - create or augment textgrids using data from other sources
 
-- found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid::
+- found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid
     ```python
     tg = tgio.openTextgrid("path_to_textgrid")
     moddedTG = tg.editTimestamps(5)
     moddedTG.save('output_path_to_textgrid')
     ```
     
-- utilize the klattgrid interface to raise all speech formants by 20% (among other possible manipulations)::
+- utilize the klattgrid interface to raise all speech formants by 20% (among other possible manipulations)
     ```python
     kg = kgio.openKlaatGrid("path_to_klaatgrid")
     incrTwenty = lambda x: x * 1.2
@@ -55,13 +55,13 @@ What can you do with this library?
     kg.save(join(outputPath, "bobby_twenty_percent_less.KlattGrid"))
     ```
 
-- replace labeled segments in a recording with silence or delete them:
-    see /examples/deleteVowels.py
+- replace labeled segments in a recording with silence or delete them
+    - see /examples/deleteVowels.py
     
-- use set operations (union, intersection, difference) on textgrid tiers:
-    see /examples/textgrid_set_operations.py
+- use set operations (union, intersection, difference) on textgrid tiers
+    - see /examples/textgrid_set_operations.py
 
-- see /praatio/praatio_scripts.py for various ready-to-use functions such as:
+- see /praatio/praatio_scripts.py for various ready-to-use functions such as
     - `splitAudioOnTier()`: split an audio file into chunks specified by intervals in one tier
     - `spellCheckEntries()`: spellcheck a textgrid tier
     - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
