@@ -65,15 +65,15 @@ What can you do with this library?
 
     kg.save(join(outputPath, "bobby_twenty_percent_less.KlattGrid"))
     
-- replace labeled segments in a recording with silence or delete them
+- replace labeled segments in a recording with silence or delete them:
 
     see /examples/deleteVowels.py
     
-- use set operations (union, intersection, difference) on textgrid tiers
+- use set operations (union, intersection, difference) on textgrid tiers:
 
     see /examples/textgrid_set_operations.py
 
-- see /praatio/praatio_scripts.py for various ready-to-use functions such as::
+- see /praatio/praatio_scripts.py for various ready-to-use functions such as:
 
     splitAudioOnTier(): split an audio file into chunks specified by intervals in one tier
 
