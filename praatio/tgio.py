@@ -1266,7 +1266,7 @@ class Textgrid():
             tier = tier.eraseRegion(start, stop, 'truncate', doShrink)
             newTG.addTier(tier)
 
-        self.maxTimestamp = maxTimestamp
+        newTG.maxTimestamp = maxTimestamp
 
         return newTG
             
@@ -1302,7 +1302,7 @@ class Textgrid():
         '''
         
         newTG = Textgrid()
-        newTG.minTimestamp = 0
+        newTG.minTimestamp = self.minTimestamp
         newTG.maxTimestamp = self.maxTimestamp + duration
         
         for tierName in self.tierNameList:
