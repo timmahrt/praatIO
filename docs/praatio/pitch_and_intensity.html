@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.2" />
+<title>praatio.pitch_and_intensity API documentation</title>
+<meta name="description" content="Created on Oct 20, 2014 …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>praatio.pitch_and_intensity</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Created on Oct 20, 2014</p>
+<p>@author: tmahrt</p>
+<p>To be used in conjunction with get_pitch_and_intensity.praat.</p>
+<p>For brevity, 'pitch_and_intensity' is referred to as 'PI'</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python"># coding: utf-8
+&#39;&#39;&#39;
+Created on Oct 20, 2014
+
+@author: tmahrt
+
+To be used in conjunction with get_pitch_and_intensity.praat.
+
+For brevity, &#39;pitch_and_intensity&#39; is referred to as &#39;PI&#39;
+&#39;&#39;&#39;
+
+import os
+from os.path import join
+import math
+import io
+
+from praatio import dataio
+from praatio import tgio
+from praatio.utilities import utils
+from praatio.utilities import myMath
+from praatio import praatio_scripts
+
+
+class OverwriteException(Exception):
+    
+    def __str__(self):
+        return (&#34;Performing this operation will result in the pitch files &#34;
+                &#34;being overwritten.  Please change the output directory &#34;
+                &#34;to an alternative location or add a suffix to the output. &#34;)
+
+
+def _extractPIPiecewise(inputFN, outputFN, praatEXE,
+                        minPitch, maxPitch, tgFN, tierName,
+                        tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
+                        forceRegenerate=True, undefinedValue=None,
+                        medianFilterWindowSize=0, pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extracts pitch and int from each labeled interval in a textgrid
+    
+    This has the benefit of being faster than using _extractPIFile if only
+    labeled regions need to have their pitch values sampled, particularly
+    for longer files.
+    
+    Returns the result as a list.  Will load the serialized result
+    if this has already been called on the appropriate files before
+    &#39;&#39;&#39;
+    outputPath = os.path.split(outputFN)[0]
+    utils.makeDir(outputPath)
+    
+    windowSize = medianFilterWindowSize
+    
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        
+        utils.makeDir(tmpOutputPath)
+        splitAudioList = praatio_scripts.splitAudioOnTier(inputFN,
+                                                          tgFN,
+                                                          tierName,
+                                                          tmpOutputPath,
+                                                          False)
+        allPIList = []
+        for start, _, fn in splitAudioList:
+            tmpTrackName = os.path.splitext(fn)[0] + &#34;.txt&#34;
+            piList = _extractPIFile(join(tmpOutputPath, fn),
+                                    join(tmpOutputPath, tmpTrackName),
+                                    praatEXE, minPitch, maxPitch,
+                                    sampleStep, silenceThreshold,
+                                    forceRegenerate=True,
+                                    medianFilterWindowSize=windowSize,
+                                    pitchQuadInterp=pitchQuadInterp)
+            piList = [(&#34;%0.3f&#34; % (float(time) + start), str(pV), str(iV))
+                      for time, pV, iV in piList]
+            allPIList.extend(piList)
+            
+        allPIList = [&#34;,&#34;.join(row) for row in allPIList]
+        with open(outputFN, &#34;w&#34;) as fd:
+            fd.write(&#34;\n&#34;.join(allPIList) + &#34;\n&#34;)
+
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+    
+    return piList
+
+
+def _extractPIFile(inputFN, outputFN, praatEXE,
+                   minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
+                   forceRegenerate=True, tgFN=None, tierName=None,
+                   undefinedValue=None, medianFilterWindowSize=0,
+                   pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extracts pitch and intensity values from an audio file
+    
+    Returns the result as a list.  Will load the serialized result
+    if this has already been called on the appropriate files before
+    &#39;&#39;&#39;
+    outputPath = os.path.split(outputFN)[0]
+    utils.makeDir(outputPath)
+    
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        
+        # The praat script uses append mode, so we need to clear any prior
+        # result
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        if pitchQuadInterp is True:
+            doInterpolation = 1
+        else:
+            doInterpolation = 0
+        
+        if tgFN is None or tierName is None:
+            argList = [inputFN, outputFN, sampleStep,
+                       minPitch, maxPitch, silenceThreshold, -1, -1,
+                       medianFilterWindowSize, doInterpolation]
+            
+            scriptName = &#34;get_pitch_and_intensity.praat&#34;
+            scriptFN = join(utils.scriptsPath, scriptName)
+            utils.runPraatScript(praatEXE, scriptFN, argList)
+            
+        else:
+            argList = [inputFN, outputFN, tgFN, tierName, sampleStep,
+                       minPitch, maxPitch, silenceThreshold,
+                       medianFilterWindowSize, doInterpolation]
+            
+            scriptName = &#34;get_pitch_and_intensity.praat&#34;
+            scriptFN = join(utils.scriptsPath, scriptName)
+            utils.runPraatScript(praatEXE, scriptFN, argList)
+
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+    
+    return piList
+
+
+def extractIntensity(inputFN, outputFN, praatEXE,
+                     minPitch, sampleStep=0.01, forceRegenerate=True,
+                     undefinedValue=None):
+    outputPath = os.path.split(outputFN)[0]
+    utils.makeDir(outputPath)
+    
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        
+        # The praat script uses append mode, so we need to clear any prior
+        # result
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [inputFN, outputFN, sampleStep,
+                   minPitch, -1, -1]
+        
+        scriptName = &#34;get_intensity.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+            
+    iList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+    
+    return iList
+
+
+def extractPitchTier(wavFN, outputFN, praatEXE,
+                     minPitch, maxPitch, sampleStep=0.01,
+                     silenceThreshold=0.03, forceRegenerate=True,
+                     medianFilterWindowSize=0,
+                     pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extract pitch at regular intervals from the input wav file
+    
+    Data is output to a text file and then returned in a list in the form
+    [(timeV1, pitchV1), (timeV2, pitchV2), ...]
+    
+    sampleStep - the frequency to sample pitch at
+    silenceThreshold - segments with lower intensity won&#39;t be analyzed
+                       for pitch
+    forceRegenerate - if running this function for the same file, if False
+                      just read in the existing pitch file
+    pitchQuadInterp - if True, quadratically interpolate pitch
+    &#39;&#39;&#39;
+    outputPath = os.path.split(outputFN)[0]
+    
+    utils.makeDir(outputPath)
+    
+    if pitchQuadInterp is True:
+        doInterpolation = 1
+    else:
+        doInterpolation = 0
+    
+    assert(os.path.exists(wavFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [wavFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold,
+                   medianFilterWindowSize, doInterpolation]
+        
+        scriptName = &#34;get_pitchtier.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    pitchTier = dataio.open2DPointObject(outputFN)
+    
+    return pitchTier
+
+
+def extractPitch(wavFN, outputFN, praatEXE,
+                 minPitch, maxPitch, sampleStep=0.01,
+                 silenceThreshold=0.03, forceRegenerate=True,
+                 undefinedValue=None, medianFilterWindowSize=0,
+                 pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extract pitch at regular intervals from the input wav file
+    
+    Data is output to a text file and then returned in a list in the form
+    [(timeV1, pitchV1), (timeV2, pitchV2), ...]
+    
+    sampleStep - the frequency to sample pitch at
+    silenceThreshold - segments with lower intensity won&#39;t be analyzed
+                       for pitch
+    forceRegenerate - if running this function for the same file, if False
+                      just read in the existing pitch file
+    undefinedValue - if None remove from the dataset, otherset set to
+                     undefinedValue
+    pitchQuadInterp - if True, quadratically interpolate pitch
+    &#39;&#39;&#39;
+    outputPath = os.path.split(outputFN)[0]
+    
+    utils.makeDir(outputPath)
+    
+    if pitchQuadInterp is True:
+        doInterpolation = 1
+    else:
+        doInterpolation = 0
+    
+    assert(os.path.exists(wavFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [wavFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold, -1, -1,
+                   medianFilterWindowSize, doInterpolation]
+        
+        scriptName = &#34;get_pitch.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+
+    return piList
+
+
+def extractPI(inputFN, outputFN, praatEXE,
+              minPitch, maxPitch, sampleStep=0.01,
+              silenceThreshold=0.03, forceRegenerate=True,
+              tgFN=None, tierName=None, tmpOutputPath=None,
+              undefinedValue=None, medianFilterWindowSize=0,
+              pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extracts pitch and intensity from a file wholesale or piecewise
+
+    If the parameters for a tg are passed in, this will only extract labeled
+    segments in a tier of the tg.  Otherwise, pitch will be extracted from
+    the entire file.
+
+    male: minPitch=50; maxPitch=350
+    female: minPitch=75; maxPitch=450
+    &#39;&#39;&#39;
+    
+    outputPath = os.path.split(outputFN)[0]
+    
+    windowSize = medianFilterWindowSize
+    
+    if tgFN is None or tierName is None:
+        piList = _extractPIFile(inputFN, outputFN,
+                                praatEXE, minPitch, maxPitch,
+                                sampleStep, silenceThreshold, forceRegenerate,
+                                undefinedValue=undefinedValue,
+                                medianFilterWindowSize=windowSize,
+                                pitchQuadInterp=pitchQuadInterp)
+    else:
+        if tmpOutputPath is None:
+            tmpOutputPath = join(outputPath, &#34;piecewise_output&#34;)
+        piList = _extractPIPiecewise(inputFN, outputFN,
+                                     praatEXE, minPitch, maxPitch,
+                                     tgFN, tierName, tmpOutputPath, sampleStep,
+                                     silenceThreshold, forceRegenerate,
+                                     undefinedValue=undefinedValue,
+                                     medianFilterWindowSize=windowSize,
+                                     pitchQuadInterp=pitchQuadInterp)
+    
+    return piList
+
+
+def loadTimeSeriesData(fn, undefinedValue=None):
+    &#39;&#39;&#39;
+    For reading the output of get_pitch_and_intensity or get_intensity
+    
+    Data should be of the form
+    [(time1, value1a, value1b, ...),
+     (time2, value2a, value2b, ...), ]
+    &#39;&#39;&#39;
+    name = os.path.splitext(os.path.split(fn)[1])[0]
+    
+    try:
+        with io.open(fn, &#34;r&#34;, encoding=&#39;utf-8&#39;) as fd:
+            data = fd.read()
+    except IOError:
+        print(&#34;No pitch track for: %s&#34; % name)
+        raise
+        
+    dataList = data.splitlines()
+    
+    dataList = [row.split(&#39;,&#39;) for row in dataList if row != &#39;&#39;]
+    
+    # The new praat script includes a header
+    if dataList[0][0] == &#34;time&#34;:
+        dataList = dataList[1:]
+    
+    newDataList = []
+    for row in dataList:
+        time = float(row.pop(0))
+        entry = [time, ]
+        doSkip = False
+        for value in row:
+            if &#39;--&#39; in value:
+                if undefinedValue is not None:
+                    value = undefinedValue
+                else:
+                    doSkip = True
+                    break
+            else:
+                value = float(value)
+            
+            entry.append(value)
+        
+        if doSkip is True:
+            continue
+        
+        newDataList.append(entry)
+
+    dataList = newDataList
+
+    return dataList
+
+
+def generatePIMeasures(dataList, tgFN, tierName, doPitch,
+                       medianFilterWindowSize=None):
+    &#39;&#39;&#39;
+    Generates processed values for the labeled intervals in a textgrid
+
+    nullLabelList - labels to ignore in the textgrid.  Defaults to [&#34;&#34;,]
+      
+    if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity
+    &#39;&#39;&#39;
+    
+    tg = tgio.openTextgrid(tgFN)
+    piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
+    
+    outputList = []
+    for interval, entryList in piData:
+        label = interval[0]
+        if doPitch:
+            tmpValList = [f0Val for _, f0Val, _ in entryList]
+            f0Measures = getPitchMeasures(tmpValList, tgFN, label,
+                                          medianFilterWindowSize, True)
+            outputList.append(list(f0Measures))
+        else:
+            tmpValList = [intensityVal for _, _, intensityVal in entryList]
+    
+            tmpValList = [intensityVal for intensityVal in tmpValList
+                          if intensityVal != 0.0]
+        
+            rmsIntensity = 0
+            if len(tmpValList) != 0:
+                rmsIntensity = myMath.rms(tmpValList)
+            outputList.append([rmsIntensity, ])
+    
+    return outputList
+
+
+def getPitchMeasures(f0Values, name=None, label=None,
+                     medianFilterWindowSize=None,
+                     filterZeroFlag=False,):
+    &#39;&#39;&#39;
+    Get various measures (min, max, etc) for the passed in list of pitch values
+    
+    name is the name of the file.  Label is the label of the current interval.
+    Both of these labels are only used debugging and can be ignored if desired.
+    medianFilterWindowSize: None -&gt; no median filtering
+    filterZeroFlag:True -&gt; zero values are removed
+    &#39;&#39;&#39;
+    
+    if name is None:
+        name = &#34;unspecified&#34;
+    if label is None:
+        label = &#34;unspecified&#34;
+    
+    if medianFilterWindowSize is not None:
+        f0Values = myMath.medianFilter(f0Values, medianFilterWindowSize,
+                                       useEdgePadding=True)
+        
+    if filterZeroFlag:
+        f0Values = [f0Val for f0Val in f0Values if int(f0Val) != 0]
+    
+    if len(f0Values) == 0:
+        myStr = u&#34;No pitch data for file: %s, label: %s&#34; % (name, label)
+        print(myStr.encode(&#39;ascii&#39;, &#39;replace&#39;))
+        counts = 0
+        meanF0 = 0
+        maxF0 = 0
+        minF0 = 0
+        rangeF0 = 0
+        variance = 0
+        std = 0
+    else:
+        counts = float(len(f0Values))
+        meanF0 = sum(f0Values) / counts
+        maxF0 = max(f0Values)
+        minF0 = min(f0Values)
+        rangeF0 = maxF0 - minF0
+    
+        variance = sum([(val - meanF0) ** 2 for val in f0Values]) / counts
+        std = math.sqrt(variance)
+            
+    return (meanF0, maxF0, minF0, rangeF0, variance, std)
+
+
+def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
+    &#39;&#39;&#39;
+    Detect pitch halving and doubling errors.
+    
+    If a textgrid is passed in, it adds the markings to the textgrid
+    &#39;&#39;&#39;
+    assert(maxJumpThreshold &gt;= 0.0 and maxJumpThreshold &lt;= 1.0)
+    
+    errorList = []
+    for i in range(1, len(pitchList)):
+        lastPitch = pitchList[i - 1][1]
+        currentPitch = pitchList[i][1]
+        
+        ceilingCutoff = currentPitch / maxJumpThreshold
+        floorCutoff = currentPitch * maxJumpThreshold
+        if((lastPitch &lt;= floorCutoff) or (lastPitch &gt;= ceilingCutoff)):
+            currentTime = pitchList[i][0]
+            errorList.append([currentTime, currentPitch / lastPitch])
+    
+    if tgToMark is not None:
+        tierName = &#34;pitch errors&#34;
+        assert(tierName not in tgToMark.tierNameList)
+        pointTier = tgio.PointTier(tierName, errorList,
+                                   tgToMark.minTimestamp,
+                                   tgToMark.maxTimestamp)
+        tgToMark.addTier(pointTier)
+    
+    return errorList, tgToMark</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="praatio.pitch_and_intensity.detectPitchErrors"><code class="name flex">
+<span>def <span class="ident">detectPitchErrors</span></span>(<span>pitchList, maxJumpThreshold=0.7, tgToMark=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Detect pitch halving and doubling errors.</p>
+<p>If a textgrid is passed in, it adds the markings to the textgrid</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
+    &#39;&#39;&#39;
+    Detect pitch halving and doubling errors.
+    
+    If a textgrid is passed in, it adds the markings to the textgrid
+    &#39;&#39;&#39;
+    assert(maxJumpThreshold &gt;= 0.0 and maxJumpThreshold &lt;= 1.0)
+    
+    errorList = []
+    for i in range(1, len(pitchList)):
+        lastPitch = pitchList[i - 1][1]
+        currentPitch = pitchList[i][1]
+        
+        ceilingCutoff = currentPitch / maxJumpThreshold
+        floorCutoff = currentPitch * maxJumpThreshold
+        if((lastPitch &lt;= floorCutoff) or (lastPitch &gt;= ceilingCutoff)):
+            currentTime = pitchList[i][0]
+            errorList.append([currentTime, currentPitch / lastPitch])
+    
+    if tgToMark is not None:
+        tierName = &#34;pitch errors&#34;
+        assert(tierName not in tgToMark.tierNameList)
+        pointTier = tgio.PointTier(tierName, errorList,
+                                   tgToMark.minTimestamp,
+                                   tgToMark.maxTimestamp)
+        tgToMark.addTier(pointTier)
+    
+    return errorList, tgToMark</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.extractIntensity"><code class="name flex">
+<span>def <span class="ident">extractIntensity</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, sampleStep=0.01, forceRegenerate=True, undefinedValue=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def extractIntensity(inputFN, outputFN, praatEXE,
+                     minPitch, sampleStep=0.01, forceRegenerate=True,
+                     undefinedValue=None):
+    outputPath = os.path.split(outputFN)[0]
+    utils.makeDir(outputPath)
+    
+    assert(os.path.exists(inputFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        
+        # The praat script uses append mode, so we need to clear any prior
+        # result
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [inputFN, outputFN, sampleStep,
+                   minPitch, -1, -1]
+        
+        scriptName = &#34;get_intensity.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+            
+    iList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+    
+    return iList</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.extractPI"><code class="name flex">
+<span>def <span class="ident">extractPI</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, forceRegenerate=True, tgFN=None, tierName=None, tmpOutputPath=None, undefinedValue=None, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Extracts pitch and intensity from a file wholesale or piecewise</p>
+<p>If the parameters for a tg are passed in, this will only extract labeled
+segments in a tier of the tg.
+Otherwise, pitch will be extracted from
+the entire file.</p>
+<dl>
+<dt><strong><code>male</code></strong> :&ensp;<code>minPitch</code>=<code>50</code>; <code>maxPitch</code>=<code>350</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>female</code></strong> :&ensp;<code>minPitch</code>=<code>75</code>; <code>maxPitch</code>=<code>450</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def extractPI(inputFN, outputFN, praatEXE,
+              minPitch, maxPitch, sampleStep=0.01,
+              silenceThreshold=0.03, forceRegenerate=True,
+              tgFN=None, tierName=None, tmpOutputPath=None,
+              undefinedValue=None, medianFilterWindowSize=0,
+              pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extracts pitch and intensity from a file wholesale or piecewise
+
+    If the parameters for a tg are passed in, this will only extract labeled
+    segments in a tier of the tg.  Otherwise, pitch will be extracted from
+    the entire file.
+
+    male: minPitch=50; maxPitch=350
+    female: minPitch=75; maxPitch=450
+    &#39;&#39;&#39;
+    
+    outputPath = os.path.split(outputFN)[0]
+    
+    windowSize = medianFilterWindowSize
+    
+    if tgFN is None or tierName is None:
+        piList = _extractPIFile(inputFN, outputFN,
+                                praatEXE, minPitch, maxPitch,
+                                sampleStep, silenceThreshold, forceRegenerate,
+                                undefinedValue=undefinedValue,
+                                medianFilterWindowSize=windowSize,
+                                pitchQuadInterp=pitchQuadInterp)
+    else:
+        if tmpOutputPath is None:
+            tmpOutputPath = join(outputPath, &#34;piecewise_output&#34;)
+        piList = _extractPIPiecewise(inputFN, outputFN,
+                                     praatEXE, minPitch, maxPitch,
+                                     tgFN, tierName, tmpOutputPath, sampleStep,
+                                     silenceThreshold, forceRegenerate,
+                                     undefinedValue=undefinedValue,
+                                     medianFilterWindowSize=windowSize,
+                                     pitchQuadInterp=pitchQuadInterp)
+    
+    return piList</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.extractPitch"><code class="name flex">
+<span>def <span class="ident">extractPitch</span></span>(<span>wavFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, forceRegenerate=True, undefinedValue=None, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Extract pitch at regular intervals from the input wav file</p>
+<p>Data is output to a text file and then returned in a list in the form
+[(timeV1, pitchV1), (timeV2, pitchV2), &hellip;]</p>
+<p>sampleStep - the frequency to sample pitch at
+silenceThreshold - segments with lower intensity won't be analyzed
+for pitch
+forceRegenerate - if running this function for the same file, if False
+just read in the existing pitch file
+undefinedValue - if None remove from the dataset, otherset set to
+undefinedValue
+pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def extractPitch(wavFN, outputFN, praatEXE,
+                 minPitch, maxPitch, sampleStep=0.01,
+                 silenceThreshold=0.03, forceRegenerate=True,
+                 undefinedValue=None, medianFilterWindowSize=0,
+                 pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extract pitch at regular intervals from the input wav file
+    
+    Data is output to a text file and then returned in a list in the form
+    [(timeV1, pitchV1), (timeV2, pitchV2), ...]
+    
+    sampleStep - the frequency to sample pitch at
+    silenceThreshold - segments with lower intensity won&#39;t be analyzed
+                       for pitch
+    forceRegenerate - if running this function for the same file, if False
+                      just read in the existing pitch file
+    undefinedValue - if None remove from the dataset, otherset set to
+                     undefinedValue
+    pitchQuadInterp - if True, quadratically interpolate pitch
+    &#39;&#39;&#39;
+    outputPath = os.path.split(outputFN)[0]
+    
+    utils.makeDir(outputPath)
+    
+    if pitchQuadInterp is True:
+        doInterpolation = 1
+    else:
+        doInterpolation = 0
+    
+    assert(os.path.exists(wavFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [wavFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold, -1, -1,
+                   medianFilterWindowSize, doInterpolation]
+        
+        scriptName = &#34;get_pitch.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+
+    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
+
+    return piList</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.extractPitchTier"><code class="name flex">
+<span>def <span class="ident">extractPitchTier</span></span>(<span>wavFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, forceRegenerate=True, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Extract pitch at regular intervals from the input wav file</p>
+<p>Data is output to a text file and then returned in a list in the form
+[(timeV1, pitchV1), (timeV2, pitchV2), &hellip;]</p>
+<p>sampleStep - the frequency to sample pitch at
+silenceThreshold - segments with lower intensity won't be analyzed
+for pitch
+forceRegenerate - if running this function for the same file, if False
+just read in the existing pitch file
+pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def extractPitchTier(wavFN, outputFN, praatEXE,
+                     minPitch, maxPitch, sampleStep=0.01,
+                     silenceThreshold=0.03, forceRegenerate=True,
+                     medianFilterWindowSize=0,
+                     pitchQuadInterp=False):
+    &#39;&#39;&#39;
+    Extract pitch at regular intervals from the input wav file
+    
+    Data is output to a text file and then returned in a list in the form
+    [(timeV1, pitchV1), (timeV2, pitchV2), ...]
+    
+    sampleStep - the frequency to sample pitch at
+    silenceThreshold - segments with lower intensity won&#39;t be analyzed
+                       for pitch
+    forceRegenerate - if running this function for the same file, if False
+                      just read in the existing pitch file
+    pitchQuadInterp - if True, quadratically interpolate pitch
+    &#39;&#39;&#39;
+    outputPath = os.path.split(outputFN)[0]
+    
+    utils.makeDir(outputPath)
+    
+    if pitchQuadInterp is True:
+        doInterpolation = 1
+    else:
+        doInterpolation = 0
+    
+    assert(os.path.exists(wavFN))
+    firstTime = not os.path.exists(outputFN)
+    if firstTime or forceRegenerate is True:
+        if os.path.exists(outputFN):
+            os.remove(outputFN)
+        
+        argList = [wavFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold,
+                   medianFilterWindowSize, doInterpolation]
+        
+        scriptName = &#34;get_pitchtier.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    pitchTier = dataio.open2DPointObject(outputFN)
+    
+    return pitchTier</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.generatePIMeasures"><code class="name flex">
+<span>def <span class="ident">generatePIMeasures</span></span>(<span>dataList, tgFN, tierName, doPitch, medianFilterWindowSize=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Generates processed values for the labeled intervals in a textgrid</p>
+<p>nullLabelList - labels to ignore in the textgrid.
+Defaults to ["",]</p>
+<p>if 'doPitch'=true get pitch measures; if =false get rms intensity</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def generatePIMeasures(dataList, tgFN, tierName, doPitch,
+                       medianFilterWindowSize=None):
+    &#39;&#39;&#39;
+    Generates processed values for the labeled intervals in a textgrid
+
+    nullLabelList - labels to ignore in the textgrid.  Defaults to [&#34;&#34;,]
+      
+    if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity
+    &#39;&#39;&#39;
+    
+    tg = tgio.openTextgrid(tgFN)
+    piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
+    
+    outputList = []
+    for interval, entryList in piData:
+        label = interval[0]
+        if doPitch:
+            tmpValList = [f0Val for _, f0Val, _ in entryList]
+            f0Measures = getPitchMeasures(tmpValList, tgFN, label,
+                                          medianFilterWindowSize, True)
+            outputList.append(list(f0Measures))
+        else:
+            tmpValList = [intensityVal for _, _, intensityVal in entryList]
+    
+            tmpValList = [intensityVal for intensityVal in tmpValList
+                          if intensityVal != 0.0]
+        
+            rmsIntensity = 0
+            if len(tmpValList) != 0:
+                rmsIntensity = myMath.rms(tmpValList)
+            outputList.append([rmsIntensity, ])
+    
+    return outputList</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.getPitchMeasures"><code class="name flex">
+<span>def <span class="ident">getPitchMeasures</span></span>(<span>f0Values, name=None, label=None, medianFilterWindowSize=None, filterZeroFlag=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get various measures (min, max, etc) for the passed in list of pitch values</p>
+<dl>
+<dt>name is the name of the file.
+Label is the label of the current interval.</dt>
+<dt>Both of these labels are only used debugging and can be ignored if desired.</dt>
+<dt><strong><code>medianFilterWindowSize</code></strong> :&ensp;<code>None</code> -&gt; <code>no</code> <code>median</code> <code>filtering</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>filterZeroFlag</code></strong> :&ensp;<code>True</code> -&gt; <code>zero</code> <code>values</code> <code>are</code> <code>removed</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getPitchMeasures(f0Values, name=None, label=None,
+                     medianFilterWindowSize=None,
+                     filterZeroFlag=False,):
+    &#39;&#39;&#39;
+    Get various measures (min, max, etc) for the passed in list of pitch values
+    
+    name is the name of the file.  Label is the label of the current interval.
+    Both of these labels are only used debugging and can be ignored if desired.
+    medianFilterWindowSize: None -&gt; no median filtering
+    filterZeroFlag:True -&gt; zero values are removed
+    &#39;&#39;&#39;
+    
+    if name is None:
+        name = &#34;unspecified&#34;
+    if label is None:
+        label = &#34;unspecified&#34;
+    
+    if medianFilterWindowSize is not None:
+        f0Values = myMath.medianFilter(f0Values, medianFilterWindowSize,
+                                       useEdgePadding=True)
+        
+    if filterZeroFlag:
+        f0Values = [f0Val for f0Val in f0Values if int(f0Val) != 0]
+    
+    if len(f0Values) == 0:
+        myStr = u&#34;No pitch data for file: %s, label: %s&#34; % (name, label)
+        print(myStr.encode(&#39;ascii&#39;, &#39;replace&#39;))
+        counts = 0
+        meanF0 = 0
+        maxF0 = 0
+        minF0 = 0
+        rangeF0 = 0
+        variance = 0
+        std = 0
+    else:
+        counts = float(len(f0Values))
+        meanF0 = sum(f0Values) / counts
+        maxF0 = max(f0Values)
+        minF0 = min(f0Values)
+        rangeF0 = maxF0 - minF0
+    
+        variance = sum([(val - meanF0) ** 2 for val in f0Values]) / counts
+        std = math.sqrt(variance)
+            
+    return (meanF0, maxF0, minF0, rangeF0, variance, std)</code></pre>
+</details>
+</dd>
+<dt id="praatio.pitch_and_intensity.loadTimeSeriesData"><code class="name flex">
+<span>def <span class="ident">loadTimeSeriesData</span></span>(<span>fn, undefinedValue=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>For reading the output of get_pitch_and_intensity or get_intensity</p>
+<p>Data should be of the form
+[(time1, value1a, value1b, &hellip;),
+(time2, value2a, value2b, &hellip;), ]</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def loadTimeSeriesData(fn, undefinedValue=None):
+    &#39;&#39;&#39;
+    For reading the output of get_pitch_and_intensity or get_intensity
+    
+    Data should be of the form
+    [(time1, value1a, value1b, ...),
+     (time2, value2a, value2b, ...), ]
+    &#39;&#39;&#39;
+    name = os.path.splitext(os.path.split(fn)[1])[0]
+    
+    try:
+        with io.open(fn, &#34;r&#34;, encoding=&#39;utf-8&#39;) as fd:
+            data = fd.read()
+    except IOError:
+        print(&#34;No pitch track for: %s&#34; % name)
+        raise
+        
+    dataList = data.splitlines()
+    
+    dataList = [row.split(&#39;,&#39;) for row in dataList if row != &#39;&#39;]
+    
+    # The new praat script includes a header
+    if dataList[0][0] == &#34;time&#34;:
+        dataList = dataList[1:]
+    
+    newDataList = []
+    for row in dataList:
+        time = float(row.pop(0))
+        entry = [time, ]
+        doSkip = False
+        for value in row:
+            if &#39;--&#39; in value:
+                if undefinedValue is not None:
+                    value = undefinedValue
+                else:
+                    doSkip = True
+                    break
+            else:
+                value = float(value)
+            
+            entry.append(value)
+        
+        if doSkip is True:
+            continue
+        
+        newDataList.append(entry)
+
+    dataList = newDataList
+
+    return dataList</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="praatio.pitch_and_intensity.OverwriteException"><code class="flex name class">
+<span>class <span class="ident">OverwriteException</span></span>
+<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class OverwriteException(Exception):
+    
+    def __str__(self):
+        return (&#34;Performing this operation will result in the pitch files &#34;
+                &#34;being overwritten.  Please change the output directory &#34;
+                &#34;to an alternative location or add a suffix to the output. &#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="praatio" href="index.html">praatio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="praatio.pitch_and_intensity.detectPitchErrors" href="#praatio.pitch_and_intensity.detectPitchErrors">detectPitchErrors</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.extractIntensity" href="#praatio.pitch_and_intensity.extractIntensity">extractIntensity</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.extractPI" href="#praatio.pitch_and_intensity.extractPI">extractPI</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.extractPitch" href="#praatio.pitch_and_intensity.extractPitch">extractPitch</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.extractPitchTier" href="#praatio.pitch_and_intensity.extractPitchTier">extractPitchTier</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.generatePIMeasures" href="#praatio.pitch_and_intensity.generatePIMeasures">generatePIMeasures</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.getPitchMeasures" href="#praatio.pitch_and_intensity.getPitchMeasures">getPitchMeasures</a></code></li>
+<li><code><a title="praatio.pitch_and_intensity.loadTimeSeriesData" href="#praatio.pitch_and_intensity.loadTimeSeriesData">loadTimeSeriesData</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="praatio.pitch_and_intensity.OverwriteException" href="#praatio.pitch_and_intensity.OverwriteException">OverwriteException</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

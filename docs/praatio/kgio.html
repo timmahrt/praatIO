@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.2" />
+<title>praatio.kgio API documentation</title>
+<meta name="description" content="Functions for reading/writing/manipulating klattgrid files in praat …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>praatio.kgio</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Functions for reading/writing/manipulating klattgrid files in praat</p>
+<p>Created on Oct 30, 2015</p>
+<p>@author: tmahrt</p>
+<dl>
+<dt>For more information on the praat klattgrid:</dt>
+<dt><strong><code>http</code></strong> :&ensp;//<code>www.fon.hum.uva.nl</code>/<code>praat</code>/<code>manual</code>/<code>KlattGrid.html</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>There are three kinds of data types in a klattgrid:
+null tiers (contain no data points &ndash; seem to function as headers for a
+set of regular tiers)
+regular tiers
+embedded tiers</p>
+<p>In this code:
+null tiers and regular tiers are both represented by KlattPointTier</p>
+<p>embedded tiers contain tiers of tiers (3 layers)
+A KlattContainerTier contains a list of KlattIntermediateTiers which
+contains a list of KlattSubPointTiers.
+Only the KlattSubPointTiers contain
+any points</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#39;&#39;&#39;
+Functions for reading/writing/manipulating klattgrid files in praat
+
+Created on Oct 30, 2015
+
+@author: tmahrt
+
+
+For more information on the praat klattgrid:
+http://www.fon.hum.uva.nl/praat/manual/KlattGrid.html
+
+There are three kinds of data types in a klattgrid:
+null tiers (contain no data points -- seem to function as headers for a
+            set of regular tiers)
+regular tiers
+embedded tiers
+
+In this code:
+null tiers and regular tiers are both represented by KlattPointTier
+
+embedded tiers contain tiers of tiers (3 layers)
+A KlattContainerTier contains a list of KlattIntermediateTiers which
+contains a list of KlattSubPointTiers.  Only the KlattSubPointTiers contain
+any points
+&#39;&#39;&#39;
+
+import io
+from os.path import join
+
+from praatio.utilities import utils
+from praatio import tgio
+
+
+class _KlattBaseTier(object):
+
+    def __init__(self, name):
+        self.tierNameList = []  # Preserves the order of the tiers
+        self.tierDict = {}
+        self.name = name
+        self.minTimestamp = None
+        self.maxTimestamp = None
+    
+    def __eq__(self, other):
+        isEqual = True
+        isEqual &amp;= self.name == other.name
+        isEqual &amp;= self.minTimestamp == other.minTimestamp
+        isEqual &amp;= self.maxTimestamp == other.maxTimestamp
+        
+        isEqual &amp;= self.tierNameList == other.tierNameList
+        if isEqual:
+            for tierName in self.tierNameList:
+                isEqual &amp;= self.tierDict[tierName] == other.tierDict[tierName]
+        
+        return isEqual
+    
+    def addTier(self, tier, tierIndex=None):
+        
+        if tierIndex is None:
+            self.tierNameList.append(tier.name)
+        else:
+            self.tierNameList.insert(tierIndex, tier.name)
+            
+        assert(tier.name not in list(self.tierDict.keys()))
+        self.tierDict[tier.name] = tier
+        
+        minV = tier.minTimestamp
+        if self.minTimestamp is None or (minV is not None and
+                                         minV &lt; self.minTimestamp):
+            self.minTimestamp = minV
+        
+        maxV = tier.maxTimestamp
+        if self.maxTimestamp is None or (maxV is not None and
+                                         maxV &gt; self.maxTimestamp):
+            self.maxTimestamp = maxV
+
+
+class KlattContainerTier(_KlattBaseTier):
+    &#39;&#39;&#39;
+    Contains a set of intermediate tiers
+    &#39;&#39;&#39;
+    def getAsText(self):
+        outputTxt = &#34;&#34;
+        outputTxt += &#34;%s? &lt;exists&gt;\n&#34; % self.name
+        
+        try:
+            self.minTimestamp = toIntOrFloat(self.minTimestamp)
+            outputTxt += &#34;xmin = %s\nxmax = %s\n&#34; % (repr(self.minTimestamp),
+                                                     repr(self.maxTimestamp))
+        except TypeError:
+            pass
+        
+        for name in self.tierNameList:
+            outputTxt += self.tierDict[name].getAsText()
+        
+        return outputTxt
+    
+    def modifySubtiers(self, tierName, modFunc):
+        &#39;&#39;&#39;
+        Modify values in every tier contained in the named intermediate tier
+        &#39;&#39;&#39;
+        kit = self.tierDict[tierName]
+        for name in kit.tierNameList:
+            subpointTier = kit.tierDict[name]
+            subpointTier.modifyValues(modFunc)
+    
+    
+class KlattIntermediateTier(_KlattBaseTier):
+    &#39;&#39;&#39;
+    Has many point tiers that are semantically related (e.g. formant tiers)
+    &#39;&#39;&#39;
+    def getAsText(self):
+        outputTxt = &#34;&#34;
+        headerTxt = &#34;%s: size=%d\n&#34; % (self.name, len(self.tierNameList))
+        
+        for name in self.tierNameList:
+            outputTxt += self.tierDict[name].getAsText()
+        
+        outputTxt = headerTxt + outputTxt
+        
+        return outputTxt
+    
+
+class KlattPointTier(tgio.TextgridTier):
+    &#39;&#39;&#39;
+    A Klatt tier not contained within another tier
+    &#39;&#39;&#39;
+    
+    def __init__(self, name, entryList, minT=None, maxT=None):
+        
+        entryList = [(float(time), label) for time, label in entryList]
+        
+        # Determine the min and max timestamps
+        timeList = [time for time, label in entryList]
+        if minT is not None:
+            timeList.append(float(minT))
+        if maxT is not None:
+            timeList.append(float(maxT))
+        
+        try:
+            minT = min(timeList)
+            maxT = max(timeList)
+        except ValueError:
+            raise tgio.TimelessTextgridTierException()
+
+        super(KlattPointTier, self).__init__(name, entryList, minT, maxT)
+    
+    def modifyValues(self, modFunc):
+        newEntryList = [(timestamp, modFunc(float(value)))
+                        for timestamp, value in self.entryList]
+        
+        self.entryList = newEntryList
+        
+    def getAsText(self):
+        outputList = []
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputList.append(&#34;%s? &lt;exists&gt; &#34; % self.name)
+        outputList.append(&#34;xmin = %s&#34; % repr(self.minTimestamp))
+        outputList.append(&#34;xmax = %s&#34; % repr(self.maxTimestamp))
+        
+        if self.name not in [&#34;phonation&#34;, &#34;vocalTract&#34;, &#34;coupling&#34;,
+                             &#34;frication&#34;]:
+            outputList.append(&#34;points: size= %d&#34; % len(self.entryList))
+        
+        for i, entry in enumerate(self.entryList):
+            outputList.append(&#34;points [%d]:&#34; % (i + 1))
+            outputList.append(&#34;    number = %s&#34; % repr(entry[0]))
+            outputList.append(&#34;    value = %s&#34; % repr(entry[1]))
+    
+        return &#34;\n&#34;.join(outputList) + &#34;\n&#34;
+
+
+class KlattSubPointTier(KlattPointTier):
+    &#39;&#39;&#39;
+    Tiers contained in a KlattIntermediateTier
+    &#39;&#39;&#39;
+        
+    def getAsText(self):
+        outputList = []
+        outputList.append(&#34;%s:&#34; % self.name)
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputList.append(&#34;    xmin = %s&#34; % repr(self.minTimestamp))
+        outputList.append(&#34;    xmax = %s&#34; % repr(self.maxTimestamp))
+        outputList.append(&#34;    points: size = %d&#34; % len(self.entryList))
+        
+        for i, entry in enumerate(self.entryList):
+            outputList.append(&#34;    points [%d]:&#34; % (i + 1))
+            outputList.append(&#34;        number = %s&#34; % repr(entry[0]))
+            outputList.append(&#34;        value = %s&#34; % repr(entry[1]))
+    
+        return &#34;\n&#34;.join(outputList) + &#39;\n&#39;
+    
+    
+class Klattgrid(tgio.Textgrid):
+    
+    def save(self, fn, minimumIntervalLength=None):
+        &#39;&#39;&#39;
+        
+        minimumIntervalLength is used for compatibility with Textgrid.save()
+            but it has no impact on a Klattgrid
+        &#39;&#39;&#39;
+        
+        # Header
+        outputTxt = &#34;&#34;
+        outputTxt += &#39;File type = &#34;ooTextFile&#34;\n&#39;
+        outputTxt += &#39;Object class = &#34;KlattGrid&#34;\n\n&#39;
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputTxt += &#34;xmin = %s\nxmax = %s\n&#34; % (repr(self.minTimestamp),
+                                                 repr(self.maxTimestamp))
+        
+        for tierName in self.tierNameList:
+            outputTxt += self.tierDict[tierName].getAsText()
+        
+        outputTxt = _cleanNumericValues(outputTxt)
+        
+        with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
+            fd.write(outputTxt)
+    
+
+def openKlattgrid(fnFullPath):
+
+    try:
+        with io.open(fnFullPath, &#34;r&#34;, encoding=&#34;utf-16&#34;) as fd:
+            data = fd.read()
+    except UnicodeError:
+        with io.open(fnFullPath, &#34;r&#34;, encoding=&#34;utf-8&#34;) as fd:
+            data = fd.read()
+    data = data.replace(&#34;\r\n&#34;, &#34;\n&#34;)
+
+    # Right now, can only open normal klatt grid and not short ones
+    kg = _openNormalKlattgrid(data)
+
+    return kg
+
+
+def wavToKlattgrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
+                   numFormants=5, maxFormantFreq=5500.0, windowLength=0.025,
+                   preEmphasis=50.0, pitchFloor=60.0, pitchCeiling=600.0,
+                   minPitch=50.0, subtractMean=True,
+                   scriptFN=None):
+    &#39;&#39;&#39;
+    Extracts the klattgrid from a wav file
+    
+    The default values are the same as the ones used in praat
+    &#39;&#39;&#39;
+    
+    if subtractMean is True:
+        subtractMean = &#34;yes&#34;
+    else:
+        subtractMean = &#34;no&#34;
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;sound_to_klattgrid.praat&#34;)
+    
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputFullPath, outputFullPath, timeStep,
+                          numFormants, maxFormantFreq, windowLength,
+                          preEmphasis, pitchFloor, pitchCeiling,
+                          minPitch, subtractMean])
+
+
+def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
+                 scriptFN=None):
+    
+    if doCascade:
+        method = &#34;Cascade&#34;
+    else:
+        method = &#34;Parallel&#34;
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        &#34;resynthesize_from_klattgrid.praat&#34;)
+    
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, klattFN, outputWavFN, method])
+
+
+def _openNormalKlattgrid(data):
+
+    kg = Klattgrid()
+
+    # Toss header
+    data = data.split(&#34;\n\n&#34;, 1)[1]
+    
+    # Not sure if this is needed
+    startI = data.index(&#34;points&#34;)
+    startI = data.index(&#34;\n&#34;, startI)
+    
+    # Find sections
+    sectionIndexList = _findIndicies(data, &#34;&lt;exists&gt;&#34;)
+    
+    sectionIndexList.append(-1)
+    
+    for i in range(len(sectionIndexList) - 1):
+        dataTuple = _getSectionHeader(data, sectionIndexList, i)
+        name, minT, maxT, sectionData, sectionTuple = dataTuple
+        
+        # Container Tier
+        if name in [&#34;oral_formants&#34;, &#34;nasal_formants&#34;, &#34;nasal_antiformants&#34;,
+                    &#34;tracheal_formants&#34;, &#34;tracheal_antiformants&#34;,
+                    &#34;delta_formants&#34;, &#34;frication_formants&#34;]:
+            
+            kct = _proccessContainerTierInput(sectionData, name)
+            kg.addTier(kct)
+                    
+        else:
+        
+            # Process entries if this tier has any
+            entryList = _buildEntryList(sectionTuple)
+            tier = KlattPointTier(name, entryList, minT, maxT)
+            kg.addTier(tier)
+        
+    return kg
+
+
+def _proccessContainerTierInput(sectionData, name):
+    sectionData = sectionData.split(&#34;\n&#34;, 3)[-1]
+    
+    formantIndexList = _findIndicies(sectionData, &#39;formants&#39;)
+    
+    subFilterList = [&#39;bandwidths&#39;,
+                     &#34;oral_formants_amplitudes&#34;,
+                     &#34;nasal_formants_amplitudes&#34;,
+                     &#34;tracheal_formants_amplitudes&#34;,
+                     &#34;frication_formants_amplitudes&#34;]
+    
+    # Find the index of all the different data sections
+    subFilterIndexList = [_findIndicies(sectionData, subName)
+                          for subName in subFilterList]
+    
+    # &#39;Formant&#39; search query finds duplicates -- remove them
+    newFormantList = []
+    for value in formantIndexList:
+        if all([value not in subList for subList in subFilterIndexList]):
+            newFormantList.append(value)
+    formantIndexList = newFormantList
+
+    # Combine regular query with formant query
+    indexListOfLists = [formantIndexList, ] + subFilterIndexList
+    
+    # Flatten index list
+    masterIndexList = [value for sublist in indexListOfLists
+                       for value in sublist]
+    masterIndexList.sort()
+    
+    # If an index list is last, it it needs to include &#39;-1&#39; to capture the
+    # rest of the data
+    for subList in indexListOfLists:
+        try:
+            val = subList[-1]
+        except IndexError:
+            continue
+        ii = masterIndexList.index(val)  # Index of the index
+        try:
+            subList.append(masterIndexList[ii + 1] - 1)
+        except IndexError:
+            subList.append(-1)
+    
+    # Build the tier structure
+    kct = KlattContainerTier(name)
+    for indexList in indexListOfLists:
+        if indexList == []:
+            continue
+        tierList = []
+        for j in range(len(indexList) - 1):
+            try:
+                tmpTuple = _getSectionHeader(sectionData, indexList, j)
+            except ValueError:
+                continue
+            subName, subMin, subMax, _, subTuple = tmpTuple
+            subName = subName[:-1]
+            
+            entryList = _buildEntryList(subTuple)
+            tier = KlattSubPointTier(subName, entryList,
+                                     subMin, subMax)
+            tierList.append(tier)
+        kit = KlattIntermediateTier(subName.split()[0])
+        for tier in tierList:
+            kit.addTier(tier)
+        kct.addTier(kit)
+    
+    return kct
+
+
+def _findIndicies(data, keyword):
+    indexList = utils.findAll(data, keyword)
+    indexList = [data.rfind(&#34;\n&#34;, 0, i) for i in indexList]
+    
+    return indexList
+
+
+def _getSectionHeader(data, indexList, i):
+    sectionStart = indexList[i]
+    sectionEnd = indexList[i + 1]
+    sectionData = data[sectionStart:sectionEnd].strip()
+    sectionTuple = sectionData.split(&#34;\n&#34;, 4)
+    
+    subheader, minr, maxr = sectionTuple[:3]
+    name = subheader.split(&#34;?&#34;)[0].strip()
+    minT = float(minr.split(&#34;=&#34;)[1].strip())
+    maxT = float(maxr.split(&#34;=&#34;)[1].strip())
+
+    tail = sectionTuple[3:]
+
+    return name, minT, maxT, sectionData, tail
+
+
+def _buildEntryList(sectionTuple):
+    entryList = []
+    if len(sectionTuple) &gt; 1:  # Has points
+        npoints = float(sectionTuple[0].split(&#34;=&#34;)[1].strip())
+        if npoints &gt; 0:
+            entryList = _processSectionData(sectionTuple[1])
+    
+    return entryList
+
+
+def _processSectionData(sectionData):
+    
+    sectionData += &#34;\n&#34;
+    
+    startI = 0
+    tupleList = []
+    while True:
+        try:
+            startI = sectionData.index(&#34;=&#34;, startI) + 1  # Past the equal sign
+        except ValueError:  # No more data
+            break
+        
+        endI = sectionData.index(&#34;\n&#34;, startI)
+        time = float(sectionData[startI:endI].strip())
+        
+        startI = sectionData.index(&#34;=&#34;, endI) + 1  # Just past the &#39;=&#39; sign
+        endI = sectionData.index(&#34;\n&#34;, startI)
+        value = float(sectionData[startI:endI].strip())
+        
+        startI = endI
+        tupleList.append((time, value))
+        
+    return tupleList
+
+
+def _cleanNumericValues(dataStr):
+    dataList = dataStr.split(&#34;\n&#34;)
+    newDataList = []
+    for row in dataList:
+        row = row.rstrip()
+        try:
+            assert(&#34;min&#34; not in row and &#34;max&#34; not in row)
+            
+            head, tail = row.split(&#34;=&#34;)
+            head = head.rstrip()
+            tail = tail.strip()
+            try:
+                row = str(int(tail))
+            except ValueError:
+                tail = &#34;%s&#34; % tail
+                if float(tail) == 0:
+                    tail = &#34;0&#34;
+            row = &#34;%s = %s&#34; % (head, tail)
+        except (ValueError, AssertionError):
+            pass
+        finally:
+            newDataList.append(row.rstrip())
+    
+    outputTxt = &#34;\n&#34;.join(newDataList)
+    
+    return outputTxt
+
+
+def toIntOrFloat(val):
+    if float(val) - float(int(val)) == 0.0:
+        val = int(val)
+    else:
+        val = float(val)
+    return val</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="praatio.kgio.openKlattgrid"><code class="name flex">
+<span>def <span class="ident">openKlattgrid</span></span>(<span>fnFullPath)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def openKlattgrid(fnFullPath):
+
+    try:
+        with io.open(fnFullPath, &#34;r&#34;, encoding=&#34;utf-16&#34;) as fd:
+            data = fd.read()
+    except UnicodeError:
+        with io.open(fnFullPath, &#34;r&#34;, encoding=&#34;utf-8&#34;) as fd:
+            data = fd.read()
+    data = data.replace(&#34;\r\n&#34;, &#34;\n&#34;)
+
+    # Right now, can only open normal klatt grid and not short ones
+    kg = _openNormalKlattgrid(data)
+
+    return kg</code></pre>
+</details>
+</dd>
+<dt id="praatio.kgio.resynthesize"><code class="name flex">
+<span>def <span class="ident">resynthesize</span></span>(<span>praatEXE, wavFN, klattFN, outputWavFN, doCascade=True, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
+                 scriptFN=None):
+    
+    if doCascade:
+        method = &#34;Cascade&#34;
+    else:
+        method = &#34;Parallel&#34;
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        &#34;resynthesize_from_klattgrid.praat&#34;)
+    
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, klattFN, outputWavFN, method])</code></pre>
+</details>
+</dd>
+<dt id="praatio.kgio.toIntOrFloat"><code class="name flex">
+<span>def <span class="ident">toIntOrFloat</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def toIntOrFloat(val):
+    if float(val) - float(int(val)) == 0.0:
+        val = int(val)
+    else:
+        val = float(val)
+    return val</code></pre>
+</details>
+</dd>
+<dt id="praatio.kgio.wavToKlattgrid"><code class="name flex">
+<span>def <span class="ident">wavToKlattgrid</span></span>(<span>praatEXE, inputFullPath, outputFullPath, timeStep=0.005, numFormants=5, maxFormantFreq=5500.0, windowLength=0.025, preEmphasis=50.0, pitchFloor=60.0, pitchCeiling=600.0, minPitch=50.0, subtractMean=True, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Extracts the klattgrid from a wav file</p>
+<p>The default values are the same as the ones used in praat</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wavToKlattgrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
+                   numFormants=5, maxFormantFreq=5500.0, windowLength=0.025,
+                   preEmphasis=50.0, pitchFloor=60.0, pitchCeiling=600.0,
+                   minPitch=50.0, subtractMean=True,
+                   scriptFN=None):
+    &#39;&#39;&#39;
+    Extracts the klattgrid from a wav file
+    
+    The default values are the same as the ones used in praat
+    &#39;&#39;&#39;
+    
+    if subtractMean is True:
+        subtractMean = &#34;yes&#34;
+    else:
+        subtractMean = &#34;no&#34;
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;sound_to_klattgrid.praat&#34;)
+    
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputFullPath, outputFullPath, timeStep,
+                          numFormants, maxFormantFreq, windowLength,
+                          preEmphasis, pitchFloor, pitchCeiling,
+                          minPitch, subtractMean])</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="praatio.kgio.KlattContainerTier"><code class="flex name class">
+<span>class <span class="ident">KlattContainerTier</span></span>
+<span>(</span><span><small>ancestors:</small> praatio.kgio._KlattBaseTier)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Contains a set of intermediate tiers</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class KlattContainerTier(_KlattBaseTier):
+    &#39;&#39;&#39;
+    Contains a set of intermediate tiers
+    &#39;&#39;&#39;
+    def getAsText(self):
+        outputTxt = &#34;&#34;
+        outputTxt += &#34;%s? &lt;exists&gt;\n&#34; % self.name
+        
+        try:
+            self.minTimestamp = toIntOrFloat(self.minTimestamp)
+            outputTxt += &#34;xmin = %s\nxmax = %s\n&#34; % (repr(self.minTimestamp),
+                                                     repr(self.maxTimestamp))
+        except TypeError:
+            pass
+        
+        for name in self.tierNameList:
+            outputTxt += self.tierDict[name].getAsText()
+        
+        return outputTxt
+    
+    def modifySubtiers(self, tierName, modFunc):
+        &#39;&#39;&#39;
+        Modify values in every tier contained in the named intermediate tier
+        &#39;&#39;&#39;
+        kit = self.tierDict[tierName]
+        for name in kit.tierNameList:
+            subpointTier = kit.tierDict[name]
+            subpointTier.modifyValues(modFunc)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.kgio.KlattContainerTier.getAsText"><code class="name flex">
+<span>def <span class="ident">getAsText</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getAsText(self):
+    outputTxt = &#34;&#34;
+    outputTxt += &#34;%s? &lt;exists&gt;\n&#34; % self.name
+    
+    try:
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputTxt += &#34;xmin = %s\nxmax = %s\n&#34; % (repr(self.minTimestamp),
+                                                 repr(self.maxTimestamp))
+    except TypeError:
+        pass
+    
+    for name in self.tierNameList:
+        outputTxt += self.tierDict[name].getAsText()
+    
+    return outputTxt</code></pre>
+</details>
+</dd>
+<dt id="praatio.kgio.KlattContainerTier.modifySubtiers"><code class="name flex">
+<span>def <span class="ident">modifySubtiers</span></span>(<span>self, tierName, modFunc)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Modify values in every tier contained in the named intermediate tier</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def modifySubtiers(self, tierName, modFunc):
+    &#39;&#39;&#39;
+    Modify values in every tier contained in the named intermediate tier
+    &#39;&#39;&#39;
+    kit = self.tierDict[tierName]
+    for name in kit.tierNameList:
+        subpointTier = kit.tierDict[name]
+        subpointTier.modifyValues(modFunc)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="praatio.kgio.KlattIntermediateTier"><code class="flex name class">
+<span>class <span class="ident">KlattIntermediateTier</span></span>
+<span>(</span><span><small>ancestors:</small> praatio.kgio._KlattBaseTier)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Has many point tiers that are semantically related (e.g. formant tiers)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class KlattIntermediateTier(_KlattBaseTier):
+    &#39;&#39;&#39;
+    Has many point tiers that are semantically related (e.g. formant tiers)
+    &#39;&#39;&#39;
+    def getAsText(self):
+        outputTxt = &#34;&#34;
+        headerTxt = &#34;%s: size=%d\n&#34; % (self.name, len(self.tierNameList))
+        
+        for name in self.tierNameList:
+            outputTxt += self.tierDict[name].getAsText()
+        
+        outputTxt = headerTxt + outputTxt
+        
+        return outputTxt</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.kgio.KlattIntermediateTier.getAsText"><code class="name flex">
+<span>def <span class="ident">getAsText</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getAsText(self):
+    outputTxt = &#34;&#34;
+    headerTxt = &#34;%s: size=%d\n&#34; % (self.name, len(self.tierNameList))
+    
+    for name in self.tierNameList:
+        outputTxt += self.tierDict[name].getAsText()
+    
+    outputTxt = headerTxt + outputTxt
+    
+    return outputTxt</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="praatio.kgio.KlattPointTier"><code class="flex name class">
+<span>class <span class="ident">KlattPointTier</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="praatio.tgio.TextgridTier" href="tgio.html#praatio.tgio.TextgridTier">TextgridTier</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A Klatt tier not contained within another tier</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class KlattPointTier(tgio.TextgridTier):
+    &#39;&#39;&#39;
+    A Klatt tier not contained within another tier
+    &#39;&#39;&#39;
+    
+    def __init__(self, name, entryList, minT=None, maxT=None):
+        
+        entryList = [(float(time), label) for time, label in entryList]
+        
+        # Determine the min and max timestamps
+        timeList = [time for time, label in entryList]
+        if minT is not None:
+            timeList.append(float(minT))
+        if maxT is not None:
+            timeList.append(float(maxT))
+        
+        try:
+            minT = min(timeList)
+            maxT = max(timeList)
+        except ValueError:
+            raise tgio.TimelessTextgridTierException()
+
+        super(KlattPointTier, self).__init__(name, entryList, minT, maxT)
+    
+    def modifyValues(self, modFunc):
+        newEntryList = [(timestamp, modFunc(float(value)))
+                        for timestamp, value in self.entryList]
+        
+        self.entryList = newEntryList
+        
+    def getAsText(self):
+        outputList = []
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputList.append(&#34;%s? &lt;exists&gt; &#34; % self.name)
+        outputList.append(&#34;xmin = %s&#34; % repr(self.minTimestamp))
+        outputList.append(&#34;xmax = %s&#34; % repr(self.maxTimestamp))
+        
+        if self.name not in [&#34;phonation&#34;, &#34;vocalTract&#34;, &#34;coupling&#34;,
+                             &#34;frication&#34;]:
+            outputList.append(&#34;points: size= %d&#34; % len(self.entryList))
+        
+        for i, entry in enumerate(self.entryList):
+            outputList.append(&#34;points [%d]:&#34; % (i + 1))
+            outputList.append(&#34;    number = %s&#34; % repr(entry[0]))
+            outputList.append(&#34;    value = %s&#34; % repr(entry[1]))
+    
+        return &#34;\n&#34;.join(outputList) + &#34;\n&#34;</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="praatio.kgio.KlattSubPointTier" href="#praatio.kgio.KlattSubPointTier">KlattSubPointTier</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.kgio.KlattPointTier.modifyValues"><code class="name flex">
+<span>def <span class="ident">modifyValues</span></span>(<span>self, modFunc)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def modifyValues(self, modFunc):
+    newEntryList = [(timestamp, modFunc(float(value)))
+                    for timestamp, value in self.entryList]
+    
+    self.entryList = newEntryList</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="praatio.tgio.TextgridTier" href="tgio.html#praatio.tgio.TextgridTier">TextgridTier</a></b></code>:
+<ul class="hlist">
+<li><code><a title="praatio.tgio.TextgridTier.__init__" href="tgio.html#praatio.tgio.TextgridTier.__init__">__init__</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.deleteEntry" href="tgio.html#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.entryType" href="tgio.html#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.find" href="tgio.html#praatio.tgio.TextgridTier.find">find</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.getAsText" href="tgio.html#praatio.tgio.TextgridTier.getAsText">getAsText</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.new" href="tgio.html#praatio.tgio.TextgridTier.new">new</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.sort" href="tgio.html#praatio.tgio.TextgridTier.sort">sort</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.union" href="tgio.html#praatio.tgio.TextgridTier.union">union</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="praatio.kgio.KlattSubPointTier"><code class="flex name class">
+<span>class <span class="ident">KlattSubPointTier</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="praatio.kgio.KlattPointTier" href="#praatio.kgio.KlattPointTier">KlattPointTier</a>, <a title="praatio.tgio.TextgridTier" href="tgio.html#praatio.tgio.TextgridTier">TextgridTier</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Tiers contained in a KlattIntermediateTier</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class KlattSubPointTier(KlattPointTier):
+    &#39;&#39;&#39;
+    Tiers contained in a KlattIntermediateTier
+    &#39;&#39;&#39;
+        
+    def getAsText(self):
+        outputList = []
+        outputList.append(&#34;%s:&#34; % self.name)
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputList.append(&#34;    xmin = %s&#34; % repr(self.minTimestamp))
+        outputList.append(&#34;    xmax = %s&#34; % repr(self.maxTimestamp))
+        outputList.append(&#34;    points: size = %d&#34; % len(self.entryList))
+        
+        for i, entry in enumerate(self.entryList):
+            outputList.append(&#34;    points [%d]:&#34; % (i + 1))
+            outputList.append(&#34;        number = %s&#34; % repr(entry[0]))
+            outputList.append(&#34;        value = %s&#34; % repr(entry[1]))
+    
+        return &#34;\n&#34;.join(outputList) + &#39;\n&#39;</code></pre>
+</details>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="praatio.kgio.KlattPointTier" href="#praatio.kgio.KlattPointTier">KlattPointTier</a></b></code>:
+<ul class="hlist">
+<li><code><a title="praatio.kgio.KlattPointTier.__init__" href="tgio.html#praatio.tgio.TextgridTier.__init__">__init__</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.deleteEntry" href="tgio.html#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.entryType" href="tgio.html#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.find" href="tgio.html#praatio.tgio.TextgridTier.find">find</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.getAsText" href="tgio.html#praatio.tgio.TextgridTier.getAsText">getAsText</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.new" href="tgio.html#praatio.tgio.TextgridTier.new">new</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.sort" href="tgio.html#praatio.tgio.TextgridTier.sort">sort</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.union" href="tgio.html#praatio.tgio.TextgridTier.union">union</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="praatio.kgio.Klattgrid"><code class="flex name class">
+<span>class <span class="ident">Klattgrid</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="praatio.tgio.Textgrid" href="tgio.html#praatio.tgio.Textgrid">Textgrid</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Klattgrid(tgio.Textgrid):
+    
+    def save(self, fn, minimumIntervalLength=None):
+        &#39;&#39;&#39;
+        
+        minimumIntervalLength is used for compatibility with Textgrid.save()
+            but it has no impact on a Klattgrid
+        &#39;&#39;&#39;
+        
+        # Header
+        outputTxt = &#34;&#34;
+        outputTxt += &#39;File type = &#34;ooTextFile&#34;\n&#39;
+        outputTxt += &#39;Object class = &#34;KlattGrid&#34;\n\n&#39;
+        self.minTimestamp = toIntOrFloat(self.minTimestamp)
+        outputTxt += &#34;xmin = %s\nxmax = %s\n&#34; % (repr(self.minTimestamp),
+                                                 repr(self.maxTimestamp))
+        
+        for tierName in self.tierNameList:
+            outputTxt += self.tierDict[tierName].getAsText()
+        
+        outputTxt = _cleanNumericValues(outputTxt)
+        
+        with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
+            fd.write(outputTxt)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.kgio.Klattgrid.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, fn, minimumIntervalLength=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>minimumIntervalLength is used for compatibility with Textgrid.save()
+but it has no impact on a Klattgrid</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def save(self, fn, minimumIntervalLength=None):
+    &#39;&#39;&#39;
+    
+    minimumIntervalLength is used for compatibility with Textgrid.save()
+        but it has no impact on a Klattgrid
+    &#39;&#39;&#39;
+    
+    # Header
+    outputTxt = &#34;&#34;
+    outputTxt += &#39;File type = &#34;ooTextFile&#34;\n&#39;
+    outputTxt += &#39;Object class = &#34;KlattGrid&#34;\n\n&#39;
+    self.minTimestamp = toIntOrFloat(self.minTimestamp)
+    outputTxt += &#34;xmin = %s\nxmax = %s\n&#34; % (repr(self.minTimestamp),
+                                             repr(self.maxTimestamp))
+    
+    for tierName in self.tierNameList:
+        outputTxt += self.tierDict[tierName].getAsText()
+    
+    outputTxt = _cleanNumericValues(outputTxt)
+    
+    with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
+        fd.write(outputTxt)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="praatio.tgio.Textgrid" href="tgio.html#praatio.tgio.Textgrid">Textgrid</a></b></code>:
+<ul class="hlist">
+<li><code><a title="praatio.tgio.Textgrid.__init__" href="tgio.html#praatio.tgio.Textgrid.__init__">__init__</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.appendTextgrid" href="tgio.html#praatio.tgio.Textgrid.appendTextgrid">appendTextgrid</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.crop" href="tgio.html#praatio.tgio.Textgrid.crop">crop</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.editTimestamps" href="tgio.html#praatio.tgio.Textgrid.editTimestamps">editTimestamps</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.eraseRegion" href="tgio.html#praatio.tgio.Textgrid.eraseRegion">eraseRegion</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.insertSpace" href="tgio.html#praatio.tgio.Textgrid.insertSpace">insertSpace</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.mergeTiers" href="tgio.html#praatio.tgio.Textgrid.mergeTiers">mergeTiers</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.new" href="tgio.html#praatio.tgio.Textgrid.new">new</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="praatio" href="index.html">praatio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="praatio.kgio.openKlattgrid" href="#praatio.kgio.openKlattgrid">openKlattgrid</a></code></li>
+<li><code><a title="praatio.kgio.resynthesize" href="#praatio.kgio.resynthesize">resynthesize</a></code></li>
+<li><code><a title="praatio.kgio.toIntOrFloat" href="#praatio.kgio.toIntOrFloat">toIntOrFloat</a></code></li>
+<li><code><a title="praatio.kgio.wavToKlattgrid" href="#praatio.kgio.wavToKlattgrid">wavToKlattgrid</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="praatio.kgio.KlattContainerTier" href="#praatio.kgio.KlattContainerTier">KlattContainerTier</a></code></h4>
+<ul class="">
+<li><code><a title="praatio.kgio.KlattContainerTier.getAsText" href="#praatio.kgio.KlattContainerTier.getAsText">getAsText</a></code></li>
+<li><code><a title="praatio.kgio.KlattContainerTier.modifySubtiers" href="#praatio.kgio.KlattContainerTier.modifySubtiers">modifySubtiers</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="praatio.kgio.KlattIntermediateTier" href="#praatio.kgio.KlattIntermediateTier">KlattIntermediateTier</a></code></h4>
+<ul class="">
+<li><code><a title="praatio.kgio.KlattIntermediateTier.getAsText" href="#praatio.kgio.KlattIntermediateTier.getAsText">getAsText</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="praatio.kgio.KlattPointTier" href="#praatio.kgio.KlattPointTier">KlattPointTier</a></code></h4>
+<ul class="">
+<li><code><a title="praatio.kgio.KlattPointTier.modifyValues" href="#praatio.kgio.KlattPointTier.modifyValues">modifyValues</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="praatio.kgio.KlattSubPointTier" href="#praatio.kgio.KlattSubPointTier">KlattSubPointTier</a></code></h4>
+</li>
+<li>
+<h4><code><a title="praatio.kgio.Klattgrid" href="#praatio.kgio.Klattgrid">Klattgrid</a></code></h4>
+<ul class="">
+<li><code><a title="praatio.kgio.Klattgrid.save" href="#praatio.kgio.Klattgrid.save">save</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

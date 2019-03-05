@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.2" />
+<title>praatio.praat_scripts API documentation</title>
+<meta name="description" content="Assorted praat scripts that don&#39;t belong elsewhere exist here …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>praatio.praat_scripts</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Assorted praat scripts that don't belong elsewhere exist here</p>
+<p>These are just launchers for the actual scripts contained in praatScripts</p>
+<p>Created on Dec 9, 2015</p>
+<p>@author: tmahrt</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#39;&#39;&#39;
+Assorted praat scripts that don&#39;t belong elsewhere exist here
+
+These are just launchers for the actual scripts contained in praatScripts
+
+Created on Dec 9, 2015
+
+@author: tmahrt
+&#39;&#39;&#39;
+
+import os
+from os.path import join
+import io
+
+from praatio import audioio
+from praatio import dataio
+from praatio.utilities import utils
+
+
+def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
+                 formantShiftRatio, pitchMedian=0.0, pitchRange=1.0,
+                 duration=1.0, scriptFN=None):
+    &#39;&#39;&#39;
+    Changes the speech formants in a file using praat&#39;s change gender function
+
+    PitchMedian = 0.0; no change in median pitch
+    PitchRange = 1.0; no change in pitch range
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        &#34;change_gender.praat&#34;)
+
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, outputWavFN, pitchFloor, pitchCeiling,
+                          formantShiftRatio, pitchMedian, pitchRange,
+                          duration])
+
+
+def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
+    &#39;&#39;&#39;
+    Changes the intensity of the wavFN (in db)
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        &#34;change_intensity.praat&#34;)
+
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, outputWavFN, newIntensity])
+    
+
+def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
+                stepSize=0.01, window_length=0.025, preemphasis=50,
+                scriptFN=None, undefinedValue=None):
+    &#39;&#39;&#39;
+    Get F1, F2, and F3 for the audio file
+    
+    maxFormant = 5500 for females, 5000 for males, &lt;8000 for children
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;get_formants.praat&#34;)
+
+    argList = [inputWavFN, outputTxtFN, stepSize, maxFormant, window_length,
+               preemphasis, -1, -1]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    path, fn = os.path.split(outputTxtFN)
+    dataList = utils.openCSV(path, fn)
+
+    # The new praat script includes a header
+    if dataList[0][0] == &#34;time&#34;:
+        dataList = dataList[1:]
+        
+    # Handle undefined values, convert values to float
+    returnList = []
+    for row in dataList:
+        keep = True
+        for i in range(1, 4):
+            if &#39;--&#39; in row[i]:
+                if undefinedValue is not None:
+                    row[i] = undefinedValue
+                else:
+                    keep = False
+                    break
+        
+        if keep is True:
+            returnList.append([float(val) for val in row])
+    
+    return returnList
+
+
+def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
+              scriptFN=None):
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;get_pulses.praat&#34;)
+    
+    argList = [inputWavFN, outputPointTierFN, minPitch, maxPitch]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    pointObj = dataio.open1DPointObject(outputPointTierFN)
+    
+    return pointObj
+
+
+def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
+                    spectralPower=2, spectralMoment=3, scriptFN=None):
+
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;get_spectral_info.praat&#34;)
+    
+    argList = [inputWavFN, inputTGFN, outputCSVFN, tierName,
+               spectralPower, spectralMoment]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    with io.open(outputCSVFN, &#34;r&#34;, encoding=&#34;utf-8&#34;) as fd:
+        data = fd.read()
+    
+    dataList = data.rstrip().split(&#34;\n&#34;)
+    dataList = [row.split(&#34;,&#34;) for row in dataList]
+    titleRow, dataList = dataList[0], dataList[1:]
+    
+    return titleRow, dataList
+
+
+def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
+                      minPitch, maxPitch, scriptFN=None, pointList=None):
+    &#39;&#39;&#39;
+    Resynthesizes the pitch in a wav file with the given pitch contour file
+    
+    The pitch track to use can optionally be passed in as pointList.  If
+    so, it will be saved as pitchFN for praat to be able to use.
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;resynthesize_pitch.praat&#34;)
+
+    if pointList is not None:
+        dur = audioio.WavQueryObj(inputWavFN).getDuration()
+        pointObj = dataio.PointObject2D(pointList,
+                                        dataio.PITCH,
+                                        0,
+                                        dur)
+        pointObj.save(pitchFN)
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavFN, pitchFN, outputWavFN,
+                          minPitch, maxPitch])
+
+
+def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
+                         minPitch, maxPitch, scriptFN=None):
+    &#39;&#39;&#39;
+    Resynthesizes the duration in a wav file with the given duration tier
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;resynthesize_duration.praat&#34;)
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavFN, durationTierFN, outputWavFN,
+                          minPitch, maxPitch])
+    
+
+def annotateSilences(praatEXE, inputWavPath, outputTGPath,
+                     minPitch=100, timeStep=0.0, silenceThreshold=-25.0,
+                     minSilDur=0.1, minSoundDur=0.1,
+                     silentLabel=&#39;silence&#39;, soundLabel=&#39;sound&#39;, scriptFN=None):
+    &#39;&#39;&#39;
+    Marks the silences and non-silences of an audio file
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;annotate_silences.praat&#34;)
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavPath, outputTGPath, minPitch, timeStep,
+                          silenceThreshold, minSilDur, minSoundDur,
+                          silentLabel, soundLabel])</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="praatio.praat_scripts.annotateSilences"><code class="name flex">
+<span>def <span class="ident">annotateSilences</span></span>(<span>praatEXE, inputWavPath, outputTGPath, minPitch=100, timeStep=0.0, silenceThreshold=-25.0, minSilDur=0.1, minSoundDur=0.1, silentLabel=&#39;silence&#39;, soundLabel=&#39;sound&#39;, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Marks the silences and non-silences of an audio file</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def annotateSilences(praatEXE, inputWavPath, outputTGPath,
+                     minPitch=100, timeStep=0.0, silenceThreshold=-25.0,
+                     minSilDur=0.1, minSoundDur=0.1,
+                     silentLabel=&#39;silence&#39;, soundLabel=&#39;sound&#39;, scriptFN=None):
+    &#39;&#39;&#39;
+    Marks the silences and non-silences of an audio file
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;annotate_silences.praat&#34;)
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavPath, outputTGPath, minPitch, timeStep,
+                          silenceThreshold, minSilDur, minSoundDur,
+                          silentLabel, soundLabel])</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.changeGender"><code class="name flex">
+<span>def <span class="ident">changeGender</span></span>(<span>praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling, formantShiftRatio, pitchMedian=0.0, pitchRange=1.0, duration=1.0, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Changes the speech formants in a file using praat's change gender function</p>
+<p>PitchMedian = 0.0; no change in median pitch
+PitchRange = 1.0; no change in pitch range</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
+                 formantShiftRatio, pitchMedian=0.0, pitchRange=1.0,
+                 duration=1.0, scriptFN=None):
+    &#39;&#39;&#39;
+    Changes the speech formants in a file using praat&#39;s change gender function
+
+    PitchMedian = 0.0; no change in median pitch
+    PitchRange = 1.0; no change in pitch range
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        &#34;change_gender.praat&#34;)
+
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, outputWavFN, pitchFloor, pitchCeiling,
+                          formantShiftRatio, pitchMedian, pitchRange,
+                          duration])</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.changeIntensity"><code class="name flex">
+<span>def <span class="ident">changeIntensity</span></span>(<span>praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Changes the intensity of the wavFN (in db)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
+    &#39;&#39;&#39;
+    Changes the intensity of the wavFN (in db)
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath,
+                        &#34;change_intensity.praat&#34;)
+
+    #  Praat crashes on exit after resynthesis with a klaatgrid
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [wavFN, outputWavFN, newIntensity])</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.getFormants"><code class="name flex">
+<span>def <span class="ident">getFormants</span></span>(<span>praatEXE, inputWavFN, outputTxtFN, maxFormant, stepSize=0.01, window_length=0.025, preemphasis=50, scriptFN=None, undefinedValue=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get F1, F2, and F3 for the audio file</p>
+<p>maxFormant = 5500 for females, 5000 for males, &lt;8000 for children</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
+                stepSize=0.01, window_length=0.025, preemphasis=50,
+                scriptFN=None, undefinedValue=None):
+    &#39;&#39;&#39;
+    Get F1, F2, and F3 for the audio file
+    
+    maxFormant = 5500 for females, 5000 for males, &lt;8000 for children
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;get_formants.praat&#34;)
+
+    argList = [inputWavFN, outputTxtFN, stepSize, maxFormant, window_length,
+               preemphasis, -1, -1]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    path, fn = os.path.split(outputTxtFN)
+    dataList = utils.openCSV(path, fn)
+
+    # The new praat script includes a header
+    if dataList[0][0] == &#34;time&#34;:
+        dataList = dataList[1:]
+        
+    # Handle undefined values, convert values to float
+    returnList = []
+    for row in dataList:
+        keep = True
+        for i in range(1, 4):
+            if &#39;--&#39; in row[i]:
+                if undefinedValue is not None:
+                    row[i] = undefinedValue
+                else:
+                    keep = False
+                    break
+        
+        if keep is True:
+            returnList.append([float(val) for val in row])
+    
+    return returnList</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.getPulses"><code class="name flex">
+<span>def <span class="ident">getPulses</span></span>(<span>praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
+              scriptFN=None):
+    
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;get_pulses.praat&#34;)
+    
+    argList = [inputWavFN, outputPointTierFN, minPitch, maxPitch]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    pointObj = dataio.open1DPointObject(outputPointTierFN)
+    
+    return pointObj</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.getSpectralInfo"><code class="name flex">
+<span>def <span class="ident">getSpectralInfo</span></span>(<span>praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName, spectralPower=2, spectralMoment=3, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
+                    spectralPower=2, spectralMoment=3, scriptFN=None):
+
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;get_spectral_info.praat&#34;)
+    
+    argList = [inputWavFN, inputTGFN, outputCSVFN, tierName,
+               spectralPower, spectralMoment]
+    utils.runPraatScript(praatEXE, scriptFN, argList)
+    
+    # Load the output
+    with io.open(outputCSVFN, &#34;r&#34;, encoding=&#34;utf-8&#34;) as fd:
+        data = fd.read()
+    
+    dataList = data.rstrip().split(&#34;\n&#34;)
+    dataList = [row.split(&#34;,&#34;) for row in dataList]
+    titleRow, dataList = dataList[0], dataList[1:]
+    
+    return titleRow, dataList</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.resynthesizeDuration"><code class="name flex">
+<span>def <span class="ident">resynthesizeDuration</span></span>(<span>praatEXE, inputWavFN, durationTierFN, outputWavFN, minPitch, maxPitch, scriptFN=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Resynthesizes the duration in a wav file with the given duration tier</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
+                         minPitch, maxPitch, scriptFN=None):
+    &#39;&#39;&#39;
+    Resynthesizes the duration in a wav file with the given duration tier
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;resynthesize_duration.praat&#34;)
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavFN, durationTierFN, outputWavFN,
+                          minPitch, maxPitch])</code></pre>
+</details>
+</dd>
+<dt id="praatio.praat_scripts.resynthesizePitch"><code class="name flex">
+<span>def <span class="ident">resynthesizePitch</span></span>(<span>praatEXE, inputWavFN, pitchFN, outputWavFN, minPitch, maxPitch, scriptFN=None, pointList=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Resynthesizes the pitch in a wav file with the given pitch contour file</p>
+<p>The pitch track to use can optionally be passed in as pointList.
+If
+so, it will be saved as pitchFN for praat to be able to use.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
+                      minPitch, maxPitch, scriptFN=None, pointList=None):
+    &#39;&#39;&#39;
+    Resynthesizes the pitch in a wav file with the given pitch contour file
+    
+    The pitch track to use can optionally be passed in as pointList.  If
+    so, it will be saved as pitchFN for praat to be able to use.
+    &#39;&#39;&#39;
+    if scriptFN is None:
+        scriptFN = join(utils.scriptsPath, &#34;resynthesize_pitch.praat&#34;)
+
+    if pointList is not None:
+        dur = audioio.WavQueryObj(inputWavFN).getDuration()
+        pointObj = dataio.PointObject2D(pointList,
+                                        dataio.PITCH,
+                                        0,
+                                        dur)
+        pointObj.save(pitchFN)
+
+    utils.runPraatScript(praatEXE, scriptFN,
+                         [inputWavFN, pitchFN, outputWavFN,
+                          minPitch, maxPitch])</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="praatio" href="index.html">praatio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="praatio.praat_scripts.annotateSilences" href="#praatio.praat_scripts.annotateSilences">annotateSilences</a></code></li>
+<li><code><a title="praatio.praat_scripts.changeGender" href="#praatio.praat_scripts.changeGender">changeGender</a></code></li>
+<li><code><a title="praatio.praat_scripts.changeIntensity" href="#praatio.praat_scripts.changeIntensity">changeIntensity</a></code></li>
+<li><code><a title="praatio.praat_scripts.getFormants" href="#praatio.praat_scripts.getFormants">getFormants</a></code></li>
+<li><code><a title="praatio.praat_scripts.getPulses" href="#praatio.praat_scripts.getPulses">getPulses</a></code></li>
+<li><code><a title="praatio.praat_scripts.getSpectralInfo" href="#praatio.praat_scripts.getSpectralInfo">getSpectralInfo</a></code></li>
+<li><code><a title="praatio.praat_scripts.resynthesizeDuration" href="#praatio.praat_scripts.resynthesizeDuration">resynthesizeDuration</a></code></li>
+<li><code><a title="praatio.praat_scripts.resynthesizePitch" href="#praatio.praat_scripts.resynthesizePitch">resynthesizePitch</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

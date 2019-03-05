@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.2" />
+<title>praatio.praatio_scripts API documentation</title>
+<meta name="description" content="Common/generic scripts or utilities that extend the functionality of
+praatio …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>praatio.praatio_scripts</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Common/generic scripts or utilities that extend the functionality of
+praatio</p>
+<p>Created on Jul 27, 2015</p>
+<p>@author: tmahrt</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#39;&#39;&#39;
+Common/generic scripts or utilities that extend the functionality of
+praatio
+
+Created on Jul 27, 2015
+
+@author: tmahrt
+&#39;&#39;&#39;
+
+import os
+from os.path import join
+import math
+import copy
+
+from praatio import tgio
+from praatio import audioio
+
+
+def _shiftTimes(tg, timeV, newTimeV):
+    &#39;&#39;&#39;
+    Change all instances of timeV in the textgrid to newTimeV
+    
+    These are meant to be small changes.  No checks are done to see
+    if the new interval steps on other intervals
+    &#39;&#39;&#39;
+    tg = tg.new()
+    for tierName in tg.tierNameList:
+        tier = tg.tierDict[tierName]
+        
+        if isinstance(tier, tgio.IntervalTier):
+            entryList = [entry for entry in tier.entryList
+                         if entry[0] == timeV or entry[1] == timeV]
+            insertEntryList = []
+            for entry in entryList:
+                if entry[0] == timeV:
+                    newStart, newStop = newTimeV, entry[1]
+                elif entry[1] == timeV:
+                    newStart, newStop = entry[0], newTimeV
+                tier.deleteEntry(entry)
+                insertEntryList.append((newStart, newStop, entry[2]))
+            
+            for entry in insertEntryList:
+                tier.insertEntry(entry)
+        
+        elif isinstance(tier, tgio.PointTier):
+            entryList = [entry for entry in tier.entryList
+                         if entry[0] == timeV]
+            for entry in entryList:
+                tier.deleteEntry(entry)
+                tier.insertEntry((newTimeV, entry[1]))
+    
+    return tg
+
+
+def audioSplice(audioObj, spliceSegment, tg, tierName, newLabel,
+                insertStart, insertStop=None, alignToZeroCrossing=True):
+    &#39;&#39;&#39;
+    Splices a segment into an audio file and corresponding textgrid
+    
+    audioObj - the audio to splice into
+    spliceSegment - the audio segment that will be placed into a larger audio
+                    file
+    tg - the textgrid to splice into
+    tierName - the tier that will receive the new label
+    newLabel - the label for the splice interval on the tier with name tierName
+    insertStart - the time to insert the splice
+    insertStop - if not None, will erase the region between sourceSpStart
+                 and sourceSpEnd.  (In practice this means audioSplice
+                 removes one segment and inserts another in its place)
+    alignToZeroCrossing - if True, moves all involved times to the nearest
+                          zero crossing in the audio.  Generally results
+                          in better sounding output
+    &#39;&#39;&#39;
+
+    retTG = tg.new()
+
+    # Ensure all time points involved in splicing fall on zero crossings
+    if alignToZeroCrossing is True:
+        
+        # Cut the splice segment to zero crossings
+        spliceDuration = spliceSegment.getDuration()
+        spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
+        spliceZeroEnd = spliceSegment.findNearestZeroCrossing(spliceDuration)
+        spliceSegment = spliceSegment.getSubsegment(spliceZeroStart,
+                                                    spliceZeroEnd)
+            
+        # Move the textgrid borders to zero crossings
+        oldInsertStart = insertStart
+        insertStart = audioObj.findNearestZeroCrossing(oldInsertStart)
+        retTG = _shiftTimes(retTG, oldInsertStart, insertStart)
+        
+        if insertStop is not None:
+            oldInsertStop = insertStop
+            insertStop = audioObj.findNearestZeroCrossing(oldInsertStop)
+            retTG = _shiftTimes(retTG, oldInsertStop, insertStop)
+    
+    # Get the start time
+    insertTime = insertStart
+    if insertStop is not None:
+        insertTime = insertStop
+    
+    # Insert into the audio file
+    audioObj.insert(insertTime, spliceSegment.audioSamples)
+    
+    # Insert a blank region into the textgrid on all tiers
+    targetDuration = spliceSegment.getDuration()
+    retTG = retTG.insertSpace(insertTime, targetDuration, &#39;stretch&#39;)
+    
+    # Insert the splice entry into the target tier
+    newEntry = (insertTime, insertTime + targetDuration, newLabel)
+    retTG.tierDict[tierName].insertEntry(newEntry)
+    
+    # Finally, delete the old section if requested
+    if insertStop is not None:
+        audioObj.deleteSegment(insertStart, insertStop)
+        retTG = retTG.eraseRegion(insertStart, insertStop, doShrink=True)
+        
+    return audioObj, retTG
+        
+    
+def spellCheckEntries(tg, targetTierName, newTierName, checkFunction,
+                      printEntries=False):
+    &#39;&#39;&#39;
+    Spell checks words in a textgrid
+    
+    Entries can contain one or more words, separated by whitespace.
+    If a mispelling is found, it is noted in a special tier and optionally
+    printed to the screen.
+    
+    checkFunction is user-defined.  There are robust spell check libraries
+    for python like woosh or pyenchant.  I have already written a naive
+    spell checker in the pysle.praattools library.
+    
+    checkFunction: should return True if a word is spelled correctly and
+                   False otherwise
+    &#39;&#39;&#39;
+    punctuationList = [&#39;_&#39;, &#39;,&#39;, &#34;&#39;&#34;, &#39;&#34;&#39;, &#39;!&#39;, &#39;?&#39;, &#39;.&#39;, &#39;;&#39;, ]
+    
+    tg = tg.new()
+    tier = tg.tierDict[targetTierName]
+    
+    mispelledEntryList = []
+    for startT, stopT, label in tier.entryList:
+        
+        # Remove punctuation
+        for char in punctuationList:
+            label = label.replace(char, &#34;&#34;)
+        
+        wordList = label.split()
+        mispelledList = []
+        for word in wordList:
+            if not checkFunction(word):
+                mispelledList.append(word)
+        
+        if len(mispelledList) &gt; 0:
+            mispelledTxt = u&#34;, &#34;.join(mispelledList)
+            mispelledEntryList.append((startT, stopT, mispelledTxt))
+            
+            if printEntries is True:
+                print((startT, stopT, mispelledTxt))
+    
+    tier = tgio.IntervalTier(newTierName, mispelledEntryList,
+                             tg.minTimestamp, tg.maxTimestamp)
+    tg.addTier(tier)
+    
+    return tg
+
+
+def splitTierEntries(tg, sourceTierName, targetTierName,
+                     startT=None, endT=None):
+    &#39;&#39;&#39;
+    Split each entry in a tier by space
+    
+    The split entries will be placed on a new tier.  The split entries
+    are equally allocated a subsegment of the interval occupied by the
+    source tier.  e.g. [(63, 66, &#39;the blue cat&#39;), ] would become
+    [(63, 64, &#39;the&#39;), (64, 65, &#39;blue&#39;), (65, 66, &#39;cat&#39;), ]
+    
+    This could be used to decompose utterances into words or, with pysle,
+    words into phones.
+    &#39;&#39;&#39;
+    minT = tg.minTimestamp
+    maxT = tg.maxTimestamp
+    
+    sourceTier = tg.tierDict[sourceTierName]
+    targetTier = None
+    
+    # Examine a subset of the source tier?
+    if startT is not None or endT is not None:
+        if startT is None:
+            startT = minT
+        if endT is None:
+            endT = maxT
+        
+        sourceTier = sourceTier.crop(startT, endT, &#34;truncated&#34;, False)
+        
+        if targetTierName in tg.tierNameList:
+            targetTier = tg.tierDict[targetTierName]
+            targetTier = targetTier.eraseRegion(startT, endT,
+                                                &#39;truncate&#39;, False)
+    
+    # Split the entries in the source tier
+    newEntryList = []
+    for start, stop, label in sourceTier.entryList:
+        labelList = label.split()
+        intervalLength = (stop - start) / float(len(labelList))
+        
+        newSubEntryList = [(start + intervalLength * i,
+                            start + intervalLength * (i + 1),
+                            label)
+                           for i, label in enumerate(labelList)]
+        newEntryList.extend(newSubEntryList)
+    
+    # Create a new tier
+    if targetTier is None:
+        targetTier = tgio.IntervalTier(targetTierName, newEntryList,
+                                       minT, maxT)
+    
+    # Or insert new entries into existing target tier
+    else:
+
+        for entry in newEntryList:
+            targetTier.insertEntry(entry, True)
+    
+    # Insert the tier into the textgrid
+    if targetTierName in tg.tierNameList:
+        tg.removeTier(targetTierName)
+    tg.addTier(targetTier)
+    
+    return tg
+    
+    
+def tgBoundariesToZeroCrossings(tg, wavObj, adjustPointTiers=True):
+    &#39;&#39;&#39;
+    Makes all textgrid interval boundaries fall on pressure wave zero crossings
+    
+    adjustPointTiers: if True, point tiers will be adjusted too.  Otherwise,
+                      only interval tiers are adjusted.
+    &#39;&#39;&#39;
+    
+    for tierName in tg.tierNameList[:]:
+        tier = tg.tierDict[tierName]
+        
+        newEntryList = []
+        if isinstance(tier, tgio.PointTier) and adjustPointTiers is True:
+            for start, label in tier.entryList:
+                newStart = wavObj.findNearestZeroCrossing(start)
+                newEntryList.append((newStart, label))
+                
+        elif isinstance(tier, tgio.IntervalTier):
+            
+            for start, stop, label in tier.entryList:
+                newStart = wavObj.findNearestZeroCrossing(start)
+                newStop = wavObj.findNearestZeroCrossing(stop)
+                newEntryList.append((newStart, newStop, label))
+        
+        newTier = tier.new(entryList=newEntryList)
+        tg.replaceTier(tierName, newTier)
+                
+    return tg
+
+
+def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
+                     outputTGFlag=False, nameStyle=None,
+                     noPartialIntervals=False, silenceLabel=None):
+    &#39;&#39;&#39;
+    Outputs one subwav for each entry in the tier of a textgrid
+    
+    outputTGFlag: If True, outputs paired, cropped textgrids
+                  If is type str (a tier name), outputs a paired, cropped
+                  textgrid with only the specified tier
+    nameStyle: if &#39;append&#39;: append interval label to output name
+               if &#39;append_no_i&#39;: append label but not interval to output name
+               if &#39;label&#39;: output name is the same as label
+               if None: output name plus the interval number
+    noPartialIntervals: if True: intervals in non-target tiers that are
+                                  not wholly contained by an interval in
+                                  the target tier will not be included in
+                                  the output textgrids
+    silenceLabel: the label for silent regions.  If silences are unlabeled
+                  intervals (i.e. blank) then leave this alone.  If silences
+                  are labeled using praat&#39;s &#34;annotate &gt;&gt; to silences&#34;
+                  then this value should be &#34;silences&#34;
+    &#39;&#39;&#39;
+    if not os.path.exists(outputPath):
+        os.mkdir(outputPath)
+    
+    if noPartialIntervals is True:
+        mode = &#39;strict&#39;
+    else:
+        mode = &#39;truncated&#39;
+    
+    tg = tgio.openTextgrid(tgFN)
+    entryList = tg.tierDict[tierName].entryList
+    
+    if silenceLabel is not None:
+        entryList = [entry for entry in entryList
+                     if entry[2] != silenceLabel]
+    
+    # Build the output name template
+    name = os.path.splitext(os.path.split(wavFN)[1])[0]
+    orderOfMagnitude = int(math.floor(math.log10(len(entryList))))
+    
+    # We want one more zero in the output than the order of magnitude
+    outputTemplate = &#34;%s_%%0%dd&#34; % (name, orderOfMagnitude + 1)
+    
+    firstWarning = True
+    
+    # If we&#39;re using the &#39;label&#39; namestyle for outputs, all of the
+    # interval labels have to be unique, or wave files with those
+    # labels as names, will be overwritten
+    if nameStyle == &#39;label&#39;:
+        wordList = [word for _, _, word in entryList]
+        multipleInstList = []
+        for word in set(wordList):
+            if wordList.count(word) &gt; 1:
+                multipleInstList.append(word)
+        
+        if len(multipleInstList) &gt; 0:
+            instListTxt = &#34;\n&#34;.join(multipleInstList)
+            print((&#34;Overwriting wave files in: %s\n&#34; +
+                   &#34;Intervals exist with the same name:\n%s&#34;)
+                  % (outputPath, instListTxt))
+            firstWarning = False
+    
+    # Output wave files
+    outputFNList = []
+    wavQObj = audioio.WavQueryObj(wavFN)
+    for i, entry in enumerate(entryList):
+        start, stop, label = entry
+        
+        # Resolve output name
+        outputName = outputTemplate % i
+        if nameStyle == &#34;append&#34;:
+            outputName += &#34;_&#34; + label
+        elif nameStyle == &#34;append_no_i&#34;:
+            outputName = name + &#34;_&#34; + label
+        elif nameStyle == &#34;label&#34;:
+            outputName = label
+        
+        outputFNFullPath = join(outputPath, outputName + &#34;.wav&#34;)
+
+        if os.path.exists(outputFNFullPath) and firstWarning:
+            print((&#34;Overwriting wave files in: %s\n&#34; +
+                   &#34;Files existed before or intervals exist with &#34; +
+                   &#34;the same name:\n%s&#34;)
+                  % (outputPath, outputName))
+        
+        frames = wavQObj.getFrames(start, stop)
+        wavQObj.outputModifiedWav(frames, outputFNFullPath)
+        
+        outputFNList.append((start, stop, outputName + &#34;.wav&#34;))
+        
+        # Output the textgrid if requested
+        if outputTGFlag is not False:
+            subTG = tg.crop(start, stop, mode, True)
+            
+            if isinstance(outputTGFlag, str):
+                for tierName in subTG.tierNameList:
+                    if tierName != outputTGFlag:
+                        subTG.removeTier(tierName)
+            
+            subTG.save(join(outputPath, outputName + &#34;.TextGrid&#34;))
+    
+    return outputFNList
+
+
+def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
+    &#39;&#39;&#39;
+    Aligns boundaries or points in a textgrid that suffer from &#39;jitter&#39;
+    
+    Often times, boundaries in different tiers are meant to line up.
+    For example the boundary of the first phone in a word and the start
+    of the word.  If manually annotated, however, those values might
+    not be the same, even if they were intended to be the same.
+    
+    This script will force all boundaries within /maxDifference/ amount
+    to be the same value.  The replacement value is either the majority
+    value found within /maxDifference/ or, if no majority exists, than
+    the value used in the search query.
+    &#39;&#39;&#39;
+    tg = tgio.openTextgrid(tgFN)
+    
+    for tierName in tg.tierNameList:
+        altNameList = [tmpName for tmpName in tg.tierNameList
+                       if tmpName != tierName]
+        
+        tier = tg.tierDict[tierName]
+        for entry in tier.entryList:
+            # Interval tier left boundary or point tier point
+            _findMisalignments(tg, entry[0], maxDifference,
+                               altNameList, tierName, entry, 0)
+        
+        # Interval tier right boundary
+        if tier.tierType == tgio.INTERVAL_TIER:
+            for entry in tier.entryList:
+                _findMisalignments(tg, entry[1], maxDifference,
+                                   altNameList, tierName, entry, 1)
+
+    return tg
+
+            
+def _findMisalignments(tg, timeV, maxDifference, tierNameList,
+                       tierName, entry, orderID):
+    &#39;&#39;&#39;
+    This is just used by alignBoundariesAcrossTiers()
+    &#39;&#39;&#39;
+    # Get the start time
+    filterStartT = timeV - maxDifference
+    if filterStartT &lt; 0:
+        filterStartT = 0
+    
+    # Get the end time
+    filterStopT = timeV + maxDifference
+    if filterStopT &gt; tg.maxTimestamp:
+        filterStopT = tg.maxTimestamp
+
+    croppedTG = tg.crop(filterStartT, filterStopT, &#34;lax&#34;, False)
+
+    matchList = [(tierName, timeV, entry, orderID)]
+    for subTierName in tierNameList:
+        subCroppedTier = croppedTG.tierDict[subTierName]
+        
+        # For each item that exists in the search span, find the boundary
+        # that lies in the search span
+        for subCroppedEntry in subCroppedTier.entryList:
+            
+            if subCroppedTier.tierType == tgio.INTERVAL_TIER:
+                subStart, subEnd, _ = subCroppedEntry
+                
+                # Left boundary?
+                leftMatchVal = None
+                if subStart &gt;= filterStartT and subStart &lt;= filterStopT:
+                    leftMatchVal = subStart
+
+                # Right boundary?
+                rightMatchVal = None
+                if subEnd &gt;= filterStartT and subEnd &lt;= filterStopT:
+                    rightMatchVal = subEnd
+                    
+                # There should be at most one matching boundary
+                assert(leftMatchVal is None or rightMatchVal is None)
+                
+                # Set the matching boundary info
+                if leftMatchVal is not None:
+                    matchVal = leftMatchVal
+                    subOrderID = 0
+                else:
+                    matchVal = rightMatchVal
+                    subOrderID = 1
+            
+                # Match value could be none if, for an interval tier,
+                # no boundary sits inside the search span (the search span
+                # is wholly inside the interval)
+                if matchVal is None:
+                    continue
+            
+            elif subCroppedTier.tierType == tgio.POINT_TIER:
+                subStart, _ = subCroppedEntry
+                if subStart &gt;= filterStartT and subStart &lt;= filterStopT:
+                    matchVal = subStart
+                    subOrderID = 0
+
+            matchList.append((subTierName, matchVal, subCroppedEntry,
+                              subOrderID))
+    
+    # Find the number of different values that are almost the same
+    valList = [row[1] for row in matchList]
+    valUniqueList = []
+    for val in valList:
+        if val not in valUniqueList:
+            valUniqueList.append(val)
+            
+    # If they&#39;re all the same, there is nothing to do
+    # If some are different, take the most common value (or else the first
+    # one) and set all similar times to that value
+    if len(valUniqueList) &gt; 1:
+        countList = [valList.count(val) for val in valUniqueList]
+        bestVal = valUniqueList[countList.index(max(countList))]
+        assert(bestVal is not None)
+        for tierName, _, oldEntry, orderID in matchList:
+
+            newEntry = list(copy.deepcopy(oldEntry))
+            newEntry[orderID] = bestVal
+            newEntry = tuple(newEntry)
+        
+            tg.tierDict[tierName].deleteEntry(oldEntry)
+            tg.tierDict[tierName].entryList.append(newEntry)
+            tg.tierDict[tierName].entryList.sort()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="praatio.praatio_scripts.alignBoundariesAcrossTiers"><code class="name flex">
+<span>def <span class="ident">alignBoundariesAcrossTiers</span></span>(<span>tgFN, maxDifference=0.01)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Aligns boundaries or points in a textgrid that suffer from 'jitter'</p>
+<p>Often times, boundaries in different tiers are meant to line up.
+For example the boundary of the first phone in a word and the start
+of the word.
+If manually annotated, however, those values might
+not be the same, even if they were intended to be the same.</p>
+<p>This script will force all boundaries within /maxDifference/ amount
+to be the same value.
+The replacement value is either the majority
+value found within /maxDifference/ or, if no majority exists, than
+the value used in the search query.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
+    &#39;&#39;&#39;
+    Aligns boundaries or points in a textgrid that suffer from &#39;jitter&#39;
+    
+    Often times, boundaries in different tiers are meant to line up.
+    For example the boundary of the first phone in a word and the start
+    of the word.  If manually annotated, however, those values might
+    not be the same, even if they were intended to be the same.
+    
+    This script will force all boundaries within /maxDifference/ amount
+    to be the same value.  The replacement value is either the majority
+    value found within /maxDifference/ or, if no majority exists, than
+    the value used in the search query.
+    &#39;&#39;&#39;
+    tg = tgio.openTextgrid(tgFN)
+    
+    for tierName in tg.tierNameList:
+        altNameList = [tmpName for tmpName in tg.tierNameList
+                       if tmpName != tierName]
+        
+        tier = tg.tierDict[tierName]
+        for entry in tier.entryList:
+            # Interval tier left boundary or point tier point
+            _findMisalignments(tg, entry[0], maxDifference,
+                               altNameList, tierName, entry, 0)
+        
+        # Interval tier right boundary
+        if tier.tierType == tgio.INTERVAL_TIER:
+            for entry in tier.entryList:
+                _findMisalignments(tg, entry[1], maxDifference,
+                                   altNameList, tierName, entry, 1)
+
+    return tg</code></pre>
+</details>
+</dd>
+<dt id="praatio.praatio_scripts.audioSplice"><code class="name flex">
+<span>def <span class="ident">audioSplice</span></span>(<span>audioObj, spliceSegment, tg, tierName, newLabel, insertStart, insertStop=None, alignToZeroCrossing=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Splices a segment into an audio file and corresponding textgrid</p>
+<p>audioObj - the audio to splice into
+spliceSegment - the audio segment that will be placed into a larger audio
+file
+tg - the textgrid to splice into
+tierName - the tier that will receive the new label
+newLabel - the label for the splice interval on the tier with name tierName
+insertStart - the time to insert the splice
+insertStop - if not None, will erase the region between sourceSpStart
+and sourceSpEnd.
+(In practice this means audioSplice
+removes one segment and inserts another in its place)
+alignToZeroCrossing - if True, moves all involved times to the nearest
+zero crossing in the audio.
+Generally results
+in better sounding output</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def audioSplice(audioObj, spliceSegment, tg, tierName, newLabel,
+                insertStart, insertStop=None, alignToZeroCrossing=True):
+    &#39;&#39;&#39;
+    Splices a segment into an audio file and corresponding textgrid
+    
+    audioObj - the audio to splice into
+    spliceSegment - the audio segment that will be placed into a larger audio
+                    file
+    tg - the textgrid to splice into
+    tierName - the tier that will receive the new label
+    newLabel - the label for the splice interval on the tier with name tierName
+    insertStart - the time to insert the splice
+    insertStop - if not None, will erase the region between sourceSpStart
+                 and sourceSpEnd.  (In practice this means audioSplice
+                 removes one segment and inserts another in its place)
+    alignToZeroCrossing - if True, moves all involved times to the nearest
+                          zero crossing in the audio.  Generally results
+                          in better sounding output
+    &#39;&#39;&#39;
+
+    retTG = tg.new()
+
+    # Ensure all time points involved in splicing fall on zero crossings
+    if alignToZeroCrossing is True:
+        
+        # Cut the splice segment to zero crossings
+        spliceDuration = spliceSegment.getDuration()
+        spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
+        spliceZeroEnd = spliceSegment.findNearestZeroCrossing(spliceDuration)
+        spliceSegment = spliceSegment.getSubsegment(spliceZeroStart,
+                                                    spliceZeroEnd)
+            
+        # Move the textgrid borders to zero crossings
+        oldInsertStart = insertStart
+        insertStart = audioObj.findNearestZeroCrossing(oldInsertStart)
+        retTG = _shiftTimes(retTG, oldInsertStart, insertStart)
+        
+        if insertStop is not None:
+            oldInsertStop = insertStop
+            insertStop = audioObj.findNearestZeroCrossing(oldInsertStop)
+            retTG = _shiftTimes(retTG, oldInsertStop, insertStop)
+    
+    # Get the start time
+    insertTime = insertStart
+    if insertStop is not None:
+        insertTime = insertStop
+    
+    # Insert into the audio file
+    audioObj.insert(insertTime, spliceSegment.audioSamples)
+    
+    # Insert a blank region into the textgrid on all tiers
+    targetDuration = spliceSegment.getDuration()
+    retTG = retTG.insertSpace(insertTime, targetDuration, &#39;stretch&#39;)
+    
+    # Insert the splice entry into the target tier
+    newEntry = (insertTime, insertTime + targetDuration, newLabel)
+    retTG.tierDict[tierName].insertEntry(newEntry)
+    
+    # Finally, delete the old section if requested
+    if insertStop is not None:
+        audioObj.deleteSegment(insertStart, insertStop)
+        retTG = retTG.eraseRegion(insertStart, insertStop, doShrink=True)
+        
+    return audioObj, retTG</code></pre>
+</details>
+</dd>
+<dt id="praatio.praatio_scripts.spellCheckEntries"><code class="name flex">
+<span>def <span class="ident">spellCheckEntries</span></span>(<span>tg, targetTierName, newTierName, checkFunction, printEntries=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Spell checks words in a textgrid</p>
+<p>Entries can contain one or more words, separated by whitespace.
+If a mispelling is found, it is noted in a special tier and optionally
+printed to the screen.</p>
+<p>checkFunction is user-defined.
+There are robust spell check libraries
+for python like woosh or pyenchant.
+I have already written a naive
+spell checker in the pysle.praattools library.</p>
+<dl>
+<dt><strong><code>checkFunction</code></strong> :&ensp;<code>should</code> <code>return</code> <code>True</code> <code>if</code> <code>a</code> <code>word</code> <code>is</code> <code>spelled</code> <code>correctly</code> <code>and</code></dt>
+<dd>False otherwise</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def spellCheckEntries(tg, targetTierName, newTierName, checkFunction,
+                      printEntries=False):
+    &#39;&#39;&#39;
+    Spell checks words in a textgrid
+    
+    Entries can contain one or more words, separated by whitespace.
+    If a mispelling is found, it is noted in a special tier and optionally
+    printed to the screen.
+    
+    checkFunction is user-defined.  There are robust spell check libraries
+    for python like woosh or pyenchant.  I have already written a naive
+    spell checker in the pysle.praattools library.
+    
+    checkFunction: should return True if a word is spelled correctly and
+                   False otherwise
+    &#39;&#39;&#39;
+    punctuationList = [&#39;_&#39;, &#39;,&#39;, &#34;&#39;&#34;, &#39;&#34;&#39;, &#39;!&#39;, &#39;?&#39;, &#39;.&#39;, &#39;;&#39;, ]
+    
+    tg = tg.new()
+    tier = tg.tierDict[targetTierName]
+    
+    mispelledEntryList = []
+    for startT, stopT, label in tier.entryList:
+        
+        # Remove punctuation
+        for char in punctuationList:
+            label = label.replace(char, &#34;&#34;)
+        
+        wordList = label.split()
+        mispelledList = []
+        for word in wordList:
+            if not checkFunction(word):
+                mispelledList.append(word)
+        
+        if len(mispelledList) &gt; 0:
+            mispelledTxt = u&#34;, &#34;.join(mispelledList)
+            mispelledEntryList.append((startT, stopT, mispelledTxt))
+            
+            if printEntries is True:
+                print((startT, stopT, mispelledTxt))
+    
+    tier = tgio.IntervalTier(newTierName, mispelledEntryList,
+                             tg.minTimestamp, tg.maxTimestamp)
+    tg.addTier(tier)
+    
+    return tg</code></pre>
+</details>
+</dd>
+<dt id="praatio.praatio_scripts.splitAudioOnTier"><code class="name flex">
+<span>def <span class="ident">splitAudioOnTier</span></span>(<span>wavFN, tgFN, tierName, outputPath, outputTGFlag=False, nameStyle=None, noPartialIntervals=False, silenceLabel=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Outputs one subwav for each entry in the tier of a textgrid</p>
+<dl>
+<dt><strong><code>outputTGFlag</code></strong> :&ensp;<code>If</code> <code>True</code>, <code>outputs</code> <code>paired</code>, <code>cropped</code> <code>textgrids</code></dt>
+<dd>If is type str (a tier name), outputs a paired, cropped
+textgrid with only the specified tier</dd>
+<dt><strong><code>nameStyle</code></strong> :&ensp;<code>if</code> <code>'append'</code>: <code>append</code> <code>interval</code> <code>label</code> <code>to</code> <code>output</code> <code>name</code></dt>
+<dd>if 'append_no_i': append label but not interval to output name
+if 'label': output name is the same as label
+if None: output name plus the interval number</dd>
+<dt><strong><code>noPartialIntervals</code></strong> :&ensp;<code>if</code> <code>True</code>: <code>intervals</code> <code>in</code> <code>non</code>-<code>target</code> <code>tiers</code> <code>that</code> <code>are</code></dt>
+<dd>not wholly contained by an interval in
+the target tier will not be included in
+the output textgrids</dd>
+<dt><strong><code>silenceLabel</code></strong> :&ensp;<code>the</code> <code>label</code> <code>for</code> <code>silent</code> <code>regions.</code>
+<code>If</code> <code>silences</code> <code>are</code> <code>unlabeled</code></dt>
+<dd>intervals (i.e. blank) then leave this alone.
+If silences
+are labeled using praat's "annotate &gt;&gt; to silences"
+then this value should be "silences"</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def splitAudioOnTier(wavFN, tgFN, tierName, outputPath,
+                     outputTGFlag=False, nameStyle=None,
+                     noPartialIntervals=False, silenceLabel=None):
+    &#39;&#39;&#39;
+    Outputs one subwav for each entry in the tier of a textgrid
+    
+    outputTGFlag: If True, outputs paired, cropped textgrids
+                  If is type str (a tier name), outputs a paired, cropped
+                  textgrid with only the specified tier
+    nameStyle: if &#39;append&#39;: append interval label to output name
+               if &#39;append_no_i&#39;: append label but not interval to output name
+               if &#39;label&#39;: output name is the same as label
+               if None: output name plus the interval number
+    noPartialIntervals: if True: intervals in non-target tiers that are
+                                  not wholly contained by an interval in
+                                  the target tier will not be included in
+                                  the output textgrids
+    silenceLabel: the label for silent regions.  If silences are unlabeled
+                  intervals (i.e. blank) then leave this alone.  If silences
+                  are labeled using praat&#39;s &#34;annotate &gt;&gt; to silences&#34;
+                  then this value should be &#34;silences&#34;
+    &#39;&#39;&#39;
+    if not os.path.exists(outputPath):
+        os.mkdir(outputPath)
+    
+    if noPartialIntervals is True:
+        mode = &#39;strict&#39;
+    else:
+        mode = &#39;truncated&#39;
+    
+    tg = tgio.openTextgrid(tgFN)
+    entryList = tg.tierDict[tierName].entryList
+    
+    if silenceLabel is not None:
+        entryList = [entry for entry in entryList
+                     if entry[2] != silenceLabel]
+    
+    # Build the output name template
+    name = os.path.splitext(os.path.split(wavFN)[1])[0]
+    orderOfMagnitude = int(math.floor(math.log10(len(entryList))))
+    
+    # We want one more zero in the output than the order of magnitude
+    outputTemplate = &#34;%s_%%0%dd&#34; % (name, orderOfMagnitude + 1)
+    
+    firstWarning = True
+    
+    # If we&#39;re using the &#39;label&#39; namestyle for outputs, all of the
+    # interval labels have to be unique, or wave files with those
+    # labels as names, will be overwritten
+    if nameStyle == &#39;label&#39;:
+        wordList = [word for _, _, word in entryList]
+        multipleInstList = []
+        for word in set(wordList):
+            if wordList.count(word) &gt; 1:
+                multipleInstList.append(word)
+        
+        if len(multipleInstList) &gt; 0:
+            instListTxt = &#34;\n&#34;.join(multipleInstList)
+            print((&#34;Overwriting wave files in: %s\n&#34; +
+                   &#34;Intervals exist with the same name:\n%s&#34;)
+                  % (outputPath, instListTxt))
+            firstWarning = False
+    
+    # Output wave files
+    outputFNList = []
+    wavQObj = audioio.WavQueryObj(wavFN)
+    for i, entry in enumerate(entryList):
+        start, stop, label = entry
+        
+        # Resolve output name
+        outputName = outputTemplate % i
+        if nameStyle == &#34;append&#34;:
+            outputName += &#34;_&#34; + label
+        elif nameStyle == &#34;append_no_i&#34;:
+            outputName = name + &#34;_&#34; + label
+        elif nameStyle == &#34;label&#34;:
+            outputName = label
+        
+        outputFNFullPath = join(outputPath, outputName + &#34;.wav&#34;)
+
+        if os.path.exists(outputFNFullPath) and firstWarning:
+            print((&#34;Overwriting wave files in: %s\n&#34; +
+                   &#34;Files existed before or intervals exist with &#34; +
+                   &#34;the same name:\n%s&#34;)
+                  % (outputPath, outputName))
+        
+        frames = wavQObj.getFrames(start, stop)
+        wavQObj.outputModifiedWav(frames, outputFNFullPath)
+        
+        outputFNList.append((start, stop, outputName + &#34;.wav&#34;))
+        
+        # Output the textgrid if requested
+        if outputTGFlag is not False:
+            subTG = tg.crop(start, stop, mode, True)
+            
+            if isinstance(outputTGFlag, str):
+                for tierName in subTG.tierNameList:
+                    if tierName != outputTGFlag:
+                        subTG.removeTier(tierName)
+            
+            subTG.save(join(outputPath, outputName + &#34;.TextGrid&#34;))
+    
+    return outputFNList</code></pre>
+</details>
+</dd>
+<dt id="praatio.praatio_scripts.splitTierEntries"><code class="name flex">
+<span>def <span class="ident">splitTierEntries</span></span>(<span>tg, sourceTierName, targetTierName, startT=None, endT=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Split each entry in a tier by space</p>
+<p>The split entries will be placed on a new tier.
+The split entries
+are equally allocated a subsegment of the interval occupied by the
+source tier.
+e.g. [(63, 66, 'the blue cat'), ] would become
+[(63, 64, 'the'), (64, 65, 'blue'), (65, 66, 'cat'), ]</p>
+<p>This could be used to decompose utterances into words or, with pysle,
+words into phones.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def splitTierEntries(tg, sourceTierName, targetTierName,
+                     startT=None, endT=None):
+    &#39;&#39;&#39;
+    Split each entry in a tier by space
+    
+    The split entries will be placed on a new tier.  The split entries
+    are equally allocated a subsegment of the interval occupied by the
+    source tier.  e.g. [(63, 66, &#39;the blue cat&#39;), ] would become
+    [(63, 64, &#39;the&#39;), (64, 65, &#39;blue&#39;), (65, 66, &#39;cat&#39;), ]
+    
+    This could be used to decompose utterances into words or, with pysle,
+    words into phones.
+    &#39;&#39;&#39;
+    minT = tg.minTimestamp
+    maxT = tg.maxTimestamp
+    
+    sourceTier = tg.tierDict[sourceTierName]
+    targetTier = None
+    
+    # Examine a subset of the source tier?
+    if startT is not None or endT is not None:
+        if startT is None:
+            startT = minT
+        if endT is None:
+            endT = maxT
+        
+        sourceTier = sourceTier.crop(startT, endT, &#34;truncated&#34;, False)
+        
+        if targetTierName in tg.tierNameList:
+            targetTier = tg.tierDict[targetTierName]
+            targetTier = targetTier.eraseRegion(startT, endT,
+                                                &#39;truncate&#39;, False)
+    
+    # Split the entries in the source tier
+    newEntryList = []
+    for start, stop, label in sourceTier.entryList:
+        labelList = label.split()
+        intervalLength = (stop - start) / float(len(labelList))
+        
+        newSubEntryList = [(start + intervalLength * i,
+                            start + intervalLength * (i + 1),
+                            label)
+                           for i, label in enumerate(labelList)]
+        newEntryList.extend(newSubEntryList)
+    
+    # Create a new tier
+    if targetTier is None:
+        targetTier = tgio.IntervalTier(targetTierName, newEntryList,
+                                       minT, maxT)
+    
+    # Or insert new entries into existing target tier
+    else:
+
+        for entry in newEntryList:
+            targetTier.insertEntry(entry, True)
+    
+    # Insert the tier into the textgrid
+    if targetTierName in tg.tierNameList:
+        tg.removeTier(targetTierName)
+    tg.addTier(targetTier)
+    
+    return tg</code></pre>
+</details>
+</dd>
+<dt id="praatio.praatio_scripts.tgBoundariesToZeroCrossings"><code class="name flex">
+<span>def <span class="ident">tgBoundariesToZeroCrossings</span></span>(<span>tg, wavObj, adjustPointTiers=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Makes all textgrid interval boundaries fall on pressure wave zero crossings</p>
+<dl>
+<dt><strong><code>adjustPointTiers</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>point</code> <code>tiers</code> <code>will</code> <code>be</code> <code>adjusted</code> <code>too.</code>
+<code>Otherwise</code>,</dt>
+<dd>only interval tiers are adjusted.</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def tgBoundariesToZeroCrossings(tg, wavObj, adjustPointTiers=True):
+    &#39;&#39;&#39;
+    Makes all textgrid interval boundaries fall on pressure wave zero crossings
+    
+    adjustPointTiers: if True, point tiers will be adjusted too.  Otherwise,
+                      only interval tiers are adjusted.
+    &#39;&#39;&#39;
+    
+    for tierName in tg.tierNameList[:]:
+        tier = tg.tierDict[tierName]
+        
+        newEntryList = []
+        if isinstance(tier, tgio.PointTier) and adjustPointTiers is True:
+            for start, label in tier.entryList:
+                newStart = wavObj.findNearestZeroCrossing(start)
+                newEntryList.append((newStart, label))
+                
+        elif isinstance(tier, tgio.IntervalTier):
+            
+            for start, stop, label in tier.entryList:
+                newStart = wavObj.findNearestZeroCrossing(start)
+                newStop = wavObj.findNearestZeroCrossing(stop)
+                newEntryList.append((newStart, newStop, label))
+        
+        newTier = tier.new(entryList=newEntryList)
+        tg.replaceTier(tierName, newTier)
+                
+    return tg</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="praatio" href="index.html">praatio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="praatio.praatio_scripts.alignBoundariesAcrossTiers" href="#praatio.praatio_scripts.alignBoundariesAcrossTiers">alignBoundariesAcrossTiers</a></code></li>
+<li><code><a title="praatio.praatio_scripts.audioSplice" href="#praatio.praatio_scripts.audioSplice">audioSplice</a></code></li>
+<li><code><a title="praatio.praatio_scripts.spellCheckEntries" href="#praatio.praatio_scripts.spellCheckEntries">spellCheckEntries</a></code></li>
+<li><code><a title="praatio.praatio_scripts.splitAudioOnTier" href="#praatio.praatio_scripts.splitAudioOnTier">splitAudioOnTier</a></code></li>
+<li><code><a title="praatio.praatio_scripts.splitTierEntries" href="#praatio.praatio_scripts.splitTierEntries">splitTierEntries</a></code></li>
+<li><code><a title="praatio.praatio_scripts.tgBoundariesToZeroCrossings" href="#praatio.praatio_scripts.tgBoundariesToZeroCrossings">tgBoundariesToZeroCrossings</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

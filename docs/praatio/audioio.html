@@ -1,0 +1,1668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.2" />
+<title>praatio.audioio API documentation</title>
+<meta name="description" content="Created on Apr 4, 2017 …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>praatio.audioio</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Created on Apr 4, 2017</p>
+<p>@author: Tim</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#39;&#39;&#39;
+Created on Apr 4, 2017
+
+@author: Tim
+&#39;&#39;&#39;
+
+import math
+import wave
+import struct
+import copy
+
+from praatio.utilities import utils
+
+sampWidthDict = {1: &#39;b&#39;, 2: &#39;h&#39;, 4: &#39;i&#39;, 8: &#39;q&#39;}
+
+
+class EndOfAudioData(Exception):
+    pass
+
+
+class FindZeroCrossingError(Exception):
+    
+    def __init__(self, startTime, endTime):
+        super(FindZeroCrossingError, self).__init__()
+        
+        self.startTime = startTime
+        self.endTime = endTime
+    
+    def __str__(self):
+        retString = &#34;No zero crossing found between %f and %f&#34;
+        return retString % (self.startTime, self.endTime)
+
+
+def samplesAsNums(waveData, sampleWidth):
+    if len(waveData) == 0:
+        raise EndOfAudioData()
+    
+    byteCode = sampWidthDict[sampleWidth]
+    actualNumFrames = int(len(waveData) / float(sampleWidth))
+    audioFrameList = struct.unpack(&#34;&lt;&#34; + byteCode * actualNumFrames, waveData)
+
+    return audioFrameList
+
+
+def numsAsSamples(sampleWidth, numList):
+    byteCode = sampWidthDict[sampleWidth]
+    byteStr = struct.pack(&#34;&lt;&#34; + byteCode * len(numList), *numList)
+    
+    return byteStr
+
+
+def getDuration(wavFN):
+    return WavQueryObj(wavFN).getDuration()
+
+    
+def getMaxAmplitude(sampleWidth):
+    &#39;&#39;&#39;Gets the maximum possible amplitude for a given sample width&#39;&#39;&#39;
+    return 2 ** (sampleWidth * 8 - 1) - 1
+
+
+def generateSineWave(duration, freq, samplingFreq, amplitude):
+    nSamples = int(duration * samplingFreq)
+    wavSpec = 2 * math.pi * freq / float(samplingFreq)
+    sinWave = [int(amplitude * math.sin(wavSpec * i))
+               for i in range(nSamples)]
+    return sinWave
+
+
+def generateSilence(duration, samplingFreq):
+    silence = [0, ] * int(duration * samplingFreq)
+    return silence
+
+
+def extractSubwav(fn, outputFN, startT, endT):
+    audioObj = openAudioFile(fn, [(startT, endT), ], doShrink=True)
+    audioObj.save(outputFN)
+    
+
+class AbstractWav(object):
+    
+    def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
+        &#39;&#39;&#39;
+        Finds the nearest zero crossing at the given time in an audio file
+        
+        Looks both before and after the timeStamp
+        &#39;&#39;&#39;
+        
+        leftStartTime = rightStartTime = targetTime
+        fileDuration = self.getDuration()
+        
+        # Find zero crossings
+        smallestLeft = None
+        smallestRight = None
+        while True:
+            try:
+                timeStamp = None
+                if leftStartTime &gt; 0:
+                    timeStamp = self.findNextZeroCrossing(leftStartTime,
+                                                          timeStep,
+                                                          reverse=True)
+            except FindZeroCrossingError:
+                pass
+            else:
+                smallestLeft = timeStamp
+            
+            try:
+                timestamp = None
+                if rightStartTime &lt; fileDuration:
+                    timestamp = self.findNextZeroCrossing(rightStartTime,
+                                                          timeStep,
+                                                          reverse=False)
+            except FindZeroCrossingError:
+                pass
+            else:
+                smallestRight = timestamp
+            
+            if smallestLeft is not None or smallestRight is not None:
+                break
+            elif leftStartTime &lt; 0 and rightStartTime &gt; fileDuration:
+                raise(FindZeroCrossingError(0, fileDuration))
+            else:
+                leftStartTime -= timeStep
+                rightStartTime += timeStep
+        
+        if smallestLeft is not None:
+            leftDiff = targetTime - smallestLeft
+            
+        if smallestRight is not None:
+            rightDiff = smallestRight - targetTime
+        
+        # Is left or right smaller?
+        if smallestLeft is None:
+            zeroCrossingTime = smallestRight
+        elif smallestRight is None:
+            zeroCrossingTime = smallestLeft
+        elif leftDiff &lt;= rightDiff:
+            zeroCrossingTime = smallestLeft
+        elif leftDiff &gt; rightDiff:
+            zeroCrossingTime = smallestRight
+        
+        return zeroCrossingTime
+
+    def findNextZeroCrossing(self, targetTime, timeStep=0.002,
+                             reverse=False):
+        &#39;&#39;&#39;
+        Finds the nearest zero crossing, searching in one direction
+        
+        Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,
+        the sample list is searched from back to front.
+        
+        targetTime is the startTime if reverse=False and
+            the endTime if reverse=True
+        &#39;&#39;&#39;
+
+        startTime = targetTime
+        if reverse is True:
+            startTime = targetTime - timeStep
+            
+        # Don&#39;t read over the edges
+        if startTime &lt; 0:
+            timeStep = startTime + timeStep
+            startTime = 0
+        elif startTime + timeStep &gt; self.getDuration():
+            timeStep = self.getDuration() - startTime
+        
+        endTime = startTime + timeStep
+        
+        # 1 Get the acoustic information and the sign for each sample
+        frameList = self.getSamples(startTime, endTime)
+        signList = [utils.sign(val) for val in frameList]
+        
+        # 2 did signs change?
+        changeList = [signList[i] != signList[i + 1]
+                      for i in range(len(frameList) - 1)]
+        
+        # 3 get samples where signs changed
+        # (iterate backwards if reverse is true)
+        if reverse is True:
+            start = len(changeList) - 1
+            stop = 0
+            step = -1
+        else:
+            start = 0
+            stop = len(changeList) - 1
+            step = 1
+        
+        changeIndexList = [i for i in range(start, stop, step)
+                           if changeList[i] == 1]
+        
+        # 4 return the zeroed frame closest to starting point
+        try:
+            zeroedFrame = changeIndexList[0]
+        except IndexError:
+            raise(FindZeroCrossingError(startTime, endTime))
+        
+        # We found the zero by comparing points to the point adjacent to them.
+        # It is possible the adjacent point is closer to zero than this one,
+        # in which case, it is the better zeroedI
+        if abs(frameList[zeroedFrame]) &gt; abs(frameList[zeroedFrame + 1]):
+            zeroedFrame = zeroedFrame + 1
+        
+        adjustTime = zeroedFrame / float(self.framerate)
+        
+        return startTime + adjustTime
+
+    
+class WavQueryObj(AbstractWav):
+    &#39;&#39;&#39;
+    A class for getting information about a wave file
+    
+    The wave file is never loaded--we only keep a reference to the
+    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don&#39;t
+    (shouldn&#39;t) change state.  For doing multiple modifications,
+    use a WavObj.
+    &#39;&#39;&#39;
+    def __init__(self, fn):
+        self.audiofile = wave.open(fn, &#34;r&#34;)
+        self.params = self.audiofile.getparams()
+    
+        self.nchannels = self.params[0]
+        self.sampwidth = self.params[1]
+        self.framerate = self.params[2]
+        self.nframes = self.params[3]
+        self.comptype = self.params[4]
+        self.compname = self.params[5]
+    
+    def concatenate(self, targetFrames, outputFN, prepend=False):
+        sourceFrames = self.getFrames()
+        
+        if prepend is True:
+            newFrames = targetFrames + sourceFrames
+        else:
+            newFrames = sourceFrames + targetFrames
+        
+        self.outputModifiedWav(newFrames, outputFN)
+    
+    def getDuration(self):
+        duration = float(self.nframes) / self.framerate
+        return duration
+    
+    def getFrames(self, startTime=None, endTime=None):
+        &#39;&#39;&#39;
+        Get frames with respect to time
+        &#39;&#39;&#39;
+        if startTime is None:
+            startTime = 0
+        startFrame = int(startTime * float(self.framerate))
+        
+        if endTime is not None:
+            duration = endTime - startTime
+            nFrames = int(self.framerate * duration)
+        else:
+            nFrames = int(self.nframes - startFrame)
+        
+        self.audiofile.setpos(startFrame)
+        frames = self.audiofile.readframes(nFrames)
+        
+        return frames
+
+    def getSamples(self, startTime, endTime):
+        
+        frames = self.getFrames(startTime, endTime)
+        audioFrameList = samplesAsNums(frames, self.sampwidth)
+     
+        return audioFrameList
+
+    def deleteWavSections(self, outputFN, keepList=None,
+                          deleteList=None, operation=&#34;shrink&#34;,
+                          sineWaveAmplitude=None):
+        &#39;&#39;&#39;
+        Remove from the audio all of the intervals
+        
+        DeleteList can easily be constructed from a textgrid tier
+        e.g. deleteList = tg.tierDict[&#34;targetTier&#34;].entryList
+        
+        operation: &#34;shrink&#34; to shrink the file length or &#34;silence or
+                   &#34;sine wave&#34; to replace the segment with silence or
+                   a sine wave
+        sineWaveAmplitude: if None and operation is &#34;sine wave&#34;
+                           use max amplitude.
+        &#39;&#39;&#39;
+    
+        assert(operation in [&#34;shrink&#34;, &#34;silence&#34;, &#34;sine wave&#34;])
+    
+        duration = float(self.nframes) / self.framerate
+        
+        # Need to specify what to keep or what to delete, but can&#39;t
+        # specify both
+        assert(keepList is not None or deleteList is not None)
+        assert(keepList is None or deleteList is None)
+        
+        if keepList is None:
+            keepList = utils.invertIntervalList(deleteList, duration)
+        else:
+            deleteList = utils.invertIntervalList(keepList, duration)
+        keepList = [[row[0], row[1], &#34;keep&#34;] for row in keepList]
+        deleteList = [[row[0], row[1], &#34;delete&#34;] for row in deleteList]
+        iterList = sorted(keepList + deleteList)
+        
+        zeroBinValue = struct.pack(sampWidthDict[self.sampwidth], 0)
+        
+        # Grab the sections to be kept
+        audioFrames = b&#34;&#34;
+        for startT, stopT, label in iterList:
+            diff = stopT - startT
+            
+            if label == &#34;keep&#34;:
+                self.audiofile.setpos(int(self.framerate * startT))
+                frames = self.audiofile.readframes(int(self.framerate * diff))
+                audioFrames += frames
+            
+            # If we are not keeping a region and we&#39;re not shrinking the
+            # duration, fill in the deleted portions with zeros
+            elif label == &#34;delete&#34; and operation == &#34;silence&#34;:
+                frames = zeroBinValue * int(self.framerate * diff)
+                audioFrames += frames
+            # Or fill it with a sine wave
+            elif label == &#34;delete&#34; and operation == &#34;sine wave&#34;:
+                frequency = 200
+                if sineWaveAmplitude is None:
+                    sineWaveAmplitude = getMaxAmplitude(self.sampwidth)
+                sineWave = generateSineWave(diff,
+                                            frequency,
+                                            self.framerate,
+                                            sineWaveAmplitude)
+                frames = numsAsSamples(self.sampwidth, sineWave)
+                audioFrames += frames
+    
+            self.outputModifiedWav(audioFrames, outputFN)
+            
+    def outputModifiedWav(self, audioFrames, outputFN):
+        &#39;&#39;&#39;
+        Output frames using the same parameters as this WavQueryObj
+        &#39;&#39;&#39;
+        
+        # Output resulting wav file
+        outParams = [self.nchannels, self.sampwidth, self.framerate,
+                     len(audioFrames), self.comptype, self.compname]
+        
+        outWave = wave.open(outputFN, &#34;w&#34;)
+        outWave.setparams(outParams)
+        outWave.writeframes(audioFrames)
+
+
+class WavObj(AbstractWav):
+    &#39;&#39;&#39;
+    A class for manipulating audio files
+    
+    The wav file is represented by its wavform as a series of signed
+    integers.  This can be very slow and take up lots of memory with
+    large files.
+    &#39;&#39;&#39;
+    
+    def __init__(self, audioSamples, params):
+
+        self.audioSamples = audioSamples
+        self.params = params
+        self.nchannels = params[0]
+        self.sampwidth = params[1]
+        self.framerate = params[2]
+        self.comptype = params[4]
+        self.compname = params[5]
+    
+    def getIndexAtTime(self, startTime):
+        return int(startTime * self.framerate)
+    
+    def insertSilence(self, startTime, silenceDuration):
+        audioSamples = generateSilence(silenceDuration, self.framerate)
+        self.insertSegment(startTime, audioSamples)
+    
+    def insert(self, startTime, valueList):
+        i = self.getIndexAtTime(startTime)
+        self.audioSamples = (self.audioSamples[:i] + valueList +
+                             self.audioSamples[i:])
+    
+    def deleteSegment(self, startTime, endTime):
+        i = self.getIndexAtTime(startTime)
+        j = self.getIndexAtTime(endTime)
+        self.audioSamples = self.audioSamples[:i] + self.audioSamples[j:]
+
+    def getDuration(self):
+        return float(len(self.audioSamples)) / self.framerate
+    
+    def getSamples(self, startTime, endTime):
+        i = self.getIndexAtTime(startTime)
+        j = self.getIndexAtTime(endTime)
+        return self.audioSamples[i:j]
+
+    def getSubsegment(self, startTime, endTime):
+        samples = self.getSamples(startTime, endTime)
+        return WavObj(samples, self.params)
+
+    def new(self):
+        return copy.deepcopy(self)
+
+    def save(self, outputFN):
+        # Output resulting wav file
+        outParams = [self.nchannels, self.sampwidth, self.framerate,
+                     len(self.audioSamples), self.comptype, self.compname]
+        
+        byteCode = sampWidthDict[self.sampwidth]
+        byteStr = struct.pack(&#34;&lt;&#34; + byteCode * len(self.audioSamples),
+                              *self.audioSamples)
+        
+        outWave = wave.open(outputFN, &#34;w&#34;)
+        outWave.setparams(outParams)
+        outWave.writeframes(byteStr)
+
+
+def openAudioFile(fn, keepList=None, deleteList=None, doShrink=True):
+    &#39;&#39;&#39;
+    Remove from the audio all of the intervals
+    
+    keepList - specifies the segments to keep; by default, everything is kept
+    doShrink - if False, segments not kept are replaced by silence
+    &#39;&#39;&#39;
+    
+    audiofile = wave.open(fn, &#34;r&#34;)
+    
+    params = audiofile.getparams()
+    sampwidth = params[1]
+    framerate = params[2]
+    nframes = params[3]
+    
+    duration = nframes / float(framerate)
+    
+    # Can&#39;t specify both the keepList and the deleteList
+    assert(keepList is None or deleteList is None)
+    
+    if keepList is None and deleteList is None:
+        keepList = [(0, duration), ]
+        deleteList = []
+    elif keepList is None:
+        keepList = utils.invertIntervalList(deleteList, duration)
+    else:
+        deleteList = utils.invertIntervalList(keepList, duration)
+        
+    keepList = [[row[0], row[1], &#34;keep&#34;] for row in keepList]
+    deleteList = [[row[0], row[1], &#34;delete&#34;] for row in deleteList]
+    iterList = sorted(keepList + deleteList)
+    
+    # Grab the sections to be kept
+    audioSampleList = []
+    byteCode = sampWidthDict[sampwidth]
+    for startT, stopT, label in iterList:
+        diff = stopT - startT
+        
+        if label == &#34;keep&#34;:
+            audiofile.setpos(int(framerate * startT))
+            frames = audiofile.readframes(int(framerate * diff))
+            
+            actualNumFrames = int(len(frames) / float(sampwidth))
+            audioSamples = struct.unpack(&#34;&lt;&#34; + byteCode * actualNumFrames,
+                                         frames)
+            audioSampleList.extend(audioSamples)
+        
+        # If we are not keeping a region and we&#39;re not shrinking the
+        # duration, fill in the deleted portions with zeros
+        elif label == &#34;delete&#34; and doShrink is False:
+            audioSampleList.extend([0, ] * int(framerate * diff))
+
+    return WavObj(audioSampleList, params)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="praatio.audioio.extractSubwav"><code class="name flex">
+<span>def <span class="ident">extractSubwav</span></span>(<span>fn, outputFN, startT, endT)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def extractSubwav(fn, outputFN, startT, endT):
+    audioObj = openAudioFile(fn, [(startT, endT), ], doShrink=True)
+    audioObj.save(outputFN)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.generateSilence"><code class="name flex">
+<span>def <span class="ident">generateSilence</span></span>(<span>duration, samplingFreq)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def generateSilence(duration, samplingFreq):
+    silence = [0, ] * int(duration * samplingFreq)
+    return silence</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.generateSineWave"><code class="name flex">
+<span>def <span class="ident">generateSineWave</span></span>(<span>duration, freq, samplingFreq, amplitude)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def generateSineWave(duration, freq, samplingFreq, amplitude):
+    nSamples = int(duration * samplingFreq)
+    wavSpec = 2 * math.pi * freq / float(samplingFreq)
+    sinWave = [int(amplitude * math.sin(wavSpec * i))
+               for i in range(nSamples)]
+    return sinWave</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.getDuration"><code class="name flex">
+<span>def <span class="ident">getDuration</span></span>(<span>wavFN)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getDuration(wavFN):
+    return WavQueryObj(wavFN).getDuration()</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.getMaxAmplitude"><code class="name flex">
+<span>def <span class="ident">getMaxAmplitude</span></span>(<span>sampleWidth)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Gets the maximum possible amplitude for a given sample width</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getMaxAmplitude(sampleWidth):
+    &#39;&#39;&#39;Gets the maximum possible amplitude for a given sample width&#39;&#39;&#39;
+    return 2 ** (sampleWidth * 8 - 1) - 1</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.numsAsSamples"><code class="name flex">
+<span>def <span class="ident">numsAsSamples</span></span>(<span>sampleWidth, numList)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def numsAsSamples(sampleWidth, numList):
+    byteCode = sampWidthDict[sampleWidth]
+    byteStr = struct.pack(&#34;&lt;&#34; + byteCode * len(numList), *numList)
+    
+    return byteStr</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.openAudioFile"><code class="name flex">
+<span>def <span class="ident">openAudioFile</span></span>(<span>fn, keepList=None, deleteList=None, doShrink=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Remove from the audio all of the intervals</p>
+<p>keepList - specifies the segments to keep; by default, everything is kept
+doShrink - if False, segments not kept are replaced by silence</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def openAudioFile(fn, keepList=None, deleteList=None, doShrink=True):
+    &#39;&#39;&#39;
+    Remove from the audio all of the intervals
+    
+    keepList - specifies the segments to keep; by default, everything is kept
+    doShrink - if False, segments not kept are replaced by silence
+    &#39;&#39;&#39;
+    
+    audiofile = wave.open(fn, &#34;r&#34;)
+    
+    params = audiofile.getparams()
+    sampwidth = params[1]
+    framerate = params[2]
+    nframes = params[3]
+    
+    duration = nframes / float(framerate)
+    
+    # Can&#39;t specify both the keepList and the deleteList
+    assert(keepList is None or deleteList is None)
+    
+    if keepList is None and deleteList is None:
+        keepList = [(0, duration), ]
+        deleteList = []
+    elif keepList is None:
+        keepList = utils.invertIntervalList(deleteList, duration)
+    else:
+        deleteList = utils.invertIntervalList(keepList, duration)
+        
+    keepList = [[row[0], row[1], &#34;keep&#34;] for row in keepList]
+    deleteList = [[row[0], row[1], &#34;delete&#34;] for row in deleteList]
+    iterList = sorted(keepList + deleteList)
+    
+    # Grab the sections to be kept
+    audioSampleList = []
+    byteCode = sampWidthDict[sampwidth]
+    for startT, stopT, label in iterList:
+        diff = stopT - startT
+        
+        if label == &#34;keep&#34;:
+            audiofile.setpos(int(framerate * startT))
+            frames = audiofile.readframes(int(framerate * diff))
+            
+            actualNumFrames = int(len(frames) / float(sampwidth))
+            audioSamples = struct.unpack(&#34;&lt;&#34; + byteCode * actualNumFrames,
+                                         frames)
+            audioSampleList.extend(audioSamples)
+        
+        # If we are not keeping a region and we&#39;re not shrinking the
+        # duration, fill in the deleted portions with zeros
+        elif label == &#34;delete&#34; and doShrink is False:
+            audioSampleList.extend([0, ] * int(framerate * diff))
+
+    return WavObj(audioSampleList, params)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.samplesAsNums"><code class="name flex">
+<span>def <span class="ident">samplesAsNums</span></span>(<span>waveData, sampleWidth)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def samplesAsNums(waveData, sampleWidth):
+    if len(waveData) == 0:
+        raise EndOfAudioData()
+    
+    byteCode = sampWidthDict[sampleWidth]
+    actualNumFrames = int(len(waveData) / float(sampleWidth))
+    audioFrameList = struct.unpack(&#34;&lt;&#34; + byteCode * actualNumFrames, waveData)
+
+    return audioFrameList</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="praatio.audioio.AbstractWav"><code class="flex name class">
+<span>class <span class="ident">AbstractWav</span></span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class AbstractWav(object):
+    
+    def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
+        &#39;&#39;&#39;
+        Finds the nearest zero crossing at the given time in an audio file
+        
+        Looks both before and after the timeStamp
+        &#39;&#39;&#39;
+        
+        leftStartTime = rightStartTime = targetTime
+        fileDuration = self.getDuration()
+        
+        # Find zero crossings
+        smallestLeft = None
+        smallestRight = None
+        while True:
+            try:
+                timeStamp = None
+                if leftStartTime &gt; 0:
+                    timeStamp = self.findNextZeroCrossing(leftStartTime,
+                                                          timeStep,
+                                                          reverse=True)
+            except FindZeroCrossingError:
+                pass
+            else:
+                smallestLeft = timeStamp
+            
+            try:
+                timestamp = None
+                if rightStartTime &lt; fileDuration:
+                    timestamp = self.findNextZeroCrossing(rightStartTime,
+                                                          timeStep,
+                                                          reverse=False)
+            except FindZeroCrossingError:
+                pass
+            else:
+                smallestRight = timestamp
+            
+            if smallestLeft is not None or smallestRight is not None:
+                break
+            elif leftStartTime &lt; 0 and rightStartTime &gt; fileDuration:
+                raise(FindZeroCrossingError(0, fileDuration))
+            else:
+                leftStartTime -= timeStep
+                rightStartTime += timeStep
+        
+        if smallestLeft is not None:
+            leftDiff = targetTime - smallestLeft
+            
+        if smallestRight is not None:
+            rightDiff = smallestRight - targetTime
+        
+        # Is left or right smaller?
+        if smallestLeft is None:
+            zeroCrossingTime = smallestRight
+        elif smallestRight is None:
+            zeroCrossingTime = smallestLeft
+        elif leftDiff &lt;= rightDiff:
+            zeroCrossingTime = smallestLeft
+        elif leftDiff &gt; rightDiff:
+            zeroCrossingTime = smallestRight
+        
+        return zeroCrossingTime
+
+    def findNextZeroCrossing(self, targetTime, timeStep=0.002,
+                             reverse=False):
+        &#39;&#39;&#39;
+        Finds the nearest zero crossing, searching in one direction
+        
+        Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,
+        the sample list is searched from back to front.
+        
+        targetTime is the startTime if reverse=False and
+            the endTime if reverse=True
+        &#39;&#39;&#39;
+
+        startTime = targetTime
+        if reverse is True:
+            startTime = targetTime - timeStep
+            
+        # Don&#39;t read over the edges
+        if startTime &lt; 0:
+            timeStep = startTime + timeStep
+            startTime = 0
+        elif startTime + timeStep &gt; self.getDuration():
+            timeStep = self.getDuration() - startTime
+        
+        endTime = startTime + timeStep
+        
+        # 1 Get the acoustic information and the sign for each sample
+        frameList = self.getSamples(startTime, endTime)
+        signList = [utils.sign(val) for val in frameList]
+        
+        # 2 did signs change?
+        changeList = [signList[i] != signList[i + 1]
+                      for i in range(len(frameList) - 1)]
+        
+        # 3 get samples where signs changed
+        # (iterate backwards if reverse is true)
+        if reverse is True:
+            start = len(changeList) - 1
+            stop = 0
+            step = -1
+        else:
+            start = 0
+            stop = len(changeList) - 1
+            step = 1
+        
+        changeIndexList = [i for i in range(start, stop, step)
+                           if changeList[i] == 1]
+        
+        # 4 return the zeroed frame closest to starting point
+        try:
+            zeroedFrame = changeIndexList[0]
+        except IndexError:
+            raise(FindZeroCrossingError(startTime, endTime))
+        
+        # We found the zero by comparing points to the point adjacent to them.
+        # It is possible the adjacent point is closer to zero than this one,
+        # in which case, it is the better zeroedI
+        if abs(frameList[zeroedFrame]) &gt; abs(frameList[zeroedFrame + 1]):
+            zeroedFrame = zeroedFrame + 1
+        
+        adjustTime = zeroedFrame / float(self.framerate)
+        
+        return startTime + adjustTime</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="praatio.audioio.WavQueryObj" href="#praatio.audioio.WavQueryObj">WavQueryObj</a></li>
+<li><a title="praatio.audioio.WavObj" href="#praatio.audioio.WavObj">WavObj</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.audioio.AbstractWav.findNearestZeroCrossing"><code class="name flex">
+<span>def <span class="ident">findNearestZeroCrossing</span></span>(<span>self, targetTime, timeStep=0.002)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Finds the nearest zero crossing at the given time in an audio file</p>
+<p>Looks both before and after the timeStamp</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
+    &#39;&#39;&#39;
+    Finds the nearest zero crossing at the given time in an audio file
+    
+    Looks both before and after the timeStamp
+    &#39;&#39;&#39;
+    
+    leftStartTime = rightStartTime = targetTime
+    fileDuration = self.getDuration()
+    
+    # Find zero crossings
+    smallestLeft = None
+    smallestRight = None
+    while True:
+        try:
+            timeStamp = None
+            if leftStartTime &gt; 0:
+                timeStamp = self.findNextZeroCrossing(leftStartTime,
+                                                      timeStep,
+                                                      reverse=True)
+        except FindZeroCrossingError:
+            pass
+        else:
+            smallestLeft = timeStamp
+        
+        try:
+            timestamp = None
+            if rightStartTime &lt; fileDuration:
+                timestamp = self.findNextZeroCrossing(rightStartTime,
+                                                      timeStep,
+                                                      reverse=False)
+        except FindZeroCrossingError:
+            pass
+        else:
+            smallestRight = timestamp
+        
+        if smallestLeft is not None or smallestRight is not None:
+            break
+        elif leftStartTime &lt; 0 and rightStartTime &gt; fileDuration:
+            raise(FindZeroCrossingError(0, fileDuration))
+        else:
+            leftStartTime -= timeStep
+            rightStartTime += timeStep
+    
+    if smallestLeft is not None:
+        leftDiff = targetTime - smallestLeft
+        
+    if smallestRight is not None:
+        rightDiff = smallestRight - targetTime
+    
+    # Is left or right smaller?
+    if smallestLeft is None:
+        zeroCrossingTime = smallestRight
+    elif smallestRight is None:
+        zeroCrossingTime = smallestLeft
+    elif leftDiff &lt;= rightDiff:
+        zeroCrossingTime = smallestLeft
+    elif leftDiff &gt; rightDiff:
+        zeroCrossingTime = smallestRight
+    
+    return zeroCrossingTime</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.AbstractWav.findNextZeroCrossing"><code class="name flex">
+<span>def <span class="ident">findNextZeroCrossing</span></span>(<span>self, targetTime, timeStep=0.002, reverse=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Finds the nearest zero crossing, searching in one direction</p>
+<p>Can do a 'reverse' search by setting reverse to True.
+In that case,
+the sample list is searched from back to front.</p>
+<p>targetTime is the startTime if reverse=False and
+the endTime if reverse=True</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def findNextZeroCrossing(self, targetTime, timeStep=0.002,
+                         reverse=False):
+    &#39;&#39;&#39;
+    Finds the nearest zero crossing, searching in one direction
+    
+    Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,
+    the sample list is searched from back to front.
+    
+    targetTime is the startTime if reverse=False and
+        the endTime if reverse=True
+    &#39;&#39;&#39;
+
+    startTime = targetTime
+    if reverse is True:
+        startTime = targetTime - timeStep
+        
+    # Don&#39;t read over the edges
+    if startTime &lt; 0:
+        timeStep = startTime + timeStep
+        startTime = 0
+    elif startTime + timeStep &gt; self.getDuration():
+        timeStep = self.getDuration() - startTime
+    
+    endTime = startTime + timeStep
+    
+    # 1 Get the acoustic information and the sign for each sample
+    frameList = self.getSamples(startTime, endTime)
+    signList = [utils.sign(val) for val in frameList]
+    
+    # 2 did signs change?
+    changeList = [signList[i] != signList[i + 1]
+                  for i in range(len(frameList) - 1)]
+    
+    # 3 get samples where signs changed
+    # (iterate backwards if reverse is true)
+    if reverse is True:
+        start = len(changeList) - 1
+        stop = 0
+        step = -1
+    else:
+        start = 0
+        stop = len(changeList) - 1
+        step = 1
+    
+    changeIndexList = [i for i in range(start, stop, step)
+                       if changeList[i] == 1]
+    
+    # 4 return the zeroed frame closest to starting point
+    try:
+        zeroedFrame = changeIndexList[0]
+    except IndexError:
+        raise(FindZeroCrossingError(startTime, endTime))
+    
+    # We found the zero by comparing points to the point adjacent to them.
+    # It is possible the adjacent point is closer to zero than this one,
+    # in which case, it is the better zeroedI
+    if abs(frameList[zeroedFrame]) &gt; abs(frameList[zeroedFrame + 1]):
+        zeroedFrame = zeroedFrame + 1
+    
+    adjustTime = zeroedFrame / float(self.framerate)
+    
+    return startTime + adjustTime</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="praatio.audioio.EndOfAudioData"><code class="flex name class">
+<span>class <span class="ident">EndOfAudioData</span></span>
+<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class EndOfAudioData(Exception):
+    pass</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.FindZeroCrossingError"><code class="flex name class">
+<span>class <span class="ident">FindZeroCrossingError</span></span>
+<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class FindZeroCrossingError(Exception):
+    
+    def __init__(self, startTime, endTime):
+        super(FindZeroCrossingError, self).__init__()
+        
+        self.startTime = startTime
+        self.endTime = endTime
+    
+    def __str__(self):
+        retString = &#34;No zero crossing found between %f and %f&#34;
+        return retString % (self.startTime, self.endTime)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.audioio.FindZeroCrossingError.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, startTime, endTime)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize self.
+See help(type(self)) for accurate signature.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, startTime, endTime):
+    super(FindZeroCrossingError, self).__init__()
+    
+    self.startTime = startTime
+    self.endTime = endTime</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="praatio.audioio.WavObj"><code class="flex name class">
+<span>class <span class="ident">WavObj</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="praatio.audioio.AbstractWav" href="#praatio.audioio.AbstractWav">AbstractWav</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class for manipulating audio files</p>
+<p>The wav file is represented by its wavform as a series of signed
+integers.
+This can be very slow and take up lots of memory with
+large files.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class WavObj(AbstractWav):
+    &#39;&#39;&#39;
+    A class for manipulating audio files
+    
+    The wav file is represented by its wavform as a series of signed
+    integers.  This can be very slow and take up lots of memory with
+    large files.
+    &#39;&#39;&#39;
+    
+    def __init__(self, audioSamples, params):
+
+        self.audioSamples = audioSamples
+        self.params = params
+        self.nchannels = params[0]
+        self.sampwidth = params[1]
+        self.framerate = params[2]
+        self.comptype = params[4]
+        self.compname = params[5]
+    
+    def getIndexAtTime(self, startTime):
+        return int(startTime * self.framerate)
+    
+    def insertSilence(self, startTime, silenceDuration):
+        audioSamples = generateSilence(silenceDuration, self.framerate)
+        self.insertSegment(startTime, audioSamples)
+    
+    def insert(self, startTime, valueList):
+        i = self.getIndexAtTime(startTime)
+        self.audioSamples = (self.audioSamples[:i] + valueList +
+                             self.audioSamples[i:])
+    
+    def deleteSegment(self, startTime, endTime):
+        i = self.getIndexAtTime(startTime)
+        j = self.getIndexAtTime(endTime)
+        self.audioSamples = self.audioSamples[:i] + self.audioSamples[j:]
+
+    def getDuration(self):
+        return float(len(self.audioSamples)) / self.framerate
+    
+    def getSamples(self, startTime, endTime):
+        i = self.getIndexAtTime(startTime)
+        j = self.getIndexAtTime(endTime)
+        return self.audioSamples[i:j]
+
+    def getSubsegment(self, startTime, endTime):
+        samples = self.getSamples(startTime, endTime)
+        return WavObj(samples, self.params)
+
+    def new(self):
+        return copy.deepcopy(self)
+
+    def save(self, outputFN):
+        # Output resulting wav file
+        outParams = [self.nchannels, self.sampwidth, self.framerate,
+                     len(self.audioSamples), self.comptype, self.compname]
+        
+        byteCode = sampWidthDict[self.sampwidth]
+        byteStr = struct.pack(&#34;&lt;&#34; + byteCode * len(self.audioSamples),
+                              *self.audioSamples)
+        
+        outWave = wave.open(outputFN, &#34;w&#34;)
+        outWave.setparams(outParams)
+        outWave.writeframes(byteStr)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.audioio.WavObj.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, audioSamples, params)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize self.
+See help(type(self)) for accurate signature.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, audioSamples, params):
+
+    self.audioSamples = audioSamples
+    self.params = params
+    self.nchannels = params[0]
+    self.sampwidth = params[1]
+    self.framerate = params[2]
+    self.comptype = params[4]
+    self.compname = params[5]</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.deleteSegment"><code class="name flex">
+<span>def <span class="ident">deleteSegment</span></span>(<span>self, startTime, endTime)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def deleteSegment(self, startTime, endTime):
+    i = self.getIndexAtTime(startTime)
+    j = self.getIndexAtTime(endTime)
+    self.audioSamples = self.audioSamples[:i] + self.audioSamples[j:]</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.getDuration"><code class="name flex">
+<span>def <span class="ident">getDuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getDuration(self):
+    return float(len(self.audioSamples)) / self.framerate</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.getIndexAtTime"><code class="name flex">
+<span>def <span class="ident">getIndexAtTime</span></span>(<span>self, startTime)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getIndexAtTime(self, startTime):
+    return int(startTime * self.framerate)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.getSamples"><code class="name flex">
+<span>def <span class="ident">getSamples</span></span>(<span>self, startTime, endTime)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getSamples(self, startTime, endTime):
+    i = self.getIndexAtTime(startTime)
+    j = self.getIndexAtTime(endTime)
+    return self.audioSamples[i:j]</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.getSubsegment"><code class="name flex">
+<span>def <span class="ident">getSubsegment</span></span>(<span>self, startTime, endTime)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getSubsegment(self, startTime, endTime):
+    samples = self.getSamples(startTime, endTime)
+    return WavObj(samples, self.params)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.insert"><code class="name flex">
+<span>def <span class="ident">insert</span></span>(<span>self, startTime, valueList)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def insert(self, startTime, valueList):
+    i = self.getIndexAtTime(startTime)
+    self.audioSamples = (self.audioSamples[:i] + valueList +
+                         self.audioSamples[i:])</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.insertSilence"><code class="name flex">
+<span>def <span class="ident">insertSilence</span></span>(<span>self, startTime, silenceDuration)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def insertSilence(self, startTime, silenceDuration):
+    audioSamples = generateSilence(silenceDuration, self.framerate)
+    self.insertSegment(startTime, audioSamples)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.new"><code class="name flex">
+<span>def <span class="ident">new</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def new(self):
+    return copy.deepcopy(self)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavObj.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, outputFN)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def save(self, outputFN):
+    # Output resulting wav file
+    outParams = [self.nchannels, self.sampwidth, self.framerate,
+                 len(self.audioSamples), self.comptype, self.compname]
+    
+    byteCode = sampWidthDict[self.sampwidth]
+    byteStr = struct.pack(&#34;&lt;&#34; + byteCode * len(self.audioSamples),
+                          *self.audioSamples)
+    
+    outWave = wave.open(outputFN, &#34;w&#34;)
+    outWave.setparams(outParams)
+    outWave.writeframes(byteStr)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="praatio.audioio.AbstractWav" href="#praatio.audioio.AbstractWav">AbstractWav</a></b></code>:
+<ul class="hlist">
+<li><code><a title="praatio.audioio.AbstractWav.findNearestZeroCrossing" href="#praatio.audioio.AbstractWav.findNearestZeroCrossing">findNearestZeroCrossing</a></code></li>
+<li><code><a title="praatio.audioio.AbstractWav.findNextZeroCrossing" href="#praatio.audioio.AbstractWav.findNextZeroCrossing">findNextZeroCrossing</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="praatio.audioio.WavQueryObj"><code class="flex name class">
+<span>class <span class="ident">WavQueryObj</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="praatio.audioio.AbstractWav" href="#praatio.audioio.AbstractWav">AbstractWav</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class for getting information about a wave file</p>
+<p>The wave file is never loaded&ndash;we only keep a reference to the
+fd.
+All operations on WavQueryObj are fast.
+WavQueryObjs don't
+(shouldn't) change state.
+For doing multiple modifications,
+use a WavObj.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class WavQueryObj(AbstractWav):
+    &#39;&#39;&#39;
+    A class for getting information about a wave file
+    
+    The wave file is never loaded--we only keep a reference to the
+    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don&#39;t
+    (shouldn&#39;t) change state.  For doing multiple modifications,
+    use a WavObj.
+    &#39;&#39;&#39;
+    def __init__(self, fn):
+        self.audiofile = wave.open(fn, &#34;r&#34;)
+        self.params = self.audiofile.getparams()
+    
+        self.nchannels = self.params[0]
+        self.sampwidth = self.params[1]
+        self.framerate = self.params[2]
+        self.nframes = self.params[3]
+        self.comptype = self.params[4]
+        self.compname = self.params[5]
+    
+    def concatenate(self, targetFrames, outputFN, prepend=False):
+        sourceFrames = self.getFrames()
+        
+        if prepend is True:
+            newFrames = targetFrames + sourceFrames
+        else:
+            newFrames = sourceFrames + targetFrames
+        
+        self.outputModifiedWav(newFrames, outputFN)
+    
+    def getDuration(self):
+        duration = float(self.nframes) / self.framerate
+        return duration
+    
+    def getFrames(self, startTime=None, endTime=None):
+        &#39;&#39;&#39;
+        Get frames with respect to time
+        &#39;&#39;&#39;
+        if startTime is None:
+            startTime = 0
+        startFrame = int(startTime * float(self.framerate))
+        
+        if endTime is not None:
+            duration = endTime - startTime
+            nFrames = int(self.framerate * duration)
+        else:
+            nFrames = int(self.nframes - startFrame)
+        
+        self.audiofile.setpos(startFrame)
+        frames = self.audiofile.readframes(nFrames)
+        
+        return frames
+
+    def getSamples(self, startTime, endTime):
+        
+        frames = self.getFrames(startTime, endTime)
+        audioFrameList = samplesAsNums(frames, self.sampwidth)
+     
+        return audioFrameList
+
+    def deleteWavSections(self, outputFN, keepList=None,
+                          deleteList=None, operation=&#34;shrink&#34;,
+                          sineWaveAmplitude=None):
+        &#39;&#39;&#39;
+        Remove from the audio all of the intervals
+        
+        DeleteList can easily be constructed from a textgrid tier
+        e.g. deleteList = tg.tierDict[&#34;targetTier&#34;].entryList
+        
+        operation: &#34;shrink&#34; to shrink the file length or &#34;silence or
+                   &#34;sine wave&#34; to replace the segment with silence or
+                   a sine wave
+        sineWaveAmplitude: if None and operation is &#34;sine wave&#34;
+                           use max amplitude.
+        &#39;&#39;&#39;
+    
+        assert(operation in [&#34;shrink&#34;, &#34;silence&#34;, &#34;sine wave&#34;])
+    
+        duration = float(self.nframes) / self.framerate
+        
+        # Need to specify what to keep or what to delete, but can&#39;t
+        # specify both
+        assert(keepList is not None or deleteList is not None)
+        assert(keepList is None or deleteList is None)
+        
+        if keepList is None:
+            keepList = utils.invertIntervalList(deleteList, duration)
+        else:
+            deleteList = utils.invertIntervalList(keepList, duration)
+        keepList = [[row[0], row[1], &#34;keep&#34;] for row in keepList]
+        deleteList = [[row[0], row[1], &#34;delete&#34;] for row in deleteList]
+        iterList = sorted(keepList + deleteList)
+        
+        zeroBinValue = struct.pack(sampWidthDict[self.sampwidth], 0)
+        
+        # Grab the sections to be kept
+        audioFrames = b&#34;&#34;
+        for startT, stopT, label in iterList:
+            diff = stopT - startT
+            
+            if label == &#34;keep&#34;:
+                self.audiofile.setpos(int(self.framerate * startT))
+                frames = self.audiofile.readframes(int(self.framerate * diff))
+                audioFrames += frames
+            
+            # If we are not keeping a region and we&#39;re not shrinking the
+            # duration, fill in the deleted portions with zeros
+            elif label == &#34;delete&#34; and operation == &#34;silence&#34;:
+                frames = zeroBinValue * int(self.framerate * diff)
+                audioFrames += frames
+            # Or fill it with a sine wave
+            elif label == &#34;delete&#34; and operation == &#34;sine wave&#34;:
+                frequency = 200
+                if sineWaveAmplitude is None:
+                    sineWaveAmplitude = getMaxAmplitude(self.sampwidth)
+                sineWave = generateSineWave(diff,
+                                            frequency,
+                                            self.framerate,
+                                            sineWaveAmplitude)
+                frames = numsAsSamples(self.sampwidth, sineWave)
+                audioFrames += frames
+    
+            self.outputModifiedWav(audioFrames, outputFN)
+            
+    def outputModifiedWav(self, audioFrames, outputFN):
+        &#39;&#39;&#39;
+        Output frames using the same parameters as this WavQueryObj
+        &#39;&#39;&#39;
+        
+        # Output resulting wav file
+        outParams = [self.nchannels, self.sampwidth, self.framerate,
+                     len(audioFrames), self.comptype, self.compname]
+        
+        outWave = wave.open(outputFN, &#34;w&#34;)
+        outWave.setparams(outParams)
+        outWave.writeframes(audioFrames)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="praatio.audioio.WavQueryObj.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, fn)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize self.
+See help(type(self)) for accurate signature.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, fn):
+    self.audiofile = wave.open(fn, &#34;r&#34;)
+    self.params = self.audiofile.getparams()
+
+    self.nchannels = self.params[0]
+    self.sampwidth = self.params[1]
+    self.framerate = self.params[2]
+    self.nframes = self.params[3]
+    self.comptype = self.params[4]
+    self.compname = self.params[5]</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavQueryObj.concatenate"><code class="name flex">
+<span>def <span class="ident">concatenate</span></span>(<span>self, targetFrames, outputFN, prepend=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def concatenate(self, targetFrames, outputFN, prepend=False):
+    sourceFrames = self.getFrames()
+    
+    if prepend is True:
+        newFrames = targetFrames + sourceFrames
+    else:
+        newFrames = sourceFrames + targetFrames
+    
+    self.outputModifiedWav(newFrames, outputFN)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavQueryObj.deleteWavSections"><code class="name flex">
+<span>def <span class="ident">deleteWavSections</span></span>(<span>self, outputFN, keepList=None, deleteList=None, operation=&#39;shrink&#39;, sineWaveAmplitude=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Remove from the audio all of the intervals</p>
+<p>DeleteList can easily be constructed from a textgrid tier
+e.g. deleteList = tg.tierDict["targetTier"].entryList</p>
+<dl>
+<dt><strong><code>operation</code></strong> :&ensp;<code>"shrink"</code> <code>to</code> <code>shrink</code> <code>the</code> <code>file</code> <code>length</code> or <code>"silence</code> or</dt>
+<dd>"sine wave" to replace the segment with silence or
+a sine wave</dd>
+<dt><strong><code>sineWaveAmplitude</code></strong> :&ensp;<code>if</code> <code>None</code> <code>and</code> <code>operation</code> <code>is</code> <code>"sine</code> <code>wave"</code></dt>
+<dd>use max amplitude.</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def deleteWavSections(self, outputFN, keepList=None,
+                      deleteList=None, operation=&#34;shrink&#34;,
+                      sineWaveAmplitude=None):
+    &#39;&#39;&#39;
+    Remove from the audio all of the intervals
+    
+    DeleteList can easily be constructed from a textgrid tier
+    e.g. deleteList = tg.tierDict[&#34;targetTier&#34;].entryList
+    
+    operation: &#34;shrink&#34; to shrink the file length or &#34;silence or
+               &#34;sine wave&#34; to replace the segment with silence or
+               a sine wave
+    sineWaveAmplitude: if None and operation is &#34;sine wave&#34;
+                       use max amplitude.
+    &#39;&#39;&#39;
+
+    assert(operation in [&#34;shrink&#34;, &#34;silence&#34;, &#34;sine wave&#34;])
+
+    duration = float(self.nframes) / self.framerate
+    
+    # Need to specify what to keep or what to delete, but can&#39;t
+    # specify both
+    assert(keepList is not None or deleteList is not None)
+    assert(keepList is None or deleteList is None)
+    
+    if keepList is None:
+        keepList = utils.invertIntervalList(deleteList, duration)
+    else:
+        deleteList = utils.invertIntervalList(keepList, duration)
+    keepList = [[row[0], row[1], &#34;keep&#34;] for row in keepList]
+    deleteList = [[row[0], row[1], &#34;delete&#34;] for row in deleteList]
+    iterList = sorted(keepList + deleteList)
+    
+    zeroBinValue = struct.pack(sampWidthDict[self.sampwidth], 0)
+    
+    # Grab the sections to be kept
+    audioFrames = b&#34;&#34;
+    for startT, stopT, label in iterList:
+        diff = stopT - startT
+        
+        if label == &#34;keep&#34;:
+            self.audiofile.setpos(int(self.framerate * startT))
+            frames = self.audiofile.readframes(int(self.framerate * diff))
+            audioFrames += frames
+        
+        # If we are not keeping a region and we&#39;re not shrinking the
+        # duration, fill in the deleted portions with zeros
+        elif label == &#34;delete&#34; and operation == &#34;silence&#34;:
+            frames = zeroBinValue * int(self.framerate * diff)
+            audioFrames += frames
+        # Or fill it with a sine wave
+        elif label == &#34;delete&#34; and operation == &#34;sine wave&#34;:
+            frequency = 200
+            if sineWaveAmplitude is None:
+                sineWaveAmplitude = getMaxAmplitude(self.sampwidth)
+            sineWave = generateSineWave(diff,
+                                        frequency,
+                                        self.framerate,
+                                        sineWaveAmplitude)
+            frames = numsAsSamples(self.sampwidth, sineWave)
+            audioFrames += frames
+
+        self.outputModifiedWav(audioFrames, outputFN)</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavQueryObj.getDuration"><code class="name flex">
+<span>def <span class="ident">getDuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getDuration(self):
+    duration = float(self.nframes) / self.framerate
+    return duration</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavQueryObj.getFrames"><code class="name flex">
+<span>def <span class="ident">getFrames</span></span>(<span>self, startTime=None, endTime=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get frames with respect to time</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getFrames(self, startTime=None, endTime=None):
+    &#39;&#39;&#39;
+    Get frames with respect to time
+    &#39;&#39;&#39;
+    if startTime is None:
+        startTime = 0
+    startFrame = int(startTime * float(self.framerate))
+    
+    if endTime is not None:
+        duration = endTime - startTime
+        nFrames = int(self.framerate * duration)
+    else:
+        nFrames = int(self.nframes - startFrame)
+    
+    self.audiofile.setpos(startFrame)
+    frames = self.audiofile.readframes(nFrames)
+    
+    return frames</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavQueryObj.getSamples"><code class="name flex">
+<span>def <span class="ident">getSamples</span></span>(<span>self, startTime, endTime)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def getSamples(self, startTime, endTime):
+    
+    frames = self.getFrames(startTime, endTime)
+    audioFrameList = samplesAsNums(frames, self.sampwidth)
+ 
+    return audioFrameList</code></pre>
+</details>
+</dd>
+<dt id="praatio.audioio.WavQueryObj.outputModifiedWav"><code class="name flex">
+<span>def <span class="ident">outputModifiedWav</span></span>(<span>self, audioFrames, outputFN)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Output frames using the same parameters as this WavQueryObj</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def outputModifiedWav(self, audioFrames, outputFN):
+    &#39;&#39;&#39;
+    Output frames using the same parameters as this WavQueryObj
+    &#39;&#39;&#39;
+    
+    # Output resulting wav file
+    outParams = [self.nchannels, self.sampwidth, self.framerate,
+                 len(audioFrames), self.comptype, self.compname]
+    
+    outWave = wave.open(outputFN, &#34;w&#34;)
+    outWave.setparams(outParams)
+    outWave.writeframes(audioFrames)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="praatio.audioio.AbstractWav" href="#praatio.audioio.AbstractWav">AbstractWav</a></b></code>:
+<ul class="hlist">
+<li><code><a title="praatio.audioio.AbstractWav.findNearestZeroCrossing" href="#praatio.audioio.AbstractWav.findNearestZeroCrossing">findNearestZeroCrossing</a></code></li>
+<li><code><a title="praatio.audioio.AbstractWav.findNextZeroCrossing" href="#praatio.audioio.AbstractWav.findNextZeroCrossing">findNextZeroCrossing</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="praatio" href="index.html">praatio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="praatio.audioio.extractSubwav" href="#praatio.audioio.extractSubwav">extractSubwav</a></code></li>
+<li><code><a title="praatio.audioio.generateSilence" href="#praatio.audioio.generateSilence">generateSilence</a></code></li>
+<li><code><a title="praatio.audioio.generateSineWave" href="#praatio.audioio.generateSineWave">generateSineWave</a></code></li>
+<li><code><a title="praatio.audioio.getDuration" href="#praatio.audioio.getDuration">getDuration</a></code></li>
+<li><code><a title="praatio.audioio.getMaxAmplitude" href="#praatio.audioio.getMaxAmplitude">getMaxAmplitude</a></code></li>
+<li><code><a title="praatio.audioio.numsAsSamples" href="#praatio.audioio.numsAsSamples">numsAsSamples</a></code></li>
+<li><code><a title="praatio.audioio.openAudioFile" href="#praatio.audioio.openAudioFile">openAudioFile</a></code></li>
+<li><code><a title="praatio.audioio.samplesAsNums" href="#praatio.audioio.samplesAsNums">samplesAsNums</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="praatio.audioio.AbstractWav" href="#praatio.audioio.AbstractWav">AbstractWav</a></code></h4>
+<ul class="">
+<li><code><a title="praatio.audioio.AbstractWav.findNearestZeroCrossing" href="#praatio.audioio.AbstractWav.findNearestZeroCrossing">findNearestZeroCrossing</a></code></li>
+<li><code><a title="praatio.audioio.AbstractWav.findNextZeroCrossing" href="#praatio.audioio.AbstractWav.findNextZeroCrossing">findNextZeroCrossing</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="praatio.audioio.EndOfAudioData" href="#praatio.audioio.EndOfAudioData">EndOfAudioData</a></code></h4>
+</li>
+<li>
+<h4><code><a title="praatio.audioio.FindZeroCrossingError" href="#praatio.audioio.FindZeroCrossingError">FindZeroCrossingError</a></code></h4>
+<ul class="">
+<li><code><a title="praatio.audioio.FindZeroCrossingError.__init__" href="#praatio.audioio.FindZeroCrossingError.__init__">__init__</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="praatio.audioio.WavObj" href="#praatio.audioio.WavObj">WavObj</a></code></h4>
+<ul class="two-column">
+<li><code><a title="praatio.audioio.WavObj.__init__" href="#praatio.audioio.WavObj.__init__">__init__</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.deleteSegment" href="#praatio.audioio.WavObj.deleteSegment">deleteSegment</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.getDuration" href="#praatio.audioio.WavObj.getDuration">getDuration</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.getIndexAtTime" href="#praatio.audioio.WavObj.getIndexAtTime">getIndexAtTime</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.getSamples" href="#praatio.audioio.WavObj.getSamples">getSamples</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.getSubsegment" href="#praatio.audioio.WavObj.getSubsegment">getSubsegment</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.insert" href="#praatio.audioio.WavObj.insert">insert</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.insertSilence" href="#praatio.audioio.WavObj.insertSilence">insertSilence</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.new" href="#praatio.audioio.WavObj.new">new</a></code></li>
+<li><code><a title="praatio.audioio.WavObj.save" href="#praatio.audioio.WavObj.save">save</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="praatio.audioio.WavQueryObj" href="#praatio.audioio.WavQueryObj">WavQueryObj</a></code></h4>
+<ul class="two-column">
+<li><code><a title="praatio.audioio.WavQueryObj.__init__" href="#praatio.audioio.WavQueryObj.__init__">__init__</a></code></li>
+<li><code><a title="praatio.audioio.WavQueryObj.concatenate" href="#praatio.audioio.WavQueryObj.concatenate">concatenate</a></code></li>
+<li><code><a title="praatio.audioio.WavQueryObj.deleteWavSections" href="#praatio.audioio.WavQueryObj.deleteWavSections">deleteWavSections</a></code></li>
+<li><code><a title="praatio.audioio.WavQueryObj.getDuration" href="#praatio.audioio.WavQueryObj.getDuration">getDuration</a></code></li>
+<li><code><a title="praatio.audioio.WavQueryObj.getFrames" href="#praatio.audioio.WavQueryObj.getFrames">getFrames</a></code></li>
+<li><code><a title="praatio.audioio.WavQueryObj.getSamples" href="#praatio.audioio.WavQueryObj.getSamples">getSamples</a></code></li>
+<li><code><a title="praatio.audioio.WavQueryObj.outputModifiedWav" href="#praatio.audioio.WavQueryObj.outputModifiedWav">outputModifiedWav</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
