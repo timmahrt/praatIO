@@ -1,7 +1,7 @@
 
 # praatIO
 
-[![](https://badges.gitter.im/praatio/Lobby.svg)](https://gitter.im/praatio/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![](https://travis-ci.org/timmahrt/praatIO.svg?branch=master)]([TravisLink][]) [![](https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?)](https://coveralls.io/github/timmahrt/praatIO?branch=master) [![](https://img.shields.io/badge/license-MIT-blue.svg?)](http://opensource.org/licenses/MIT) [![](https://img.shields.io/pypi/v/praatio.svg)](https://pypi.org/project/praatio/)
+[![](https://badges.gitter.im/praatio/Lobby.svg)](https://gitter.im/praatio/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![](https://travis-ci.org/timmahrt/praatIO.svg?branch=master)](https://travis-ci.org/timmahrt/praatIO) [![](https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?)](https://coveralls.io/github/timmahrt/praatIO?branch=master) [![](https://img.shields.io/badge/license-MIT-blue.svg?)](http://opensource.org/licenses/MIT) [![](https://img.shields.io/pypi/v/praatio.svg)](https://pypi.org/project/praatio/)
 
 *Questions?  Comments?  Feedback?  Chat with us on gitter!*
 
@@ -19,13 +19,14 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 
 # Table of contents
 1. [Common Use Cases](#common-use-cases)
-2. [Tutorials](#tutorials)
-3. [Major revisions](#major-revisions)
-4. [Requirements](#requirements)
-5. [Usage](#usage)
-6. [Installation](#installation)
-7. [Citing praatIO](#citing-praatio)
-8. [Acknowledgements](#acknowledgements)
+2. [Documentation](#documentation)
+3. [Tutorials](#tutorials)
+4. [Major revisions](#major-revisions)
+5. [Requirements](#requirements)
+6. [Usage](#usage)
+7. [Installation](#installation)
+8. [Citing praatIO](#citing-praatio)
+9. [Acknowledgements](#acknowledgements)
 
 ## Common Use Cases
 
@@ -66,6 +67,13 @@ What can you do with this library?
     - `spellCheckEntries()`: spellcheck a textgrid tier
     - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
     - `alignBoundariesAcrossTiers()`: for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
+
+
+## Documentation
+
+Automatically generated pdocs can be found here:
+
+http://timmahrt.github.io/praatIO/
 
 
 ## Tutorials
