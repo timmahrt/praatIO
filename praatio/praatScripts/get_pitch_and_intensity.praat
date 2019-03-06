@@ -8,6 +8,7 @@ form Soundfile to pitch and intensity
     real Min_pitch 75
     real Max_pitch 450
     real Silence_threshold 0.03
+    sentence pitch_unit Hertz
     real Start_time -1 (= start of the file)
     real End_time -1 (= end of the file)
     real Median_filter_window_size 0
@@ -129,7 +130,7 @@ table = Create Table with column names: "table", 0, "time pitch intensity"
 for i to (tmax - tmin) / sample_step
 	time = tmin + i * sample_step
 	selectObject: pitch
-	pitchVal = Get value at time: time, "Hertz", "Linear"
+	pitchVal = Get value at time: time, pitch_unit$, "Linear"
 	selectObject: intensity
 	intensityVal = Get value at time: time, "Cubic"
 	

@@ -31,7 +31,8 @@ class OverwriteException(Exception):
 
 def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                         minPitch, maxPitch, tgFN, tierName,
-                        tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
+                        tmpOutputPath, sampleStep=0.01,
+                        silenceThreshold=0.03, pitchUnit="Hertz",
                         forceRegenerate=True, undefinedValue=None,
                         medianFilterWindowSize=0, pitchQuadInterp=False):
     '''
@@ -66,7 +67,7 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                                     join(tmpOutputPath, tmpTrackName),
                                     praatEXE, minPitch, maxPitch,
                                     sampleStep, silenceThreshold,
-                                    forceRegenerate=True,
+                                    pitchUnit, forceRegenerate=True,
                                     medianFilterWindowSize=windowSize,
                                     pitchQuadInterp=pitchQuadInterp)
             piList = [("%0.3f" % (float(time) + start), str(pV), str(iV))
@@ -84,12 +85,12 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
 
 def _extractPIFile(inputFN, outputFN, praatEXE,
                    minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
-                   forceRegenerate=True, tgFN=None, tierName=None,
+                   pitchUnit="Hertz", forceRegenerate=True,
                    undefinedValue=None, medianFilterWindowSize=0,
                    pitchQuadInterp=False):
     '''
     Extracts pitch and intensity values from an audio file
-    
+
     Returns the result as a list.  Will load the serialized result
     if this has already been called on the appropriate files before
     '''
@@ -109,24 +110,14 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
             doInterpolation = 1
         else:
             doInterpolation = 0
+    
+        argList = [inputFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold, pitchUnit, -1, -1,
+                   medianFilterWindowSize, doInterpolation]
         
-        if tgFN is None or tierName is None:
-            argList = [inputFN, outputFN, sampleStep,
-                       minPitch, maxPitch, silenceThreshold, -1, -1,
-                       medianFilterWindowSize, doInterpolation]
-            
-            scriptName = "get_pitch_and_intensity.praat"
-            scriptFN = join(utils.scriptsPath, scriptName)
-            utils.runPraatScript(praatEXE, scriptFN, argList)
-            
-        else:
-            argList = [inputFN, outputFN, tgFN, tierName, sampleStep,
-                       minPitch, maxPitch, silenceThreshold,
-                       medianFilterWindowSize, doInterpolation]
-            
-            scriptName = "get_pitch_and_intensity.praat"
-            scriptFN = join(utils.scriptsPath, scriptName)
-            utils.runPraatScript(praatEXE, scriptFN, argList)
+        scriptName = "get_pitch_and_intensity.praat"
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
 
     piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
     
@@ -256,8 +247,9 @@ def extractPitch(wavFN, outputFN, praatEXE,
 
 def extractPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
-              silenceThreshold=0.03, forceRegenerate=True,
-              tgFN=None, tierName=None, tmpOutputPath=None,
+              silenceThreshold=0.03, pitchUnit="Hertz",
+              forceRegenerate=True, tgFN=None,
+              tierName=None, tmpOutputPath=None,
               undefinedValue=None, medianFilterWindowSize=0,
               pitchQuadInterp=False):
     '''
@@ -269,6 +261,7 @@ def extractPI(inputFN, outputFN, praatEXE,
 
     male: minPitch=50; maxPitch=350
     female: minPitch=75; maxPitch=450
+    pitchUnit: "Hertz", "semitones re 100 Hz", etc
     '''
     
     outputPath = os.path.split(outputFN)[0]
@@ -278,7 +271,8 @@ def extractPI(inputFN, outputFN, praatEXE,
     if tgFN is None or tierName is None:
         piList = _extractPIFile(inputFN, outputFN,
                                 praatEXE, minPitch, maxPitch,
-                                sampleStep, silenceThreshold, forceRegenerate,
+                                sampleStep, silenceThreshold, pitchUnit,
+                                forceRegenerate,
                                 undefinedValue=undefinedValue,
                                 medianFilterWindowSize=windowSize,
                                 pitchQuadInterp=pitchQuadInterp)
