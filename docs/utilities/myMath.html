@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio.utilities.myMath API documentation</title>
-<meta name="description" content="Created on Jan 6, 2016 …" />
+<meta name="description" content="Various math utilities" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,24 +20,23 @@
 <h1 class="title"><code>praatio.utilities.myMath</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Created on Jan 6, 2016</p>
-<p>@author: Tim</p>
+<p>Various math utilities</p>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">&#39;&#39;&#39;
-Created on Jan 6, 2016
-
-@author: Tim
+Various math utilities
 &#39;&#39;&#39;
 
 import math
 
 
-def medianFilterTimeSeriesData(featureTimeList, filterAmount, index,
+def filterTimeSeriesData(filterFunc, featureTimeList, windowSize, index,
                                useEdgePadding):
     &#39;&#39;&#39;
-    Median filter time-stamped data values.
+    Filter time-stamped data values within a window
     
+    filterFunc could be medianFilter() or znormFilter()
+
     It&#39;s ok to have other values in the list. eg
     featureTimeList: [(time_0, .., featureA_0, ..),
                       (time_1, .., featureA_1, ..),
@@ -45,8 +44,8 @@ def medianFilterTimeSeriesData(featureTimeList, filterAmount, index,
     &#39;&#39;&#39;
     featureTimeList = [list(row) for row in featureTimeList]
     featValues = [row[index] for row in featureTimeList]
-    featValues = medianFilter(featValues, filterAmount,
-                              useEdgePadding)
+    featValues = filterFunc(featValues, windowSize,
+                            useEdgePadding)
     assert(len(featureTimeList) == len(featValues))
     outputList = [piRow[:index] + [f0Val, ] + piRow[index + 1:]
                   for piRow, f0Val in zip(featureTimeList, featValues)]
@@ -54,7 +53,88 @@ def medianFilterTimeSeriesData(featureTimeList, filterAmount, index,
     return outputList
 
 
+def znormalizeSpeakerData(featureTimeList, index, filterZeroValues):
+    &#39;&#39;&#39;
+    znormalize time series data
+
+    The idea is to normalize each speaker separately to be able
+    to compare data across several speakers for speaker-dependent
+    data like pitch range
+
+    To normalize a speakers data within a local window, use filterTimeSeriesData()
+
+    filterZeroValues: if True, don&#39;t consider zero values in the mean and stdDev
+      (recommended value for data like pitch or intensity)
+    &#39;&#39;&#39;
+    featureTimeList = [list(row) for row in featureTimeList]
+    featValues = [row[index] for row in featureTimeList]
+
+    if not filterZeroValues:
+        featValues = znormalizeData(featValues)
+    else:
+        featValuesNoZeroes = [val for val in featValues if val != &#39;&#39;]
+        meanVal = mean(featValuesNoZeroes)
+        stdDevVal = stdDev(featValuesNoZeroes)
+
+        featValues = [(val - meanVal) / stdDevVal if val &gt; 0 else 0 for val in featValues]
+
+    assert(len(featureTimeList) == len(featValues))
+    outputList = [piRow[:index] + [val, ] + piRow[index + 1:]
+                  for piRow, val in zip(featureTimeList, featValues)]
+
+    return outputList
+
+
 def medianFilter(dist, window, useEdgePadding):
+    &#39;&#39;&#39;
+    median filter each value in a dataset; filtering occurs within a given window
+
+    Median filtering is used to &#34;smooth&#34; out extreme values.  It can be useful if
+    your data has lots of quick spikes.  The larger the window, the flatter the output
+    becomes.
+    Given:
+    x = [1 1 1 9 5 2 4 7 4 5 1 5]
+    medianFilter(x, 5, False)
+    &gt;&gt; [1 1 1 2 4 5 4 4 4 5 1 5]
+    &#39;&#39;&#39;
+    return _stepFilter(median, dist, window, useEdgePadding)
+
+
+def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
+    &#39;&#39;&#39;
+    z-normalize each value in a dataset; normalization occurs within a given window
+
+    If you suspect that events are sensitive to local changes, (e.g. local changes in pitch
+    are more important absolute differences in pitch) then using windowed
+    znormalization is appropriate.
+
+    See znormalizeData() for more information on znormalization.
+    &#39;&#39;&#39;
+
+    def znormalizeCenterVal(valList):
+        valToNorm = valList[int(len(valList) / 2.0)]
+        return (valToNorm - mean(valList)) / stdDev(valList)
+
+    if not filterZeroValues:
+        filteredOutput = _stepFilter(znormalizeCenterVal, dist, window, useEdgePadding)
+    else:
+        zeroIndexList = []
+        nonzeroValList = []
+        for i, val in enumerate(dst):
+            if val &gt; 0.0:
+                nonzeroValList.append(val)
+            else:
+                zeroIndexList.append(i)
+
+        filteredOutput = _stepFilter(znormalizeCenterVal, nonzeroValList, window, useEdgePadding)
+
+        for i in zeroIndexList:
+            filteredOutput.insert(i, 0.0)
+
+    return filteredOutput
+
+
+def _stepFilter(filterFunc, dist, window, useEdgePadding):
     
     offset = int(math.floor(window / 2.0))
     length = len(dist)
@@ -90,7 +170,7 @@ def medianFilter(dist, window, useEdgePadding):
                 preContext.insert(0, dist[smallIndexValue])
                 
             dataToFilter = preContext + currentContext + postContext
-            value = _median(dataToFilter)
+            value = filterFunc(dataToFilter)
         else:
             value = dist[x]
         returnList.append(value)
@@ -98,7 +178,7 @@ def medianFilter(dist, window, useEdgePadding):
     return returnList
 
 
-def _median(valList):
+def median(valList):
     
     valList = valList[:]
     valList.sort()
@@ -113,7 +193,35 @@ def _median(valList):
     return medianVal
 
 
+def mean(valList):
+    return sum(valList) / float(len(valList))
+
+
+def stdDev(valList):
+    meanVal = mean(valList)
+    squaredSum = sum([(val - meanVal) ** 2 for val in valList])
+
+    return math.sqrt(squaredSum / float(len(valList) - 1))
+
+
+def znormalizeData(valList):
+    &#39;&#39;&#39;
+    Given a list of floats, return the z-normalized values of the floats
+
+    The formula is: z(v) = (v - mean) / stdDev
+    In effect, this scales all values to the range [-4, 4].
+    It can be used, for example, to compare the pitch values of different speakers who
+    naturally have different pitch ranges.
+    &#39;&#39;&#39;
+    valList = valList[:]
+    meanVal = mean(valList)
+    stdDevVal = stdDev(valList)
+
+    return [(val - meanVal) / stdDevVal for val in valList]
+
+
 def rms(intensityValues):
+    &#39;&#39;&#39;Return the root mean square for the input set of values&#39;&#39;&#39;
     intensityValues = [val ** 2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)
     return math.sqrt(meanVal)</code></pre>
@@ -126,62 +234,12 @@ def rms(intensityValues):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="praatio.utilities.myMath.medianFilter"><code class="name flex">
-<span>def <span class="ident">medianFilter</span></span>(<span>dist, window, useEdgePadding)</span>
+<dt id="praatio.utilities.myMath.filterTimeSeriesData"><code class="name flex">
+<span>def <span class="ident">filterTimeSeriesData</span></span>(<span>filterFunc, featureTimeList, windowSize, index, useEdgePadding)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def medianFilter(dist, window, useEdgePadding):
-    
-    offset = int(math.floor(window / 2.0))
-    length = len(dist)
-
-    returnList = []
-    for x in range(length):
-        dataToFilter = []
-        # If using edge padding or if 0 &lt;= context &lt;= length
-        if useEdgePadding or (((0 &lt;= x - offset) and (x + offset &lt; length))):
-            
-            preContext = []
-            currentContext = [dist[x], ]
-            postContext = []
-            
-            lastKnownLargeIndex = 0
-            for y in range(1, offset + 1):  # 1-based
-                if x + y &gt;= length:
-                    if lastKnownLargeIndex == 0:
-                        largeIndexValue = x
-                    else:
-                        largeIndexValue = lastKnownLargeIndex
-                else:
-                    largeIndexValue = x + y
-                    lastKnownLargeIndex = x + y
-                
-                postContext.append(dist[largeIndexValue])
-                
-                if x - y &lt; 0:
-                    smallIndexValue = 0
-                else:
-                    smallIndexValue = x - y
-                    
-                preContext.insert(0, dist[smallIndexValue])
-                
-            dataToFilter = preContext + currentContext + postContext
-            value = _median(dataToFilter)
-        else:
-            value = dist[x]
-        returnList.append(value)
-        
-    return returnList</code></pre>
-</details>
-</dd>
-<dt id="praatio.utilities.myMath.medianFilterTimeSeriesData"><code class="name flex">
-<span>def <span class="ident">medianFilterTimeSeriesData</span></span>(<span>featureTimeList, filterAmount, index, useEdgePadding)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Median filter time-stamped data values.</p>
+<section class="desc"><p>Filter time-stamped data values within a window</p>
+<p>filterFunc could be medianFilter() or znormFilter()</p>
 <dl>
 <dt>It's ok to have other values in the list. eg</dt>
 <dt><strong><code>featureTimeList</code></strong> :&ensp;[(<code>time_0</code>, <code>..</code>, <code>featureA_0</code>, <code>..</code>),</dt>
@@ -190,11 +248,13 @@ def rms(intensityValues):
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def medianFilterTimeSeriesData(featureTimeList, filterAmount, index,
+<pre><code class="python">def filterTimeSeriesData(filterFunc, featureTimeList, windowSize, index,
                                useEdgePadding):
     &#39;&#39;&#39;
-    Median filter time-stamped data values.
+    Filter time-stamped data values within a window
     
+    filterFunc could be medianFilter() or znormFilter()
+
     It&#39;s ok to have other values in the list. eg
     featureTimeList: [(time_0, .., featureA_0, ..),
                       (time_1, .., featureA_1, ..),
@@ -202,8 +262,8 @@ def rms(intensityValues):
     &#39;&#39;&#39;
     featureTimeList = [list(row) for row in featureTimeList]
     featValues = [row[index] for row in featureTimeList]
-    featValues = medianFilter(featValues, filterAmount,
-                              useEdgePadding)
+    featValues = filterFunc(featValues, windowSize,
+                            useEdgePadding)
     assert(len(featureTimeList) == len(featValues))
     outputList = [piRow[:index] + [f0Val, ] + piRow[index + 1:]
                   for piRow, f0Val in zip(featureTimeList, featValues)]
@@ -211,17 +271,220 @@ def rms(intensityValues):
     return outputList</code></pre>
 </details>
 </dd>
-<dt id="praatio.utilities.myMath.rms"><code class="name flex">
-<span>def <span class="ident">rms</span></span>(<span>intensityValues)</span>
+<dt id="praatio.utilities.myMath.mean"><code class="name flex">
+<span>def <span class="ident">mean</span></span>(<span>valList)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
+<pre><code class="python">def mean(valList):
+    return sum(valList) / float(len(valList))</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.median"><code class="name flex">
+<span>def <span class="ident">median</span></span>(<span>valList)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def median(valList):
+    
+    valList = valList[:]
+    valList.sort()
+    
+    if len(valList) % 2 == 0:  # Even
+        i = int(len(valList) / 2.0)
+        medianVal = (valList[i - 1] + valList[i]) / 2.0
+    else:  # Odd
+        i = int(len(valList) / 2.0)
+        medianVal = valList[i]
+        
+    return medianVal</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.medianFilter"><code class="name flex">
+<span>def <span class="ident">medianFilter</span></span>(<span>dist, window, useEdgePadding)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>median filter each value in a dataset; filtering occurs within a given window</p>
+<p>Median filtering is used to "smooth" out extreme values.
+It can be useful if
+your data has lots of quick spikes.
+The larger the window, the flatter the output
+becomes.
+Given:
+x = [1 1 1 9 5 2 4 7 4 5 1 5]
+medianFilter(x, 5, False)</p>
+<blockquote>
+<blockquote>
+<p>[1 1 1 2 4 5 4 4 4 5 1 5]</p>
+</blockquote>
+</blockquote></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def medianFilter(dist, window, useEdgePadding):
+    &#39;&#39;&#39;
+    median filter each value in a dataset; filtering occurs within a given window
+
+    Median filtering is used to &#34;smooth&#34; out extreme values.  It can be useful if
+    your data has lots of quick spikes.  The larger the window, the flatter the output
+    becomes.
+    Given:
+    x = [1 1 1 9 5 2 4 7 4 5 1 5]
+    medianFilter(x, 5, False)
+    &gt;&gt; [1 1 1 2 4 5 4 4 4 5 1 5]
+    &#39;&#39;&#39;
+    return _stepFilter(median, dist, window, useEdgePadding)</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.rms"><code class="name flex">
+<span>def <span class="ident">rms</span></span>(<span>intensityValues)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return the root mean square for the input set of values</p></section>
+<details class="source">
+<summary>Source code</summary>
 <pre><code class="python">def rms(intensityValues):
+    &#39;&#39;&#39;Return the root mean square for the input set of values&#39;&#39;&#39;
     intensityValues = [val ** 2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)
     return math.sqrt(meanVal)</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.stdDev"><code class="name flex">
+<span>def <span class="ident">stdDev</span></span>(<span>valList)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def stdDev(valList):
+    meanVal = mean(valList)
+    squaredSum = sum([(val - meanVal) ** 2 for val in valList])
+
+    return math.sqrt(squaredSum / float(len(valList) - 1))</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.znormWindowFilter"><code class="name flex">
+<span>def <span class="ident">znormWindowFilter</span></span>(<span>dst, window, useEdgePadding, filterZeroValues)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>z-normalize each value in a dataset; normalization occurs within a given window</p>
+<p>If you suspect that events are sensitive to local changes, (e.g. local changes in pitch
+are more important absolute differences in pitch) then using windowed
+znormalization is appropriate.</p>
+<p>See znormalizeData() for more information on znormalization.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
+    &#39;&#39;&#39;
+    z-normalize each value in a dataset; normalization occurs within a given window
+
+    If you suspect that events are sensitive to local changes, (e.g. local changes in pitch
+    are more important absolute differences in pitch) then using windowed
+    znormalization is appropriate.
+
+    See znormalizeData() for more information on znormalization.
+    &#39;&#39;&#39;
+
+    def znormalizeCenterVal(valList):
+        valToNorm = valList[int(len(valList) / 2.0)]
+        return (valToNorm - mean(valList)) / stdDev(valList)
+
+    if not filterZeroValues:
+        filteredOutput = _stepFilter(znormalizeCenterVal, dist, window, useEdgePadding)
+    else:
+        zeroIndexList = []
+        nonzeroValList = []
+        for i, val in enumerate(dst):
+            if val &gt; 0.0:
+                nonzeroValList.append(val)
+            else:
+                zeroIndexList.append(i)
+
+        filteredOutput = _stepFilter(znormalizeCenterVal, nonzeroValList, window, useEdgePadding)
+
+        for i in zeroIndexList:
+            filteredOutput.insert(i, 0.0)
+
+    return filteredOutput</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.znormalizeData"><code class="name flex">
+<span>def <span class="ident">znormalizeData</span></span>(<span>valList)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Given a list of floats, return the z-normalized values of the floats</p>
+<p>The formula is: z(v) = (v - mean) / stdDev
+In effect, this scales all values to the range [-4, 4].
+It can be used, for example, to compare the pitch values of different speakers who
+naturally have different pitch ranges.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def znormalizeData(valList):
+    &#39;&#39;&#39;
+    Given a list of floats, return the z-normalized values of the floats
+
+    The formula is: z(v) = (v - mean) / stdDev
+    In effect, this scales all values to the range [-4, 4].
+    It can be used, for example, to compare the pitch values of different speakers who
+    naturally have different pitch ranges.
+    &#39;&#39;&#39;
+    valList = valList[:]
+    meanVal = mean(valList)
+    stdDevVal = stdDev(valList)
+
+    return [(val - meanVal) / stdDevVal for val in valList]</code></pre>
+</details>
+</dd>
+<dt id="praatio.utilities.myMath.znormalizeSpeakerData"><code class="name flex">
+<span>def <span class="ident">znormalizeSpeakerData</span></span>(<span>featureTimeList, index, filterZeroValues)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>znormalize time series data</p>
+<p>The idea is to normalize each speaker separately to be able
+to compare data across several speakers for speaker-dependent
+data like pitch range</p>
+<p>To normalize a speakers data within a local window, use filterTimeSeriesData()</p>
+<dl>
+<dt><strong><code>filterZeroValues</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>don't</code> <code>consider</code> <code>zero</code> <code>values</code> <code>in</code> <code>the</code> <a title="praatio.utilities.myMath.mean" href="#praatio.utilities.myMath.mean"><code>mean()</code></a> <code>and</code> <a title="praatio.utilities.myMath.stdDev" href="#praatio.utilities.myMath.stdDev"><code>stdDev()</code></a></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>(recommended value for data like pitch or intensity)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def znormalizeSpeakerData(featureTimeList, index, filterZeroValues):
+    &#39;&#39;&#39;
+    znormalize time series data
+
+    The idea is to normalize each speaker separately to be able
+    to compare data across several speakers for speaker-dependent
+    data like pitch range
+
+    To normalize a speakers data within a local window, use filterTimeSeriesData()
+
+    filterZeroValues: if True, don&#39;t consider zero values in the mean and stdDev
+      (recommended value for data like pitch or intensity)
+    &#39;&#39;&#39;
+    featureTimeList = [list(row) for row in featureTimeList]
+    featValues = [row[index] for row in featureTimeList]
+
+    if not filterZeroValues:
+        featValues = znormalizeData(featValues)
+    else:
+        featValuesNoZeroes = [val for val in featValues if val != &#39;&#39;]
+        meanVal = mean(featValuesNoZeroes)
+        stdDevVal = stdDev(featValuesNoZeroes)
+
+        featValues = [(val - meanVal) / stdDevVal if val &gt; 0 else 0 for val in featValues]
+
+    assert(len(featureTimeList) == len(featValues))
+    outputList = [piRow[:index] + [val, ] + piRow[index + 1:]
+                  for piRow, val in zip(featureTimeList, featValues)]
+
+    return outputList</code></pre>
 </details>
 </dd>
 </dl>
@@ -242,9 +505,15 @@ def rms(intensityValues):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="praatio.utilities.myMath.filterTimeSeriesData" href="#praatio.utilities.myMath.filterTimeSeriesData">filterTimeSeriesData</a></code></li>
+<li><code><a title="praatio.utilities.myMath.mean" href="#praatio.utilities.myMath.mean">mean</a></code></li>
+<li><code><a title="praatio.utilities.myMath.median" href="#praatio.utilities.myMath.median">median</a></code></li>
 <li><code><a title="praatio.utilities.myMath.medianFilter" href="#praatio.utilities.myMath.medianFilter">medianFilter</a></code></li>
-<li><code><a title="praatio.utilities.myMath.medianFilterTimeSeriesData" href="#praatio.utilities.myMath.medianFilterTimeSeriesData">medianFilterTimeSeriesData</a></code></li>
 <li><code><a title="praatio.utilities.myMath.rms" href="#praatio.utilities.myMath.rms">rms</a></code></li>
+<li><code><a title="praatio.utilities.myMath.stdDev" href="#praatio.utilities.myMath.stdDev">stdDev</a></code></li>
+<li><code><a title="praatio.utilities.myMath.znormWindowFilter" href="#praatio.utilities.myMath.znormWindowFilter">znormWindowFilter</a></code></li>
+<li><code><a title="praatio.utilities.myMath.znormalizeData" href="#praatio.utilities.myMath.znormalizeData">znormalizeData</a></code></li>
+<li><code><a title="praatio.utilities.myMath.znormalizeSpeakerData" href="#praatio.utilities.myMath.znormalizeSpeakerData">znormalizeSpeakerData</a></code></li>
 </ul>
 </li>
 </ul>

@@ -20,18 +20,33 @@
 <h1 class="title"><code>praatio.tgio</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Functions for reading/writing/manipulating textgrid files</p>
-<p>Created on Apr 15, 2013</p>
-<p>@author: timmahrt</p>
+<p>Functions for reading/writing/manipulating textgrid files.</p>
+<p>This file contains the main data structures for representing Textgrid data:
+Textgrid, IntervalTier, and PointTier</p>
+<p>A Textgrid is a container for multiple annotation tiers.
+Tiers can contain
+either interval data (IntervalTier) or point data (PointTier).
+Tiers in a Textgrid are ordered and must contain a unique name.</p>
+<p>openTextgrid() can be used to open a textgrid file.
+Textgrid.save() can be used to save a Textgrid object to a file.</p>
+<p>see the <strong>examples/</strong> directory for lots of examples using tgio.py</p>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">&#39;&#39;&#39;
-Functions for reading/writing/manipulating textgrid files
+<pre><code class="python">&#34;&#34;&#34;
+Functions for reading/writing/manipulating textgrid files.
 
-Created on Apr 15, 2013
+This file contains the main data structures for representing Textgrid data:
+Textgrid, IntervalTier, and PointTier
 
-@author: timmahrt
-&#39;&#39;&#39;
+A Textgrid is a container for multiple annotation tiers.  Tiers can contain
+either interval data (IntervalTier) or point data (PointTier).
+Tiers in a Textgrid are ordered and must contain a unique name.
+
+openTextgrid() can be used to open a textgrid file.
+Textgrid.save() can be used to save a Textgrid object to a file.
+
+see the **examples/** directory for lots of examples using tgio.py
+&#34;&#34;&#34;
 
 import re
 import copy
@@ -270,7 +285,12 @@ class TextgridTier(object):
         return isEqual
     
     def appendTier(self, tier):
-        
+        &#39;&#39;&#39;
+        Append a tier to the end of this one.
+
+        This tier&#39;s maxtimestamp will be lengthened by the amount in the passed in tier.
+        &#39;&#39;&#39;
+
         minTime = self.minTimestamp
         if tier.minTimestamp &lt; minTime:
             minTime = tier.minTimestamp
@@ -1158,6 +1178,11 @@ class Textgrid():
         return isEqual
     
     def addTier(self, tier, tierIndex=None):
+        &#39;&#39;&#39;
+        Add a tier to this textgrid.
+
+        If tierIndex is specified, insert the tier into the specified position.
+        &#39;&#39;&#39;
         
         assert(tier.name not in list(self.tierDict.keys()))
 
@@ -1293,7 +1318,7 @@ class Textgrid():
             tier = tier.eraseRegion(start, stop, &#39;truncate&#39;, doShrink)
             newTG.addTier(tier)
 
-        self.maxTimestamp = maxTimestamp
+        newTG.maxTimestamp = maxTimestamp
 
         return newTG
             
@@ -1329,7 +1354,7 @@ class Textgrid():
         &#39;&#39;&#39;
         
         newTG = Textgrid()
-        newTG.minTimestamp = 0
+        newTG.minTimestamp = self.minTimestamp
         newTG.maxTimestamp = self.maxTimestamp + duration
         
         for tierName in self.tierNameList:
@@ -3008,6 +3033,7 @@ this tier while changing the duration of labeled segments.</p></section>
 <ul class="hlist">
 <li><code><b><a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a></b></code>:
 <ul class="hlist">
+<li><code><a title="praatio.tgio.TextgridTier.appendTier" href="#praatio.tgio.TextgridTier.appendTier">appendTier</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.deleteEntry" href="#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.entryType" href="#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.find" href="#praatio.tgio.TextgridTier.find">find</a></code></li>
@@ -3627,6 +3653,7 @@ the user is notified of each collision</p></section>
 <ul class="hlist">
 <li><code><b><a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a></b></code>:
 <ul class="hlist">
+<li><code><a title="praatio.tgio.TextgridTier.appendTier" href="#praatio.tgio.TextgridTier.appendTier">appendTier</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.deleteEntry" href="#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.entryType" href="#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.find" href="#praatio.tgio.TextgridTier.find">find</a></code></li>
@@ -3668,6 +3695,11 @@ the user is notified of each collision</p></section>
         return isEqual
     
     def addTier(self, tier, tierIndex=None):
+        &#39;&#39;&#39;
+        Add a tier to this textgrid.
+
+        If tierIndex is specified, insert the tier into the specified position.
+        &#39;&#39;&#39;
         
         assert(tier.name not in list(self.tierDict.keys()))
 
@@ -3803,7 +3835,7 @@ the user is notified of each collision</p></section>
             tier = tier.eraseRegion(start, stop, &#39;truncate&#39;, doShrink)
             newTG.addTier(tier)
 
-        self.maxTimestamp = maxTimestamp
+        newTG.maxTimestamp = maxTimestamp
 
         return newTG
             
@@ -3839,7 +3871,7 @@ the user is notified of each collision</p></section>
         &#39;&#39;&#39;
         
         newTG = Textgrid()
-        newTG.minTimestamp = 0
+        newTG.minTimestamp = self.minTimestamp
         newTG.maxTimestamp = self.maxTimestamp + duration
         
         for tierName in self.tierNameList:
@@ -3978,10 +4010,16 @@ the user is notified of each collision</p></section>
 <span>def <span class="ident">addTier</span></span>(<span>self, tier, tierIndex=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Add a tier to this textgrid.</p>
+<p>If tierIndex is specified, insert the tier into the specified position.</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def addTier(self, tier, tierIndex=None):
+    &#39;&#39;&#39;
+    Add a tier to this textgrid.
+
+    If tierIndex is specified, insert the tier into the specified position.
+    &#39;&#39;&#39;
     
     assert(tier.name not in list(self.tierDict.keys()))
 
@@ -4177,7 +4215,7 @@ will be reduced by start - stop)</p></section>
         tier = tier.eraseRegion(start, stop, &#39;truncate&#39;, doShrink)
         newTG.addTier(tier)
 
-    self.maxTimestamp = maxTimestamp
+    newTG.maxTimestamp = maxTimestamp
 
     return newTG</code></pre>
 </details>
@@ -4219,7 +4257,7 @@ right of 'start' will be advanced by 'duration' seconds</li>
     &#39;&#39;&#39;
     
     newTG = Textgrid()
-    newTG.minTimestamp = 0
+    newTG.minTimestamp = self.minTimestamp
     newTG.maxTimestamp = self.maxTimestamp + duration
     
     for tierName in self.tierNameList:
@@ -4472,7 +4510,12 @@ See help(type(self)) for accurate signature.</p></section>
         return isEqual
     
     def appendTier(self, tier):
-        
+        &#39;&#39;&#39;
+        Append a tier to the end of this one.
+
+        This tier&#39;s maxtimestamp will be lengthened by the amount in the passed in tier.
+        &#39;&#39;&#39;
+
         minTime = self.minTimestamp
         if tier.minTimestamp &lt; minTime:
             minTime = tier.minTimestamp
@@ -4628,11 +4671,17 @@ See help(type(self)) for accurate signature.</p></section>
 <span>def <span class="ident">appendTier</span></span>(<span>self, tier)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Append a tier to the end of this one.</p>
+<p>This tier's maxtimestamp will be lengthened by the amount in the passed in tier.</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def appendTier(self, tier):
-    
+    &#39;&#39;&#39;
+    Append a tier to the end of this one.
+
+    This tier&#39;s maxtimestamp will be lengthened by the amount in the passed in tier.
+    &#39;&#39;&#39;
+
     minTime = self.minTimestamp
     if tier.minTimestamp &lt; minTime:
         minTime = tier.minTimestamp

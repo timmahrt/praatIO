@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio.applied_scripts.sppas_util API documentation</title>
-<meta name="description" content="Created on Dec 5, 2016 …" />
+<meta name="description" content="This script modifies the output of sppas, a forced-aligner tool …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,10 +20,9 @@
 <h1 class="title"><code>praatio.applied_scripts.sppas_util</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Created on Dec 5, 2016</p>
-<p>This script modifies the output of sppas, a forced-aligner tool, by
-renaming the textgrids, removing tiers, renaming tiers, and changing
-the contents of some tiers.</p>
+<p>This script modifies the output of sppas, a forced-aligner tool.</p>
+<p>It renames the textgrids, removes some tiers, renames other tiers,
+and changes the contents of some tiers.</p>
 <dl>
 <dt>For more information on SPPAS visit the SPPAS homepage:</dt>
 <dt><strong><code>http</code></strong> :&ensp;//<code>www.sppas.org</code>/</dt>
@@ -32,22 +31,21 @@ the contents of some tiers.</p>
 <dt><strong><code>https</code></strong> :&ensp;//<code>github.com</code>/<code>brigittebigi</code>/<code>sppas</code></dt>
 <dd>&nbsp;</dd>
 </dl>
-<p>@author: Tim Mahrt</p>
+<p>see examples/sppas_post_process.py</p>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">&#39;&#39;&#39;
-Created on Dec 5, 2016
+This script modifies the output of sppas, a forced-aligner tool.
 
-This script modifies the output of sppas, a forced-aligner tool, by
-renaming the textgrids, removing tiers, renaming tiers, and changing
-the contents of some tiers.
+It renames the textgrids, removes some tiers, renames other tiers,
+and changes the contents of some tiers.
 
 For more information on SPPAS visit the SPPAS homepage:
 http://www.sppas.org/
 or
 https://github.com/brigittebigi/sppas
 
-@author: Tim Mahrt
+see examples/sppas_post_process.py
 &#39;&#39;&#39;
 
 import io
@@ -58,7 +56,7 @@ import shutil
 from praatio import tgio
 from praatio import praatio_scripts
 from praatio.utilities import utils
-from praatio.applied_scripts import xsampa
+from praatio.utilities import xsampa
 
 # The SPPAS-produced tiers to delete
 # You probably don&#39;t want to remove items from this list but you could

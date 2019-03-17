@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio.praat_scripts API documentation</title>
-<meta name="description" content="Assorted praat scripts that don&#39;t belong elsewhere exist here …" />
+<meta name="description" content="Python wrappers for various praat scripts contained in /praatScripts …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,20 +20,16 @@
 <h1 class="title"><code>praatio.praat_scripts</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Assorted praat scripts that don't belong elsewhere exist here</p>
-<p>These are just launchers for the actual scripts contained in praatScripts</p>
-<p>Created on Dec 9, 2015</p>
-<p>@author: tmahrt</p>
+<p>Python wrappers for various praat scripts contained in /praatScripts.</p>
+<p>see <strong>examples/auto_segment_speech.py</strong>, <strong>examples/get_pitch_and_formants.py</strong>,
+<strong>klatt_resynthesis.py</strong></p>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">&#39;&#39;&#39;
-Assorted praat scripts that don&#39;t belong elsewhere exist here
+Python wrappers for various praat scripts contained in /praatScripts.
 
-These are just launchers for the actual scripts contained in praatScripts
-
-Created on Dec 9, 2015
-
-@author: tmahrt
+see **examples/auto_segment_speech.py**, **examples/get_pitch_and_formants.py**,
+**klatt_resynthesis.py**
 &#39;&#39;&#39;
 
 import os
@@ -121,7 +117,11 @@ def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
 
 def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
               scriptFN=None):
-    
+    &#39;&#39;&#39;
+    Gets the pitch/glottal pulses for an audio file.
+
+    http://www.fon.hum.uva.nl/praat/manual/Sound___Pitch__To_PointProcess__peaks____.html
+    &#39;&#39;&#39;
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, &#34;get_pulses.praat&#34;)
     
@@ -136,7 +136,13 @@ def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
 
 def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
                     spectralPower=2, spectralMoment=3, scriptFN=None):
+    &#39;&#39;&#39;
+    Extracts various spectral measures from an audio file
 
+    http://www.fon.hum.uva.nl/praat/manual/Spectrum.html
+    Measures include: center_of_gravity, standard_deviation
+    skewness, kertosis, central_movement
+    &#39;&#39;&#39;
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, &#34;get_spectral_info.praat&#34;)
     
@@ -340,12 +346,20 @@ PitchRange = 1.0; no change in pitch range</p></section>
 <span>def <span class="ident">getPulses</span></span>(<span>praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch, scriptFN=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Gets the pitch/glottal pulses for an audio file.</p>
+<dl>
+<dt><strong><code>http</code></strong> :&ensp;//<code>www.fon.hum.uva.nl</code>/<code>praat</code>/<code>manual</code>/<code>Sound___Pitch__To_PointProcess__peaks____.html</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
               scriptFN=None):
-    
+    &#39;&#39;&#39;
+    Gets the pitch/glottal pulses for an audio file.
+
+    http://www.fon.hum.uva.nl/praat/manual/Sound___Pitch__To_PointProcess__peaks____.html
+    &#39;&#39;&#39;
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, &#34;get_pulses.praat&#34;)
     
@@ -362,12 +376,24 @@ PitchRange = 1.0; no change in pitch range</p></section>
 <span>def <span class="ident">getSpectralInfo</span></span>(<span>praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName, spectralPower=2, spectralMoment=3, scriptFN=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Extracts various spectral measures from an audio file</p>
+<dl>
+<dt><strong><code>http</code></strong> :&ensp;//<code>www.fon.hum.uva.nl</code>/<code>praat</code>/<code>manual</code>/<code>Spectrum.html</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Measures include: center_of_gravity, standard_deviation
+skewness, kertosis, central_movement</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
                     spectralPower=2, spectralMoment=3, scriptFN=None):
+    &#39;&#39;&#39;
+    Extracts various spectral measures from an audio file
 
+    http://www.fon.hum.uva.nl/praat/manual/Spectrum.html
+    Measures include: center_of_gravity, standard_deviation
+    skewness, kertosis, central_movement
+    &#39;&#39;&#39;
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, &#34;get_spectral_info.praat&#34;)
     

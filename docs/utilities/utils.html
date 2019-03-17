@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio.utilities.utils API documentation</title>
-<meta name="description" content="Created on Oct 30, 2015 …" />
+<meta name="description" content="Various generic utility functions" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,14 +20,11 @@
 <h1 class="title"><code>praatio.utilities.utils</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Created on Oct 30, 2015</p>
-<p>@author: tmahrt</p>
+<p>Various generic utility functions</p>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">&#39;&#39;&#39;
-Created on Oct 30, 2015
-
-@author: tmahrt
+Various generic utility functions
 &#39;&#39;&#39;
 
 import os
@@ -168,12 +165,19 @@ def invertIntervalList(inputList, maxValue=None):
 
 
 def makeDir(path):
+    &#39;&#39;&#39;
+    Creates a new directory
+
+    Unlike os.mkdir, it does not throw an exception if the directory already exists.
+    &#39;&#39;&#39;
     if not os.path.exists(path):
         os.mkdir(path)
         
 
 def findAll(txt, subStr):
-    
+    &#39;&#39;&#39;
+    Find the starting indicies of all instances of subStr in txt
+    &#39;&#39;&#39;
     indexList = []
     index = 0
     while True:
@@ -320,7 +324,15 @@ def openCSV(path, fn, valueIndex=None, encoding=&#34;utf-8&#34;):
 
 
 def safeZip(listOfLists, enforceLength):
-    &#34;A safe version of python&#39;s zip()&#34;
+    &#34;&#34;&#34;
+    A safe version of python&#39;s zip()
+
+    If two sublists are of different sizes, python&#39;s zip will truncate
+    the output to be the smaller of the two.
+
+    safeZip throws an exception if the size of the any sublist is different
+    from the rest.
+    &#34;&#34;&#34;
     if enforceLength is True:
         length = len(listOfLists[0])
         assert(all([length == len(subList) for subList in listOfLists]))
@@ -344,11 +356,13 @@ def safeZip(listOfLists, enforceLength):
 <span>def <span class="ident">findAll</span></span>(<span>txt, subStr)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Find the starting indicies of all instances of subStr in txt</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def findAll(txt, subStr):
-    
+    &#39;&#39;&#39;
+    Find the starting indicies of all instances of subStr in txt
+    &#39;&#39;&#39;
     indexList = []
     index = 0
     while True:
@@ -554,10 +568,16 @@ index.</p></section>
 <span>def <span class="ident">makeDir</span></span>(<span>path)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Creates a new directory</p>
+<p>Unlike os.mkdir, it does not throw an exception if the directory already exists.</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def makeDir(path):
+    &#39;&#39;&#39;
+    Creates a new directory
+
+    Unlike os.mkdir, it does not throw an exception if the directory already exists.
+    &#39;&#39;&#39;
     if not os.path.exists(path):
         os.mkdir(path)</code></pre>
 </details>
@@ -625,11 +645,23 @@ indicated by valueIndex.</p></section>
 <span>def <span class="ident">safeZip</span></span>(<span>listOfLists, enforceLength)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A safe version of python's zip()</p></section>
+<section class="desc"><p>A safe version of python's zip()</p>
+<p>If two sublists are of different sizes, python's zip will truncate
+the output to be the smaller of the two.</p>
+<p>safeZip throws an exception if the size of the any sublist is different
+from the rest.</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def safeZip(listOfLists, enforceLength):
-    &#34;A safe version of python&#39;s zip()&#34;
+    &#34;&#34;&#34;
+    A safe version of python&#39;s zip()
+
+    If two sublists are of different sizes, python&#39;s zip will truncate
+    the output to be the smaller of the two.
+
+    safeZip throws an exception if the size of the any sublist is different
+    from the rest.
+    &#34;&#34;&#34;
     if enforceLength is True:
         length = len(listOfLists[0])
         assert(all([length == len(subList) for subList in listOfLists]))

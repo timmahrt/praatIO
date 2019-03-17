@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio.pitch_and_intensity API documentation</title>
-<meta name="description" content="Created on Oct 20, 2014 …" />
+<meta name="description" content="Functions for working with pitch data …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,21 +20,30 @@
 <h1 class="title"><code>praatio.pitch_and_intensity</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Created on Oct 20, 2014</p>
-<p>@author: tmahrt</p>
-<p>To be used in conjunction with get_pitch_and_intensity.praat.</p>
+<p>Functions for working with pitch data</p>
+<p>This file depends on the praat script get_pitch_and_intensity.praat
+(which depends on praat) to extract pitch and intensity values from
+audio data.
+Once the data is extracted, there are functions for
+data normalization and calculating various measures from the time
+stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p>
 <p>For brevity, 'pitch_and_intensity' is referred to as 'PI'</p>
+<p>see <strong>examples/get_pitch_and_formants.py</strong></p>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python"># coding: utf-8
 &#39;&#39;&#39;
-Created on Oct 20, 2014
+Functions for working with pitch data
 
-@author: tmahrt
-
-To be used in conjunction with get_pitch_and_intensity.praat.
+This file depends on the praat script get_pitch_and_intensity.praat
+(which depends on praat) to extract pitch and intensity values from
+audio data.  Once the data is extracted, there are functions for
+data normalization and calculating various measures from the time
+stamped output of the praat script (ie **generatePIMeasures()**)
 
 For brevity, &#39;pitch_and_intensity&#39; is referred to as &#39;PI&#39;
+
+see **examples/get_pitch_and_formants.py**
 &#39;&#39;&#39;
 
 import os
@@ -49,6 +58,15 @@ from praatio.utilities import myMath
 from praatio import praatio_scripts
 
 
+class NormalizationException(Exception):
+
+    def __str__(self):
+        return (&#34;Local normalization will nullify the effect of global normalization. &#34;
+                &#34;Local normalization should be used to examine local phenomena &#34;
+                &#34;(e.g. max pitch in a segment of running speech).&#34;
+                &#34;Global normalization should be used to examine global phenomena &#34;
+                &#34;(e.g. the pitch range of a speaker).&#34;)
+
 class OverwriteException(Exception):
     
     def __str__(self):
@@ -59,7 +77,8 @@ class OverwriteException(Exception):
 
 def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                         minPitch, maxPitch, tgFN, tierName,
-                        tmpOutputPath, sampleStep=0.01, silenceThreshold=0.03,
+                        tmpOutputPath, sampleStep=0.01,
+                        silenceThreshold=0.03, pitchUnit=&#34;Hertz&#34;,
                         forceRegenerate=True, undefinedValue=None,
                         medianFilterWindowSize=0, pitchQuadInterp=False):
     &#39;&#39;&#39;
@@ -94,7 +113,7 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
                                     join(tmpOutputPath, tmpTrackName),
                                     praatEXE, minPitch, maxPitch,
                                     sampleStep, silenceThreshold,
-                                    forceRegenerate=True,
+                                    pitchUnit, forceRegenerate=True,
                                     medianFilterWindowSize=windowSize,
                                     pitchQuadInterp=pitchQuadInterp)
             piList = [(&#34;%0.3f&#34; % (float(time) + start), str(pV), str(iV))
@@ -112,12 +131,12 @@ def _extractPIPiecewise(inputFN, outputFN, praatEXE,
 
 def _extractPIFile(inputFN, outputFN, praatEXE,
                    minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03,
-                   forceRegenerate=True, tgFN=None, tierName=None,
+                   pitchUnit=&#34;Hertz&#34;, forceRegenerate=True,
                    undefinedValue=None, medianFilterWindowSize=0,
                    pitchQuadInterp=False):
     &#39;&#39;&#39;
     Extracts pitch and intensity values from an audio file
-    
+
     Returns the result as a list.  Will load the serialized result
     if this has already been called on the appropriate files before
     &#39;&#39;&#39;
@@ -137,24 +156,14 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
             doInterpolation = 1
         else:
             doInterpolation = 0
+    
+        argList = [inputFN, outputFN, sampleStep,
+                   minPitch, maxPitch, silenceThreshold, pitchUnit, -1, -1,
+                   medianFilterWindowSize, doInterpolation]
         
-        if tgFN is None or tierName is None:
-            argList = [inputFN, outputFN, sampleStep,
-                       minPitch, maxPitch, silenceThreshold, -1, -1,
-                       medianFilterWindowSize, doInterpolation]
-            
-            scriptName = &#34;get_pitch_and_intensity.praat&#34;
-            scriptFN = join(utils.scriptsPath, scriptName)
-            utils.runPraatScript(praatEXE, scriptFN, argList)
-            
-        else:
-            argList = [inputFN, outputFN, tgFN, tierName, sampleStep,
-                       minPitch, maxPitch, silenceThreshold,
-                       medianFilterWindowSize, doInterpolation]
-            
-            scriptName = &#34;get_pitch_and_intensity.praat&#34;
-            scriptFN = join(utils.scriptsPath, scriptName)
-            utils.runPraatScript(praatEXE, scriptFN, argList)
+        scriptName = &#34;get_pitch_and_intensity.praat&#34;
+        scriptFN = join(utils.scriptsPath, scriptName)
+        utils.runPraatScript(praatEXE, scriptFN, argList)
 
     piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
     
@@ -284,8 +293,9 @@ def extractPitch(wavFN, outputFN, praatEXE,
 
 def extractPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
-              silenceThreshold=0.03, forceRegenerate=True,
-              tgFN=None, tierName=None, tmpOutputPath=None,
+              silenceThreshold=0.03, pitchUnit=&#34;Hertz&#34;,
+              forceRegenerate=True, tgFN=None,
+              tierName=None, tmpOutputPath=None,
               undefinedValue=None, medianFilterWindowSize=0,
               pitchQuadInterp=False):
     &#39;&#39;&#39;
@@ -297,6 +307,7 @@ def extractPI(inputFN, outputFN, praatEXE,
 
     male: minPitch=50; maxPitch=350
     female: minPitch=75; maxPitch=450
+    pitchUnit: &#34;Hertz&#34;, &#34;semitones re 100 Hz&#34;, etc
     &#39;&#39;&#39;
     
     outputPath = os.path.split(outputFN)[0]
@@ -306,7 +317,8 @@ def extractPI(inputFN, outputFN, praatEXE,
     if tgFN is None or tierName is None:
         piList = _extractPIFile(inputFN, outputFN,
                                 praatEXE, minPitch, maxPitch,
-                                sampleStep, silenceThreshold, forceRegenerate,
+                                sampleStep, silenceThreshold, pitchUnit,
+                                forceRegenerate,
                                 undefinedValue=undefinedValue,
                                 medianFilterWindowSize=windowSize,
                                 pitchQuadInterp=pitchQuadInterp)
@@ -377,43 +389,77 @@ def loadTimeSeriesData(fn, undefinedValue=None):
 
 
 def generatePIMeasures(dataList, tgFN, tierName, doPitch,
-                       medianFilterWindowSize=None):
+                       medianFilterWindowSize=None,
+                       globalZNormalization=False,
+                       localZNormalizationWindowSize=0):
     &#39;&#39;&#39;
     Generates processed values for the labeled intervals in a textgrid
 
     nullLabelList - labels to ignore in the textgrid.  Defaults to [&#34;&#34;,]
       
     if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity
+    medianFilterWindowSize: if none, no filtering is done
+    globalZNormalization: if True, values are normalized with the mean
+                          and stdDev of the data in dataList
+    localZNormalization: if greater than 1, values are normalized with the mean
+                         and stdDev of the local context (for a window of 5, it
+                         would consider the current value, 2 values before and 2
+                         values after)
     &#39;&#39;&#39;
-    
+
+    # Warn user that normalizing a second time nullifies the first normalization
+    if globalZNormalization is True and localZNormalizationWindowSize &gt; 0:
+        raise NormalizationException()
+
+    if globalZNormalization is True:
+        if doPitch:
+            dataList = myMath.znormalizeSpeakerData(dataList, 1, True)
+        else:
+            dataList = myMath.znormalizeSpeakerData(dataList, 2, True)
+
+    # Raw values should have 0 filtered; normalized values are centered around 0, so don&#39;t filter
+    filterZeroFlag = not globalZNormalization
+
     tg = tgio.openTextgrid(tgFN)
     piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
-    
+
     outputList = []
     for interval, entryList in piData:
         label = interval[0]
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entryList]
             f0Measures = getPitchMeasures(tmpValList, tgFN, label,
-                                          medianFilterWindowSize, True)
+                                          medianFilterWindowSize, filterZeroFlag)
             outputList.append(list(f0Measures))
         else:
             tmpValList = [intensityVal for _, _, intensityVal in entryList]
     
-            tmpValList = [intensityVal for intensityVal in tmpValList
-                          if intensityVal != 0.0]
+            if filterZeroFlag:
+                tmpValList = [intensityVal for intensityVal in tmpValList
+                              if intensityVal != 0.0]
         
             rmsIntensity = 0
             if len(tmpValList) != 0:
                 rmsIntensity = myMath.rms(tmpValList)
             outputList.append([rmsIntensity, ])
     
+    # Locally normalize the output
+    if localZNormalizationWindowSize &gt; 0 and len(outputList) &gt; 0:
+        for colI in range(len(outputList[0])):
+            featValList = [row[colI] for row in outputList]
+
+            featValList = myMath.znormWindowFilter(featValList, localZNormalizationWindowSize, True, True)
+            assert(len(featValList) == len(outputList))
+
+            for i, val in enumerate(featValList):
+                outputList[i][colI] = val
+
     return outputList
 
 
 def getPitchMeasures(f0Values, name=None, label=None,
                      medianFilterWindowSize=None,
-                     filterZeroFlag=False,):
+                     filterZeroFlag=False):
     &#39;&#39;&#39;
     Get various measures (min, max, etc) for the passed in list of pitch values
     
@@ -427,7 +473,7 @@ def getPitchMeasures(f0Values, name=None, label=None,
         name = &#34;unspecified&#34;
     if label is None:
         label = &#34;unspecified&#34;
-    
+
     if medianFilterWindowSize is not None:
         f0Values = myMath.medianFilter(f0Values, medianFilterWindowSize,
                                        useEdgePadding=True)
@@ -568,7 +614,7 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 </details>
 </dd>
 <dt id="praatio.pitch_and_intensity.extractPI"><code class="name flex">
-<span>def <span class="ident">extractPI</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, forceRegenerate=True, tgFN=None, tierName=None, tmpOutputPath=None, undefinedValue=None, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
+<span>def <span class="ident">extractPI</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, pitchUnit=&#39;Hertz&#39;, forceRegenerate=True, tgFN=None, tierName=None, tmpOutputPath=None, undefinedValue=None, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Extracts pitch and intensity from a file wholesale or piecewise</p>
@@ -581,13 +627,16 @@ the entire file.</p>
 <dd>&nbsp;</dd>
 <dt><strong><code>female</code></strong> :&ensp;<code>minPitch</code>=<code>75</code>; <code>maxPitch</code>=<code>450</code></dt>
 <dd>&nbsp;</dd>
+<dt><strong><code>pitchUnit</code></strong> :&ensp;<code>"Hertz"</code>, <code>"semitones</code> <code>re</code> <code>100</code> <code>Hz"</code>, <code>etc</code></dt>
+<dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def extractPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
-              silenceThreshold=0.03, forceRegenerate=True,
-              tgFN=None, tierName=None, tmpOutputPath=None,
+              silenceThreshold=0.03, pitchUnit=&#34;Hertz&#34;,
+              forceRegenerate=True, tgFN=None,
+              tierName=None, tmpOutputPath=None,
               undefinedValue=None, medianFilterWindowSize=0,
               pitchQuadInterp=False):
     &#39;&#39;&#39;
@@ -599,6 +648,7 @@ the entire file.</p>
 
     male: minPitch=50; maxPitch=350
     female: minPitch=75; maxPitch=450
+    pitchUnit: &#34;Hertz&#34;, &#34;semitones re 100 Hz&#34;, etc
     &#39;&#39;&#39;
     
     outputPath = os.path.split(outputFN)[0]
@@ -608,7 +658,8 @@ the entire file.</p>
     if tgFN is None or tierName is None:
         piList = _extractPIFile(inputFN, outputFN,
                                 praatEXE, minPitch, maxPitch,
-                                sampleStep, silenceThreshold, forceRegenerate,
+                                sampleStep, silenceThreshold, pitchUnit,
+                                forceRegenerate,
                                 undefinedValue=undefinedValue,
                                 medianFilterWindowSize=windowSize,
                                 pitchQuadInterp=pitchQuadInterp)
@@ -753,47 +804,91 @@ pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
 </details>
 </dd>
 <dt id="praatio.pitch_and_intensity.generatePIMeasures"><code class="name flex">
-<span>def <span class="ident">generatePIMeasures</span></span>(<span>dataList, tgFN, tierName, doPitch, medianFilterWindowSize=None)</span>
+<span>def <span class="ident">generatePIMeasures</span></span>(<span>dataList, tgFN, tierName, doPitch, medianFilterWindowSize=None, globalZNormalization=False, localZNormalizationWindowSize=0)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Generates processed values for the labeled intervals in a textgrid</p>
 <p>nullLabelList - labels to ignore in the textgrid.
 Defaults to ["",]</p>
-<p>if 'doPitch'=true get pitch measures; if =false get rms intensity</p></section>
+<dl>
+<dt>if 'doPitch'=true get pitch measures; if =false get rms intensity</dt>
+<dt><strong><code>medianFilterWindowSize</code></strong> :&ensp;<code>if</code> <code>none</code>, <code>no</code> <code>filtering</code> <code>is</code> <code>done</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>globalZNormalization</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>values</code> <code>are</code> <code>normalized</code> <code>with</code> <code>the</code> <code>mean</code></dt>
+<dd>and stdDev of the data in dataList</dd>
+<dt><strong><code>localZNormalization</code></strong> :&ensp;<code>if</code> <code>greater</code> <code>than</code> <code>1</code>, <code>values</code> <code>are</code> <code>normalized</code> <code>with</code> <code>the</code> <code>mean</code></dt>
+<dd>and stdDev of the local context (for a window of 5, it
+would consider the current value, 2 values before and 2
+values after)</dd>
+</dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def generatePIMeasures(dataList, tgFN, tierName, doPitch,
-                       medianFilterWindowSize=None):
+                       medianFilterWindowSize=None,
+                       globalZNormalization=False,
+                       localZNormalizationWindowSize=0):
     &#39;&#39;&#39;
     Generates processed values for the labeled intervals in a textgrid
 
     nullLabelList - labels to ignore in the textgrid.  Defaults to [&#34;&#34;,]
       
     if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity
+    medianFilterWindowSize: if none, no filtering is done
+    globalZNormalization: if True, values are normalized with the mean
+                          and stdDev of the data in dataList
+    localZNormalization: if greater than 1, values are normalized with the mean
+                         and stdDev of the local context (for a window of 5, it
+                         would consider the current value, 2 values before and 2
+                         values after)
     &#39;&#39;&#39;
-    
+
+    # Warn user that normalizing a second time nullifies the first normalization
+    if globalZNormalization is True and localZNormalizationWindowSize &gt; 0:
+        raise NormalizationException()
+
+    if globalZNormalization is True:
+        if doPitch:
+            dataList = myMath.znormalizeSpeakerData(dataList, 1, True)
+        else:
+            dataList = myMath.znormalizeSpeakerData(dataList, 2, True)
+
+    # Raw values should have 0 filtered; normalized values are centered around 0, so don&#39;t filter
+    filterZeroFlag = not globalZNormalization
+
     tg = tgio.openTextgrid(tgFN)
     piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
-    
+
     outputList = []
     for interval, entryList in piData:
         label = interval[0]
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entryList]
             f0Measures = getPitchMeasures(tmpValList, tgFN, label,
-                                          medianFilterWindowSize, True)
+                                          medianFilterWindowSize, filterZeroFlag)
             outputList.append(list(f0Measures))
         else:
             tmpValList = [intensityVal for _, _, intensityVal in entryList]
     
-            tmpValList = [intensityVal for intensityVal in tmpValList
-                          if intensityVal != 0.0]
+            if filterZeroFlag:
+                tmpValList = [intensityVal for intensityVal in tmpValList
+                              if intensityVal != 0.0]
         
             rmsIntensity = 0
             if len(tmpValList) != 0:
                 rmsIntensity = myMath.rms(tmpValList)
             outputList.append([rmsIntensity, ])
     
+    # Locally normalize the output
+    if localZNormalizationWindowSize &gt; 0 and len(outputList) &gt; 0:
+        for colI in range(len(outputList[0])):
+            featValList = [row[colI] for row in outputList]
+
+            featValList = myMath.znormWindowFilter(featValList, localZNormalizationWindowSize, True, True)
+            assert(len(featValList) == len(outputList))
+
+            for i, val in enumerate(featValList):
+                outputList[i][colI] = val
+
     return outputList</code></pre>
 </details>
 </dd>
@@ -815,7 +910,7 @@ Label is the label of the current interval.</dt>
 <summary>Source code</summary>
 <pre><code class="python">def getPitchMeasures(f0Values, name=None, label=None,
                      medianFilterWindowSize=None,
-                     filterZeroFlag=False,):
+                     filterZeroFlag=False):
     &#39;&#39;&#39;
     Get various measures (min, max, etc) for the passed in list of pitch values
     
@@ -829,7 +924,7 @@ Label is the label of the current interval.</dt>
         name = &#34;unspecified&#34;
     if label is None:
         label = &#34;unspecified&#34;
-    
+
     if medianFilterWindowSize is not None:
         f0Values = myMath.medianFilter(f0Values, medianFilterWindowSize,
                                        useEdgePadding=True)
@@ -927,6 +1022,24 @@ Label is the label of the current interval.</dt>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="praatio.pitch_and_intensity.NormalizationException"><code class="flex name class">
+<span>class <span class="ident">NormalizationException</span></span>
+<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class NormalizationException(Exception):
+
+    def __str__(self):
+        return (&#34;Local normalization will nullify the effect of global normalization. &#34;
+                &#34;Local normalization should be used to examine local phenomena &#34;
+                &#34;(e.g. max pitch in a segment of running speech).&#34;
+                &#34;Global normalization should be used to examine global phenomena &#34;
+                &#34;(e.g. the pitch range of a speaker).&#34;)</code></pre>
+</details>
+</dd>
 <dt id="praatio.pitch_and_intensity.OverwriteException"><code class="flex name class">
 <span>class <span class="ident">OverwriteException</span></span>
 <span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
@@ -971,6 +1084,9 @@ Label is the label of the current interval.</dt>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="praatio.pitch_and_intensity.NormalizationException" href="#praatio.pitch_and_intensity.NormalizationException">NormalizationException</a></code></h4>
+</li>
 <li>
 <h4><code><a title="praatio.pitch_and_intensity.OverwriteException" href="#praatio.pitch_and_intensity.OverwriteException">OverwriteException</a></code></h4>
 </li>

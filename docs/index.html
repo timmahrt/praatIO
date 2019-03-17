@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Praatio is a library for working praat files and audio data …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,38 +20,96 @@
 <h1 class="title"><code>praatio</code> module</h1>
 </header>
 <section id="section-intro">
+<p>Praatio is a library for working praat files and audio data.</p>
+<p>Praat is a popular tool for working with transcribed speech data.
+It has tools for annotating speech, manipulating speech, and extracting information from speech.
+Praat's homepage: <a href="http://www.fon.hum.uva.nl/praat/">http://www.fon.hum.uva.nl/praat/</a></p>
+<p>praatio's utility comes from the classes Textgrid, IntervalTier, and PointTier in <strong>tgio.py</strong>
+These classes represent the speech transcript data stored inside of .TextGrid files.
+tgio.py
+contains functions for reading/writing these objects from/to files.
+<strong>dataio.py</strong> and <strong>kgio.py</strong> contain similar code for other data files that praat works with.</p>
+<p><strong>pitch_and_intensity.py</strong> uses praat to extract pitch and intensity values from audio using praat.</p>
+<p><strong>praat_scripts.py</strong> enables one to run various praat scripts from within python.
+If preferred, one
+can access the <strong>praatScripts/</strong> directory to view and edit the praat scripts or open them directly in praat.
+They can all be run independently of python.</p>
+<p><strong>audioio.py</strong> is for reading, reading, and performing simple manipulations to wave files.</p>
+<p><strong>praatio_scripts.py</strong> contains code that combines various code in praatio&ndash;mostly high-level functions for
+working with textgrids, sometimes in conjuction with audio files.</p>
+<p><strong>applied_scripts/</strong> contains application-specific code that heavily depends on praatio.
+Right now it just
+contains code for working with SPPAS, which is a forced alignment tool <a href="http://www.sppas.org/">http://www.sppas.org/</a></p>
+<p>For example scripts that use various parts of the praatio library, please see 'examples/' in the root directory.
+If you downloaded praatio from pip, you can get the example files on the praatio github page:
+<a href="https://github.com/timmahrt/praatIO">https://github.com/timmahrt/praatIO</a></p>
+<p>There is also a tutorial for working with praatio on the github page.</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Praatio is a library for working praat files and audio data.
+
+Praat is a popular tool for working with transcribed speech data.
+It has tools for annotating speech, manipulating speech, and extracting information from speech.
+Praat&#39;s homepage: [http://www.fon.hum.uva.nl/praat/](http://www.fon.hum.uva.nl/praat/)
+
+praatio&#39;s utility comes from the classes Textgrid, IntervalTier, and PointTier in **tgio.py**
+These classes represent the speech transcript data stored inside of .TextGrid files.  tgio.py
+contains functions for reading/writing these objects from/to files.
+**dataio.py** and **kgio.py** contain similar code for other data files that praat works with.
+
+**pitch_and_intensity.py** uses praat to extract pitch and intensity values from audio using praat.
+
+**praat_scripts.py** enables one to run various praat scripts from within python.  If preferred, one
+can access the **praatScripts/** directory to view and edit the praat scripts or open them directly in praat.
+They can all be run independently of python.
+
+**audioio.py** is for reading, reading, and performing simple manipulations to wave files.
+
+**praatio_scripts.py** contains code that combines various code in praatio--mostly high-level functions for
+working with textgrids, sometimes in conjuction with audio files.
+
+**applied_scripts/** contains application-specific code that heavily depends on praatio.  Right now it just
+contains code for working with SPPAS, which is a forced alignment tool [http://www.sppas.org/](http://www.sppas.org/)
+
+For example scripts that use various parts of the praatio library, please see &#39;examples/&#39; in the root directory.
+If you downloaded praatio from pip, you can get the example files on the praatio github page:
+[https://github.com/timmahrt/praatIO](https://github.com/timmahrt/praatIO)
+
+There is also a tutorial for working with praatio on the github page.
+&#34;&#34;&#34;</code></pre>
+</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
 <dt><code class="name"><a title="praatio.applied_scripts" href="applied_scripts/index.html">praatio.applied_scripts</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Application-specific code that relies on praatio</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.audioio" href="audioio.html">praatio.audioio</a></code></dt>
 <dd>
-<section class="desc"><p>Created on Apr 4, 2017 …</p></section>
+<section class="desc"><p>Functions for reading, writing, querying, and manipulating audio …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.dataio" href="dataio.html">praatio.dataio</a></code></dt>
 <dd>
-<section class="desc"><p>For handling shorter, less complicated praat data files …</p></section>
+<section class="desc"><p>Code for reading, writing, and representing less complicated praat data files …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.kgio" href="kgio.html">praatio.kgio</a></code></dt>
 <dd>
-<section class="desc"><p>Functions for reading/writing/manipulating klattgrid files in praat …</p></section>
+<section class="desc"><p>Functions for reading/writing/manipulating klattgrid files …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.pitch_and_intensity" href="pitch_and_intensity.html">praatio.pitch_and_intensity</a></code></dt>
 <dd>
-<section class="desc"><p>Created on Oct 20, 2014 …</p></section>
+<section class="desc"><p>Functions for working with pitch data …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.praat_scripts" href="praat_scripts.html">praatio.praat_scripts</a></code></dt>
 <dd>
-<section class="desc"><p>Assorted praat scripts that don't belong elsewhere exist here …</p></section>
+<section class="desc"><p>Python wrappers for various praat scripts contained in /praatScripts …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.praatio_scripts" href="praatio_scripts.html">praatio.praatio_scripts</a></code></dt>
 <dd>
-<section class="desc"><p>Common/generic scripts or utilities that extend the functionality of
-praatio …</p></section>
+<section class="desc"><p>Common/generic scripts or utilities that extend the functionality of praatio …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.tgio" href="tgio.html">praatio.tgio</a></code></dt>
 <dd>
@@ -59,7 +117,7 @@ praatio …</p></section>
 </dd>
 <dt><code class="name"><a title="praatio.utilities" href="utilities/index.html">praatio.utilities</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Various os, math, and language-related utilities.</p></section>
 </dd>
 </dl>
 </section>

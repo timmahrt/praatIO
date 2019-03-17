@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.5.2" />
 <title>praatio.kgio API documentation</title>
-<meta name="description" content="Functions for reading/writing/manipulating klattgrid files in praat …" />
+<meta name="description" content="Functions for reading/writing/manipulating klattgrid files …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,10 +20,9 @@
 <h1 class="title"><code>praatio.kgio</code> module</h1>
 </header>
 <section id="section-intro">
-<p>Functions for reading/writing/manipulating klattgrid files in praat</p>
-<p>Created on Oct 30, 2015</p>
-<p>@author: tmahrt</p>
+<p>Functions for reading/writing/manipulating klattgrid files</p>
 <dl>
+<dt>A klaatgrid can be used for speech synthesis/resynthesis.</dt>
 <dt>For more information on the praat klattgrid:</dt>
 <dt><strong><code>http</code></strong> :&ensp;//<code>www.fon.hum.uva.nl</code>/<code>praat</code>/<code>manual</code>/<code>KlattGrid.html</code></dt>
 <dd>&nbsp;</dd>
@@ -40,16 +39,13 @@ A KlattContainerTier contains a list of KlattIntermediateTiers which
 contains a list of KlattSubPointTiers.
 Only the KlattSubPointTiers contain
 any points</p>
+<p>see <strong>examples/klatt_resynthesis.py</strong></p>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">&#39;&#39;&#39;
-Functions for reading/writing/manipulating klattgrid files in praat
+Functions for reading/writing/manipulating klattgrid files
 
-Created on Oct 30, 2015
-
-@author: tmahrt
-
-
+A klaatgrid can be used for speech synthesis/resynthesis.
 For more information on the praat klattgrid:
 http://www.fon.hum.uva.nl/praat/manual/KlattGrid.html
 
@@ -66,6 +62,8 @@ embedded tiers contain tiers of tiers (3 layers)
 A KlattContainerTier contains a list of KlattIntermediateTiers which
 contains a list of KlattSubPointTiers.  Only the KlattSubPointTiers contain
 any points
+
+see **examples/klatt_resynthesis.py**
 &#39;&#39;&#39;
 
 import io
@@ -838,6 +836,7 @@ def toIntOrFloat(val):
 <li><code><b><a title="praatio.tgio.TextgridTier" href="tgio.html#praatio.tgio.TextgridTier">TextgridTier</a></b></code>:
 <ul class="hlist">
 <li><code><a title="praatio.tgio.TextgridTier.__init__" href="tgio.html#praatio.tgio.TextgridTier.__init__">__init__</a></code></li>
+<li><code><a title="praatio.tgio.TextgridTier.appendTier" href="tgio.html#praatio.tgio.TextgridTier.appendTier">appendTier</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.deleteEntry" href="tgio.html#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.entryType" href="tgio.html#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.find" href="tgio.html#praatio.tgio.TextgridTier.find">find</a></code></li>
@@ -882,6 +881,7 @@ def toIntOrFloat(val):
 <li><code><b><a title="praatio.kgio.KlattPointTier" href="#praatio.kgio.KlattPointTier">KlattPointTier</a></b></code>:
 <ul class="hlist">
 <li><code><a title="praatio.kgio.KlattPointTier.__init__" href="tgio.html#praatio.tgio.TextgridTier.__init__">__init__</a></code></li>
+<li><code><a title="praatio.kgio.KlattPointTier.appendTier" href="tgio.html#praatio.tgio.TextgridTier.appendTier">appendTier</a></code></li>
 <li><code><a title="praatio.kgio.KlattPointTier.deleteEntry" href="tgio.html#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
 <li><code><a title="praatio.kgio.KlattPointTier.entryType" href="tgio.html#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
 <li><code><a title="praatio.kgio.KlattPointTier.find" href="tgio.html#praatio.tgio.TextgridTier.find">find</a></code></li>
@@ -966,6 +966,7 @@ but it has no impact on a Klattgrid</p></section>
 <li><code><b><a title="praatio.tgio.Textgrid" href="tgio.html#praatio.tgio.Textgrid">Textgrid</a></b></code>:
 <ul class="hlist">
 <li><code><a title="praatio.tgio.Textgrid.__init__" href="tgio.html#praatio.tgio.Textgrid.__init__">__init__</a></code></li>
+<li><code><a title="praatio.tgio.Textgrid.addTier" href="tgio.html#praatio.tgio.Textgrid.addTier">addTier</a></code></li>
 <li><code><a title="praatio.tgio.Textgrid.appendTextgrid" href="tgio.html#praatio.tgio.Textgrid.appendTextgrid">appendTextgrid</a></code></li>
 <li><code><a title="praatio.tgio.Textgrid.crop" href="tgio.html#praatio.tgio.Textgrid.crop">crop</a></code></li>
 <li><code><a title="praatio.tgio.Textgrid.editTimestamps" href="tgio.html#praatio.tgio.Textgrid.editTimestamps">editTimestamps</a></code></li>
