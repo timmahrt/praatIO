@@ -89,6 +89,10 @@ You can view them online using the external website Jupyter:
     
 ## Major revisions
 
+Ver 3.7 (March 17, 2019)
+- Speaker normalization and normalization within local context added to pitch and intensity query functions
+- Generated pdoc documentation added
+
 Ver 3.6 (May 05, 2017)
 - Major clean up of tgio
     - Ver 3.6 is **not** backwards compatible with previous versions of PraatIO.  Lots of changes to tgio.
