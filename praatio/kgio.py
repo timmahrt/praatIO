@@ -1,11 +1,6 @@
 '''
 Functions for reading/writing/manipulating klattgrid files in praat
 
-Created on Oct 30, 2015
-
-@author: tmahrt
-
-
 For more information on the praat klattgrid:
 http://www.fon.hum.uva.nl/praat/manual/KlattGrid.html
 
@@ -216,7 +211,7 @@ class Klattgrid(tgio.Textgrid):
             fd.write(outputTxt)
     
 
-def openKlattGrid(fnFullPath):
+def openKlattgrid(fnFullPath):
 
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
@@ -227,12 +222,12 @@ def openKlattGrid(fnFullPath):
     data = data.replace("\r\n", "\n")
 
     # Right now, can only open normal klatt grid and not short ones
-    kg = _openNormalKlattGrid(data)
+    kg = _openNormalKlattgrid(data)
 
     return kg
 
 
-def wavToKlattGrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
+def wavToKlattgrid(praatEXE, inputFullPath, outputFullPath, timeStep=0.005,
                    numFormants=5, maxFormantFreq=5500.0, windowLength=0.025,
                    preEmphasis=50.0, pitchFloor=60.0, pitchCeiling=600.0,
                    minPitch=50.0, subtractMean=True,
@@ -275,7 +270,7 @@ def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True,
                          [wavFN, klattFN, outputWavFN, method])
 
 
-def _openNormalKlattGrid(data):
+def _openNormalKlattgrid(data):
 
     kg = Klattgrid()
 

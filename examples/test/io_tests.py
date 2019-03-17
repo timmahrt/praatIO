@@ -136,10 +136,10 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
         
-        kg = kgio.openKlattGrid(inputFN)
+        kg = kgio.openKlattgrid(inputFN)
         kg.save(outputFN)
         
-        self.assertTrue(areTheSame(inputFN, outputFN, kgio.openKlattGrid))
+        self.assertTrue(areTheSame(inputFN, outputFN, kgio.openKlattgrid))
  
  
 if __name__ == "__main__":
