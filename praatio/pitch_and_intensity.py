@@ -1,10 +1,12 @@
 # coding: utf-8
 '''
-Created on Oct 20, 2014
+Functions for working with pitch data
 
-@author: tmahrt
-
-To be used in conjunction with get_pitch_and_intensity.praat.
+This file depends on the praat script get_pitch_and_intensity.praat
+(which depends on praat) to extract pitch and intensity values from
+audio data.  Once the data is extracted, there are functions for
+data normalization and calculating various measures from the time
+stamped output of the praat script..
 
 For brevity, 'pitch_and_intensity' is referred to as 'PI'
 '''
@@ -20,6 +22,15 @@ from praatio.utilities import utils
 from praatio.utilities import myMath
 from praatio import praatio_scripts
 
+
+class NormalizationException(Exception):
+
+    def __str__(self):
+        return ("Local normalization will nullify the effect of global normalization. "
+                "Local normalization should be used to examine local phenomena "
+                "(e.g. max pitch in a segment of running speech)."
+                "Global normalization should be used to examine global phenomena "
+                "(e.g. the pitch range of a speaker).")
 
 class OverwriteException(Exception):
     
@@ -343,43 +354,77 @@ def loadTimeSeriesData(fn, undefinedValue=None):
 
 
 def generatePIMeasures(dataList, tgFN, tierName, doPitch,
-                       medianFilterWindowSize=None):
+                       medianFilterWindowSize=None,
+                       globalZNormalization=False,
+                       localZNormalizationWindowSize=0):
     '''
     Generates processed values for the labeled intervals in a textgrid
 
     nullLabelList - labels to ignore in the textgrid.  Defaults to ["",]
       
     if 'doPitch'=true get pitch measures; if =false get rms intensity
+    medianFilterWindowSize: if none, no filtering is done
+    globalZNormalization: if True, values are normalized with the mean
+                          and stdDev of the data in dataList
+    localZNormalization: if greater than 1, values are normalized with the mean
+                         and stdDev of the local context (for a window of 5, it
+                         would consider the current value, 2 values before and 2
+                         values after)
     '''
-    
+
+    # Warn user that normalizing a second time nullifies the first normalization
+    if globalZNormalization is True and localZNormalizationWindowSize > 0:
+        raise NormalizationException()
+
+    if globalZNormalization is True:
+        if doPitch:
+            dataList = myMath.znormalizeSpeakerData(dataList, 1, True)
+        else:
+            dataList = myMath.znormalizeSpeakerData(dataList, 2, True)
+
+    # Raw values should have 0 filtered; normalized values are centered around 0, so don't filter
+    filterZeroFlag = not globalZNormalization
+
     tg = tgio.openTextgrid(tgFN)
     piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
-    
+
     outputList = []
     for interval, entryList in piData:
         label = interval[0]
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entryList]
             f0Measures = getPitchMeasures(tmpValList, tgFN, label,
-                                          medianFilterWindowSize, True)
+                                          medianFilterWindowSize, filterZeroFlag)
             outputList.append(list(f0Measures))
         else:
             tmpValList = [intensityVal for _, _, intensityVal in entryList]
     
-            tmpValList = [intensityVal for intensityVal in tmpValList
-                          if intensityVal != 0.0]
+            if filterZeroFlag:
+                tmpValList = [intensityVal for intensityVal in tmpValList
+                              if intensityVal != 0.0]
         
             rmsIntensity = 0
             if len(tmpValList) != 0:
                 rmsIntensity = myMath.rms(tmpValList)
             outputList.append([rmsIntensity, ])
     
+    # Locally normalize the output
+    if localZNormalizationWindowSize > 0 and len(outputList) > 0:
+        for colI in range(len(outputList[0])):
+            featValList = [row[colI] for row in outputList]
+
+            featValList = myMath.znormWindowFilter(featValList, localZNormalizationWindowSize, True, True)
+            assert(len(featValList) == len(outputList))
+
+            for i, val in enumerate(featValList):
+                outputList[i][colI] = val
+
     return outputList
 
 
 def getPitchMeasures(f0Values, name=None, label=None,
                      medianFilterWindowSize=None,
-                     filterZeroFlag=False,):
+                     filterZeroFlag=False):
     '''
     Get various measures (min, max, etc) for the passed in list of pitch values
     
@@ -393,7 +438,7 @@ def getPitchMeasures(f0Values, name=None, label=None,
         name = "unspecified"
     if label is None:
         label = "unspecified"
-    
+
     if medianFilterWindowSize is not None:
         f0Values = myMath.medianFilter(f0Values, medianFilterWindowSize,
                                        useEdgePadding=True)
