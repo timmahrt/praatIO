@@ -1,10 +1,7 @@
 '''
-Created on Aug 30, 2014
-
-@author: tmahrt
-
 Extracts the duration of each interval in each tier of the specified textgrids
-and outputs the data in a csv friendly format
+
+Outputs the data in a csv friendly format
 '''
 
 import os

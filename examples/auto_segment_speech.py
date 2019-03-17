@@ -1,12 +1,12 @@
 '''
-Created on Oct 13, 2016
-
-@author: Tim
+Automatically segments an audio file based on silence.
 
 Marks an utterance for speech and silence.  Then, via
 markTranscriptForAnnotations, chunks those segments into small,
 manageable chunks.  The code assumes that the speaker is
 talking most of the time.
+
+Probably only useful in limited circumstances.
 '''
 
 from os.path import join

@@ -1,3 +1,6 @@
+'''
+Example of using praatio for merging tiers together.
+'''
 
 import os
 from os.path import join

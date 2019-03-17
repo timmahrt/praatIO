@@ -6,9 +6,11 @@ This file depends on the praat script get_pitch_and_intensity.praat
 (which depends on praat) to extract pitch and intensity values from
 audio data.  Once the data is extracted, there are functions for
 data normalization and calculating various measures from the time
-stamped output of the praat script..
+stamped output of the praat script (ie **generatePIMeasures()**)
 
 For brevity, 'pitch_and_intensity' is referred to as 'PI'
+
+see **examples/get_pitch_and_formants.py**
 '''
 
 import os

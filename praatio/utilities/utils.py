@@ -1,7 +1,5 @@
 '''
-Created on Oct 30, 2015
-
-@author: tmahrt
+Various generic utility functions
 '''
 
 import os
@@ -142,12 +140,19 @@ def invertIntervalList(inputList, maxValue=None):
 
 
 def makeDir(path):
+    '''
+    Creates a new directory
+
+    Unlike os.mkdir, it does not throw an exception if the directory already exists.
+    '''
     if not os.path.exists(path):
         os.mkdir(path)
         
 
 def findAll(txt, subStr):
-    
+    '''
+    Find the starting indicies of all instances of subStr in txt
+    '''
     indexList = []
     index = 0
     while True:
@@ -294,7 +299,15 @@ def openCSV(path, fn, valueIndex=None, encoding="utf-8"):
 
 
 def safeZip(listOfLists, enforceLength):
-    "A safe version of python's zip()"
+    """
+    A safe version of python's zip()
+
+    If two sublists are of different sizes, python's zip will truncate
+    the output to be the smaller of the two.
+
+    safeZip throws an exception if the size of the any sublist is different
+    from the rest.
+    """
     if enforceLength is True:
         length = len(listOfLists[0])
         assert(all([length == len(subList) for subList in listOfLists]))

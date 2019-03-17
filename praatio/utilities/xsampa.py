@@ -7,7 +7,7 @@ Downloaded from:
 http://www.let.rug.nl/~kleiweg/L04/devel/python/xsampa.py
 
 This code was released without a license.  However, it's publically available
-on Peter Kleiweg's website and is included in praatio with the author's
+on the website of the author, Peter Kleiweg, and is included in praatio with the author's
 permission.
 """
 

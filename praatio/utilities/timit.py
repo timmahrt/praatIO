@@ -1,10 +1,6 @@
 #encoding: utf-8
 '''
-Created on Mar 2, 2017
-
-This is a table of some TIMIT and ARPABET to IPA codes.
-
-@author: Tim
+This is a table of TIMIT-and-ARPABET-to-IPA codes.
 '''
 
 timitToIPA = {u"ng": u"ŋ",

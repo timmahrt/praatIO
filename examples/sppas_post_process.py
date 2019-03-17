@@ -1,9 +1,5 @@
 '''
-Created on Feb 04, 2017
-
-Demonstrates the code that preps and cleans up the input and output of sppas
-
-@author: tmahrt
+Example of using praatio to clean up sppas output
 '''
 
 from os.path import join

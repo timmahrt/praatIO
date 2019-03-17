@@ -1,10 +1,18 @@
-'''
-Functions for reading/writing/manipulating textgrid files
+"""
+Functions for reading/writing/manipulating textgrid files.
 
-Created on Apr 15, 2013
+This file contains the main data structures for representing Textgrid data:
+Textgrid, IntervalTier, and PointTier
 
-@author: timmahrt
-'''
+A Textgrid is a container for multiple annotation tiers.  Tiers can contain
+either interval data (IntervalTier) or point data (PointTier).
+Tiers in a Textgrid are ordered and must contain a unique name.
+
+openTextgrid() can be used to open a textgrid file.
+Textgrid.save() can be used to save a Textgrid object to a file.
+
+see the **examples/** directory for lots of examples using tgio.py
+"""
 
 import re
 import copy
@@ -243,7 +251,12 @@ class TextgridTier(object):
         return isEqual
     
     def appendTier(self, tier):
-        
+        '''
+        Append a tier to the end of this one.
+
+        This tier's maxtimestamp will be lengthened by the amount in the passed in tier.
+        '''
+
         minTime = self.minTimestamp
         if tier.minTimestamp < minTime:
             minTime = tier.minTimestamp
@@ -1131,6 +1144,11 @@ class Textgrid():
         return isEqual
     
     def addTier(self, tier, tierIndex=None):
+        '''
+        Add a tier to this textgrid.
+
+        If tierIndex is specified, insert the tier into the specified position.
+        '''
         
         assert(tier.name not in list(self.tierDict.keys()))
 

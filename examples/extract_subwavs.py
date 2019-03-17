@@ -1,9 +1,5 @@
 '''
-Created on Aug 31, 2014
-
-@author: tmahrt
-
-Extracts a separate wav file for each tier in a textgrid
+Praatio example of extracting a separate wav file for each labeled entry in a textgrid tier
 '''
 
 import os

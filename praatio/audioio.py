@@ -1,7 +1,7 @@
 '''
-Created on Apr 4, 2017
+Functions for reading, writing, querying, and manipulating audio.
 
-@author: Tim
+see **examples/anonymize_recording.py**, **examples/delete_vowels.py**, and **examples/extract_subwavs.py**
 '''
 
 import math
@@ -32,6 +32,7 @@ class FindZeroCrossingError(Exception):
 
 
 def samplesAsNums(waveData, sampleWidth):
+    '''Convert samples of a python wave object from bytes to numbers'''
     if len(waveData) == 0:
         raise EndOfAudioData()
     
@@ -43,6 +44,7 @@ def samplesAsNums(waveData, sampleWidth):
 
 
 def numsAsSamples(sampleWidth, numList):
+    '''Convert audio data from numbers to bytes'''
     byteCode = sampWidthDict[sampleWidth]
     byteStr = struct.pack("<" + byteCode * len(numList), *numList)
     

@@ -1,9 +1,5 @@
 '''
-Created on Dec 16, 2014
-
-@author: tmahrt
-
-Extracts points in a PointProcess for the vowels specified in a textgrid
+Praatio example for extracting points in a PointProcess for the vowels specified in a textgrid
 '''
 
 import os

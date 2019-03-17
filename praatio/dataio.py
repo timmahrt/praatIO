@@ -1,9 +1,7 @@
 '''
-For handling shorter, less complicated praat data files
+Code for reading, writing, and representing less complicated praat data files
 
-Created on Nov 26, 2015
-
-@author: tmahrt
+see **examples/get_vowel_points.py**
 '''
 
 import io

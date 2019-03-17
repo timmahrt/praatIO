@@ -1,7 +1,5 @@
 '''
-Created on Nov 9, 2015
-
-@author: tmahrt
+Example of using praatio to generate speech resynthesized via klaatgrids.
 '''
 
 import os

@@ -1,16 +1,15 @@
 '''
-Created on Dec 5, 2016
+This script modifies the output of sppas, a forced-aligner tool.
 
-This script modifies the output of sppas, a forced-aligner tool, by
-renaming the textgrids, removing tiers, renaming tiers, and changing
-the contents of some tiers.
+It renames the textgrids, removes some tiers, renames other tiers,
+and changes the contents of some tiers.
 
 For more information on SPPAS visit the SPPAS homepage:
 http://www.sppas.org/
 or
 https://github.com/brigittebigi/sppas
 
-@author: Tim Mahrt
+see examples/sppas_post_process.py
 '''
 
 import io
@@ -21,7 +20,7 @@ import shutil
 from praatio import tgio
 from praatio import praatio_scripts
 from praatio.utilities import utils
-from praatio.applied_scripts import xsampa
+from praatio.utilities import xsampa
 
 # The SPPAS-produced tiers to delete
 # You probably don't want to remove items from this list but you could

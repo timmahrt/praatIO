@@ -1,10 +1,7 @@
 '''
-Created on Apr 3, 2017
+Replaces someone saying a name with a tone over the name to 'hide' the name.
 
-@author: Tim
-
-Replaces someone saying a name with a tone over the name to 'hide' the
-name.  The times that the names are spoken are taken from a transcript
+The times that the names are spoken are taken from a transcript
 of the recording.
 '''
 

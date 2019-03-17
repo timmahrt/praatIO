@@ -1,10 +1,7 @@
 '''
-Created on Mar 27, 2016
+An example using TextgridTier set operations.
 
-@author: Tim
-
-The following example is derived from real code.  It was the reason the set
-operations were added to the praatio library.
+The following example is derived from real code.
 
 The original code.  Suppose you have two tiers and want to use one tier to
 filter the results of another tier.  In my case, I had textgrids with

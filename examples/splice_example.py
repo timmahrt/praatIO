@@ -1,7 +1,5 @@
 '''
-Created on May 26, 2017
-
-@author: Tim
+Example of using praatio's audio splice functions
 '''
 
 import os

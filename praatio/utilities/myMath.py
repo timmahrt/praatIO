@@ -176,7 +176,7 @@ def stdDev(valList):
     meanVal = mean(valList)
     squaredSum = sum([(val - meanVal) ** 2 for val in valList])
 
-    return math.sqrt(squaredSum / (len(valList) - 1))
+    return math.sqrt(squaredSum / float(len(valList) - 1))
 
 
 def znormalizeData(valList):

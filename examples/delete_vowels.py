@@ -1,9 +1,5 @@
 '''
-Created on June 20, 2016
-
-@author: tmahrt
-
-Deletes the vowels from the textgrids and audio files
+Praatio example for deleting the vowels from the textgrids and audio files
 '''
 
 import os

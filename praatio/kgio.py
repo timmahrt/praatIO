@@ -1,6 +1,7 @@
 '''
-Functions for reading/writing/manipulating klattgrid files in praat
+Functions for reading/writing/manipulating klattgrid files
 
+A klaatgrid can be used for speech synthesis/resynthesis.
 For more information on the praat klattgrid:
 http://www.fon.hum.uva.nl/praat/manual/KlattGrid.html
 
@@ -17,6 +18,8 @@ embedded tiers contain tiers of tiers (3 layers)
 A KlattContainerTier contains a list of KlattIntermediateTiers which
 contains a list of KlattSubPointTiers.  Only the KlattSubPointTiers contain
 any points
+
+see **examples/klatt_resynthesis.py**
 '''
 
 import io

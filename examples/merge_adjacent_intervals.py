@@ -1,7 +1,5 @@
 '''
-Created on Jun 15, 2015
-
-@author: tmahrt
+Example of using praatio for merging intervals that share a border.
 '''
 
 import os

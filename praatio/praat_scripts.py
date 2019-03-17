@@ -1,11 +1,8 @@
 '''
-Assorted praat scripts that don't belong elsewhere exist here
+Python wrappers for various praat scripts contained in /praatScripts.
 
-These are just launchers for the actual scripts contained in praatScripts
-
-Created on Dec 9, 2015
-
-@author: tmahrt
+see **examples/auto_segment_speech.py**, **examples/get_pitch_and_formants.py**,
+**klatt_resynthesis.py**
 '''
 
 import os
@@ -93,7 +90,11 @@ def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
 
 def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
               scriptFN=None):
-    
+    '''
+    Gets the pitch/glottal pulses for an audio file.
+
+    http://www.fon.hum.uva.nl/praat/manual/Sound___Pitch__To_PointProcess__peaks____.html
+    '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "get_pulses.praat")
     
@@ -108,7 +109,13 @@ def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
 
 def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
                     spectralPower=2, spectralMoment=3, scriptFN=None):
+    '''
+    Extracts various spectral measures from an audio file
 
+    http://www.fon.hum.uva.nl/praat/manual/Spectrum.html
+    Measures include: center_of_gravity, standard_deviation
+    skewness, kertosis, central_movement
+    '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "get_spectral_info.praat")
     

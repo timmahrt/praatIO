@@ -1,9 +1,5 @@
 '''
-Created on Jan 5, 2016
-
-@author: tmahrt
-
-Extracts pitch and intensity values in a wav file using praat
+Praatio example for extracting pitch and intensity values in a wav file using praat
 '''
 
 import os

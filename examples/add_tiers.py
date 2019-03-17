@@ -1,9 +1,5 @@
 '''
-Created on Aug 31, 2014
-
-@author: tmahrt
-
-Adds two tiers to the same textgrid
+Praatio example of adding two tiers to the same textgrid
 '''
 
 import os

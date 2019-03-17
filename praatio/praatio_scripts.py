@@ -1,10 +1,8 @@
 '''
-Common/generic scripts or utilities that extend the functionality of
-praatio
+Common/generic scripts or utilities that extend the functionality of praatio
 
-Created on Jul 27, 2015
-
-@author: tmahrt
+see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
+**examples/extract_subwavs.py**, **examples/splice_example.py**.
 '''
 
 import os
