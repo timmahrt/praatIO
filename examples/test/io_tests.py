@@ -13,6 +13,7 @@ generated files.
 '''
 
 import unittest
+from unittest.mock import mock_open, patch
 import os
 from os.path import join
 
@@ -38,6 +39,26 @@ def areTheSame(fn1, fn2, fileHandler=None):
     data2 = fileHandler(fn2)
     
     return data1 == data2
+
+
+def run_save(tg, minimumIntervalLength=None, minTimestamp=None, maxTimestamp=None):
+    '''
+    Mock write function and return the first tier's entry list
+
+    tg.save() mutates the textgrid's data, so the entry list
+    before and after saving can be different
+    '''
+    m = mock_open()
+    with patch('io.open', m):
+        tg.save("garbage.Textgrid",
+                minimumIntervalLength=minimumIntervalLength,
+                minTimestamp=minTimestamp,
+                maxTimestamp=maxTimestamp)
+
+    entryList = tg.tierDict[tg.tierNameList[0]].entryList
+    entryList = [[start, end, label] for start, end, label in entryList]
+
+    return entryList
 
 
 class IOTests(unittest.TestCase):
@@ -122,7 +143,7 @@ class IOTests(unittest.TestCase):
         pp.save(outputFN)
         
         self.assertTrue(areTheSame(inputFN, outputFN, dataio.open1DPointObject))
-        
+
     def test_point_process_io_long_vs_short(self):
         
         shortFN = join(self.dataRoot, "bobby.PointProcess")
@@ -140,7 +161,95 @@ class IOTests(unittest.TestCase):
         kg.save(outputFN)
         
         self.assertTrue(areTheSame(inputFN, outputFN, kgio.openKlattgrid))
- 
- 
+
+    def test_save(self):
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0.0, 0.4, ''], [0.4, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 2.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+        actualEntryList = run_save(tg)
+
+        self.assertEqual(expectedEntryList, actualEntryList)
+
+    def test_save_with_minimum_time_stamp(self):
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0.3, 0.4, ''], [0.4, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 2.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0.3, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+        actualEntryList = run_save(tg)
+
+        self.assertEqual(expectedEntryList, actualEntryList)
+
+    def test_save_with_force_zero_as_minimum_time(self):
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0, 0.4, ''], [0.4, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 2.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0.3, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+        actualEntryList = run_save(tg, minTimestamp=0)
+
+        self.assertEqual(expectedEntryList, actualEntryList)
+
+    def test_save_with_force_larger_value_as_maximum_time(self):
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0.3, 0.4, ''], [0.4, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 3.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0.3, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+        actualEntryList = run_save(tg, maxTimestamp=3.0)
+
+        self.assertEqual(expectedEntryList, actualEntryList)
+
+    def test_save_with_force_too_large_minimum_time(self):
+        # If you choose to force save to use a minTimestamp, all
+        # of your entries must be higher than that minTimestamp
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0, 0.4, ''], [0.4, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 2.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0.3, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+
+        self.assertRaises(AssertionError, run_save, tg, minTimestamp=1.0)
+
+    def test_save_with_force_too_large_minimum_time(self):
+        # If you choose to force save to use a minTimestamp, all
+        # of your entries must be higher than that minTimestamp
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0, 0.4, ''], [0.4, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 2.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0.3, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+
+        self.assertRaises(AssertionError, run_save, tg, maxTimestamp=1.0)
+
+    def test_save_with_minimum_interval_length(self):
+        # The first entry will be stretched to fill the unlabeled region in
+        # front of it: [0.30, 0.35, ''] (The unlabeled region starts at 0.3
+        # instead of 0 because the minTimestamp for this tg is 0.3)
+        userEntryList = [[0.35, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+        expectedEntryList = [[0.3, 0.6, 'A'], [0.6, 0.8, ''], [0.8, 1.0, 'E'],
+                             [1.0, 1.2, ''], [1.2, 1.3, 'I'], [1.3, 2.0, '']]
+
+        tier = tgio.IntervalTier('test', userEntryList, 0.3, 2.0)
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+        actualEntryList = run_save(tg, minimumIntervalLength=0.06)
+
+        self.assertEqual(expectedEntryList, actualEntryList)
+
 if __name__ == "__main__":
     unittest.main()

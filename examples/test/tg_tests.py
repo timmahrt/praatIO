@@ -56,6 +56,26 @@ class IOTests(unittest.TestCase):
         self.assertTrue("phone" not in tg.tierNameList)
         self.assertTrue("candy" in tg.tierNameList)
     
+    def test_mintimestamp_behaviour(self):
+        userEntryList = [[0.4, 0.6, 'A'], [0.8, 1.0, 'E'], [1.2, 1.3, 'I']]
+
+        # By default, the min and max timestamp values come from the entry list
+        tier = tgio.IntervalTier('test', userEntryList)
+        self.assertEqual(0.4, tier.minTimestamp)
+        self.assertEqual(1.3, tier.maxTimestamp)
+
+        # The user can specify the min and max timestamp
+        tier = tgio.IntervalTier('test', userEntryList, 0.2, 2.0)
+        self.assertEqual(0.2, tier.minTimestamp)
+        self.assertEqual(2.0, tier.maxTimestamp)
+
+        # When the user specified min/max timestamps are less/greater
+        # than the min/max specified in the entry list, use the values
+        # specified in the entry list
+        tier = tgio.IntervalTier('test', userEntryList, 1.0, 1.1)
+        self.assertEqual(0.4, tier.minTimestamp)
+        self.assertEqual(1.3, tier.maxTimestamp)
+
     def setUp(self):
         if not os.path.exists(self.outputRoot):
             os.mkdir(self.outputRoot)

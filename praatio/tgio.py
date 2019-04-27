@@ -93,7 +93,7 @@ def _fillInBlanks(tier, blankLabel="", startTime=None, endTime=None):
                         tier.minTimestamp, tier.maxTimestamp)
 
 
-def _removeUltrashortIntervals(tier, minLength):
+def _removeUltrashortIntervals(tier, minLength, minTimestamp):
     '''
     Remove intervals that are very tiny
     
@@ -114,23 +114,25 @@ def _removeUltrashortIntervals(tier, minLength):
                 newEntryList[j - 1] = (lastStart, stop, lastLabel)
         else:
             # Special case: the first entry in oldEntryList was ultra-short
-            if len(newEntryList) == 0 and start != 0:
-                newEntryList.append((0, stop, label))
+            if len(newEntryList) == 0 and start != minTimestamp:
+                newEntryList.append((minTimestamp, stop, label))
             # Normal case
             else:
                 newEntryList.append((start, stop, label))
             j += 1
     
     # Next, shift near equivalent tiny boundaries
+    # This will link intervals that were connected by an interval
+    # that was shorter than minLength
     j = 0
     while j < len(newEntryList) - 1:
         diff = abs(newEntryList[j][1] - newEntryList[j + 1][0])
-        if diff > 0 and diff < MIN_INTERVAL_LENGTH:
+        if diff > 0 and diff < minLength:
             newEntryList[j] = (newEntryList[j][0],
                                newEntryList[j + 1][0],
                                newEntryList[j][2])
         j += 1
-    
+
     return tier.new(entryList=newEntryList)
 
      
@@ -1401,23 +1403,40 @@ class Textgrid():
         self.removeTier(name)
         self.addTier(newTier, tierIndex)
             
-    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH):
-        
+    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None):
+        '''
+        To save the current textgrid
+
+        fn - the fullpath filename of the output
+        minimumIntervalLength - any labeled intervals smaller than this will be removed,
+            useful for removing ultrashort or fragmented intervals; if None, don't remove any.
+        minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
+            in the Textgrid object.  If minTimestamp is larger than timestamps in your textgrid,
+            an exception will be thrown.
+        maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
+            in the Textgrid object.  If maxTimestamp is smaller than timestamps in your textgrid,
+            an exception will be thrown.
+        '''
         for tier in self.tierDict.values():
             tier.sort()
         
+        if minTimestamp == None:
+            minTimestamp = self.minTimestamp
+        if maxTimestamp == None:
+            maxTimestamp = self.maxTimestamp
+
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
             tier = self.tierDict[name]
             if isinstance(tier, IntervalTier):
-                
                 tier = _fillInBlanks(tier,
                                      "",
-                                     self.minTimestamp,
-                                     self.maxTimestamp)
+                                     minTimestamp,
+                                     maxTimestamp)
                 if minimumIntervalLength is not None:
                     tier = _removeUltrashortIntervals(tier,
-                                                      minimumIntervalLength)
+                                                      minimumIntervalLength,
+                                                      minTimestamp)
                 self.tierDict[name] = tier
         
         for tier in self.tierDict.values():
@@ -1427,8 +1446,8 @@ class Textgrid():
         outputTxt = ""
         outputTxt += 'File type = "ooTextFile short"\n'
         outputTxt += 'Object class = "TextGrid"\n\n'
-        outputTxt += "%s\n%s\n" % (repr(self.minTimestamp),
-                                   repr(self.maxTimestamp))
+        outputTxt += "%s\n%s\n" % (repr(minTimestamp),
+                                   repr(maxTimestamp))
         outputTxt += "<exists>\n%d\n" % len(self.tierNameList)
         
         for tierName in self.tierNameList:

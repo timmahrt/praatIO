@@ -111,7 +111,6 @@ Ver 3.4 (February 04, 2017)
 
 
 Ver 3.3 (June 27, 2016)
-
 - Find zero-crossings in a wave file
    - for shifting all boundaries in a textgrid see *praatio_scripts.tgBoundariesToZeroCrossings()*
    - for finding individual zero crossings, see *praatio_scripts.findNearestZeroCrossing()*
