@@ -13,7 +13,6 @@ generated files.
 '''
 
 import unittest
-from unittest.mock import mock_open, patch
 import os
 from os.path import join
 
@@ -48,12 +47,11 @@ def run_save(tg, minimumIntervalLength=None, minTimestamp=None, maxTimestamp=Non
     tg.save() mutates the textgrid's data, so the entry list
     before and after saving can be different
     '''
-    m = mock_open()
-    with patch('io.open', m):
-        tg.save("garbage.Textgrid",
-                minimumIntervalLength=minimumIntervalLength,
-                minTimestamp=minTimestamp,
-                maxTimestamp=maxTimestamp)
+
+    tg.save("garbage.Textgrid",
+            minimumIntervalLength=minimumIntervalLength,
+            minTimestamp=minTimestamp,
+            maxTimestamp=maxTimestamp)
 
     entryList = tg.tierDict[tg.tierNameList[0]].entryList
     entryList = [[start, end, label] for start, end, label in entryList]
