@@ -87,7 +87,14 @@ You can view them online using the external website Jupyter:
 [Tutorial 1: An introduction and tutorial](<https://nbviewer.jupyter.org/github/timmahrt/praatIO/blob/master/tutorials/tutorial1_intro_to_praatio.ipynb>)
     
     
-## Major revisions
+## Version history
+
+Praatio uses semantic versioning (Major.Minor.Patch)
+
+Ver 3.8 (July 24, 2019)
+- Textgrids can be saved in the Textgrid long file format with .save(fn, useShortForm=False).
+    - For backwards compatibility, by default, it saves in the short file format.
+- Textgrid output formatting is now closer to what Praat outputs.
 
 Ver 3.7 (March 17, 2019)
 - Speaker normalization and normalization within local context added to pitch and intensity query functions
