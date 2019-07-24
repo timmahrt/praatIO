@@ -21,7 +21,7 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 1. [Common Use Cases](#common-use-cases)
 2. [Documentation](#documentation)
 3. [Tutorials](#tutorials)
-4. [Major revisions](#major-revisions)
+4. [Version History](#version-history)
 5. [Requirements](#requirements)
 6. [Usage](#usage)
 7. [Installation](#installation)
@@ -87,7 +87,7 @@ You can view them online using the external website Jupyter:
 [Tutorial 1: An introduction and tutorial](<https://nbviewer.jupyter.org/github/timmahrt/praatIO/blob/master/tutorials/tutorial1_intro_to_praatio.ipynb>)
     
     
-## Version history
+## Version History
 
 Praatio uses semantic versioning (Major.Minor.Patch)
 
