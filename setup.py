@@ -20,5 +20,6 @@ setup(name='praatio',
       license='LICENSE',
       description='A library for working with praat, textgrids, time aligned audio transcripts, and audio files.',
       long_description=io.open('README.md', 'r', encoding="utf-8").read(),
+      long_description_content_type="text/markdown",
 #       install_requires=[], # No requirements! # requires 'from setuptools import setup'
       )
