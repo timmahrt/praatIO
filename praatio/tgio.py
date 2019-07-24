@@ -312,12 +312,12 @@ class TextgridTier(object):
         text = ""
         text += '"%s"\n' % self.tierType
         text += '"%s"\n' % self.name
-        text += '%s\n%s\n%s\n' % (repr(self.minTimestamp),
-                                  repr(self.maxTimestamp),
+        text += '%s\n%s\n%s\n' % (numToStr(self.minTimestamp),
+                                  numToStr(self.maxTimestamp),
                                   len(self.entryList))
         
         for entry in self.entryList:
-            entry = [repr(val) for val in entry[:-1]] + ['"%s"' % entry[-1], ]
+            entry = [numToStr(val) for val in entry[:-1]] + ['"%s"' % entry[-1], ]
             try:
                 unicode
             except NameError:
@@ -1403,7 +1403,7 @@ class Textgrid():
         self.removeTier(name)
         self.addTier(newTier, tierIndex)
             
-    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None):
+    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None, useShortForm=True):
         '''
         To save the current textgrid
 
@@ -1416,6 +1416,8 @@ class Textgrid():
         maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
             in the Textgrid object.  If maxTimestamp is smaller than timestamps in your textgrid,
             an exception will be thrown.
+        useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
+            long-form textgrid format.  For backwards compatibility, is True by default.
         '''
         for tier in self.tierDict.values():
             tier.sort()
@@ -1442,16 +1444,51 @@ class Textgrid():
         for tier in self.tierDict.values():
             tier.sort()
         
-        # Header
         outputTxt = ""
-        outputTxt += 'File type = "ooTextFile short"\n'
+        outputTxt += 'File type = "ooTextFile"\n'
         outputTxt += 'Object class = "TextGrid"\n\n'
-        outputTxt += "%s\n%s\n" % (repr(minTimestamp),
-                                   repr(maxTimestamp))
-        outputTxt += "<exists>\n%d\n" % len(self.tierNameList)
-        
-        for tierName in self.tierNameList:
-            outputTxt += self.tierDict[tierName].getAsText()
+        if useShortForm == True:
+            # Header
+            outputTxt += "%s\n%s\n" % (numToStr(minTimestamp),
+                                       numToStr(maxTimestamp))
+            outputTxt += "<exists>\n%d\n" % len(self.tierNameList)
+
+            for tierName in self.tierNameList:
+                outputTxt += self.tierDict[tierName].getAsText()
+        else:
+            tab = " " * 4
+
+            # Header
+            outputTxt += "xmin = %s \n" % numToStr(minTimestamp)
+            outputTxt += "xmax = %s \n" % numToStr(maxTimestamp)
+            outputTxt += "tiers? <exists> \n"
+            outputTxt += "size = %d \n" % len(self.tierNameList)
+            outputTxt += "item []: \n"
+
+            for tierNum, tierName in enumerate(self.tierNameList):
+                tier = self.tierDict[tierName]
+                # Interval header
+                outputTxt += tab + "item [%d]:\n" % (tierNum + 1)
+                outputTxt += tab * 2 + 'class = "%s" \n' % tier.tierType
+                outputTxt += tab * 2 + 'name = "%s" \n' % tierName
+                outputTxt += tab * 2 + 'xmin = %s \n' % numToStr(tier.minTimestamp)
+                outputTxt += tab * 2 + 'xmax = %s \n' % numToStr(tier.maxTimestamp)
+
+                if tier.tierType == INTERVAL_TIER:
+                    outputTxt += tab * 2 + 'intervals: size = %d \n' % len(tier.entryList)
+                    for intervalNum, entry in enumerate(tier.entryList):
+                        start, stop, label = entry
+                        outputTxt += tab * 2 + 'intervals [%d]:\n' %  (intervalNum + 1)
+                        outputTxt += tab * 3 + 'xmin = %s \n' % numToStr(start)
+                        outputTxt += tab * 3 + 'xmax = %s \n' % numToStr(stop)
+                        outputTxt += tab * 3 + 'text = "%s" \n' % label
+                else:
+                    outputTxt += tab * 2 + 'points: size = %d\n ' % len(tier.entryList)
+                    for pointNum, entry in enumerate(tier.entryList):
+                        timestamp, label = entry
+                        outputTxt += tab * 2 + 'points [%d]:\n' % (pointNum + 1)
+                        outputTxt += tab * 3 + 'number = %s \n' % numToStr(timestamp)
+                        outputTxt += tab * 3 + 'mark = "%s" \n' % label
         
         with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputTxt)
@@ -1640,6 +1677,14 @@ def _parseShortTextgrid(data):
                                     tierStartTime, tierEndTime))
 
     return newTG
+
+
+def numToStr(inputNum):
+    if _isclose(inputNum, int(inputNum)):
+        retVal = "%d" % inputNum
+    else:
+        retVal = "%s" % repr(inputNum)
+    return retVal
 
 
 def strToIntOrFloat(inputStr):

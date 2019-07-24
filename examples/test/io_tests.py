@@ -14,6 +14,7 @@ generated files.
 
 import unittest
 import os
+import io
 from os.path import join
 
 from praatio import tgio
@@ -38,6 +39,13 @@ def areTheSame(fn1, fn2, fileHandler=None):
     data2 = fileHandler(fn2)
     
     return data1 == data2
+
+
+def readFile(fn):
+    data = ""
+    with io.open(fn, "r") as fd:
+        data = fd.read()
+    return data
 
 
 def run_save(tg, minimumIntervalLength=None, minTimestamp=None, maxTimestamp=None):
@@ -92,7 +100,29 @@ class IOTests(unittest.TestCase):
         longFN = join(self.dataRoot, "textgrid_to_merge_longfile.TextGrid")
         
         self.assertTrue(areTheSame(shortFN, longFN, tgio.openTextgrid))
-    
+
+    def test_saving_short_textgrid(self):
+        '''Tests that short textgrid files are saved non-destructively'''
+        fn = "textgrid_to_merge.TextGrid"
+        shortFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "saved_short_file.textgrid")
+
+        tg = tgio.openTextgrid(shortFN)
+        tg.save(outputFN)
+
+        self.assertTrue(areTheSame(shortFN, outputFN, readFile))
+
+    def test_saving_long_textgrid(self):
+        '''Tests that long textgrid files are saved non-destructively'''
+        fn = "textgrid_to_merge_longfile.TextGrid"
+        longFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "saved_long_file.textgrid")
+
+        tg = tgio.openTextgrid(longFN)
+        tg.save(outputFN, useShortForm=False)
+
+        self.assertTrue(areTheSame(longFN, outputFN, readFile))
+
     def test_get_audio_duration(self):
         '''Tests that the two audio duration methods output the same value.'''
         wavFN = join(self.dataRoot, "bobby.wav")

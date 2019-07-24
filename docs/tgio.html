@@ -127,7 +127,7 @@ def _fillInBlanks(tier, blankLabel=&#34;&#34;, startTime=None, endTime=None):
                         tier.minTimestamp, tier.maxTimestamp)
 
 
-def _removeUltrashortIntervals(tier, minLength):
+def _removeUltrashortIntervals(tier, minLength, minTimestamp):
     &#39;&#39;&#39;
     Remove intervals that are very tiny
     
@@ -148,23 +148,25 @@ def _removeUltrashortIntervals(tier, minLength):
                 newEntryList[j - 1] = (lastStart, stop, lastLabel)
         else:
             # Special case: the first entry in oldEntryList was ultra-short
-            if len(newEntryList) == 0 and start != 0:
-                newEntryList.append((0, stop, label))
+            if len(newEntryList) == 0 and start != minTimestamp:
+                newEntryList.append((minTimestamp, stop, label))
             # Normal case
             else:
                 newEntryList.append((start, stop, label))
             j += 1
     
     # Next, shift near equivalent tiny boundaries
+    # This will link intervals that were connected by an interval
+    # that was shorter than minLength
     j = 0
     while j &lt; len(newEntryList) - 1:
         diff = abs(newEntryList[j][1] - newEntryList[j + 1][0])
-        if diff &gt; 0 and diff &lt; MIN_INTERVAL_LENGTH:
+        if diff &gt; 0 and diff &lt; minLength:
             newEntryList[j] = (newEntryList[j][0],
                                newEntryList[j + 1][0],
                                newEntryList[j][2])
         j += 1
-    
+
     return tier.new(entryList=newEntryList)
 
      
@@ -344,12 +346,12 @@ class TextgridTier(object):
         text = &#34;&#34;
         text += &#39;&#34;%s&#34;\n&#39; % self.tierType
         text += &#39;&#34;%s&#34;\n&#39; % self.name
-        text += &#39;%s\n%s\n%s\n&#39; % (repr(self.minTimestamp),
-                                  repr(self.maxTimestamp),
+        text += &#39;%s\n%s\n%s\n&#39; % (numToStr(self.minTimestamp),
+                                  numToStr(self.maxTimestamp),
                                   len(self.entryList))
         
         for entry in self.entryList:
-            entry = [repr(val) for val in entry[:-1]] + [&#39;&#34;%s&#34;&#39; % entry[-1], ]
+            entry = [numToStr(val) for val in entry[:-1]] + [&#39;&#34;%s&#34;&#39; % entry[-1], ]
             try:
                 unicode
             except NameError:
@@ -1435,38 +1437,92 @@ class Textgrid():
         self.removeTier(name)
         self.addTier(newTier, tierIndex)
             
-    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH):
-        
+    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None, useShortForm=True):
+        &#39;&#39;&#39;
+        To save the current textgrid
+
+        fn - the fullpath filename of the output
+        minimumIntervalLength - any labeled intervals smaller than this will be removed,
+            useful for removing ultrashort or fragmented intervals; if None, don&#39;t remove any.
+        minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
+            in the Textgrid object.  If minTimestamp is larger than timestamps in your textgrid,
+            an exception will be thrown.
+        maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
+            in the Textgrid object.  If maxTimestamp is smaller than timestamps in your textgrid,
+            an exception will be thrown.
+        useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
+            long-form textgrid format.  For backwards compatibility, is True by default.
+        &#39;&#39;&#39;
         for tier in self.tierDict.values():
             tier.sort()
         
+        if minTimestamp == None:
+            minTimestamp = self.minTimestamp
+        if maxTimestamp == None:
+            maxTimestamp = self.maxTimestamp
+
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
             tier = self.tierDict[name]
             if isinstance(tier, IntervalTier):
-                
                 tier = _fillInBlanks(tier,
                                      &#34;&#34;,
-                                     self.minTimestamp,
-                                     self.maxTimestamp)
+                                     minTimestamp,
+                                     maxTimestamp)
                 if minimumIntervalLength is not None:
                     tier = _removeUltrashortIntervals(tier,
-                                                      minimumIntervalLength)
+                                                      minimumIntervalLength,
+                                                      minTimestamp)
                 self.tierDict[name] = tier
         
         for tier in self.tierDict.values():
             tier.sort()
         
-        # Header
         outputTxt = &#34;&#34;
-        outputTxt += &#39;File type = &#34;ooTextFile short&#34;\n&#39;
+        outputTxt += &#39;File type = &#34;ooTextFile&#34;\n&#39;
         outputTxt += &#39;Object class = &#34;TextGrid&#34;\n\n&#39;
-        outputTxt += &#34;%s\n%s\n&#34; % (repr(self.minTimestamp),
-                                   repr(self.maxTimestamp))
-        outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
-        
-        for tierName in self.tierNameList:
-            outputTxt += self.tierDict[tierName].getAsText()
+        if useShortForm == True:
+            # Header
+            outputTxt += &#34;%s\n%s\n&#34; % (numToStr(minTimestamp),
+                                       numToStr(maxTimestamp))
+            outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
+            
+            for tierName in self.tierNameList:
+                outputTxt += self.tierDict[tierName].getAsText()
+        else:
+            tab = &#34; &#34; * 4
+
+            # Header
+            outputTxt += &#34;xmin = %s \n&#34; % numToStr(minTimestamp)
+            outputTxt += &#34;xmax = %s \n&#34; % numToStr(maxTimestamp)
+            outputTxt += &#34;tiers? &lt;exists&gt; \n&#34;
+            outputTxt += &#34;size = %d \n&#34; % len(self.tierNameList)
+            outputTxt += &#34;item []: \n&#34;
+
+            for tierNum, tierName in enumerate(self.tierNameList):
+                tier = self.tierDict[tierName]
+                # Interval header
+                outputTxt += tab + &#34;item [%d]:\n&#34; % (tierNum + 1)
+                outputTxt += tab * 2 + &#39;class = &#34;%s&#34; \n&#39; % tier.tierType
+                outputTxt += tab * 2 + &#39;name = &#34;%s&#34; \n&#39; % tierName
+                outputTxt += tab * 2 + &#39;xmin = %s \n&#39; % numToStr(tier.minTimestamp)
+                outputTxt += tab * 2 + &#39;xmax = %s \n&#39; % numToStr(tier.maxTimestamp)
+
+                if tier.tierType == INTERVAL_TIER:
+                    outputTxt += tab * 2 + &#39;intervals: size = %d \n&#39; % len(tier.entryList)
+                    for intervalNum, entry in enumerate(tier.entryList):
+                        start, stop, label = entry
+                        outputTxt += tab * 2 + &#39;intervals [%d]:\n&#39; %  (intervalNum + 1)
+                        outputTxt += tab * 3 + &#39;xmin = %s \n&#39; % numToStr(start)
+                        outputTxt += tab * 3 + &#39;xmax = %s \n&#39; % numToStr(stop)
+                        outputTxt += tab * 3 + &#39;text = &#34;%s&#34; \n&#39; % label
+                else:
+                    outputTxt += tab * 2 + &#39;points: size = %d\n &#39; % len(tier.entryList)
+                    for pointNum, entry in enumerate(tier.entryList):
+                        timestamp, label = entry
+                        outputTxt += tab * 2 + &#39;points [%d]:\n&#39; % (pointNum + 1)
+                        outputTxt += tab * 3 + &#39;number = %s \n&#39; % numToStr(timestamp)
+                        outputTxt += tab * 3 + &#39;mark = &#34;%s&#34; \n&#39; % label
         
         with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
             fd.write(outputTxt)
@@ -1657,6 +1713,14 @@ def _parseShortTextgrid(data):
     return newTG
 
 
+def numToStr(inputNum):
+    if _isclose(inputNum, int(inputNum)):
+        retVal = &#34;%d&#34; % inputNum
+    else:
+        retVal = &#34;%s&#34; % repr(inputNum)
+    return retVal
+
+
 def strToIntOrFloat(inputStr):
     return float(inputStr) if &#39;.&#39; in inputStr else int(inputStr)
 
@@ -1740,6 +1804,21 @@ if they share a boundary</p></section>
                    percentOverlapFlag or timeOverlapFlag)
     
     return overlapFlag</code></pre>
+</details>
+</dd>
+<dt id="praatio.tgio.numToStr"><code class="name flex">
+<span>def <span class="ident">numToStr</span></span>(<span>inputNum)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def numToStr(inputNum):
+    if _isclose(inputNum, int(inputNum)):
+        retVal = &#34;%d&#34; % inputNum
+    else:
+        retVal = &#34;%s&#34; % repr(inputNum)
+    return retVal</code></pre>
 </details>
 </dd>
 <dt id="praatio.tgio.openTextgrid"><code class="name flex">
@@ -3952,38 +4031,92 @@ the user is notified of each collision</p></section>
         self.removeTier(name)
         self.addTier(newTier, tierIndex)
             
-    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH):
-        
+    def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None, useShortForm=True):
+        &#39;&#39;&#39;
+        To save the current textgrid
+
+        fn - the fullpath filename of the output
+        minimumIntervalLength - any labeled intervals smaller than this will be removed,
+            useful for removing ultrashort or fragmented intervals; if None, don&#39;t remove any.
+        minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
+            in the Textgrid object.  If minTimestamp is larger than timestamps in your textgrid,
+            an exception will be thrown.
+        maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
+            in the Textgrid object.  If maxTimestamp is smaller than timestamps in your textgrid,
+            an exception will be thrown.
+        useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
+            long-form textgrid format.  For backwards compatibility, is True by default.
+        &#39;&#39;&#39;
         for tier in self.tierDict.values():
             tier.sort()
         
+        if minTimestamp == None:
+            minTimestamp = self.minTimestamp
+        if maxTimestamp == None:
+            maxTimestamp = self.maxTimestamp
+
         # Fill in the blank spaces for interval tiers
         for name in self.tierNameList:
             tier = self.tierDict[name]
             if isinstance(tier, IntervalTier):
-                
                 tier = _fillInBlanks(tier,
                                      &#34;&#34;,
-                                     self.minTimestamp,
-                                     self.maxTimestamp)
+                                     minTimestamp,
+                                     maxTimestamp)
                 if minimumIntervalLength is not None:
                     tier = _removeUltrashortIntervals(tier,
-                                                      minimumIntervalLength)
+                                                      minimumIntervalLength,
+                                                      minTimestamp)
                 self.tierDict[name] = tier
         
         for tier in self.tierDict.values():
             tier.sort()
         
-        # Header
         outputTxt = &#34;&#34;
-        outputTxt += &#39;File type = &#34;ooTextFile short&#34;\n&#39;
+        outputTxt += &#39;File type = &#34;ooTextFile&#34;\n&#39;
         outputTxt += &#39;Object class = &#34;TextGrid&#34;\n\n&#39;
-        outputTxt += &#34;%s\n%s\n&#34; % (repr(self.minTimestamp),
-                                   repr(self.maxTimestamp))
-        outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
-        
-        for tierName in self.tierNameList:
-            outputTxt += self.tierDict[tierName].getAsText()
+        if useShortForm == True:
+            # Header
+            outputTxt += &#34;%s\n%s\n&#34; % (numToStr(minTimestamp),
+                                       numToStr(maxTimestamp))
+            outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
+            
+            for tierName in self.tierNameList:
+                outputTxt += self.tierDict[tierName].getAsText()
+        else:
+            tab = &#34; &#34; * 4
+
+            # Header
+            outputTxt += &#34;xmin = %s \n&#34; % numToStr(minTimestamp)
+            outputTxt += &#34;xmax = %s \n&#34; % numToStr(maxTimestamp)
+            outputTxt += &#34;tiers? &lt;exists&gt; \n&#34;
+            outputTxt += &#34;size = %d \n&#34; % len(self.tierNameList)
+            outputTxt += &#34;item []: \n&#34;
+
+            for tierNum, tierName in enumerate(self.tierNameList):
+                tier = self.tierDict[tierName]
+                # Interval header
+                outputTxt += tab + &#34;item [%d]:\n&#34; % (tierNum + 1)
+                outputTxt += tab * 2 + &#39;class = &#34;%s&#34; \n&#39; % tier.tierType
+                outputTxt += tab * 2 + &#39;name = &#34;%s&#34; \n&#39; % tierName
+                outputTxt += tab * 2 + &#39;xmin = %s \n&#39; % numToStr(tier.minTimestamp)
+                outputTxt += tab * 2 + &#39;xmax = %s \n&#39; % numToStr(tier.maxTimestamp)
+
+                if tier.tierType == INTERVAL_TIER:
+                    outputTxt += tab * 2 + &#39;intervals: size = %d \n&#39; % len(tier.entryList)
+                    for intervalNum, entry in enumerate(tier.entryList):
+                        start, stop, label = entry
+                        outputTxt += tab * 2 + &#39;intervals [%d]:\n&#39; %  (intervalNum + 1)
+                        outputTxt += tab * 3 + &#39;xmin = %s \n&#39; % numToStr(start)
+                        outputTxt += tab * 3 + &#39;xmax = %s \n&#39; % numToStr(stop)
+                        outputTxt += tab * 3 + &#39;text = &#34;%s&#34; \n&#39; % label
+                else:
+                    outputTxt += tab * 2 + &#39;points: size = %d\n &#39; % len(tier.entryList)
+                    for pointNum, entry in enumerate(tier.entryList):
+                        timestamp, label = entry
+                        outputTxt += tab * 2 + &#39;points [%d]:\n&#39; % (pointNum + 1)
+                        outputTxt += tab * 3 + &#39;number = %s \n&#39; % numToStr(timestamp)
+                        outputTxt += tab * 3 + &#39;mark = &#34;%s&#34; \n&#39; % label
         
         with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
             fd.write(outputTxt)</code></pre>
@@ -4383,44 +4516,112 @@ with all others being tossed (default accepts all)</p>
 </details>
 </dd>
 <dt id="praatio.tgio.Textgrid.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self, fn, minimumIntervalLength=1e-08)</span>
+<span>def <span class="ident">save</span></span>(<span>self, fn, minimumIntervalLength=1e-08, minTimestamp=None, maxTimestamp=None, useShortForm=True)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>To save the current textgrid</p>
+<p>fn - the fullpath filename of the output
+minimumIntervalLength - any labeled intervals smaller than this will be removed,
+useful for removing ultrashort or fragmented intervals; if None, don't remove any.
+minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
+in the Textgrid object.
+If minTimestamp is larger than timestamps in your textgrid,
+an exception will be thrown.
+maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
+in the Textgrid object.
+If maxTimestamp is smaller than timestamps in your textgrid,
+an exception will be thrown.
+useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
+long-form textgrid format.
+For backwards compatibility, is True by default.</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH):
-    
+<pre><code class="python">def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None, useShortForm=True):
+    &#39;&#39;&#39;
+    To save the current textgrid
+
+    fn - the fullpath filename of the output
+    minimumIntervalLength - any labeled intervals smaller than this will be removed,
+        useful for removing ultrashort or fragmented intervals; if None, don&#39;t remove any.
+    minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
+        in the Textgrid object.  If minTimestamp is larger than timestamps in your textgrid,
+        an exception will be thrown.
+    maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
+        in the Textgrid object.  If maxTimestamp is smaller than timestamps in your textgrid,
+        an exception will be thrown.
+    useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
+        long-form textgrid format.  For backwards compatibility, is True by default.
+    &#39;&#39;&#39;
     for tier in self.tierDict.values():
         tier.sort()
     
+    if minTimestamp == None:
+        minTimestamp = self.minTimestamp
+    if maxTimestamp == None:
+        maxTimestamp = self.maxTimestamp
+
     # Fill in the blank spaces for interval tiers
     for name in self.tierNameList:
         tier = self.tierDict[name]
         if isinstance(tier, IntervalTier):
-            
             tier = _fillInBlanks(tier,
                                  &#34;&#34;,
-                                 self.minTimestamp,
-                                 self.maxTimestamp)
+                                 minTimestamp,
+                                 maxTimestamp)
             if minimumIntervalLength is not None:
                 tier = _removeUltrashortIntervals(tier,
-                                                  minimumIntervalLength)
+                                                  minimumIntervalLength,
+                                                  minTimestamp)
             self.tierDict[name] = tier
     
     for tier in self.tierDict.values():
         tier.sort()
     
-    # Header
     outputTxt = &#34;&#34;
-    outputTxt += &#39;File type = &#34;ooTextFile short&#34;\n&#39;
+    outputTxt += &#39;File type = &#34;ooTextFile&#34;\n&#39;
     outputTxt += &#39;Object class = &#34;TextGrid&#34;\n\n&#39;
-    outputTxt += &#34;%s\n%s\n&#34; % (repr(self.minTimestamp),
-                               repr(self.maxTimestamp))
-    outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
-    
-    for tierName in self.tierNameList:
-        outputTxt += self.tierDict[tierName].getAsText()
+    if useShortForm == True:
+        # Header
+        outputTxt += &#34;%s\n%s\n&#34; % (numToStr(minTimestamp),
+                                   numToStr(maxTimestamp))
+        outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
+        
+        for tierName in self.tierNameList:
+            outputTxt += self.tierDict[tierName].getAsText()
+    else:
+        tab = &#34; &#34; * 4
+
+        # Header
+        outputTxt += &#34;xmin = %s \n&#34; % numToStr(minTimestamp)
+        outputTxt += &#34;xmax = %s \n&#34; % numToStr(maxTimestamp)
+        outputTxt += &#34;tiers? &lt;exists&gt; \n&#34;
+        outputTxt += &#34;size = %d \n&#34; % len(self.tierNameList)
+        outputTxt += &#34;item []: \n&#34;
+
+        for tierNum, tierName in enumerate(self.tierNameList):
+            tier = self.tierDict[tierName]
+            # Interval header
+            outputTxt += tab + &#34;item [%d]:\n&#34; % (tierNum + 1)
+            outputTxt += tab * 2 + &#39;class = &#34;%s&#34; \n&#39; % tier.tierType
+            outputTxt += tab * 2 + &#39;name = &#34;%s&#34; \n&#39; % tierName
+            outputTxt += tab * 2 + &#39;xmin = %s \n&#39; % numToStr(tier.minTimestamp)
+            outputTxt += tab * 2 + &#39;xmax = %s \n&#39; % numToStr(tier.maxTimestamp)
+
+            if tier.tierType == INTERVAL_TIER:
+                outputTxt += tab * 2 + &#39;intervals: size = %d \n&#39; % len(tier.entryList)
+                for intervalNum, entry in enumerate(tier.entryList):
+                    start, stop, label = entry
+                    outputTxt += tab * 2 + &#39;intervals [%d]:\n&#39; %  (intervalNum + 1)
+                    outputTxt += tab * 3 + &#39;xmin = %s \n&#39; % numToStr(start)
+                    outputTxt += tab * 3 + &#39;xmax = %s \n&#39; % numToStr(stop)
+                    outputTxt += tab * 3 + &#39;text = &#34;%s&#34; \n&#39; % label
+            else:
+                outputTxt += tab * 2 + &#39;points: size = %d\n &#39; % len(tier.entryList)
+                for pointNum, entry in enumerate(tier.entryList):
+                    timestamp, label = entry
+                    outputTxt += tab * 2 + &#39;points [%d]:\n&#39; % (pointNum + 1)
+                    outputTxt += tab * 3 + &#39;number = %s \n&#39; % numToStr(timestamp)
+                    outputTxt += tab * 3 + &#39;mark = &#34;%s&#34; \n&#39; % label
     
     with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
         fd.write(outputTxt)</code></pre>
@@ -4569,12 +4770,12 @@ See help(type(self)) for accurate signature.</p></section>
         text = &#34;&#34;
         text += &#39;&#34;%s&#34;\n&#39; % self.tierType
         text += &#39;&#34;%s&#34;\n&#39; % self.name
-        text += &#39;%s\n%s\n%s\n&#39; % (repr(self.minTimestamp),
-                                  repr(self.maxTimestamp),
+        text += &#39;%s\n%s\n%s\n&#39; % (numToStr(self.minTimestamp),
+                                  numToStr(self.maxTimestamp),
                                   len(self.entryList))
         
         for entry in self.entryList:
-            entry = [repr(val) for val in entry[:-1]] + [&#39;&#34;%s&#34;&#39; % entry[-1], ]
+            entry = [numToStr(val) for val in entry[:-1]] + [&#39;&#34;%s&#34;&#39; % entry[-1], ]
             try:
                 unicode
             except NameError:
@@ -4765,12 +4966,12 @@ See help(type(self)) for accurate signature.</p></section>
     text = &#34;&#34;
     text += &#39;&#34;%s&#34;\n&#39; % self.tierType
     text += &#39;&#34;%s&#34;\n&#39; % self.name
-    text += &#39;%s\n%s\n%s\n&#39; % (repr(self.minTimestamp),
-                              repr(self.maxTimestamp),
+    text += &#39;%s\n%s\n%s\n&#39; % (numToStr(self.minTimestamp),
+                              numToStr(self.maxTimestamp),
                               len(self.entryList))
     
     for entry in self.entryList:
-        entry = [repr(val) for val in entry[:-1]] + [&#39;&#34;%s&#34;&#39; % entry[-1], ]
+        entry = [numToStr(val) for val in entry[:-1]] + [&#39;&#34;%s&#34;&#39; % entry[-1], ]
         try:
             unicode
         except NameError:
@@ -4887,6 +5088,7 @@ Overlapping entries are merged.</p></section>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="praatio.tgio.intervalOverlapCheck" href="#praatio.tgio.intervalOverlapCheck">intervalOverlapCheck</a></code></li>
+<li><code><a title="praatio.tgio.numToStr" href="#praatio.tgio.numToStr">numToStr</a></code></li>
 <li><code><a title="praatio.tgio.openTextgrid" href="#praatio.tgio.openTextgrid">openTextgrid</a></code></li>
 <li><code><a title="praatio.tgio.strToIntOrFloat" href="#praatio.tgio.strToIntOrFloat">strToIntOrFloat</a></code></li>
 </ul>
