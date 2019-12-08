@@ -1,9 +1,9 @@
 
 # praatIO
 
-[![](https://badges.gitter.im/praatio/Lobby.svg)](https://gitter.im/praatio/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![](https://travis-ci.org/timmahrt/praatIO.svg?branch=master)](https://travis-ci.org/timmahrt/praatIO) [![](https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?)](https://coveralls.io/github/timmahrt/praatIO?branch=master) [![](https://img.shields.io/badge/license-MIT-blue.svg?)](http://opensource.org/licenses/MIT) [![](https://img.shields.io/pypi/v/praatio.svg)](https://pypi.org/project/praatio/)
+[![](https://travis-ci.org/timmahrt/praatIO.svg?branch=master)](https://travis-ci.org/timmahrt/praatIO) [![](https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?)](https://coveralls.io/github/timmahrt/praatIO?branch=master) [![](https://img.shields.io/badge/license-MIT-blue.svg?)](http://opensource.org/licenses/MIT) [![](https://img.shields.io/pypi/v/praatio.svg)](https://pypi.org/project/praatio/)
 
-*Questions?  Comments?  Feedback?  Chat with us on gitter!*
+*Questions?  Comments?  Feedback? [![](https://badges.gitter.im/praatio/Lobby.svg)](https://gitter.im/praatio/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)*
 
 -----
 
@@ -89,7 +89,7 @@ You can view them online using the external website Jupyter:
     
 ## Version History
 
-Praatio uses semantic versioning (Major.Minor.Patch)
+*Praatio uses semantic versioning (Major.Minor.Patch)*
 
 Ver 3.8 (July 24, 2019)
 - Textgrids can be saved in the Textgrid long file format with .save(fn, useShortForm=False).
