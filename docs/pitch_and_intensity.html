@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.5.2" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>praatio.pitch_and_intensity API documentation</title>
 <meta name="description" content="Functions for working with pitch data …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>praatio.pitch_and_intensity</code> module</h1>
+<h1 class="title">Module <code>praatio.pitch_and_intensity</code></h1>
 </header>
 <section id="section-intro">
 <p>Functions for working with pitch data</p>
@@ -30,7 +30,9 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
 <p>For brevity, 'pitch_and_intensity' is referred to as 'PI'</p>
 <p>see <strong>examples/get_pitch_and_formants.py</strong></p>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python"># coding: utf-8
 &#39;&#39;&#39;
 Functions for working with pitch data
@@ -548,7 +550,9 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 <section class="desc"><p>Detect pitch halving and doubling errors.</p>
 <p>If a textgrid is passed in, it adds the markings to the textgrid</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
     &#39;&#39;&#39;
     Detect pitch halving and doubling errors.
@@ -585,7 +589,9 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def extractIntensity(inputFN, outputFN, praatEXE,
                      minPitch, sampleStep=0.01, forceRegenerate=True,
                      undefinedValue=None):
@@ -614,7 +620,7 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 </details>
 </dd>
 <dt id="praatio.pitch_and_intensity.extractPI"><code class="name flex">
-<span>def <span class="ident">extractPI</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, pitchUnit=&#39;Hertz&#39;, forceRegenerate=True, tgFN=None, tierName=None, tmpOutputPath=None, undefinedValue=None, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
+<span>def <span class="ident">extractPI</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, maxPitch, sampleStep=0.01, silenceThreshold=0.03, pitchUnit='Hertz', forceRegenerate=True, tgFN=None, tierName=None, tmpOutputPath=None, undefinedValue=None, medianFilterWindowSize=0, pitchQuadInterp=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Extracts pitch and intensity from a file wholesale or piecewise</p>
@@ -622,16 +628,13 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 segments in a tier of the tg.
 Otherwise, pitch will be extracted from
 the entire file.</p>
-<dl>
-<dt><strong><code>male</code></strong> :&ensp;<code>minPitch</code>=<code>50</code>; <code>maxPitch</code>=<code>350</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>female</code></strong> :&ensp;<code>minPitch</code>=<code>75</code>; <code>maxPitch</code>=<code>450</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>pitchUnit</code></strong> :&ensp;<code>"Hertz"</code>, <code>"semitones</code> <code>re</code> <code>100</code> <code>Hz"</code>, <code>etc</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<p>male: minPitch=50; maxPitch=350
+female: minPitch=75; maxPitch=450
+pitchUnit: "Hertz", "semitones re 100 Hz", etc</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def extractPI(inputFN, outputFN, praatEXE,
               minPitch, maxPitch, sampleStep=0.01,
               silenceThreshold=0.03, pitchUnit=&#34;Hertz&#34;,
@@ -693,7 +696,9 @@ undefinedValue - if None remove from the dataset, otherset set to
 undefinedValue
 pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def extractPitch(wavFN, outputFN, praatEXE,
                  minPitch, maxPitch, sampleStep=0.01,
                  silenceThreshold=0.03, forceRegenerate=True,
@@ -756,7 +761,9 @@ forceRegenerate - if running this function for the same file, if False
 just read in the existing pitch file
 pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def extractPitchTier(wavFN, outputFN, praatEXE,
                      minPitch, maxPitch, sampleStep=0.01,
                      silenceThreshold=0.03, forceRegenerate=True,
@@ -810,19 +817,18 @@ pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
 <section class="desc"><p>Generates processed values for the labeled intervals in a textgrid</p>
 <p>nullLabelList - labels to ignore in the textgrid.
 Defaults to ["",]</p>
-<dl>
-<dt>if 'doPitch'=true get pitch measures; if =false get rms intensity</dt>
-<dt><strong><code>medianFilterWindowSize</code></strong> :&ensp;<code>if</code> <code>none</code>, <code>no</code> <code>filtering</code> <code>is</code> <code>done</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>globalZNormalization</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>values</code> <code>are</code> <code>normalized</code> <code>with</code> <code>the</code> <code>mean</code></dt>
-<dd>and stdDev of the data in dataList</dd>
-<dt><strong><code>localZNormalization</code></strong> :&ensp;<code>if</code> <code>greater</code> <code>than</code> <code>1</code>, <code>values</code> <code>are</code> <code>normalized</code> <code>with</code> <code>the</code> <code>mean</code></dt>
-<dd>and stdDev of the local context (for a window of 5, it
+<p>if 'doPitch'=true get pitch measures; if =false get rms intensity
+medianFilterWindowSize: if none, no filtering is done
+globalZNormalization: if True, values are normalized with the mean
+and stdDev of the data in dataList
+localZNormalization: if greater than 1, values are normalized with the mean
+and stdDev of the local context (for a window of 5, it
 would consider the current value, 2 values before and 2
-values after)</dd>
-</dl></section>
+values after)</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def generatePIMeasures(dataList, tgFN, tierName, doPitch,
                        medianFilterWindowSize=None,
                        globalZNormalization=False,
@@ -897,17 +903,15 @@ values after)</dd>
 </code></dt>
 <dd>
 <section class="desc"><p>Get various measures (min, max, etc) for the passed in list of pitch values</p>
-<dl>
-<dt>name is the name of the file.
-Label is the label of the current interval.</dt>
-<dt>Both of these labels are only used debugging and can be ignored if desired.</dt>
-<dt><strong><code>medianFilterWindowSize</code></strong> :&ensp;<code>None</code> -&gt; <code>no</code> <code>median</code> <code>filtering</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>filterZeroFlag</code></strong> :&ensp;<code>True</code> -&gt; <code>zero</code> <code>values</code> <code>are</code> <code>removed</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<p>name is the name of the file.
+Label is the label of the current interval.
+Both of these labels are only used debugging and can be ignored if desired.
+medianFilterWindowSize: None -&gt; no median filtering
+filterZeroFlag:True -&gt; zero values are removed</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def getPitchMeasures(f0Values, name=None, label=None,
                      medianFilterWindowSize=None,
                      filterZeroFlag=False):
@@ -964,7 +968,9 @@ Label is the label of the current interval.</dt>
 [(time1, value1a, value1b, &hellip;),
 (time2, value2a, value2b, &hellip;), ]</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def loadTimeSeriesData(fn, undefinedValue=None):
     &#39;&#39;&#39;
     For reading the output of get_pitch_and_intensity or get_intensity
@@ -1024,12 +1030,14 @@ Label is the label of the current interval.</dt>
 <dl>
 <dt id="praatio.pitch_and_intensity.NormalizationException"><code class="flex name class">
 <span>class <span class="ident">NormalizationException</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+<span>(</span><span>...)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class NormalizationException(Exception):
 
     def __str__(self):
@@ -1039,15 +1047,22 @@ Label is the label of the current interval.</dt>
                 &#34;Global normalization should be used to examine global phenomena &#34;
                 &#34;(e.g. the pitch range of a speaker).&#34;)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 <dt id="praatio.pitch_and_intensity.OverwriteException"><code class="flex name class">
 <span>class <span class="ident">OverwriteException</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+<span>(</span><span>...)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class OverwriteException(Exception):
     
     def __str__(self):
@@ -1055,6 +1070,11 @@ Label is the label of the current interval.</dt>
                 &#34;being overwritten.  Please change the output directory &#34;
                 &#34;to an alternative location or add a suffix to the output. &#34;)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -1096,7 +1116,7 @@ Label is the label of the current interval.</dt>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

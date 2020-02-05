@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.5.2" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>praatio.tgio API documentation</title>
 <meta name="description" content="Functions for reading/writing/manipulating textgrid files …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>praatio.tgio</code> module</h1>
+<h1 class="title">Module <code>praatio.tgio</code></h1>
 </header>
 <section id="section-intro">
 <p>Functions for reading/writing/manipulating textgrid files.</p>
@@ -31,7 +31,9 @@ Tiers in a Textgrid are ordered and must contain a unique name.</p>
 Textgrid.save() can be used to save a Textgrid object to a file.</p>
 <p>see the <strong>examples/</strong> directory for lots of examples using tgio.py</p>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">&#34;&#34;&#34;
 Functions for reading/writing/manipulating textgrid files.
 
@@ -1486,7 +1488,7 @@ class Textgrid():
             outputTxt += &#34;%s\n%s\n&#34; % (numToStr(minTimestamp),
                                        numToStr(maxTimestamp))
             outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
-            
+
             for tierName in self.tierNameList:
                 outputTxt += self.tierDict[tierName].getAsText()
         else:
@@ -1757,7 +1759,9 @@ must overlap by at least this threshold</p>
 <p>If boundaryInclusive is true, then two intervals are considered to overlap
 if they share a boundary</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def intervalOverlapCheck(interval, cmprInterval, percentThreshold=0,
                          timeThreshold=0, boundaryInclusive=False):
     &#39;&#39;&#39;
@@ -1812,7 +1816,9 @@ if they share a boundary</p></section>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def numToStr(inputNum):
     if _isclose(inputNum, int(inputNum)):
         retVal = &#34;%d&#34; % inputNum
@@ -1827,7 +1833,9 @@ if they share a boundary</p></section>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def openTextgrid(fnFullPath):
     
     try:
@@ -1854,7 +1862,9 @@ if they share a boundary</p></section>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def strToIntOrFloat(inputStr):
     return float(inputStr) if &#39;.&#39; in inputStr else int(inputStr)</code></pre>
 </details>
@@ -1866,12 +1876,14 @@ if they share a boundary</p></section>
 <dl>
 <dt id="praatio.tgio.BadIntervalError"><code class="flex name class">
 <span>class <span class="ident">BadIntervalError</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+<span>(</span><span>start, stop, label)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class BadIntervalError(Exception):
     
     def __init__(self, start, stop, label):
@@ -1885,31 +1897,22 @@ if they share a boundary</p></section>
         return (&#34;Problem with interval--could not create textgrid &#34; +
                 &#34;(%s,%s,%s)&#34; % dataTuple)</code></pre>
 </details>
-<h3>Methods</h3>
-<dl>
-<dt id="praatio.tgio.BadIntervalError.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, start, stop, label)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Initialize self.
-See help(type(self)) for accurate signature.</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def __init__(self, start, stop, label):
-    super(BadIntervalError, self).__init__()
-    self.start = start
-    self.stop = stop
-    self.label = label</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 <dt id="praatio.tgio.Interval"><code class="flex name class">
 <span>class <span class="ident">Interval</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.tuple)</span>
+<span>(</span><span>start, end, label)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Interval(start, end, label)</p></section>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.tuple</li>
+</ul>
 <h3>Instance variables</h3>
 <dl>
 <dt id="praatio.tgio.Interval.end"><code class="name">var <span class="ident">end</span></code></dt>
@@ -1928,12 +1931,20 @@ See help(type(self)) for accurate signature.</p></section>
 </dd>
 <dt id="praatio.tgio.IntervalTier"><code class="flex name class">
 <span>class <span class="ident">IntervalTier</span></span>
-<span>(</span><span><small>ancestors:</small> <a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a>)</span>
+<span>(</span><span>name, entryList, minT=None, maxT=None, pairedWav=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>An interval tier is for annotating events that have duration</p>
+<p>The entryList is of the form:
+[(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]</p>
+<p>The data stored in the labels can be anything but will
+be interpreted as text by praatio (the label could be descriptive
+text e.g. ('erase this region') or numerical data e.g. (average pitch
+values like '132'))</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class IntervalTier(TextgridTier):
     
     tierType = INTERVAL_TIER
@@ -2442,83 +2453,27 @@ See help(type(self)) for accurate signature.</p></section>
             
         return IntervalTier(self.name, newEntryList, newMin, newMax)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a></li>
+</ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="praatio.tgio.IntervalTier.tierType"><code class="name">var <span class="ident">tierType</span></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>str(object='') -&gt; str
+str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
+<p>Create a new string object from the given object. If encoding or
+errors is specified, then the object must expose a data buffer
+that will be decoded using the given encoding and error handler.
+Otherwise, returns the result of object.<strong>str</strong>() (if defined)
+or repr(object).
+encoding defaults to sys.getdefaultencoding().
+errors defaults to 'strict'.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="praatio.tgio.IntervalTier.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, name, entryList, minT=None, maxT=None, pairedWav=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>An interval tier is for annotating events that have duration</p>
-<p>The entryList is of the form:
-[(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]</p>
-<p>The data stored in the labels can be anything but will
-be interpreted as text by praatio (the label could be descriptive
-text e.g. ('erase this region') or numerical data e.g. (average pitch
-values like '132'))</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def __init__(self, name, entryList, minT=None, maxT=None,
-             pairedWav=None):
-    &#39;&#39;&#39;
-    An interval tier is for annotating events that have duration
-    
-    The entryList is of the form:
-    [(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]
-    
-    The data stored in the labels can be anything but will
-    be interpreted as text by praatio (the label could be descriptive
-    text e.g. (&#39;erase this region&#39;) or numerical data e.g. (average pitch
-    values like &#39;132&#39;))
-    &#39;&#39;&#39;
-    entryList = [(float(start), float(stop), label)
-                 for start, stop, label in entryList]
-
-    if minT is not None:
-        minT = float(minT)
-    if maxT is not None:
-        maxT = float(maxT)
-    
-    if maxT is None and pairedWav is not None:
-        maxT = _getWavDuration(pairedWav)
-    
-    # Prevent poorly-formed textgrids from being created
-    for entry in entryList:
-        if entry[0] &gt;= entry[1]:
-            fmtStr = &#34;Anomaly: startTime=%f, stopTime=%f, label=%s&#34;
-            print((fmtStr % (entry[0], entry[1], entry[2])))
-        assert(entry[0] &lt; entry[1])
-    
-    # Remove whitespace
-    tmpEntryList = []
-    for start, stop, label in entryList:
-        tmpEntryList.append(Interval(start, stop, label.strip()))
-    entryList = tmpEntryList
-    
-    # Determine the minimum and maximum timestampes
-    minTimeList = [subList[0] for subList in entryList]
-    maxTimeList = [subList[1] for subList in entryList]
-    
-    if minT is not None:
-        minTimeList.append(minT)
-    if maxT is not None:
-        maxTimeList.append(maxT)
-
-    try:
-        minT = min(minTimeList)
-        maxT = max(maxTimeList)
-    except ValueError:
-        raise TimelessTextgridTierException()
-    
-    super(IntervalTier, self).__init__(name, entryList, minT, maxT)</code></pre>
-</details>
-</dd>
 <dt id="praatio.tgio.IntervalTier.crop"><code class="name flex">
 <span>def <span class="ident">crop</span></span>(<span>self, cropStart, cropEnd, mode, rebaseToZero)</span>
 </code></dt>
@@ -2533,7 +2488,9 @@ truncated to fit within the crop region.</p>
 <p>If rebaseToZero is True, the cropped textgrid values will be
 subtracted by the cropStart</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">    def crop(self, cropStart, cropEnd, mode, rebaseToZero):
         &#39;&#39;&#39;
         Creates a new tier with all entries that fit inside the new interval
@@ -2650,7 +2607,9 @@ subtracted by the cropStart</p></section>
 <p>Any overlapping portions of entries with entries in this textgrid
 will be removed from the returned tier.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def difference(self, tier):
     &#39;&#39;&#39;
     Takes the set difference of this tier and the given one
@@ -2678,7 +2637,9 @@ will be removed from the returned tier.</p></section>
 <p>If allowOvershoot is True, an interval can go beyond the bounds
 of the textgrid</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def editTimestamps(self, offset, allowOvershoot=False):
     &#39;&#39;&#39;
     Modifies all timestamps by a constant amount
@@ -2726,23 +2687,19 @@ of the textgrid</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Makes a region in a tier blank (removes all contained entries)</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>in</code> <code>the</code> <code>event</code> <code>that</code> <code>intervals</code> <code>exist</code> <code>in</code> <code>the</code> <code>insertion</code> <code>area</code>,</dt>
-<dd>one of three things may happen</dd>
-</dl>
-<ul>
-<li>'truncate' - partially contained entries will have the portion
-removed that overlaps with the target entry</li>
-<li>'categorical' - all entries that overlap, even partially, with the
-target entry will be completely removed</li>
-<li>None or any other value - AssertionError is thrown</li>
-</ul>
-<dl>
-<dt><strong><code>doShrink</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>moves</code> <code>leftward</code> <code>by</code> (/<code>stop</code>/ - /<code>start</code>/) <code>amount</code>,</dt>
-<dd>each item that occurs after /stop/</dd>
-</dl></section>
+<p>collisionCode: in the event that intervals exist in the insertion area,
+one of three things may happen
+- 'truncate' - partially contained entries will have the portion
+removed that overlaps with the target entry
+- 'categorical' - all entries that overlap, even partially, with the
+target entry will be completely removed
+- None or any other value - AssertionError is thrown</p>
+<p>doShrink: if True, moves leftward by (/stop/ - /start/) amount,
+each item that occurs after /stop/</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def eraseRegion(self, start, stop, collisionCode=None, doShrink=True):
     &#39;&#39;&#39;
     Makes a region in a tier blank (removes all contained entries)
@@ -2834,7 +2791,9 @@ target entry will be completely removed</li>
 <section class="desc"><p>Returns the regions of the textgrid without labels</p>
 <p>This can include unlabeled segments and regions marked as silent.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def getNonEntries(self):
     &#39;&#39;&#39;
     Returns the regions of the textgrid without labels
@@ -2871,7 +2830,9 @@ target entry will be completely removed</li>
 <p>dataTupleList should be of the form:
 [(time1, value1a, value1b,&hellip;), (time2, value2a, value2b&hellip;), &hellip;]</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def getValuesInIntervals(self, dataTupleList):
     &#39;&#39;&#39;
     Returns data from dataTupleList contained in labeled intervals
@@ -2896,19 +2857,17 @@ target entry will be completely removed</li>
 </code></dt>
 <dd>
 <section class="desc"><p>inserts an interval into the tier</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>in</code> <code>the</code> <code>event</code> <code>that</code> <code>intervals</code> <code>exist</code> <code>in</code> <code>the</code> <code>insertion</code> <code>area</code>,</dt>
-<dd>one of three things may happen</dd>
-</dl>
-<ul>
-<li>'replace' - existing items will be removed</li>
-<li>'merge' - inserting item will be fused with existing items</li>
-<li>None or any other value - TextgridCollisionException is thrown</li>
-</ul>
+<p>collisionCode: in the event that intervals exist in the insertion area,
+one of three things may happen
+- 'replace' - existing items will be removed
+- 'merge' - inserting item will be fused with existing items
+- None or any other value - TextgridCollisionException is thrown</p>
 <p>if warnFlag is True and collisionCode is not None,
 the user is notified of each collision</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def insertEntry(self, entry, warnFlag=True, collisionCode=None):
     &#39;&#39;&#39;
     inserts an interval into the tier
@@ -2960,19 +2919,17 @@ the user is notified of each collision</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Inserts a blank region into the tier</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>in</code> <code>the</code> <code>event</code> <code>that</code> <code>an</code> <code>interval</code> <code>stradles</code> <code>the</code></dt>
-<dd>starting point</dd>
-</dl>
-<ul>
-<li>'stretch' - stretches the interval by /duration/ amount</li>
-<li>'split' - splits the interval into two&ndash;everything to the
-right of 'start' will be advanced by 'duration' seconds</li>
-<li>'no change' - leaves the interval as is with no change</li>
-<li>None or any other value - AssertionError is thrown</li>
-</ul></section>
+<p>collisionCode: in the event that an interval stradles the
+starting point
+- 'stretch' - stretches the interval by /duration/ amount
+- 'split' - splits the interval into two&ndash;everything to the
+right of 'start' will be advanced by 'duration' seconds
+- 'no change' - leaves the interval as is with no change
+- None or any other value - AssertionError is thrown</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def insertSpace(self, start, duration, collisionCode=None):
     &#39;&#39;&#39;
     Inserts a blank region into the tier
@@ -3035,7 +2992,9 @@ returned tier.
 If intervals partially overlap, only the overlapping
 portion will be returned.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def intersection(self, tier):
     &#39;&#39;&#39;
     Takes the set intersection of this tier and the given one
@@ -3070,7 +3029,9 @@ portion will be returned.</p></section>
 <p>This preserves the labels and the duration of silence in
 this tier while changing the duration of labeled segments.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def morph(self, targetTier, filterFunc=None):
     &#39;&#39;&#39;
     Morphs the duration of segments in this tier to those in another
@@ -3126,10 +3087,14 @@ this tier while changing the duration of labeled segments.</p></section>
 </dd>
 <dt id="praatio.tgio.Point"><code class="flex name class">
 <span>class <span class="ident">Point</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.tuple)</span>
+<span>(</span><span>time, label)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Point(time, label)</p></section>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.tuple</li>
+</ul>
 <h3>Instance variables</h3>
 <dl>
 <dt id="praatio.tgio.Point.label"><code class="name">var <span class="ident">label</span></code></dt>
@@ -3144,12 +3109,20 @@ this tier while changing the duration of labeled segments.</p></section>
 </dd>
 <dt id="praatio.tgio.PointTier"><code class="flex name class">
 <span>class <span class="ident">PointTier</span></span>
-<span>(</span><span><small>ancestors:</small> <a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a>)</span>
+<span>(</span><span>name, entryList, minT=None, maxT=None, pairedWav=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>A point tier is for annotating instaneous events</p>
+<p>The entryList is of the form:
+[(timeVal1, label1), (timeVal2, label2), ]</p>
+<p>The data stored in the labels can be anything but will
+be interpreted as text by praatio (the label could be descriptive
+text e.g. ('peak point here') or numerical data e.g. (pitch values
+like '132'))</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class PointTier(TextgridTier):
     
     tierType = POINT_TIER
@@ -3388,63 +3361,31 @@ this tier while changing the duration of labeled segments.</p></section>
         
         return newTier</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a></li>
+</ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="praatio.tgio.PointTier.entryType"><code class="name">var <span class="ident">entryType</span></code></dt>
+<dd>
+<section class="desc"><p>Point(time, label)</p></section>
+</dd>
 <dt id="praatio.tgio.PointTier.tierType"><code class="name">var <span class="ident">tierType</span></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>str(object='') -&gt; str
+str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
+<p>Create a new string object from the given object. If encoding or
+errors is specified, then the object must expose a data buffer
+that will be decoded using the given encoding and error handler.
+Otherwise, returns the result of object.<strong>str</strong>() (if defined)
+or repr(object).
+encoding defaults to sys.getdefaultencoding().
+errors defaults to 'strict'.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="praatio.tgio.PointTier.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, name, entryList, minT=None, maxT=None, pairedWav=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>A point tier is for annotating instaneous events</p>
-<p>The entryList is of the form:
-[(timeVal1, label1), (timeVal2, label2), ]</p>
-<p>The data stored in the labels can be anything but will
-be interpreted as text by praatio (the label could be descriptive
-text e.g. ('peak point here') or numerical data e.g. (pitch values
-like '132'))</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def __init__(self, name, entryList, minT=None, maxT=None,
-             pairedWav=None):
-    &#39;&#39;&#39;
-    A point tier is for annotating instaneous events
-    
-    The entryList is of the form:
-    [(timeVal1, label1), (timeVal2, label2), ]
-    
-    The data stored in the labels can be anything but will
-    be interpreted as text by praatio (the label could be descriptive
-    text e.g. (&#39;peak point here&#39;) or numerical data e.g. (pitch values
-    like &#39;132&#39;))
-    &#39;&#39;&#39;
-    
-    entryList = [Point(float(time), label) for time, label in entryList]
-    
-    # Determine the min and max timestamps
-    timeList = [time for time, label in entryList]
-    if minT is not None:
-        timeList.append(float(minT))
-    if maxT is not None:
-        timeList.append(float(maxT))
-        
-    if maxT is None and pairedWav is not None:
-        maxT = _getWavDuration(pairedWav)
-    
-    try:
-        minT = min(timeList)
-        maxT = max(timeList)
-    except ValueError:
-        raise TimelessTextgridTierException()
-
-    super(PointTier, self).__init__(name, entryList, minT, maxT)</code></pre>
-</details>
-</dd>
 <dt id="praatio.tgio.PointTier.crop"><code class="name flex">
 <span>def <span class="ident">crop</span></span>(<span>self, cropStart, cropEnd, mode=None, rebaseToZero=True)</span>
 </code></dt>
@@ -3454,7 +3395,9 @@ like '132'))</p></section>
 This parameter is kept for compatibility with
 IntervalTier.crop()</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def crop(self, cropStart, cropEnd, mode=None,
          rebaseToZero=True):
     &#39;&#39;&#39;
@@ -3493,7 +3436,9 @@ IntervalTier.crop()</p></section>
 <p>If allowOvershoot is True, an interval can go beyond the bounds
 of the textgrid</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def editTimestamps(self, offset, allowOvershoot=False):
     &#39;&#39;&#39;
     Modifies all timestamps by a constant amount
@@ -3534,14 +3479,14 @@ of the textgrid</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Makes a region in a tier blank (removes all contained entries)</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>Ignored</code> <code>for</code> <code>the</code> <code>moment</code> (<code>added</code> <code>for</code> <code>compatibility</code></dt>
-<dd>with eraseRegion() for Interval Tiers)</dd>
-<dt><strong><code>doShrink</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>moves</code> <code>leftward</code> <code>by</code> (/<code>stop</code>/ - /<code>start</code>/)</dt>
-<dd>all points to the right of /stop/</dd>
-</dl></section>
+<p>collisionCode: Ignored for the moment (added for compatibility
+with eraseRegion() for Interval Tiers)
+doShrink: if True, moves leftward by (/stop/ - /start/)
+all points to the right of /stop/</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def eraseRegion(self, start, stop, collisionCode=None, doShrink=True):
     &#39;&#39;&#39;
     Makes a region in a tier blank (removes all contained entries)
@@ -3597,7 +3542,9 @@ pass through self.entryList.
 If the data is not sequentially
 ordered, the incorrect response will be returned.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def getValuesAtPoints(self, dataTupleList, fuzzyMatching=False):
     &#39;&#39;&#39;
     Get the values that occur at points in the point tier
@@ -3634,19 +3581,17 @@ ordered, the incorrect response will be returned.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>inserts an interval into the tier</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>in</code> <code>the</code> <code>event</code> <code>that</code> <code>intervals</code> <code>exist</code> <code>in</code> <code>the</code> <code>insertion</code> <code>area</code>,</dt>
-<dd>one of three things may happen</dd>
-</dl>
-<ul>
-<li>'replace' - existing items will be removed</li>
-<li>'merge' - inserting item will be fused with existing items</li>
-<li>None or any other value - TextgridCollisionException is thrown</li>
-</ul>
+<p>collisionCode: in the event that intervals exist in the insertion area,
+one of three things may happen
+- 'replace' - existing items will be removed
+- 'merge' - inserting item will be fused with existing items
+- None or any other value - TextgridCollisionException is thrown</p>
 <p>if warnFlag is True and collisionCode is not None,
 the user is notified of each collision</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def insertEntry(self, entry, warnFlag=True, collisionCode=None):
     &#39;&#39;&#39;
     inserts an interval into the tier
@@ -3700,12 +3645,12 @@ the user is notified of each collision</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Inserts a region into the tier</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>Ignored</code> <code>for</code> <code>the</code> <code>moment</code> (<code>added</code> <code>for</code> <code>compatibility</code></dt>
-<dd>with insertSpace() for Interval Tiers)</dd>
-</dl></section>
+<p>collisionCode: Ignored for the moment (added for compatibility
+with insertSpace() for Interval Tiers)</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def insertSpace(self, start, duration, collisionCode=None):
     &#39;&#39;&#39;
     Inserts a region into the tier
@@ -3734,7 +3679,6 @@ the user is notified of each collision</p></section>
 <ul class="hlist">
 <li><code><a title="praatio.tgio.TextgridTier.appendTier" href="#praatio.tgio.TextgridTier.appendTier">appendTier</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.deleteEntry" href="#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
-<li><code><a title="praatio.tgio.TextgridTier.entryType" href="#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.find" href="#praatio.tgio.TextgridTier.find">find</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.getAsText" href="#praatio.tgio.TextgridTier.getAsText">getAsText</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.new" href="#praatio.tgio.TextgridTier.new">new</a></code></li>
@@ -3748,9 +3692,11 @@ the user is notified of each collision</p></section>
 <span>class <span class="ident">Textgrid</span></span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>A container that stores and operates over interval and point tiers</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class Textgrid():
     
     def __init__(self):
@@ -4080,7 +4026,7 @@ the user is notified of each collision</p></section>
             outputTxt += &#34;%s\n%s\n&#34; % (numToStr(minTimestamp),
                                        numToStr(maxTimestamp))
             outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
-            
+
             for tierName in self.tierNameList:
                 outputTxt += self.tierDict[tierName].getAsText()
         else:
@@ -4121,24 +4067,12 @@ the user is notified of each collision</p></section>
         with io.open(fn, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fd:
             fd.write(outputTxt)</code></pre>
 </details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="praatio.kgio.Klattgrid" href="kgio.html#praatio.kgio.Klattgrid">Klattgrid</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="praatio.tgio.Textgrid.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>A container that stores and operates over interval and point tiers</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def __init__(self):
-    &#39;A container that stores and operates over interval and point tiers&#39;
-    self.tierNameList = []  # Preserves the order of the tiers
-    self.tierDict = {}
-
-    self.minTimestamp = None
-    self.maxTimestamp = None</code></pre>
-</details>
-</dd>
 <dt id="praatio.tgio.Textgrid.addTier"><code class="name flex">
 <span>def <span class="ident">addTier</span></span>(<span>self, tier, tierIndex=None)</span>
 </code></dt>
@@ -4146,7 +4080,9 @@ the user is notified of each collision</p></section>
 <section class="desc"><p>Add a tier to this textgrid.</p>
 <p>If tierIndex is specified, insert the tier into the specified position.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def addTier(self, tier, tierIndex=None):
     &#39;&#39;&#39;
     Add a tier to this textgrid.
@@ -4180,7 +4116,9 @@ the user is notified of each collision</p></section>
 <p>if onlyMatchingNames is False, tiers that don't appear in both
 textgrids will also appear</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def appendTextgrid(self, tg, onlyMatchingNames=True):
     &#39;&#39;&#39;
     Append one textgrid to the end of this one
@@ -4258,7 +4196,9 @@ truncated to fit within the crop region.</p>
 <p>If rebaseToZero is True, the cropped textgrid values will be
 subtracted by the cropStart</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def crop(self, cropStart, cropEnd, mode, rebaseToZero):
     &#39;&#39;&#39;
     Creates a textgrid where all intervals fit within the crop region
@@ -4300,7 +4240,9 @@ subtracted by the cropStart</p></section>
 <dd>
 <section class="desc"><p>Modifies all timestamps by a constant amount</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def editTimestamps(self, offset, allowOvershoot=False):
     &#39;&#39;&#39;
     Modifies all timestamps by a constant amount
@@ -4326,7 +4268,9 @@ subtracted by the cropStart</p></section>
 will be shifted to fill the void (ie the duration of the textgrid
 will be reduced by start - stop)</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def eraseRegion(self, start, stop, doShrink=True):
     &#39;&#39;&#39;
     Makes a region in a tier blank (removes all contained entries)
@@ -4360,19 +4304,17 @@ will be reduced by start - stop)</p></section>
 <section class="desc"><p>Inserts a blank region into a textgrid</p>
 <p>Every item that occurs after /start/ will be pushed back by
 /duration/ seconds</p>
-<dl>
-<dt><strong><code>collisionCode</code></strong> :&ensp;<code>in</code> <code>the</code> <code>event</code> <code>that</code> <code>an</code> <code>interval</code> <code>stradles</code> <code>the</code></dt>
-<dd>starting point</dd>
-</dl>
-<ul>
-<li>'stretch' - stretches the interval by /duration/ amount</li>
-<li>'split' - splits the interval into two&ndash;everything to the
-right of 'start' will be advanced by 'duration' seconds</li>
-<li>'no change' - leaves the interval as is with no change</li>
-<li>None or any other value - AssertionError is thrown</li>
-</ul></section>
+<p>collisionCode: in the event that an interval stradles the
+starting point
+- 'stretch' - stretches the interval by /duration/ amount
+- 'split' - splits the interval into two&ndash;everything to the
+right of 'start' will be advanced by 'duration' seconds
+- 'no change' - leaves the interval as is with no change
+- None or any other value - AssertionError is thrown</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def insertSpace(self, start, duration, collisionCode=None):
     &#39;&#39;&#39;
     Inserts a blank region into a textgrid
@@ -4410,7 +4352,9 @@ right of 'start' will be advanced by 'duration' seconds</li>
 with all others being tossed (default accepts all)</p>
 <p>If /tierList/ is none, combine all tiers.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def mergeTiers(self, includeFunc=None,
                tierList=None, preserveOtherTiers=True):
     &#39;&#39;&#39;
@@ -4470,7 +4414,9 @@ with all others being tossed (default accepts all)</p>
 <dd>
 <section class="desc"><p>Returns a copy of this Textgrid</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def new(self):
     &#39;&#39;&#39;Returns a copy of this Textgrid&#39;&#39;&#39;
     return copy.deepcopy(self)</code></pre>
@@ -4482,7 +4428,9 @@ with all others being tossed (default accepts all)</p>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def removeTier(self, name):
     self.tierNameList.pop(self.tierNameList.index(name))
     return self.tierDict.pop(name)</code></pre>
@@ -4494,7 +4442,9 @@ with all others being tossed (default accepts all)</p>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def renameTier(self, oldName, newName):
     oldTier = self.tierDict[oldName]
     tierIndex = self.tierNameList.index(oldName)
@@ -4508,7 +4458,9 @@ with all others being tossed (default accepts all)</p>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def replaceTier(self, name, newTier):
     tierIndex = self.tierNameList.index(name)
     self.removeTier(name)
@@ -4535,7 +4487,9 @@ useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use th
 long-form textgrid format.
 For backwards compatibility, is True by default.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def save(self, fn, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None, useShortForm=True):
     &#39;&#39;&#39;
     To save the current textgrid
@@ -4585,7 +4539,7 @@ For backwards compatibility, is True by default.</p></section>
         outputTxt += &#34;%s\n%s\n&#34; % (numToStr(minTimestamp),
                                    numToStr(maxTimestamp))
         outputTxt += &#34;&lt;exists&gt;\n%d\n&#34; % len(self.tierNameList)
-        
+
         for tierName in self.tierNameList:
             outputTxt += self.tierDict[tierName].getAsText()
     else:
@@ -4631,12 +4585,14 @@ For backwards compatibility, is True by default.</p></section>
 </dd>
 <dt id="praatio.tgio.TextgridCollisionException"><code class="flex name class">
 <span>class <span class="ident">TextgridCollisionException</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+<span>(</span><span>tierName, insertInterval, collisionList)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class TextgridCollisionException(Exception):
     
     def __init__(self, tierName, insertInterval, collisionList):
@@ -4652,32 +4608,22 @@ For backwards compatibility, is True by default.</p></section>
         return (&#34;Attempted to insert interval %s into tier %s of textgrid&#34; +
                 &#34;but overlapping entries %s already exist&#34; % dataTuple)</code></pre>
 </details>
-<h3>Methods</h3>
-<dl>
-<dt id="praatio.tgio.TextgridCollisionException.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, tierName, insertInterval, collisionList)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Initialize self.
-See help(type(self)) for accurate signature.</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def __init__(self, tierName, insertInterval, collisionList):
-    super(TextgridCollisionException, self).__init__()
-    self.tierName = tierName
-    self.insertInterval = insertInterval
-    self.collisionList = collisionList</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 <dt id="praatio.tgio.TextgridTier"><code class="flex name class">
 <span>class <span class="ident">TextgridTier</span></span>
+<span>(</span><span>name, entryList, minT, maxT, pairedWav=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>See PointTier or IntervalTier</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class TextgridTier(object):
     
     tierType = None
@@ -4834,8 +4780,9 @@ See help(type(self)) for accurate signature.</p></section>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="praatio.tgio.PointTier" href="#praatio.tgio.PointTier">PointTier</a></li>
+<li><a title="praatio.kgio.KlattPointTier" href="kgio.html#praatio.kgio.KlattPointTier">KlattPointTier</a></li>
 <li><a title="praatio.tgio.IntervalTier" href="#praatio.tgio.IntervalTier">IntervalTier</a></li>
+<li><a title="praatio.tgio.PointTier" href="#praatio.tgio.PointTier">PointTier</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -4850,24 +4797,6 @@ See help(type(self)) for accurate signature.</p></section>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="praatio.tgio.TextgridTier.__init__"><code class="name flex">
-<span>def <span class="ident">__init__</span></span>(<span>self, name, entryList, minT, maxT, pairedWav=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>See PointTier or IntervalTier</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def __init__(self, name, entryList, minT, maxT,
-             pairedWav=None):
-    &#39;&#39;&#39;See PointTier or IntervalTier&#39;&#39;&#39;
-    entryList.sort()
-    
-    self.name = name
-    self.entryList = entryList
-    self.minTimestamp = minT
-    self.maxTimestamp = maxT</code></pre>
-</details>
-</dd>
 <dt id="praatio.tgio.TextgridTier.appendTier"><code class="name flex">
 <span>def <span class="ident">appendTier</span></span>(<span>self, tier)</span>
 </code></dt>
@@ -4875,7 +4804,9 @@ See help(type(self)) for accurate signature.</p></section>
 <section class="desc"><p>Append a tier to the end of this one.</p>
 <p>This tier's maxtimestamp will be lengthened by the amount in the passed in tier.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def appendTier(self, tier):
     &#39;&#39;&#39;
     Append a tier to the end of this one.
@@ -4909,7 +4840,9 @@ See help(type(self)) for accurate signature.</p></section>
 <dd>
 <section class="desc"><p>Removes an entry from the entryList</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def deleteEntry(self, entry):
     &#39;&#39;&#39;Removes an entry from the entryList&#39;&#39;&#39;
     self.entryList.pop(self.entryList.index(entry))</code></pre>
@@ -4920,14 +4853,13 @@ See help(type(self)) for accurate signature.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Returns the index of all intervals that match the given label</p>
-<dl>
-<dt>substrMatchFlag: if True, match any label containing matchLabel.</dt>
-<dt>if False, label must be the same as matchLabel.</dt>
-<dt><strong><code>usingRE</code></strong> :&ensp;<code>if</code> <code>True</code>, <code>matchLabel</code> <code>is</code> <code>interpreted</code> <code>as</code> <code>a</code> <code>regular</code> <code>expression</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<p>substrMatchFlag: if True, match any label containing matchLabel.
+if False, label must be the same as matchLabel.
+usingRE: if True, matchLabel is interpreted as a regular expression</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def find(self, matchLabel, substrMatchFlag=False, usingRE=False):
     &#39;&#39;&#39;
     Returns the index of all intervals that match the given label
@@ -4960,7 +4892,9 @@ See help(type(self)) for accurate signature.</p></section>
 <dd>
 <section class="desc"><p>Prints each entry in the tier on a separate line w/ timing info</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def getAsText(self):
     &#39;&#39;&#39;Prints each entry in the tier on a separate line w/ timing info&#39;&#39;&#39;
     text = &#34;&#34;
@@ -4990,7 +4924,9 @@ See help(type(self)) for accurate signature.</p></section>
 <dd>
 <section class="desc"><p>Make a new tier derived from the current one</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def new(self, name=None, entryList=None, minTimestamp=None,
         maxTimestamp=None, pairedWav=None):
     &#39;&#39;&#39;Make a new tier derived from the current one&#39;&#39;&#39;
@@ -5015,7 +4951,9 @@ See help(type(self)) for accurate signature.</p></section>
 <dd>
 <section class="desc"><p>Sorts the entries in the entryList</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def sort(self):
     &#39;&#39;&#39;Sorts the entries in the entryList&#39;&#39;&#39;
     # A list containing tuples and lists will be sorted with tuples
@@ -5037,7 +4975,9 @@ See help(type(self)) for accurate signature.</p></section>
 <p>All entries in the given tier are added to the current tier.
 Overlapping entries are merged.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def union(self, tier):
     &#39;&#39;&#39;
     The given tier is set unioned to this tier.
@@ -5059,17 +4999,24 @@ Overlapping entries are merged.</p></section>
 </dd>
 <dt id="praatio.tgio.TimelessTextgridTierException"><code class="flex name class">
 <span>class <span class="ident">TimelessTextgridTierException</span></span>
-<span>(</span><span><small>ancestors:</small> builtins.Exception, builtins.BaseException)</span>
+<span>(</span><span>...)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class TimelessTextgridTierException(Exception):
     
     def __str__(self):
         return &#34;All textgrid tiers much have a min and max duration&#34;</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -5097,9 +5044,6 @@ Overlapping entries are merged.</p></section>
 <ul>
 <li>
 <h4><code><a title="praatio.tgio.BadIntervalError" href="#praatio.tgio.BadIntervalError">BadIntervalError</a></code></h4>
-<ul class="">
-<li><code><a title="praatio.tgio.BadIntervalError.__init__" href="#praatio.tgio.BadIntervalError.__init__">__init__</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="praatio.tgio.Interval" href="#praatio.tgio.Interval">Interval</a></code></h4>
@@ -5112,7 +5056,6 @@ Overlapping entries are merged.</p></section>
 <li>
 <h4><code><a title="praatio.tgio.IntervalTier" href="#praatio.tgio.IntervalTier">IntervalTier</a></code></h4>
 <ul class="">
-<li><code><a title="praatio.tgio.IntervalTier.__init__" href="#praatio.tgio.IntervalTier.__init__">__init__</a></code></li>
 <li><code><a title="praatio.tgio.IntervalTier.crop" href="#praatio.tgio.IntervalTier.crop">crop</a></code></li>
 <li><code><a title="praatio.tgio.IntervalTier.difference" href="#praatio.tgio.IntervalTier.difference">difference</a></code></li>
 <li><code><a title="praatio.tgio.IntervalTier.editTimestamps" href="#praatio.tgio.IntervalTier.editTimestamps">editTimestamps</a></code></li>
@@ -5136,9 +5079,9 @@ Overlapping entries are merged.</p></section>
 <li>
 <h4><code><a title="praatio.tgio.PointTier" href="#praatio.tgio.PointTier">PointTier</a></code></h4>
 <ul class="two-column">
-<li><code><a title="praatio.tgio.PointTier.__init__" href="#praatio.tgio.PointTier.__init__">__init__</a></code></li>
 <li><code><a title="praatio.tgio.PointTier.crop" href="#praatio.tgio.PointTier.crop">crop</a></code></li>
 <li><code><a title="praatio.tgio.PointTier.editTimestamps" href="#praatio.tgio.PointTier.editTimestamps">editTimestamps</a></code></li>
+<li><code><a title="praatio.tgio.PointTier.entryType" href="#praatio.tgio.PointTier.entryType">entryType</a></code></li>
 <li><code><a title="praatio.tgio.PointTier.eraseRegion" href="#praatio.tgio.PointTier.eraseRegion">eraseRegion</a></code></li>
 <li><code><a title="praatio.tgio.PointTier.getValuesAtPoints" href="#praatio.tgio.PointTier.getValuesAtPoints">getValuesAtPoints</a></code></li>
 <li><code><a title="praatio.tgio.PointTier.insertEntry" href="#praatio.tgio.PointTier.insertEntry">insertEntry</a></code></li>
@@ -5149,7 +5092,6 @@ Overlapping entries are merged.</p></section>
 <li>
 <h4><code><a title="praatio.tgio.Textgrid" href="#praatio.tgio.Textgrid">Textgrid</a></code></h4>
 <ul class="two-column">
-<li><code><a title="praatio.tgio.Textgrid.__init__" href="#praatio.tgio.Textgrid.__init__">__init__</a></code></li>
 <li><code><a title="praatio.tgio.Textgrid.addTier" href="#praatio.tgio.Textgrid.addTier">addTier</a></code></li>
 <li><code><a title="praatio.tgio.Textgrid.appendTextgrid" href="#praatio.tgio.Textgrid.appendTextgrid">appendTextgrid</a></code></li>
 <li><code><a title="praatio.tgio.Textgrid.crop" href="#praatio.tgio.Textgrid.crop">crop</a></code></li>
@@ -5166,14 +5108,10 @@ Overlapping entries are merged.</p></section>
 </li>
 <li>
 <h4><code><a title="praatio.tgio.TextgridCollisionException" href="#praatio.tgio.TextgridCollisionException">TextgridCollisionException</a></code></h4>
-<ul class="">
-<li><code><a title="praatio.tgio.TextgridCollisionException.__init__" href="#praatio.tgio.TextgridCollisionException.__init__">__init__</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="praatio.tgio.TextgridTier" href="#praatio.tgio.TextgridTier">TextgridTier</a></code></h4>
 <ul class="two-column">
-<li><code><a title="praatio.tgio.TextgridTier.__init__" href="#praatio.tgio.TextgridTier.__init__">__init__</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.appendTier" href="#praatio.tgio.TextgridTier.appendTier">appendTier</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.deleteEntry" href="#praatio.tgio.TextgridTier.deleteEntry">deleteEntry</a></code></li>
 <li><code><a title="praatio.tgio.TextgridTier.entryType" href="#praatio.tgio.TextgridTier.entryType">entryType</a></code></li>
@@ -5194,7 +5132,7 @@ Overlapping entries are merged.</p></section>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
