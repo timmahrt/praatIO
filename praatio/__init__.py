@@ -21,9 +21,6 @@ They can all be run independently of python.
 **praatio_scripts.py** contains code that combines various code in praatio--mostly high-level functions for
 working with textgrids, sometimes in conjuction with audio files.
 
-**applied_scripts/** contains application-specific code that heavily depends on praatio.  Right now it just
-contains code for working with SPPAS, which is a forced alignment tool [http://www.sppas.org/](http://www.sppas.org/)
-
 For example scripts that use various parts of the praatio library, please see 'examples/' in the root directory.
 If you downloaded praatio from pip, you can get the example files on the praatio github page:
 [https://github.com/timmahrt/praatIO](https://github.com/timmahrt/praatIO)
