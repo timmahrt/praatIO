@@ -45,6 +45,11 @@ def _getWavDuration(wavFN):
     return duration
 
 
+def _removeBlanks(tier):
+    entryList = [entry for entry in tier.entryList if entry[-1] != ""]
+    return tier.new(entryList=entryList)
+
+
 def _fillInBlanks(tier, blankLabel="", startTime=None, endTime=None):
     '''
     Fills in the space between intervals with empty space
@@ -1494,8 +1499,12 @@ class Textgrid():
             fd.write(outputTxt)
 
 
-def openTextgrid(fnFullPath):
-    
+def openTextgrid(fnFullPath, readRaw=False):
+    '''
+    Opens a textgrid for editing
+
+    readRaw: points and intervals with an empty label ie '' are removed unless readRaw=True
+    '''
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
@@ -1510,6 +1519,12 @@ def openTextgrid(fnFullPath):
         textgrid = _parseShortTextgrid(data)
     else:
         textgrid = _parseNormalTextgrid(data)
+    
+    if readRaw == False:
+        for tierName in textgrid.tierNameList:
+            tier = textgrid.tierDict[tierName]
+            tier = _removeBlanks(tier)
+            textgrid.replaceTier(tierName, tier)
     
     return textgrid
 
@@ -1577,8 +1592,6 @@ def _parseNormalTextgrid(data):
                     break
                 
                 label = label.strip()
-                if label == "":
-                    continue
                 tierEntryList.append((timeStart, timeEnd, label))
             tier = IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
         else:
@@ -1590,8 +1603,6 @@ def _parseNormalTextgrid(data):
                     break
                 
                 label = label.strip()
-                if label == "":
-                    continue
                 tierEntryList.append((time, label))
             tier = PointTier(tierName, tierEntryList, tierStart, tierEnd)
         
@@ -1654,8 +1665,6 @@ def _parseShortTextgrid(data):
                     break
                 
                 label = label.strip()
-                if label == "":
-                    continue
                 entryList.append((startTime, endTime, label))
                 
             newTG.addTier(IntervalTier(tierName, entryList,
@@ -1669,8 +1678,6 @@ def _parseShortTextgrid(data):
                 except (ValueError, IndexError):
                     break
                 label = label.strip()
-                if label == "":
-                    continue
                 entryList.append((time, label))
                 
             newTG.addTier(PointTier(tierName, entryList,

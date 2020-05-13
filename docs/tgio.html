@@ -69,7 +69,7 @@ Point = namedtuple(&#39;Point&#39;, [&#39;time&#39;, &#39;label&#39;]) # point e
 def _isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
     return abs(a - b) &lt;= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
-  
+
 def _getWavDuration(wavFN):
     &#34;For internal use.  See praatio.audioio.WavQueryObj() for general use.&#34;
     audiofile = wave.open(wavFN, &#34;r&#34;)
@@ -79,6 +79,11 @@ def _getWavDuration(wavFN):
     duration = float(nframes) / framerate
     
     return duration
+
+
+def _removeBlanks(tier):
+    entryList = [entry for entry in tier.entryList if entry[-1] != &#34;&#34;]
+    return tier.new(entryList=entryList)
 
 
 def _fillInBlanks(tier, blankLabel=&#34;&#34;, startTime=None, endTime=None):
@@ -1530,8 +1535,12 @@ class Textgrid():
             fd.write(outputTxt)
 
 
-def openTextgrid(fnFullPath):
-    
+def openTextgrid(fnFullPath, readRaw=False):
+    &#39;&#39;&#39;
+    Opens a textgrid for editing
+
+    readRaw: points and intervals with an empty label ie &#39;&#39; are removed unless readRaw=True
+    &#39;&#39;&#39;
     try:
         with io.open(fnFullPath, &#34;r&#34;, encoding=&#34;utf-16&#34;) as fd:
             data = fd.read()
@@ -1547,6 +1556,12 @@ def openTextgrid(fnFullPath):
     else:
         textgrid = _parseNormalTextgrid(data)
     
+    if readRaw == False:
+        for tierName in textgrid.tierNameList:
+            tier = textgrid.tierDict[tierName]
+            tier = _removeBlanks(tier)
+            textgrid.replaceTier(tierName, tier)
+
     return textgrid
 
 
@@ -1613,8 +1628,6 @@ def _parseNormalTextgrid(data):
                     break
                 
                 label = label.strip()
-                if label == &#34;&#34;:
-                    continue
                 tierEntryList.append((timeStart, timeEnd, label))
             tier = IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
         else:
@@ -1626,8 +1639,6 @@ def _parseNormalTextgrid(data):
                     break
                 
                 label = label.strip()
-                if label == &#34;&#34;:
-                    continue
                 tierEntryList.append((time, label))
             tier = PointTier(tierName, tierEntryList, tierStart, tierEnd)
         
@@ -1690,8 +1701,6 @@ def _parseShortTextgrid(data):
                     break
                 
                 label = label.strip()
-                if label == &#34;&#34;:
-                    continue
                 entryList.append((startTime, endTime, label))
                 
             newTG.addTier(IntervalTier(tierName, entryList,
@@ -1705,8 +1714,6 @@ def _parseShortTextgrid(data):
                 except (ValueError, IndexError):
                     break
                 label = label.strip()
-                if label == &#34;&#34;:
-                    continue
                 entryList.append((time, label))
                 
             newTG.addTier(PointTier(tierName, entryList,
@@ -1828,16 +1835,21 @@ if they share a boundary</p></section>
 </details>
 </dd>
 <dt id="praatio.tgio.openTextgrid"><code class="name flex">
-<span>def <span class="ident">openTextgrid</span></span>(<span>fnFullPath)</span>
+<span>def <span class="ident">openTextgrid</span></span>(<span>fnFullPath, readRaw=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Opens a textgrid for editing</p>
+<p>readRaw: points and intervals with an empty label ie '' are removed unless readRaw=True</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def openTextgrid(fnFullPath):
-    
+<pre><code class="python">def openTextgrid(fnFullPath, readRaw=False):
+    &#39;&#39;&#39;
+    Opens a textgrid for editing
+
+    readRaw: points and intervals with an empty label ie &#39;&#39; are removed unless readRaw=True
+    &#39;&#39;&#39;
     try:
         with io.open(fnFullPath, &#34;r&#34;, encoding=&#34;utf-16&#34;) as fd:
             data = fd.read()
@@ -1853,6 +1865,12 @@ if they share a boundary</p></section>
     else:
         textgrid = _parseNormalTextgrid(data)
     
+    if readRaw == False:
+        for tierName in textgrid.tierNameList:
+            tier = textgrid.tierDict[tierName]
+            tier = _removeBlanks(tier)
+            textgrid.replaceTier(tierName, tier)
+
     return textgrid</code></pre>
 </details>
 </dd>

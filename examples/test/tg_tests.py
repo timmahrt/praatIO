@@ -24,6 +24,24 @@ class IOTests(unittest.TestCase):
         self.dataRoot = join(root, "files")
         self.outputRoot = join(self.dataRoot, "io_test_output")
     
+    def test_openTextgrid(self):
+        tgFN = join(self.dataRoot, "mary.TextGrid")
+        
+        tg = tgio.openTextgrid(tgFN)
+        tier = tg.tierDict['word']
+        numEntries = len(tier.entryList)
+
+        self.assertEqual(4, numEntries)
+
+    def test_openTextgrid_with_readRaw(self):
+        tgFN = join(self.dataRoot, "mary.TextGrid")
+        
+        tg = tgio.openTextgrid(tgFN, True)
+        tier = tg.tierDict['word']
+        numEntries = len(tier.entryList)
+
+        self.assertEqual(6, numEntries)
+
     def test_shift(self):
         '''Testing adjustments to textgrid times'''
         tgFN = join(self.dataRoot, "mary.TextGrid")

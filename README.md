@@ -91,6 +91,10 @@ You can view them online using the external website Jupyter:
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 4.1 (May 13, 2020)
+- Textgrids can now be read "raw"
+    - For backwards compatibility, by default, unlabeled points and intervals are removed when opening textgrids
+
 Ver 4.0 (February 5, 2020)
 - Removed unlicensed xsampa.py file, along with associated utility sppas_util.py (originally added in Ver 3.4)
     - If you are not directly importing either of those files, you can upgrade without changing your code
