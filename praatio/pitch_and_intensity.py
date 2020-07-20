@@ -295,7 +295,7 @@ def extractPI(inputFN, outputFN, praatEXE,
         piList = _extractPIPiecewise(inputFN, outputFN,
                                      praatEXE, minPitch, maxPitch,
                                      tgFN, tierName, tmpOutputPath, sampleStep,
-                                     silenceThreshold, forceRegenerate,
+                                     silenceThreshold, pitchUnit, forceRegenerate,
                                      undefinedValue=undefinedValue,
                                      medianFilterWindowSize=windowSize,
                                      pitchQuadInterp=pitchQuadInterp)

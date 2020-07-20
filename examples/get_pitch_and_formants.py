@@ -33,17 +33,16 @@ bobbyPitchData = pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
                                                forceRegenerate=False)
 
 # Here are two examples of the new functionality of extracting pitch
-# from only labeled intervals in a textgrid.  However, the example files
-# I have provided are too short and praat will not process them.
+# from only labeled intervals in a textgrid.
 
 # Extracts each labeled interval as a separate wave file, extracts the
 # pitch track from each of those, and then aggregates the result.
-# pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
-#                               join(pitchPath, "bobby_segments.txt"),
-#                               praatEXE, 50, 350,
-#                               forceRegenerate=True,
-#                               tgFN=join(wavPath, "bobby_words.TextGrid"),
-#                               tierName="word")
+pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
+                              join(pitchPath, "bobby_segments.txt"),
+                              praatEXE, 50, 350,
+                              forceRegenerate=True,
+                              tgFN=join(wavPath, "bobby_words.TextGrid"),
+                              tierName="phrase")
 
 # Generates the entire pitch contour for the file, but only saves the
 # labeled sections.  Functionally the same as the commented-out code above.
