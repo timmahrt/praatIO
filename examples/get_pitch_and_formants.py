@@ -53,6 +53,19 @@ pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
 #                                    tgFN=join(wavPath, "bobby_words.TextGrid"),
 #                                    tierName="word")
 
+
+# If you have short intervals (word length or shorter) you will probably get errors
+# from praat with the above code.  The sampling window has to be a certain size to
+# get good results.  You might have better luck getting the pitch over the entire
+# file and then filtering only the pitch values that fall inside your labeled intervals
+maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
+                                              join(pitchPath, "mary.txt"),
+                                              praatEXE, 75, 450,
+                                              forceRegenerate=False)
+tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
+tier = tg.tierDict["phone"]
+filteredData = tier.getValuesInIntervals(maryPitchData)
+
 maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
                                               join(pitchPath, "mary.txt"),
                                               praatEXE, 75, 450,
