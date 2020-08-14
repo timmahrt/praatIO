@@ -125,7 +125,7 @@ class IOTests(unittest.TestCase):
 
     def test_saving_and_loading_json(self):
         '''Tests that json files are saved non-destructively'''
-        fn = "textgrid_to_merge.TextGrid"
+        fn = "mary.TextGrid"
         shortFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
         outputLastFN = join(self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid")

@@ -1559,7 +1559,7 @@ def _tgToJson(tg, minimumIntervalLength, minTimestamp, maxTimestamp):
     '''Returns a json representation of a textgrid'''
     tg = _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp)
     tgAsDict = _tgToDictionary(tg)
-    return json.dumps(tgAsDict)
+    return json.dumps(tgAsDict, ensure_ascii=False)
 
 
 def _tgToDictionary(tg):
