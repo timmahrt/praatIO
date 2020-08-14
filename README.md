@@ -91,6 +91,11 @@ You can view them online using the external website Jupyter:
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 4.2 (Aug 14, 2020)
+- Textgrids can now be written to/read from a json file
+    - tg.save("blah.json", outputFormat=tgio.JSON)
+    - tg = openTextgrid("blah.json", readAsJson=True)
+
 Ver 4.1 (May 13, 2020)
 - Textgrids can now be read "raw"
     - For backwards compatibility, by default, unlabeled points and intervals are removed when opening textgrids
