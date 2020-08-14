@@ -123,6 +123,21 @@ class IOTests(unittest.TestCase):
 
         self.assertTrue(areTheSame(longFN, outputFN, readFile))
 
+    def test_saving_and_loading_json(self):
+        '''Tests that json files are saved non-destructively'''
+        fn = "textgrid_to_merge.TextGrid"
+        shortFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
+        outputLastFN = join(self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid")
+
+        tgFromTgFile = tgio.openTextgrid(shortFN)
+        tgFromTgFile.save(outputFN, outputFormat=tgio.JSON)
+
+        tgFromJsonFile = tgio.openTextgrid(outputFN, readAsJson=True)
+        tgFromJsonFile.save(outputLastFN)
+
+        self.assertTrue(areTheSame(shortFN, outputLastFN, readFile))
+
     def test_get_audio_duration(self):
         '''Tests that the two audio duration methods output the same value.'''
         wavFN = join(self.dataRoot, "bobby.wav")
