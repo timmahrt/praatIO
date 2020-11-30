@@ -175,6 +175,12 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
 def extractIntensity(inputFN, outputFN, praatEXE,
                      minPitch, sampleStep=0.01, forceRegenerate=True,
                      undefinedValue=None):
+    &#39;&#39;&#39;
+    Extract the intensity for an audio file
+
+    Calculates intensity using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
+    &#39;&#39;&#39;
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
     
@@ -216,6 +222,9 @@ def extractPitchTier(wavFN, outputFN, praatEXE,
     forceRegenerate - if running this function for the same file, if False
                       just read in the existing pitch file
     pitchQuadInterp - if True, quadratically interpolate pitch
+
+    Calculates pitch using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
     &#39;&#39;&#39;
     outputPath = os.path.split(outputFN)[0]
     
@@ -264,6 +273,9 @@ def extractPitch(wavFN, outputFN, praatEXE,
     undefinedValue - if None remove from the dataset, otherset set to
                      undefinedValue
     pitchQuadInterp - if True, quadratically interpolate pitch
+
+    Calculates pitch using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
     &#39;&#39;&#39;
     outputPath = os.path.split(outputFN)[0]
     
@@ -310,6 +322,10 @@ def extractPI(inputFN, outputFN, praatEXE,
     male: minPitch=50; maxPitch=350
     female: minPitch=75; maxPitch=450
     pitchUnit: &#34;Hertz&#34;, &#34;semitones re 100 Hz&#34;, etc
+
+    Calculates pitch and intensity using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
     &#39;&#39;&#39;
     
     outputPath = os.path.split(outputFN)[0]
@@ -587,7 +603,9 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 <span>def <span class="ident">extractIntensity</span></span>(<span>inputFN, outputFN, praatEXE, minPitch, sampleStep=0.01, forceRegenerate=True, undefinedValue=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Extract the intensity for an audio file</p>
+<p>Calculates intensity using the following praat command:
+<a href="https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html">https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -595,6 +613,12 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
 <pre><code class="python">def extractIntensity(inputFN, outputFN, praatEXE,
                      minPitch, sampleStep=0.01, forceRegenerate=True,
                      undefinedValue=None):
+    &#39;&#39;&#39;
+    Extract the intensity for an audio file
+
+    Calculates intensity using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
+    &#39;&#39;&#39;
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
     
@@ -630,7 +654,10 @@ Otherwise, pitch will be extracted from
 the entire file.</p>
 <p>male: minPitch=50; maxPitch=350
 female: minPitch=75; maxPitch=450
-pitchUnit: "Hertz", "semitones re 100 Hz", etc</p></section>
+pitchUnit: "Hertz", "semitones re 100 Hz", etc</p>
+<p>Calculates pitch and intensity using the following praat command:
+<a href="https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html">https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</a>
+<a href="https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html">https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -652,6 +679,10 @@ pitchUnit: "Hertz", "semitones re 100 Hz", etc</p></section>
     male: minPitch=50; maxPitch=350
     female: minPitch=75; maxPitch=450
     pitchUnit: &#34;Hertz&#34;, &#34;semitones re 100 Hz&#34;, etc
+
+    Calculates pitch and intensity using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
     &#39;&#39;&#39;
     
     outputPath = os.path.split(outputFN)[0]
@@ -694,7 +725,9 @@ forceRegenerate - if running this function for the same file, if False
 just read in the existing pitch file
 undefinedValue - if None remove from the dataset, otherset set to
 undefinedValue
-pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
+pitchQuadInterp - if True, quadratically interpolate pitch</p>
+<p>Calculates pitch using the following praat command:
+<a href="https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html">https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -718,6 +751,9 @@ pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
     undefinedValue - if None remove from the dataset, otherset set to
                      undefinedValue
     pitchQuadInterp - if True, quadratically interpolate pitch
+
+    Calculates pitch using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
     &#39;&#39;&#39;
     outputPath = os.path.split(outputFN)[0]
     
@@ -759,7 +795,9 @@ silenceThreshold - segments with lower intensity won't be analyzed
 for pitch
 forceRegenerate - if running this function for the same file, if False
 just read in the existing pitch file
-pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
+pitchQuadInterp - if True, quadratically interpolate pitch</p>
+<p>Calculates pitch using the following praat command:
+<a href="https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html">https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</a></p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -781,6 +819,9 @@ pitchQuadInterp - if True, quadratically interpolate pitch</p></section>
     forceRegenerate - if running this function for the same file, if False
                       just read in the existing pitch file
     pitchQuadInterp - if True, quadratically interpolate pitch
+
+    Calculates pitch using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
     &#39;&#39;&#39;
     outputPath = os.path.split(outputFN)[0]
     

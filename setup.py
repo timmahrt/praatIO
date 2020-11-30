@@ -8,7 +8,7 @@ Created on Aug 29, 2014
 from setuptools import setup
 import io
 setup(name='praatio',
-      version='4.2.0',
+      version='4.2.1',
       author='Tim Mahrt',
       author_email='timmahrt@gmail.com',
       url='https://github.com/timmahrt/praatIO',

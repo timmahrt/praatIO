@@ -140,6 +140,12 @@ def _extractPIFile(inputFN, outputFN, praatEXE,
 def extractIntensity(inputFN, outputFN, praatEXE,
                      minPitch, sampleStep=0.01, forceRegenerate=True,
                      undefinedValue=None):
+    '''
+    Extract the intensity for an audio file
+
+    Calculates intensity using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
+    '''
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
     
@@ -181,6 +187,9 @@ def extractPitchTier(wavFN, outputFN, praatEXE,
     forceRegenerate - if running this function for the same file, if False
                       just read in the existing pitch file
     pitchQuadInterp - if True, quadratically interpolate pitch
+
+    Calculates pitch using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
     '''
     outputPath = os.path.split(outputFN)[0]
     
@@ -229,6 +238,9 @@ def extractPitch(wavFN, outputFN, praatEXE,
     undefinedValue - if None remove from the dataset, otherset set to
                      undefinedValue
     pitchQuadInterp - if True, quadratically interpolate pitch
+
+    Calculates pitch using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
     '''
     outputPath = os.path.split(outputFN)[0]
     
@@ -275,6 +287,10 @@ def extractPI(inputFN, outputFN, praatEXE,
     male: minPitch=50; maxPitch=350
     female: minPitch=75; maxPitch=450
     pitchUnit: "Hertz", "semitones re 100 Hz", etc
+
+    Calculates pitch and intensity using the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
     '''
     
     outputPath = os.path.split(outputFN)[0]

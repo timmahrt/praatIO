@@ -22,6 +22,9 @@ def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
 
     PitchMedian = 0.0; no change in median pitch
     PitchRange = 1.0; no change in pitch range
+
+    Uses the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__Change_gender___.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath,
@@ -37,6 +40,9 @@ def changeGender(praatEXE, wavFN, outputWavFN, pitchFloor, pitchCeiling,
 def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
     '''
     Changes the intensity of the wavFN (in db)
+
+    Uses the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__Scale_intensity___.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath,
@@ -54,6 +60,9 @@ def getFormants(praatEXE, inputWavFN, outputTxtFN, maxFormant,
     Get F1, F2, and F3 for the audio file
     
     maxFormant = 5500 for females, 5000 for males, <8000 for children
+
+    Uses the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Formant__burg____.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "get_formants.praat")
@@ -93,6 +102,7 @@ def getPulses(praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch,
     '''
     Gets the pitch/glottal pulses for an audio file.
 
+    Uses the following praat command:
     http://www.fon.hum.uva.nl/praat/manual/Sound___Pitch__To_PointProcess__peaks____.html
     '''
     if scriptFN is None:
@@ -112,9 +122,11 @@ def getSpectralInfo(praatEXE, inputWavFN, inputTGFN, outputCSVFN, tierName,
     '''
     Extracts various spectral measures from an audio file
 
-    http://www.fon.hum.uva.nl/praat/manual/Spectrum.html
     Measures include: center_of_gravity, standard_deviation
     skewness, kertosis, central_movement
+
+    Uses the following praat command:
+    http://www.fon.hum.uva.nl/praat/manual/Spectrum.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "get_spectral_info.praat")
@@ -141,6 +153,9 @@ def resynthesizePitch(praatEXE, inputWavFN, pitchFN, outputWavFN,
     
     The pitch track to use can optionally be passed in as pointList.  If
     so, it will be saved as pitchFN for praat to be able to use.
+
+    Uses the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Manipulation.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
@@ -162,6 +177,9 @@ def resynthesizeDuration(praatEXE, inputWavFN, durationTierFN, outputWavFN,
                          minPitch, maxPitch, scriptFN=None):
     '''
     Resynthesizes the duration in a wav file with the given duration tier
+
+    Uses the following praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Manipulation.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "resynthesize_duration.praat")
@@ -177,6 +195,9 @@ def annotateSilences(praatEXE, inputWavPath, outputTGPath,
                      silentLabel='silence', soundLabel='sound', scriptFN=None):
     '''
     Marks the silences and non-silences of an audio file
+
+    Uses the praat command:
+    https://www.fon.hum.uva.nl/praat/manual/Sound__To_TextGrid__silences____.html
     '''
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "annotate_silences.praat")
