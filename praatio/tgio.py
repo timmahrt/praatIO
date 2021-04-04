@@ -35,6 +35,10 @@ JSON = "json"
 SUPPORTED_OUTPUT_FORMATS = [TEXTGRID, JSON]
 
 
+def _escapeQuotes(text):
+    return text.replace('"', '""')
+
+
 def _isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
@@ -328,7 +332,12 @@ class TextgridTier(object):
         return returnList
 
     def getAsText(self):
-        """Prints each entry in the tier on a separate line w/ timing info"""
+        """
+        Prints each entry in the tier on a separate line w/ timing info
+
+        TODO: Delete this?  It was being used in writing shortform textgrids
+              but is not anymore
+        """
         text = ""
         text += '"%s"\n' % self.tierType
         text += '"%s"\n' % self.name
@@ -1554,7 +1563,30 @@ def _tgToShortTextForm(
     outputTxt += "%s\n%s\n" % (numToStr(tg.minTimestamp), numToStr(tg.maxTimestamp))
     outputTxt += "<exists>\n%d\n" % len(tg.tierNameList)
     for tierName in tg.tierNameList:
-        outputTxt += tg.tierDict[tierName].getAsText()
+        tier = tg.tierDict[tierName]
+        text = ""
+        text += '"%s"\n' % tier.tierType
+        text += '"%s"\n' % _escapeQuotes(tier.name)
+        text += "%s\n%s\n%s\n" % (
+            numToStr(tier.minTimestamp),
+            numToStr(tier.maxTimestamp),
+            len(tier.entryList),
+        )
+
+        for entry in tier.entryList:
+            entry = [numToStr(val) for val in entry[:-1]] + [
+                '"%s"' % _escapeQuotes(entry[-1])
+            ]
+            try:
+                unicode
+            except NameError:
+                unicodeFunc = str
+            else:
+                unicodeFunc = unicode
+
+            text += "\n".join([unicodeFunc(val) for val in entry]) + "\n"
+
+        outputTxt += text
 
     return outputTxt
 
@@ -1587,7 +1619,7 @@ def _tgToLongTextForm(
         # Interval header
         outputTxt += tab + "item [%d]:\n" % (tierNum + 1)
         outputTxt += tab * 2 + 'class = "%s" \n' % tier.tierType
-        outputTxt += tab * 2 + 'name = "%s" \n' % tierName
+        outputTxt += tab * 2 + 'name = "%s" \n' % _escapeQuotes(tierName)
         outputTxt += tab * 2 + "xmin = %s \n" % numToStr(tier.minTimestamp)
         outputTxt += tab * 2 + "xmax = %s \n" % numToStr(tier.maxTimestamp)
 
@@ -1598,14 +1630,14 @@ def _tgToLongTextForm(
                 outputTxt += tab * 2 + "intervals [%d]:\n" % (intervalNum + 1)
                 outputTxt += tab * 3 + "xmin = %s \n" % numToStr(start)
                 outputTxt += tab * 3 + "xmax = %s \n" % numToStr(stop)
-                outputTxt += tab * 3 + 'text = "%s" \n' % label
+                outputTxt += tab * 3 + 'text = "%s" \n' % _escapeQuotes(label)
         else:
             outputTxt += tab * 2 + "points: size = %d \n" % len(tier.entryList)
             for pointNum, entry in enumerate(tier.entryList):
                 timestamp, label = entry
                 outputTxt += tab * 2 + "points [%d]:\n" % (pointNum + 1)
                 outputTxt += tab * 3 + "number = %s \n" % numToStr(timestamp)
-                outputTxt += tab * 3 + 'mark = "%s" \n' % label
+                outputTxt += tab * 3 + 'mark = "%s" \n' % _escapeQuotes(label)
 
     return outputTxt
 
@@ -1904,6 +1936,8 @@ def _fetchTextRow(dataStr, index, searchStr=None):
     word = dataStr[startIndex:endIndex]
     word = word[1:-1]  # Remove the quote marks around the text
     word = word.strip()
+
+    word = word.replace('""', '"')  # Unescape quote marks
 
     # Advance to the end of the line
     endIndex = dataStr.index("\n", endIndex)
