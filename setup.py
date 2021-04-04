@@ -10,7 +10,7 @@ import io
 
 setup(
     name="praatio",
-    version="4.2.1",
+    version="4.3.0",
     author="Tim Mahrt",
     author_email="timmahrt@gmail.com",
     url="https://github.com/timmahrt/praatIO",

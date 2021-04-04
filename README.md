@@ -91,6 +91,11 @@ You can view them online using the external website Jupyter:
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 4.3 (Apr 5, 2021)
+- Textgrid reading/writing is now more robust (newlines and quotes are ok)
+- Textgrids can now be saved without creating blank intervals
+    - For backwards compatibility, by default, segments with no intervals will be given a blank entry with a label of ""
+
 Ver 4.2 (Aug 14, 2020)
 - Textgrids can now be written to/read from a json file
     - tg.save("blah.json", outputFormat=tgio.JSON)
