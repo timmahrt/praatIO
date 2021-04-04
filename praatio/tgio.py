@@ -1738,11 +1738,11 @@ def _parseNormalTextgrid(data):
             else:
                 raise
         tierName = header.split("name = ")[1].split("\n", 1)[0]
+        tierName, tierNameI = _fetchTextRow(header, 0, "name = ")
         tierStart = header.split("xmin = ")[1].split("\n", 1)[0]
         tierStart = strToIntOrFloat(tierStart)
         tierEnd = header.split("xmax = ")[1].split("\n", 1)[0]
         tierEnd = strToIntOrFloat(tierEnd)
-        tierName = tierName.strip()[1:-1]
 
         # Get the tier entry list
         tierEntryList = []
@@ -1811,7 +1811,7 @@ def _parseShortTextgrid(data):
         metaStartI = _fetchRow(tierData, 0)[1]
 
         # Tier meta-information
-        tierName, tierNameEndI = _fetchRow(tierData, metaStartI)
+        tierName, tierNameEndI = _fetchTextRow(tierData, metaStartI)
         tierStartTime, tierStartTimeI = _fetchRow(tierData, tierNameEndI)
         tierEndTime, tierEndTimeI = _fetchRow(tierData, tierStartTimeI)
         startTimeI = _fetchRow(tierData, tierEndTimeI)[1]

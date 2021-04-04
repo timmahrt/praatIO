@@ -6,7 +6,7 @@ Object class = "TextGrid"
 <exists>
 3
 "IntervalTier"
-"word"
+"""word"""
 0
 1.194625
 6
