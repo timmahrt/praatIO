@@ -157,14 +157,18 @@ def intervalOverlapCheck(
     """
     Checks whether two intervals overlap
 
-    If percentThreshold is greater than 0, then if the intervals overlap, they
-        must overlap by at least this threshold
+    Args:
+        interval (Interval):
+        cmprInterval (Interval):
+        percentThreshold (float): if percentThreshold is greater than 0, then
+            if the intervals overlap, they must overlap by at least this threshold
+        timeThreshold (float): if greater than 0, then if the intervals overlap,
+            they must overlap by at least this threshold
+        boundaryInclusive (float): if true, then two intervals are considered to
+            overlap if they share a boundary
 
-    If timeThreshold is greater than 0, then if the intervals overlap, they
-        must overlap by at least this threshold
-
-    If boundaryInclusive is true, then two intervals are considered to overlap
-        if they share a boundary
+    Returns:
+        bool:
     """
 
     startTime, endTime = interval[:2]
@@ -310,9 +314,13 @@ class TextgridTier(object):
         """
         Returns the index of all intervals that match the given label
 
-        substrMatchFlag: if True, match any label containing matchLabel.
-                         if False, label must be the same as matchLabel.
-        usingRE: if True, matchLabel is interpreted as a regular expression
+        Args:
+            matchLabel (str): the label to search for
+            substrMatchFlag (bool): if True, match any label containing matchLabel. if False, label must be the same as matchLabel.
+            usingRE (bool): if True, matchLabel is interpreted as a regular expression
+
+        Returns:
+            List: A list of indicies
         """
         returnList = []
         if usingRE is True:
@@ -458,8 +466,16 @@ class PointTier(TextgridTier):
         """
         Creates a new tier containing all entries inside the new interval
 
-        mode is ignored.  This parameter is kept for compatibility with
-        IntervalTier.crop()
+        Args:
+            cropStart (float):
+            cropEnd (float):
+            mode (str): Mode is ignored.  This parameter is kept for
+                compatibility with IntervalTier.crop()
+            rebaseToZero (bool): if True, all entries will have their
+                timestamps subtracted by *cropStart*.
+
+        Returns:
+            PointTier: the modified version of the current tier
         """
         newEntryList = []
 
@@ -477,16 +493,19 @@ class PointTier(TextgridTier):
             minT = cropStart
             maxT = cropEnd
 
-        # Create subtier
-        subTier = PointTier(self.name, newEntryList, minT, maxT)
-        return subTier
+        return PointTier(self.name, newEntryList, minT, maxT)
 
     def editTimestamps(self, offset, allowOvershoot=False):
         """
         Modifies all timestamps by a constant amount
 
-        If allowOvershoot is True, an interval can go beyond the bounds
-        of the textgrid
+        Args:
+            offset (float):
+            allowOvershoot (bool): if True, an interval can go beyond
+                the bounds of the textgrid
+
+        Returns:
+            PointTier: the modified version of the current tier
         """
 
         newEntryList = []
@@ -519,8 +538,13 @@ class PointTier(TextgridTier):
         """
         Get the values that occur at points in the point tier
 
-        If fuzzyMatching is True, if there is not a feature value
-        at a point, the nearest feature value will be taken.
+        Args:
+            dataTupleList (list):
+            fuzzyMatching (bool): if True, if there is not a feature value
+                at a point, the nearest feature value will be taken.
+
+        Returns:
+            List
 
         The procedure assumes that all data is ordered in time.
         dataTupleList should be in the form
@@ -548,10 +572,14 @@ class PointTier(TextgridTier):
         """
         Makes a region in a tier blank (removes all contained entries)
 
-        collisionCode: Ignored for the moment (added for compatibility
-                       with eraseRegion() for Interval Tiers)
-        doShrink: if True, moves leftward by (/stop/ - /start/)
-                  all points to the right of /stop/
+        Args:
+            start (float): the start of the deletion interval
+            stop (float): the end of the deletion interval
+            collisionCode (str): Ignored for the moment (added for compatibility with eraseRegion() for Interval Tiers)
+            doShrink (bool): if True, moves leftward by (/stop/ - /start/) all points to the right of /stop/
+
+        Returns:
+            PointTier: the modified version of the current tier
         """
 
         newTier = self.new()
@@ -586,14 +614,20 @@ class PointTier(TextgridTier):
         """
         inserts an interval into the tier
 
-        collisionCode: in the event that intervals exist in the insertion area,
-                        one of three things may happen
-        - 'replace' - existing items will be removed
-        - 'merge' - inserting item will be fused with existing items
-        - None or any other value - TextgridCollisionException is thrown
+        Args:
+            entry (tuple|Point): the entry to insert
+            warnFlag (bool): see below for details
+            collisionCode (str): determines the behavior if intervals exist in
+                the insertion area. One of ('replace', 'merge', or None)
+                - 'replace', existing items will be removed
+                - 'merge', inserting item will be fused with existing items
+                - None or any other value will thrown TextgridCollisionException
 
-        if warnFlag is True and collisionCode is not None,
-        the user is notified of each collision
+        Returns:
+            None
+
+        If warnFlag is True and collisionCode is not None, the user is notified
+        of each collision
         """
         timestamp, label = entry
 
@@ -633,8 +667,13 @@ class PointTier(TextgridTier):
         """
         Inserts a region into the tier
 
-        collisionCode: Ignored for the moment (added for compatibility
-                       with insertSpace() for Interval Tiers)
+        Args:
+            start (float): the start time to insert a space at
+            duration (float): the duration of the space to insert
+            collisionCode (str): Ignored for the moment (added for compatibility with insertSpace() for Interval Tiers)
+
+        Returns:
+            PointTier: the modified version of the current tier
         """
 
         newEntryList = []
@@ -714,15 +753,20 @@ class IntervalTier(TextgridTier):
         """
         Creates a new tier with all entries that fit inside the new interval
 
-        mode = {'strict', 'lax', 'truncated'}
-            If 'strict', only intervals wholly contained by the crop
-                interval will be kept
-            If 'lax', partially contained intervals will be kept
-            If 'truncated', partially contained intervals will be
-                truncated to fit within the crop region.
+        Args:
+            cropStart (float):
+            cropEnd (float):
+            mode (string): one of ['strict', 'lax', or 'truncated']
+                - 'strict', only intervals wholly contained by the crop
+                    interval will be kept
+                - 'lax', partially contained intervals will be kept
+                - 'truncated', partially contained intervals will be
+                    truncated to fit within the crop region.
+            rebaseToZero (bool): if True, the cropped textgrid values
+                will be subtracted by the cropStart
 
-        If rebaseToZero is True, the cropped textgrid values will be
-            subtracted by the cropStart
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
 
         assert mode in ["strict", "lax", "truncated"]
@@ -828,6 +872,12 @@ class IntervalTier(TextgridTier):
 
         Any overlapping portions of entries with entries in this textgrid
         will be removed from the returned tier.
+
+        Args:
+            tier (IntervalTier):
+
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
         retTier = self.new()
 
@@ -842,10 +892,13 @@ class IntervalTier(TextgridTier):
         """
         Modifies all timestamps by a constant amount
 
-        Can modify the interval start independent of the interval end
+        Args:
+            offset (start): the amount to shift all intervals
+            allowOvershoot (bool): if True, an interval can
+                go beyond the bounds of the textgrid
 
-        If allowOvershoot is True, an interval can go beyond the bounds
-        of the textgrid
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
 
         newEntryList = []
@@ -883,16 +936,22 @@ class IntervalTier(TextgridTier):
         """
         Makes a region in a tier blank (removes all contained entries)
 
-        collisionCode: in the event that intervals exist in the insertion area,
-                       one of three things may happen
-        - 'truncate' - partially contained entries will have the portion
-                       removed that overlaps with the target entry
-        - 'categorical' - all entries that overlap, even partially, with the
-                          target entry will be completely removed
-        - None or any other value - AssertionError is thrown
+        Args:
+            start (float):
+            stop (float):
+            collisionCode (bool): determines the behavior when the region to
+                erase overlaps with existing intervals. One of ['truncate',
+                'categorical', None]
+                - 'truncate' partially contained entries will have the portion
+                    removed that overlaps with the target entry
+                - 'categorical' all entries that overlap, even partially, with
+                    the target entry will be completely removed
+                - None or any other value throws AssertionError
+            doShrink (bool): if True, moves leftward by (/stop/ - /start/)
+                amount, each item that occurs after /stop/
 
-        doShrink: if True, moves leftward by (/stop/ - /start/) amount,
-                  each item that occurs after /stop/
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
 
         matchList = self.crop(start, stop, "lax", False).entryList
@@ -1013,14 +1072,20 @@ class IntervalTier(TextgridTier):
         """
         inserts an interval into the tier
 
-        collisionCode: in the event that intervals exist in the insertion area,
-                        one of three things may happen
-        - 'replace' - existing items will be removed
-        - 'merge' - inserting item will be fused with existing items
-        - None or any other value - TextgridCollisionException is thrown
+        Args:
+            entry (list|Interval): the Interval to insert
+            warnFlag (bool):
+            collisionCode: determines the behavior in the event that intervals
+                exist in the insertion area.  One of ['replace', 'merge' None]
+                - 'replace' will remove existing items
+                - 'merge' will fuse the inserting item with existing items
+                - None or any other value will throw a TextgridCollisionException
 
-        if warnFlag is True and collisionCode is not None,
+        if *warnFlag* is True and *collisionCode* is not None,
         the user is notified of each collision
+
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
         startTime, endTime = entry[:2]
 
@@ -1060,13 +1125,19 @@ class IntervalTier(TextgridTier):
         """
         Inserts a blank region into the tier
 
-        collisionCode: in the event that an interval stradles the
-                       starting point
-        - 'stretch' - stretches the interval by /duration/ amount
-        - 'split' - splits the interval into two--everything to the
+        Args:
+            start (float):
+            duration (float)
+            collisionCode (str): determines the behavior that occurs if
+                an interval stradles the starting pointone of ['stretch',
+                'split', 'no change']
+                - 'stretch' stretches the interval by /duration/ amount
+                - 'split' splits the interval into two--everything to the
                     right of 'start' will be advanced by 'duration' seconds
-        - 'no change' - leaves the interval as is with no change
-        - None or any other value - AssertionError is thrown
+                - 'no change' leaves the interval as is with no change
+
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
 
         # if the collisionCode is not properly set it isn't clear what to do
@@ -1113,6 +1184,12 @@ class IntervalTier(TextgridTier):
         Only intervals that exist in both tiers will remain in the
         returned tier.  If intervals partially overlap, only the overlapping
         portion will be returned.
+
+        Args:
+            tier (IntervalTier): the tier to intersect with
+
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
         retEntryList = []
         for start, stop, label in tier.entryList:
@@ -1139,6 +1216,15 @@ class IntervalTier(TextgridTier):
 
         This preserves the labels and the duration of silence in
         this tier while changing the duration of labeled segments.
+
+        Args:
+            targetTier (IntervalTier):
+            filterFunc (functor): if specified, filters entries. The
+                functor takes one argument, an Interval. It returns true
+                if the Interval should be modified and false if not.
+
+        Returns:
+            IntervalTier: the modified version of the current tier
         """
         cumulativeAdjustAmount = 0
         lastFromEnd = 0
@@ -1194,7 +1280,12 @@ class Textgrid:
         """
         Add a tier to this textgrid.
 
-        If tierIndex is specified, insert the tier into the specified position.
+        Args:
+            tier (TextgridTier):
+            tierIndex (int): if specified, insert the tier into the specified position
+
+        Returns:
+            None
         """
 
         assert tier.name not in list(self.tierDict.keys())
@@ -1218,8 +1309,13 @@ class Textgrid:
         """
         Append one textgrid to the end of this one
 
-        if onlyMatchingNames is False, tiers that don't appear in both
-        textgrids will also appear
+        Args:
+            tg (Textgrid): the tier to add to this one
+            onlyMatchingNames (bool): if False, tiers that don't appear in both
+                textgrids will also appear
+
+        Returns:
+            Textgrid: the modified version of the current textgrid
         """
         retTG = Textgrid()
 
@@ -1280,15 +1376,20 @@ class Textgrid:
         """
         Creates a textgrid where all intervals fit within the crop region
 
-        mode = {'strict', 'lax', 'truncated'}
-            If 'strict', only intervals wholly contained by the crop
-                interval will be kept
-            If 'lax', partially contained intervals will be kept
-            If 'truncated', partially contained intervals will be
-                truncated to fit within the crop region.
+        Args:
+            cropStart (float):
+            cropEnd (float):
+            mode (str): one of ['strict', 'lax', 'truncated']
+                - 'strict', only intervals wholly contained by the crop
+                    interval will be kept
+                - 'lax', partially contained intervals will be kept
+                - 'truncated', partially contained intervals will be
+                    truncated to fit within the crop region.
+            rebaseToZero (bool): if True, the cropped textgrid values will be
+                subtracted by the cropStart
 
-        If rebaseToZero is True, the cropped textgrid values will be
-            subtracted by the cropStart
+        Returns:
+            Textgrid: the modified version of the current textgrid
         """
 
         assert mode in ["strict", "lax", "truncated"]
@@ -1314,9 +1415,16 @@ class Textgrid:
         """
         Makes a region in a tier blank (removes all contained entries)
 
-        If 'doShrink' is True, all entries appearing after the erased interval
-        will be shifted to fill the void (ie the duration of the textgrid
-        will be reduced by start - stop)
+        Args:
+            start (float):
+            stop (float):
+            doShrink (bool): if True, all entries appearing after the
+                erased interval will be shifted to fill the void (ie
+                the duration of the textgrid will be reduced by
+                *start* - *stop*)
+
+        Returns:
+            Textgrid: the modified version of the current textgrid
         """
 
         diff = stop - start
@@ -1338,6 +1446,15 @@ class Textgrid:
     def editTimestamps(self, offset, allowOvershoot=False):
         """
         Modifies all timestamps by a constant amount
+
+        Args:
+            offset (float): the amount to offset in seconds
+            allowOvershoot (bool): if True, entries can go
+                beyond the min and max timestamp set by the
+                Textgrid
+
+        Returns:
+            Textgrid: the modified version of the current textgrid
         """
 
         tg = Textgrid()
@@ -1354,16 +1471,23 @@ class Textgrid:
         """
         Inserts a blank region into a textgrid
 
-        Every item that occurs after /start/ will be pushed back by
-        /duration/ seconds
+        Every item that occurs after *start* will be pushed back by
+        *duration* seconds
 
-        collisionCode: in the event that an interval stradles the
-                       starting point
-        - 'stretch' - stretches the interval by /duration/ amount
-        - 'split' - splits the interval into two--everything to the
+        Args:
+            start (float):
+            duration (float):
+            collisionCode (str): Determines behaviour in the event that an
+                interval stradles the starting point.
+                One of ['stretch', 'split', 'no change', None]
+                - 'stretch' stretches the interval by /duration/ amount
+                - 'split' splits the interval into two--everything to the
                     right of 'start' will be advanced by 'duration' seconds
-        - 'no change' - leaves the interval as is with no change
-        - None or any other value - AssertionError is thrown
+                - 'no change' leaves the interval as is with no change
+                - None or any other value throws an AssertionError
+
+        Returns:
+            Textgrid: the modified version of the current textgrid
         """
 
         newTG = Textgrid()
@@ -1381,10 +1505,16 @@ class Textgrid:
         """
         Combine tiers
 
-        /includeFunc/ regulates which intervals to include in the merging
-          with all others being tossed (default accepts all)
+        Args:
+            includeFunc (functor): regulates which intervals to include in the
+                merging with all others being tossed (default accepts all)
+            tierList (list): A list of tier names to combine. If none, combine
+                all tiers.
+            preserveOtherTiers (bool): If false, uncombined tiers are not
+                included in the output.
 
-        If /tierList/ is none, combine all tiers.
+        Returns:
+            Textgrid: the modified version of the current textgrid
         """
 
         if tierList is None:
@@ -1460,22 +1590,32 @@ class Textgrid:
         """
         To save the current textgrid
 
-        fn - the fullpath filename of the output
-        minimumIntervalLength - any labeled intervals smaller than this will be removed,
-            useful for removing ultrashort or fragmented intervals; if None, don't remove any.
-            Removed intervals are merged (without their label) into adjacent entries.
-        minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
-            in the Textgrid object.  If minTimestamp is larger than timestamps in your textgrid,
-            an exception will be thrown.
-        maxTimestamp - the maxTimestamp of the saved Textgrid; if None, use whatever is defined
-            in the Textgrid object.  If maxTimestamp is smaller than timestamps in your textgrid,
-            an exception will be thrown.
-        useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
-            long-form textgrid format.  For backwards compatibility, is True by default.
-            Ignored if format is not 'Textgrid'
-        outputFormat - one of ['textgrid', 'json']
-        ignoreBlankSpaces - if False, blank sections in interval tiers will be filled in with an
-            empty interval (with a label of "")
+        Args:
+            fn (str): the fullpath filename of the output
+            minimumIntervalLength (float): any labeled intervals smaller
+                than this will be removed, useful for removing ultrashort
+                or fragmented intervals; if None, don't remove any.
+                Removed intervals are merged (without their label) into
+                adjacent entries.
+            minTimestamp (float): the minTimestamp of the saved Textgrid;
+                if None, use whatever is defined in the Textgrid object.
+                If minTimestamp is larger than timestamps in your textgrid,
+                an exception will be thrown.
+            maxTimestamp (float): the maxTimestamp of the saved Textgrid;
+                if None, use whatever is defined in the Textgrid object.
+                If maxTimestamp is smaller than timestamps in your textgrid,
+                an exception will be thrown.
+            useShortForm (bool): if True, save the textgrid as a short
+                textgrid. Otherwise, use the long-form textgrid format.
+                For backwards compatibility, is True by default. Ignored if
+                format is not 'Textgrid'
+            outputFormat (str): one of ['textgrid', 'json']
+            ignoreBlankSpaces (bool): if False, blank sections in interval
+                tiers will be filled in with an empty interval
+                (with a label of "")
+
+        Returns:
+            None
         """
 
         if outputFormat not in SUPPORTED_OUTPUT_FORMATS:
@@ -1695,8 +1835,15 @@ def openTextgrid(fnFullPath, readRaw=False, readAsJson=False):
     """
     Opens a textgrid for editing
 
-    readRaw: points and intervals with an empty label '' are removed unless readRaw=True
-    readAsJson: if True, assume the Textgrid is saved as Json rather than in its native format
+    Args:
+        fnFullPath (str): the path to the textgrid to open
+        readRaw (bool): points and intervals with an empty label
+            '' are removed unless readRaw=True
+        readAsJson (bool): if True, assume the Textgrid is saved
+            as Json rather than in its native format
+
+    Returns:
+        Textgrid
 
     https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
     """

@@ -65,19 +65,24 @@ def audioSplice(
     """
     Splices a segment into an audio file and corresponding textgrid
 
-    audioObj - the audio to splice into
-    spliceSegment - the audio segment that will be placed into a larger audio
-                    file
-    tg - the textgrid to splice into
-    tierName - the tier that will receive the new label
-    newLabel - the label for the splice interval on the tier with name tierName
-    insertStart - the time to insert the splice
-    insertStop - if not None, will erase the region between sourceSpStart
-                 and sourceSpEnd.  (In practice this means audioSplice
-                 removes one segment and inserts another in its place)
-    alignToZeroCrossing - if True, moves all involved times to the nearest
-                          zero crossing in the audio.  Generally results
-                          in better sounding output
+    Args:
+        audioObj (WavObj): the audio to splice into
+        spliceSegment (WavObj): the audio segment that will be placed into a
+            larger audio file
+        tg (Textgrid): the textgrid to splice into
+        tierName (str): the name of the tier that will receive the new label
+        newLabel (str): the label for the splice interval on the tier with
+            name tierName
+        insertStart (float): the time to insert the splice
+        insertStop (float): if not None, will erase the region between
+            sourceSpStart and sourceSpEnd.  (In practice this means audioSplice
+            removes one segment and inserts another in its place)
+        alignToZeroCrossing - if True, moves all involved times to the nearest
+            zero crossing in the audio.  Generally results
+            in better sounding output
+
+    Returns:
+        [WavObj, Textgrid]
     """
 
     retTG = tg.new()
@@ -288,21 +293,26 @@ def splitAudioOnTier(
     """
     Outputs one subwav for each entry in the tier of a textgrid
 
-    outputTGFlag: If True, outputs paired, cropped textgrids
-                  If is type str (a tier name), outputs a paired, cropped
-                  textgrid with only the specified tier
-    nameStyle: if 'append': append interval label to output name
-               if 'append_no_i': append label but not interval to output name
-               if 'label': output name is the same as label
-               if None: output name plus the interval number
-    noPartialIntervals: if True: intervals in non-target tiers that are
-                                  not wholly contained by an interval in
-                                  the target tier will not be included in
-                                  the output textgrids
-    silenceLabel: the label for silent regions.  If silences are unlabeled
-                  intervals (i.e. blank) then leave this alone.  If silences
-                  are labeled using praat's "annotate >> to silences"
-                  then this value should be "silences"
+    Args:
+        wavnFN (str):
+        tgFN (str):
+        tierName (str):
+        outputPath (str):
+        outputTGFlag (bool): If True, outputs paired, cropped textgrids
+            If is type str (a tier name), outputs a paired, cropped
+            textgrid with only the specified tier
+        nameStyle (str):
+            - 'append': append interval label to output name
+            - 'append_no_i': append label but not interval to output name
+            - 'label': output name is the same as label
+            - None: output name plus the interval number
+        noPartialIntervals (bool): if True: intervals in non-target tiers that
+            are not wholly contained by an interval in the target tier will not
+            be included in the output textgrids
+        silenceLabel (str): the label for silent regions.  If silences are
+            unlabeled intervals (i.e. blank) then leave this alone.  If
+            silences are labeled using praat's "annotate >> to silences"
+            then this value should be "silences"
     """
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
