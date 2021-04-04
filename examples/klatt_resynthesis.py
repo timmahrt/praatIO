@@ -1,6 +1,6 @@
-'''
+"""
 Example of using praatio to generate speech resynthesized via klaatgrids.
-'''
+"""
 
 import os
 from os.path import join
@@ -21,8 +21,9 @@ mainKlaatFN = join(outputPath, name + ".KlattGrid")
 # Wav to klaatgrid
 praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"  # Example for Mac
 # praatEXE = r"C:\Praat.exe" # Example for Windows
-kgio.wavToKlattgrid(praatEXE, wavFN, mainKlaatFN, maxFormantFreq=3500,
-                    pitchFloor=50, pitchCeiling=350)
+kgio.wavToKlattgrid(
+    praatEXE, wavFN, mainKlaatFN, maxFormantFreq=3500, pitchFloor=50, pitchCeiling=350
+)
 
 # Increase formants by 20%
 incrTwenty = lambda x: x * 1.2

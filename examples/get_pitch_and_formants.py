@@ -1,6 +1,6 @@
-'''
+"""
 Praatio example for extracting pitch and intensity values in a wav file using praat
-'''
+"""
 
 import os
 from os.path import join
@@ -20,29 +20,37 @@ rmsIntensityPath = join(rootOutputFolder, "rms_intensity")
 
 
 praatEXE = r"C:\Praat.exe"
-#praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"
+# praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"
 utils.makeDir(rootOutputFolder)
 utils.makeDir(pitchPath)
 utils.makeDir(pitchMeasuresPath)
 utils.makeDir(rmsIntensityPath)
 utils.makeDir(formantsPath)
 
-bobbyPitchData = pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
-                                               join(pitchPath, "bobby.txt"),
-                                               praatEXE, 50, 350,
-                                               forceRegenerate=False)
+bobbyPitchData = pitch_and_intensity.extractPI(
+    join(wavPath, "bobby.wav"),
+    join(pitchPath, "bobby.txt"),
+    praatEXE,
+    50,
+    350,
+    forceRegenerate=False,
+)
 
 # Here are two examples of the new functionality of extracting pitch
 # from only labeled intervals in a textgrid.
 
 # Extracts each labeled interval as a separate wave file, extracts the
 # pitch track from each of those, and then aggregates the result.
-pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
-                              join(pitchPath, "bobby_segments.txt"),
-                              praatEXE, 50, 350,
-                              forceRegenerate=True,
-                              tgFN=join(wavPath, "bobby_words.TextGrid"),
-                              tierName="phrase")
+pitch_and_intensity.extractPI(
+    join(wavPath, "bobby.wav"),
+    join(pitchPath, "bobby_segments.txt"),
+    praatEXE,
+    50,
+    350,
+    forceRegenerate=True,
+    tgFN=join(wavPath, "bobby_words.TextGrid"),
+    tierName="phrase",
+)
 
 # Generates the entire pitch contour for the file, but only saves the
 # labeled sections.  Functionally the same as the commented-out code above.
@@ -58,42 +66,64 @@ pitch_and_intensity.extractPI(join(wavPath, "bobby.wav"),
 # from praat with the above code.  The sampling window has to be a certain size to
 # get good results.  You might have better luck getting the pitch over the entire
 # file and then filtering only the pitch values that fall inside your labeled intervals
-maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
-                                              join(pitchPath, "mary.txt"),
-                                              praatEXE, 75, 450,
-                                              forceRegenerate=False)
+maryPitchData = pitch_and_intensity.extractPI(
+    join(wavPath, "mary.wav"),
+    join(pitchPath, "mary.txt"),
+    praatEXE,
+    75,
+    450,
+    forceRegenerate=False,
+)
 tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
 tier = tg.tierDict["phone"]
 filteredData = tier.getValuesInIntervals(maryPitchData)
 
-maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
-                                              join(pitchPath, "mary.txt"),
-                                              praatEXE, 75, 450,
-                                              forceRegenerate=False)
+maryPitchData = pitch_and_intensity.extractPI(
+    join(wavPath, "mary.wav"),
+    join(pitchPath, "mary.txt"),
+    praatEXE,
+    75,
+    450,
+    forceRegenerate=False,
+)
 
-maryPitchData = pitch_and_intensity.extractPI(join(wavPath, "mary.wav"),
-                                              join(pitchPath, "mary_interpolated.txt"),
-                                              praatEXE, 75, 450,
-                                              forceRegenerate=False,
-                                              pitchQuadInterp=True)
+maryPitchData = pitch_and_intensity.extractPI(
+    join(wavPath, "mary.wav"),
+    join(pitchPath, "mary_interpolated.txt"),
+    praatEXE,
+    75,
+    450,
+    forceRegenerate=False,
+    pitchQuadInterp=True,
+)
 
 
 filteredFN = "mary_300hz_high_pass_filtered.wav"
-maryFilteredPitchData = pitch_and_intensity.extractPitch(join(wavPath, filteredFN),
-                                                         join(pitchPath, "mary_filtered.txt"),
-                                                         praatEXE, 75, 450,
-                                                         forceRegenerate=False)
+maryFilteredPitchData = pitch_and_intensity.extractPitch(
+    join(wavPath, filteredFN),
+    join(pitchPath, "mary_filtered.txt"),
+    praatEXE,
+    75,
+    450,
+    forceRegenerate=False,
+)
 
 # Generate pitch and intensity values for one file
-pitch_and_intensity.generatePIMeasures(bobbyPitchData,
-                                       join(tgPath, "bobby_words.TextGrid"),
-                                       "word", doPitch=True,
-                                       medianFilterWindowSize=9)
+pitch_and_intensity.generatePIMeasures(
+    bobbyPitchData,
+    join(tgPath, "bobby_words.TextGrid"),
+    "word",
+    doPitch=True,
+    medianFilterWindowSize=9,
+)
 
-pitch_and_intensity.generatePIMeasures(maryPitchData,
-                                       join(tgPath, "mary.TextGrid"),
-                                       "word", doPitch=False,
-                                       medianFilterWindowSize=9)
+pitch_and_intensity.generatePIMeasures(
+    maryPitchData,
+    join(tgPath, "mary.TextGrid"),
+    "word",
+    doPitch=False,
+    medianFilterWindowSize=9,
+)
 
 tg = tgio.openTextgrid(join(tgPath, "bobby_words.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
@@ -107,7 +137,6 @@ tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(maryFilteredPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_filtered_errors.TextGrid"))
 
-formantData = praat_scripts.getFormants(praatEXE,
-                          join(wavPath, "bobby.wav"),
-                          join(formantsPath, "bobby.txt"),
-                          5500)
+formantData = praat_scripts.getFormants(
+    praatEXE, join(wavPath, "bobby.wav"), join(formantsPath, "bobby.txt"), 5500
+)
