@@ -1600,7 +1600,7 @@ def _tgToLongTextForm(
                 outputTxt += tab * 3 + "xmax = %s \n" % numToStr(stop)
                 outputTxt += tab * 3 + 'text = "%s" \n' % label
         else:
-            outputTxt += tab * 2 + "points: size = %d\n " % len(tier.entryList)
+            outputTxt += tab * 2 + "points: size = %d \n" % len(tier.entryList)
             for pointNum, entry in enumerate(tier.entryList):
                 timestamp, label = entry
                 outputTxt += tab * 2 + "points [%d]:\n" % (pointNum + 1)
