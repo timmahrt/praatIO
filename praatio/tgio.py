@@ -1446,6 +1446,7 @@ class Textgrid:
         maxTimestamp=None,
         useShortForm=True,
         outputFormat=TEXTGRID,
+        ignoreBlankSpaces=False,
     ):
         """
         To save the current textgrid
@@ -1453,6 +1454,7 @@ class Textgrid:
         fn - the fullpath filename of the output
         minimumIntervalLength - any labeled intervals smaller than this will be removed,
             useful for removing ultrashort or fragmented intervals; if None, don't remove any.
+            Removed intervals are merged (without their label) into adjacent entries.
         minTimestamp - the minTimestamp of the saved Textgrid; if None, use whatever is defined
             in the Textgrid object.  If minTimestamp is larger than timestamps in your textgrid,
             an exception will be thrown.
@@ -1462,7 +1464,9 @@ class Textgrid:
         useShortForm - if True, save the textgrid as a short textgrid. Otherwise, use the
             long-form textgrid format.  For backwards compatibility, is True by default.
             Ignored if format is not 'Textgrid'
-        format - one of ['textgrid', 'json']
+        outputFormat - one of ['textgrid', 'json']
+        ignoreBlankSpaces - if False, blank sections in interval tiers will be filled in with an
+            empty interval (with a label of "")
         """
 
         if outputFormat not in SUPPORTED_OUTPUT_FORMATS:
@@ -1471,22 +1475,36 @@ class Textgrid:
         if outputFormat == TEXTGRID:
             if useShortForm:
                 outputTxt = _tgToShortTextForm(
-                    self, minimumIntervalLength, minTimestamp, maxTimestamp
+                    self,
+                    minimumIntervalLength,
+                    minTimestamp,
+                    maxTimestamp,
+                    ignoreBlankSpaces,
                 )
             else:
                 outputTxt = _tgToLongTextForm(
-                    self, minimumIntervalLength, minTimestamp, maxTimestamp
+                    self,
+                    minimumIntervalLength,
+                    minTimestamp,
+                    maxTimestamp,
+                    ignoreBlankSpaces,
                 )
         elif outputFormat == JSON:
             outputTxt = _tgToJson(
-                self, minimumIntervalLength, minTimestamp, maxTimestamp
+                self,
+                minimumIntervalLength,
+                minTimestamp,
+                maxTimestamp,
+                ignoreBlankSpaces,
             )
 
         with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputTxt)
 
 
-def _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp):
+def _prepTgForSaving(
+    tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
+):
     for tier in tg.tierDict.values():
         tier.sort()
 
@@ -1501,15 +1519,16 @@ def _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp):
         tg.maxTimestamp = maxTimestamp
 
     # Fill in the blank spaces for interval tiers
-    for name in tg.tierNameList:
-        tier = tg.tierDict[name]
-        if isinstance(tier, IntervalTier):
-            tier = _fillInBlanks(tier, "", minTimestamp, maxTimestamp)
-            if minimumIntervalLength is not None:
-                tier = _removeUltrashortIntervals(
-                    tier, minimumIntervalLength, minTimestamp
-                )
-            tg.tierDict[name] = tier
+    if not ignoreBlankSpaces:
+        for name in tg.tierNameList:
+            tier = tg.tierDict[name]
+            if isinstance(tier, IntervalTier):
+                tier = _fillInBlanks(tier, "", minTimestamp, maxTimestamp)
+                if minimumIntervalLength is not None:
+                    tier = _removeUltrashortIntervals(
+                        tier, minimumIntervalLength, minTimestamp
+                    )
+                tg.tierDict[name] = tier
 
     for tier in tg.tierDict.values():
         tier.sort()
@@ -1518,9 +1537,15 @@ def _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp):
 
 
 def _tgToShortTextForm(
-    tg, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None
+    tg,
+    minimumIntervalLength=MIN_INTERVAL_LENGTH,
+    minTimestamp=None,
+    maxTimestamp=None,
+    ignoreBlankSpaces=False,
 ):
-    tg = _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp)
+    tg = _prepTgForSaving(
+        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
+    )
 
     # Header
     outputTxt = ""
@@ -1535,9 +1560,15 @@ def _tgToShortTextForm(
 
 
 def _tgToLongTextForm(
-    tg, minimumIntervalLength=MIN_INTERVAL_LENGTH, minTimestamp=None, maxTimestamp=None
+    tg,
+    minimumIntervalLength=MIN_INTERVAL_LENGTH,
+    minTimestamp=None,
+    maxTimestamp=None,
+    ignoreBlankSpaces=False,
 ):
-    tg = _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp)
+    tg = _prepTgForSaving(
+        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
+    )
     outputTxt = ""
     outputTxt += 'File type = "ooTextFile"\n'
     outputTxt += 'Object class = "TextGrid"\n\n'
@@ -1579,9 +1610,11 @@ def _tgToLongTextForm(
     return outputTxt
 
 
-def _tgToJson(tg, minimumIntervalLength, minTimestamp, maxTimestamp):
+def _tgToJson(tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces):
     """Returns a json representation of a textgrid"""
-    tg = _prepTgForSaving(tg, minimumIntervalLength, minTimestamp, maxTimestamp)
+    tg = _prepTgForSaving(
+        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
+    )
     tgAsDict = _tgToDictionary(tg)
     return json.dumps(tgAsDict, ensure_ascii=False)
 

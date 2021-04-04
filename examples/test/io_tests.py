@@ -48,7 +48,13 @@ def readFile(fn):
     return data
 
 
-def run_save(tg, minimumIntervalLength=None, minTimestamp=None, maxTimestamp=None):
+def run_save(
+    tg,
+    minimumIntervalLength=None,
+    minTimestamp=None,
+    maxTimestamp=None,
+    ignoreBlankSpaces=False,
+):
     """
     Mock write function and return the first tier's entry list
 
@@ -61,6 +67,7 @@ def run_save(tg, minimumIntervalLength=None, minTimestamp=None, maxTimestamp=Non
         minimumIntervalLength=minimumIntervalLength,
         minTimestamp=minTimestamp,
         maxTimestamp=maxTimestamp,
+        ignoreBlankSpaces=ignoreBlankSpaces,
     )
 
     entryList = tg.tierDict[tg.tierNameList[0]].entryList
@@ -343,6 +350,20 @@ class IOTests(unittest.TestCase):
         tg = tgio.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg, minimumIntervalLength=0.06)
+
+        self.assertEqual(expectedEntryList, actualEntryList)
+
+    def test_save_with_ignore_blank_sections(self):
+        """
+        Tests that blank sections can be ignored on saving a textgrid
+        """
+        entryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntryList = entryList  # Blank intervals should not be inserted
+        tier = tgio.IntervalTier("test", entryList)
+
+        tg = tgio.Textgrid()
+        tg.addTier(tier)
+        actualEntryList = run_save(tg, ignoreBlankSpaces=True)
 
         self.assertEqual(expectedEntryList, actualEntryList)
 
