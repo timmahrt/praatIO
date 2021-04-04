@@ -1665,6 +1665,8 @@ def openTextgrid(fnFullPath, readRaw=False, readAsJson=False):
 
     readRaw: points and intervals with an empty label '' are removed unless readRaw=True
     readAsJson: if True, assume the Textgrid is saved as Json rather than in its native format
+
+    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
     """
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
@@ -1748,9 +1750,9 @@ def _parseNormalTextgrid(data):
         if tierType == INTERVAL_TIER:
             while True:
                 try:
-                    timeStart, timeStartI = _fetchRow(tierData, "xmin = ", labelI)
-                    timeEnd, timeEndI = _fetchRow(tierData, "xmax = ", timeStartI)
-                    label, labelI = _fetchRow(tierData, "text =", timeEndI)
+                    timeStart, timeStartI = _fetchRow(tierData, labelI, "xmin = ")
+                    timeEnd, timeEndI = _fetchRow(tierData, timeStartI, "xmax = ")
+                    label, labelI = _fetchTextRow(tierData, timeEndI, "text = ")
                 except (ValueError, IndexError):
                     break
 
@@ -1760,8 +1762,8 @@ def _parseNormalTextgrid(data):
         else:
             while True:
                 try:
-                    time, timeI = _fetchRow(tierData, "number = ", labelI)
-                    label, labelI = _fetchRow(tierData, "mark =", timeI)
+                    time, timeI = _fetchRow(tierData, labelI, "number = ")
+                    label, labelI = _fetchTextRow(tierData, timeI, "mark = ")
                 except (ValueError, IndexError):
                     break
 
@@ -1806,13 +1808,13 @@ def _parseShortTextgrid(data):
         tierData = data[blockStartI:blockEndI]
 
         # First row contains the tier type, which we already know
-        metaStartI = _fetchRow(tierData, "", 0)[1]
+        metaStartI = _fetchRow(tierData, 0)[1]
 
         # Tier meta-information
-        tierName, tierNameEndI = _fetchRow(tierData, "", metaStartI)
-        tierStartTime, tierStartTimeI = _fetchRow(tierData, "", tierNameEndI)
-        tierEndTime, tierEndTimeI = _fetchRow(tierData, "", tierStartTimeI)
-        startTimeI = _fetchRow(tierData, "", tierEndTimeI)[1]
+        tierName, tierNameEndI = _fetchRow(tierData, metaStartI)
+        tierStartTime, tierStartTimeI = _fetchRow(tierData, tierNameEndI)
+        tierEndTime, tierEndTimeI = _fetchRow(tierData, tierStartTimeI)
+        startTimeI = _fetchRow(tierData, tierEndTimeI)[1]
 
         tierStartTime = strToIntOrFloat(tierStartTime)
         tierEndTime = strToIntOrFloat(tierEndTime)
@@ -1822,9 +1824,9 @@ def _parseShortTextgrid(data):
         if isInterval:
             while True:
                 try:
-                    startTime, endTimeI = _fetchRow(tierData, "", startTimeI)
-                    endTime, labelI = _fetchRow(tierData, "", endTimeI)
-                    label, startTimeI = _fetchRow(tierData, "", labelI)
+                    startTime, endTimeI = _fetchRow(tierData, startTimeI)
+                    endTime, labelI = _fetchRow(tierData, endTimeI)
+                    label, startTimeI = _fetchTextRow(tierData, labelI)
                 except (ValueError, IndexError):
                     break
 
@@ -1836,8 +1838,8 @@ def _parseShortTextgrid(data):
         else:
             while True:
                 try:
-                    time, labelI = _fetchRow(tierData, "", startTimeI)
-                    label, startTimeI = _fetchRow(tierData, "", labelI)
+                    time, labelI = _fetchRow(tierData, startTimeI)
+                    label, startTimeI = _fetchTextRow(tierData, labelI)
                 except (ValueError, IndexError):
                     break
                 label = label.strip()
@@ -1860,8 +1862,12 @@ def strToIntOrFloat(inputStr):
     return float(inputStr) if "." in inputStr else int(inputStr)
 
 
-def _fetchRow(dataStr, searchStr, index):
-    startIndex = dataStr.index(searchStr, index) + len(searchStr)
+def _fetchRow(dataStr, index, searchStr=None):
+    if searchStr is None:
+        startIndex = index
+    else:
+        startIndex = dataStr.index(searchStr, index) + len(searchStr)
+
     endIndex = dataStr.index("\n", startIndex)
 
     word = dataStr[startIndex:endIndex]
@@ -1869,5 +1875,37 @@ def _fetchRow(dataStr, searchStr, index):
     if word[0] == '"' and word[-1] == '"':
         word = word[1:-1]
     word = word.strip()
+
+    return word, endIndex + 1
+
+
+def _fetchTextRow(dataStr, index, searchStr=None):
+    if searchStr is None:
+        startIndex = index
+    else:
+        startIndex = dataStr.index(searchStr, index) + len(searchStr)
+
+    # A textgrid text is ended by double quotes. Double quotes that
+    # appear in the text are escaped by a preceeding double quotes.
+    # We know we're at the end of a text if the number of double
+    # quotes is odd.
+    endIndex = startIndex + 1
+    while True:
+        quoteStartIndex = dataStr.index('"', endIndex)
+        quoteEndIndex = quoteStartIndex
+        while dataStr[quoteEndIndex] == '"':
+            quoteEndIndex += 1
+
+        endIndex = quoteEndIndex
+
+        if (quoteEndIndex - quoteStartIndex) % 2 != 0:
+            break
+
+    word = dataStr[startIndex:endIndex]
+    word = word[1:-1]  # Remove the quote marks around the text
+    word = word.strip()
+
+    # Advance to the end of the line
+    endIndex = dataStr.index("\n", endIndex)
 
     return word, endIndex + 1

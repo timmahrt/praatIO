@@ -23,18 +23,16 @@ from praatio import kgio
 from praatio import audioio
 
 
-def areTheSame(fn1, fn2, fileHandler=None):
+def areTheSame(fn1, fn2, fileHandler):
     """
     Tests that files contain the same data
 
-    Usually we don't want to compare the raw text files.  There are minute
-    differences in the way floating points values are.
+    If fileHandler is tgio file reader like tgio.openTextgrid then
+    we can compare a shortTextgrid and a longTextgrid.
 
-    Also allows us to compare short and long-form textgrids
+    If fileHandler is readFile or io.open, etc then the raw
+    text will be compared.
     """
-    if fileHandler is None:
-        fileHandler = lambda fn: open(fn, "r").read()
-
     data1 = fileHandler(fn1)
     data2 = fileHandler(fn2)
 
@@ -44,8 +42,7 @@ def areTheSame(fn1, fn2, fileHandler=None):
 def readFile(fn):
     data = ""
     with io.open(fn, "r") as fd:
-        data = fd.read()
-    return data
+        return fd.read()
 
 
 def run_save(
@@ -91,6 +88,28 @@ class IOTests(unittest.TestCase):
         if not os.path.exists(self.outputRoot):
             os.mkdir(self.outputRoot)
 
+    def test_reading_textgrids_with_newlines_in_labels(self):
+        """Tests for reading/writing textgrids with newlines"""
+        fn = "bobby_words_with_newlines.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, fn)
+
+        tg = tgio.openTextgrid(inputFN)
+        tg.save(outputFN)
+
+        self.assertTrue(areTheSame(inputFN, outputFN, readFile))
+
+    def test_reading_long_textgrids_with_newlines_in_labels(self):
+        """Tests for reading/writing textgrids with newlines"""
+        fn = "bobby_words_with_newlines_longfile.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, fn)
+
+        tg = tgio.openTextgrid(inputFN)
+        tg.save(outputFN, useShortForm=False)
+
+        self.assertTrue(areTheSame(inputFN, outputFN, readFile))
+
     def test_tg_io(self):
         """Tests for reading/writing textgrid io"""
         fn = "textgrid_to_merge.TextGrid"
@@ -100,7 +119,7 @@ class IOTests(unittest.TestCase):
         tg = tgio.openTextgrid(inputFN)
         tg.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, tgio.openTextgrid))
+        self.assertTrue(areTheSame(inputFN, outputFN, readFile))
 
     def test_tg_io_long_vs_short(self):
         """Tests reading of long vs short textgrids"""
