@@ -217,37 +217,6 @@ class TextgridTier(object):
 
         return returnList
 
-    def getAsText(self):
-        """
-        Prints each entry in the tier on a separate line w/ timing info
-
-        TODO: Delete this?  It was being used in writing shortform textgrids
-              but is not anymore
-        """
-        text = ""
-        text += '"%s"\n' % self.tierType
-        text += '"%s"\n' % self.name
-        text += "%s\n%s\n%s\n" % (
-            myMath.numToStr(self.minTimestamp),
-            myMath.numToStr(self.maxTimestamp),
-            len(self.entryList),
-        )
-
-        for entry in self.entryList:
-            entry = [myMath.numToStr(val) for val in entry[:-1]] + [
-                '"%s"' % entry[-1],
-            ]
-            try:
-                unicode
-            except NameError:
-                unicodeFunc = str
-            else:
-                unicodeFunc = unicode
-
-            text += "\n".join([unicodeFunc(val) for val in entry]) + "\n"
-
-        return text
-
     def new(
         self,
         name=None,
