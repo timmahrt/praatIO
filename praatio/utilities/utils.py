@@ -8,6 +8,7 @@ import subprocess
 import functools
 import itertools
 import io
+import wave
 from pkg_resources import resource_filename
 
 # Get the folder one level above the current folder

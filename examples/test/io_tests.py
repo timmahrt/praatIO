@@ -21,6 +21,7 @@ from praatio import tgio
 from praatio import dataio
 from praatio import kgio
 from praatio import audioio
+from praatio.utilities import utils
 
 
 def areTheSame(fn1, fn2, fileHandler):
@@ -172,7 +173,7 @@ class IOTests(unittest.TestCase):
         """Tests that the two audio duration methods output the same value."""
         wavFN = join(self.dataRoot, "bobby.wav")
 
-        durationA = tgio._getWavDuration(wavFN)
+        durationA = utils.getWavDuration(wavFN)
         durationB = audioio.getDuration(wavFN)
         self.assertTrue(durationA == durationB)
 

@@ -17,8 +17,6 @@ see the **examples/** directory for lots of examples using tgio.py
 import re
 import copy
 import io
-import wave
-import json
 from collections import namedtuple
 
 from praatio.utilities import utils
