@@ -343,3 +343,14 @@ def safeZip(listOfLists, enforceLength):
         zipFunc = itertools.zip_longest  # Python 3.x
 
     return zipFunc(*listOfLists)
+
+
+def getWavDuration(wavFN):
+    "For internal use.  See praatio.audioio.WavQueryObj() for general use."
+    audiofile = wave.open(wavFN, "r")
+    params = audiofile.getparams()
+    framerate = params[2]
+    nframes = params[3]
+    duration = float(nframes) / framerate
+
+    return duration

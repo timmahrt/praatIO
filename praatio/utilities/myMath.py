@@ -5,6 +5,18 @@ Various math utilities
 import math
 
 
+def numToStr(inputNum):
+    if isclose(inputNum, int(inputNum)):
+        retVal = "%d" % inputNum
+    else:
+        retVal = "%s" % repr(inputNum)
+    return retVal
+
+
+def isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+
 def filterTimeSeriesData(
     filterFunc, featureTimeList, windowSize, index, useEdgePadding
 ):
