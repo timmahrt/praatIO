@@ -9,7 +9,7 @@ import math
 import wave
 import struct
 import copy
-from typing import List
+from typing import List, Tuple
 
 from praatio.utilities import utils
 
@@ -282,8 +282,8 @@ class WavQueryObj(AbstractWav):
     def deleteWavSections(
         self,
         outputFN: str,
-        keepList: List[tuple[float, float, str]] = None,
-        deleteList: List[tuple[float, float, str]] = None,
+        keepList: List[Tuple[float, float, str]] = None,
+        deleteList: List[Tuple[float, float, str]] = None,
         operation: str = "shrink",
         sineWaveAmplitude: float = None,
     ):
@@ -440,8 +440,8 @@ class WavObj(AbstractWav):
 
 def openAudioFile(
     fn: str,
-    keepList: List[tuple[float, float, str]] = None,
-    deleteList: List[tuple[float, float, str]] = None,
+    keepList: List[Tuple[float, float, str]] = None,
+    deleteList: List[Tuple[float, float, str]] = None,
     doShrink: bool = True,
 ) -> WavObj:
     """
