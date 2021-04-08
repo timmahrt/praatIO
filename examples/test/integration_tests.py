@@ -97,7 +97,6 @@ class IntegrationTests(unittest.TestCase):
 
         root = os.path.join(".", "files")
         endingList = os.listdir(root)
-        endingDir = os.getcwd()
         rmList = [fn for fn in endingList if fn not in self.startingList]
 
         if self.oldRoot == root:

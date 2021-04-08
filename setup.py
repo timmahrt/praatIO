@@ -10,7 +10,8 @@ import io
 
 setup(
     name="praatio",
-    version="4.3.0",
+    python_requires=">3.6.0",
+    version="5.0.0",
     author="Tim Mahrt",
     author_email="timmahrt@gmail.com",
     url="https://github.com/timmahrt/praatIO",
@@ -22,8 +23,11 @@ setup(
         ]
     },
     license="LICENSE",
-    description="A library for working with praat, textgrids, time aligned audio transcripts, and audio files.",
+    description=(
+        "A library for working with praat, textgrids, "
+        "time aligned audio transcripts, and audio files."
+    ),
     long_description=io.open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    #       install_requires=[], # No requirements! # requires 'from setuptools import setup'
+    # install_requires=[], # No requirements! # requires 'from setuptools import setup'
 )
