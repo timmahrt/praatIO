@@ -9,12 +9,16 @@ import os
 from os.path import join
 import math
 import copy
+from typing import Callable, List
 
-from praatio import tgio
+from praatio import textgrid
+from praatio import textgrid_io
 from praatio import audioio
 
 
-def _shiftTimes(tg, timeV, newTimeV):
+def _shiftTimes(
+    tg: textgrid.Textgrid, timeV: float, newTimeV: float
+) -> textgrid.Textgrid:
     """
     Change all instances of timeV in the textgrid to newTimeV
 
@@ -25,7 +29,7 @@ def _shiftTimes(tg, timeV, newTimeV):
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
 
-        if isinstance(tier, tgio.IntervalTier):
+        if isinstance(tier, textgrid.IntervalTier):
             entryList = [
                 entry
                 for entry in tier.entryList
@@ -43,7 +47,7 @@ def _shiftTimes(tg, timeV, newTimeV):
             for entry in insertEntryList:
                 tier.insertEntry(entry)
 
-        elif isinstance(tier, tgio.PointTier):
+        elif isinstance(tier, textgrid.PointTier):
             entryList = [entry for entry in tier.entryList if entry[0] == timeV]
             for entry in entryList:
                 tier.deleteEntry(entry)
@@ -53,15 +57,15 @@ def _shiftTimes(tg, timeV, newTimeV):
 
 
 def audioSplice(
-    audioObj,
-    spliceSegment,
-    tg,
-    tierName,
-    newLabel,
-    insertStart,
-    insertStop=None,
-    alignToZeroCrossing=True,
-):
+    audioObj: audioio.WavObj,
+    spliceSegment: audioio.WavObj,
+    tg: textgrid.Textgrid,
+    tierName: str,
+    newLabel: str,
+    insertStart: float,
+    insertStop: float = None,
+    alignToZeroCrossing: bool = True,
+) -> [audioio.WavObj, textgrid.Textgrid]:
     """
     Splices a segment into an audio file and corresponding textgrid
 
@@ -131,8 +135,12 @@ def audioSplice(
 
 
 def spellCheckEntries(
-    tg, targetTierName, newTierName, checkFunction, printEntries=False
-):
+    tg: textgrid.Textgrid,
+    targetTierName: str,
+    newTierName: str,
+    checkFunction: Callable[[str], bool],
+    printEntries: bool = False,
+) -> textgrid.Textgrid:
     """
     Spell checks words in a textgrid
 
@@ -140,7 +148,8 @@ def spellCheckEntries(
     If a mispelling is found, it is noted in a special tier and optionally
     printed to the screen.
 
-    checkFunction is user-defined.  There are robust spell check libraries
+    checkFunction is user-defined.  It takes a word and returns True if it is
+    spelled correctly and false if not. There are robust spell check libraries
     for python like woosh or pyenchant.  I have already written a naive
     spell checker in the pysle.praattools library.
 
@@ -181,7 +190,7 @@ def spellCheckEntries(
             if printEntries is True:
                 print((startT, stopT, mispelledTxt))
 
-    tier = tgio.IntervalTier(
+    tier = textgrid.IntervalTier(
         newTierName, mispelledEntryList, tg.minTimestamp, tg.maxTimestamp
     )
     tg.addTier(tier)
@@ -189,7 +198,13 @@ def spellCheckEntries(
     return tg
 
 
-def splitTierEntries(tg, sourceTierName, targetTierName, startT=None, endT=None):
+def splitTierEntries(
+    tg: textgrid.Textgrid,
+    sourceTierName: str,
+    targetTierName: str,
+    startT: float = None,
+    endT: float = None,
+) -> textgrid.Textgrid:
     """
     Split each entry in a tier by space
 
@@ -234,7 +249,7 @@ def splitTierEntries(tg, sourceTierName, targetTierName, startT=None, endT=None)
 
     # Create a new tier
     if targetTier is None:
-        targetTier = tgio.IntervalTier(targetTierName, newEntryList, minT, maxT)
+        targetTier = textgrid.IntervalTier(targetTierName, newEntryList, minT, maxT)
 
     # Or insert new entries into existing target tier
     else:
@@ -250,7 +265,9 @@ def splitTierEntries(tg, sourceTierName, targetTierName, startT=None, endT=None)
     return tg
 
 
-def tgBoundariesToZeroCrossings(tg, wavObj, adjustPointTiers=True):
+def tgBoundariesToZeroCrossings(
+    tg: textgrid.Textgrid, wavObj: audioio.WavObj, adjustPointTiers: bool = True
+) -> textgrid.Textgrid:
     """
     Makes all textgrid interval boundaries fall on pressure wave zero crossings
 
@@ -262,12 +279,12 @@ def tgBoundariesToZeroCrossings(tg, wavObj, adjustPointTiers=True):
         tier = tg.tierDict[tierName]
 
         newEntryList = []
-        if isinstance(tier, tgio.PointTier) and adjustPointTiers is True:
+        if isinstance(tier, textgrid.PointTier) and adjustPointTiers is True:
             for start, label in tier.entryList:
                 newStart = wavObj.findNearestZeroCrossing(start)
                 newEntryList.append((newStart, label))
 
-        elif isinstance(tier, tgio.IntervalTier):
+        elif isinstance(tier, textgrid.IntervalTier):
 
             for start, stop, label in tier.entryList:
                 newStart = wavObj.findNearestZeroCrossing(start)
@@ -281,15 +298,15 @@ def tgBoundariesToZeroCrossings(tg, wavObj, adjustPointTiers=True):
 
 
 def splitAudioOnTier(
-    wavFN,
-    tgFN,
-    tierName,
-    outputPath,
-    outputTGFlag=False,
-    nameStyle=None,
-    noPartialIntervals=False,
-    silenceLabel=None,
-):
+    wavFN: str,
+    tgFN: str,
+    tierName: str,
+    outputPath: str,
+    outputTGFlag: bool = False,
+    nameStyle: str = None,
+    noPartialIntervals: bool = False,
+    silenceLabel: str = None,
+) -> List[str]:
     """
     Outputs one subwav for each entry in the tier of a textgrid
 
@@ -322,7 +339,7 @@ def splitAudioOnTier(
     else:
         mode = "truncated"
 
-    tg = tgio.openTextgrid(tgFN)
+    tg = textgrid_io.openTextgrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
 
     if silenceLabel is not None:
@@ -404,7 +421,9 @@ def splitAudioOnTier(
     return outputFNList
 
 
-def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
+def alignBoundariesAcrossTiers(
+    tgFN: str, maxDifference: float = 0.01
+) -> textgrid.Textgrid:
     """
     Aligns boundaries or points in a textgrid that suffer from 'jitter'
 
@@ -418,7 +437,7 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
     value found within /maxDifference/ or, if no majority exists, than
     the value used in the search query.
     """
-    tg = tgio.openTextgrid(tgFN)
+    tg = textgrid_io.openTextgrid(tgFN)
 
     for tierName in tg.tierNameList:
         altNameList = [tmpName for tmpName in tg.tierNameList if tmpName != tierName]
@@ -431,7 +450,7 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
             )
 
         # Interval tier right boundary
-        if tier.tierType == tgio.INTERVAL_TIER:
+        if tier.tierType == textgrid.INTERVAL_TIER:
             for entry in tier.entryList:
                 _findMisalignments(
                     tg, entry[1], maxDifference, altNameList, tierName, entry, 1
@@ -441,8 +460,14 @@ def alignBoundariesAcrossTiers(tgFN, maxDifference=0.01):
 
 
 def _findMisalignments(
-    tg, timeV, maxDifference, tierNameList, tierName, entry, orderID
-):
+    tg: textgrid.Textgrid,
+    timeV: float,
+    maxDifference: float,
+    tierNameList: List[str],
+    tierName: str,
+    entry: list,
+    orderID: int,
+) -> None:
     """
     This is just used by alignBoundariesAcrossTiers()
     """
@@ -466,7 +491,7 @@ def _findMisalignments(
         # that lies in the search span
         for subCroppedEntry in subCroppedTier.entryList:
 
-            if subCroppedTier.tierType == tgio.INTERVAL_TIER:
+            if subCroppedTier.tierType == textgrid.INTERVAL_TIER:
                 subStart, subEnd, _ = subCroppedEntry
 
                 # Left boundary?
@@ -496,7 +521,7 @@ def _findMisalignments(
                 if matchVal is None:
                     continue
 
-            elif subCroppedTier.tierType == tgio.POINT_TIER:
+            elif subCroppedTier.tierType == textgrid.POINT_TIER:
                 subStart, _ = subCroppedEntry
                 if subStart >= filterStartT and subStart <= filterStopT:
                     matchVal = subStart

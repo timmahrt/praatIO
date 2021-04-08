@@ -10,6 +10,7 @@ import itertools
 import io
 import wave
 from pkg_resources import resource_filename
+from typing import List
 
 # Get the folder one level above the current folder
 scriptsPath = resource_filename(
@@ -18,7 +19,12 @@ scriptsPath = resource_filename(
 )
 
 
-def getValueAtTime(timestamp, sortedDataTupleList, fuzzyMatching=False, startI=0):
+def getValueAtTime(
+    timestamp: float,
+    sortedDataTupleList,
+    fuzzyMatching: bool = False,
+    startI: float = 0,
+) -> [float, float, int]:
     """
     Get the value in the data list (sorted by time) that occurs at this point
 
@@ -88,7 +94,7 @@ def getValueAtTime(timestamp, sortedDataTupleList, fuzzyMatching=False, startI=0
     return retTime, retVal, i
 
 
-def getValuesInInterval(dataTupleList, start, stop):
+def getValuesInInterval(dataTupleList: list, start: float, stop: float) -> list:
     """
     Gets the values that exist within an interval
 
@@ -105,7 +111,7 @@ def getValuesInInterval(dataTupleList, start, stop):
     return intervalDataList
 
 
-def sign(x):
+def sign(x: float) -> int:
     """Returns 1 if x is positive, 0 if x is 0, and -1 otherwise"""
     retVal = 0
     if x > 0:
@@ -115,7 +121,9 @@ def sign(x):
     return retVal
 
 
-def invertIntervalList(inputList, maxValue=None):
+def invertIntervalList(
+    inputList: List[List[int]], maxValue: int = None
+) -> List[List[int]]:
     """
     Inverts the segments of a list of intervals
 
@@ -145,7 +153,7 @@ def invertIntervalList(inputList, maxValue=None):
     return invList
 
 
-def makeDir(path):
+def makeDir(path: str) -> None:
     """
     Creates a new directory
 
@@ -155,7 +163,7 @@ def makeDir(path):
         os.mkdir(path)
 
 
-def findAll(txt, subStr):
+def findAll(txt: str, subStr: str) -> List[int]:
     """
     Find the starting indicies of all instances of subStr in txt
     """
@@ -173,7 +181,7 @@ def findAll(txt, subStr):
 
 
 class FileNotFound(Exception):
-    def __init__(self, fullPath):
+    def __init__(self, fullPath: str):
         super(FileNotFound, self).__init__()
         self.fullPath = fullPath
 
@@ -182,7 +190,7 @@ class FileNotFound(Exception):
 
 
 class PraatExecutionFailed(Exception):
-    def __init__(self, cmdList):
+    def __init__(self, cmdList: List[str]):
         super(PraatExecutionFailed, self).__init__()
         self.cmdList = cmdList
 
@@ -202,7 +210,9 @@ class PraatExecutionFailed(Exception):
         return errorStr + cmdTxt
 
 
-def runPraatScript(praatEXE, scriptFN, argList, cwd=None):
+def runPraatScript(
+    praatEXE: str, scriptFN: str, argList: List[str], cwd: str = None
+) -> None:
 
     # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
@@ -219,7 +229,7 @@ def runPraatScript(praatEXE, scriptFN, argList, cwd=None):
         raise PraatExecutionFailed(cmdList)
 
 
-def _getMatchFunc(pattern):
+def _getMatchFunc(pattern: str):
     """
     An unsophisticated pattern matching function
     """
@@ -253,13 +263,13 @@ def _getMatchFunc(pattern):
 
 
 def findFiles(
-    path,
-    filterPaths=False,
-    filterExt=None,
-    filterPattern=None,
-    skipIfNameInList=None,
-    stripExt=False,
-):
+    path: str,
+    filterPaths: bool = False,
+    filterExt: str = None,
+    filterPattern: str = None,
+    skipIfNameInList: List[str] = None,
+    stripExt: bool = False,
+) -> List[str]:
 
     fnList = os.listdir(path)
 
@@ -302,7 +312,9 @@ def findFiles(
     return fnList
 
 
-def openCSV(path, fn, valueIndex=None, encoding="utf-8"):
+def openCSV(
+    path: str, fn: str, valueIndex: int = None, encoding: str = "utf-8"
+) -> List[list]:
     """
     Load a feature
 
@@ -324,7 +336,7 @@ def openCSV(path, fn, valueIndex=None, encoding="utf-8"):
     return featureList
 
 
-def safeZip(listOfLists, enforceLength):
+def safeZip(listOfLists: List[list], enforceLength: bool) -> List[list]:
     """
     A safe version of python's zip()
 
@@ -346,7 +358,7 @@ def safeZip(listOfLists, enforceLength):
     return zipFunc(*listOfLists)
 
 
-def getWavDuration(wavFN):
+def getWavDuration(wavFN: str) -> float:
     "For internal use.  See praatio.audioio.WavQueryObj() for general use."
     audiofile = wave.open(wavFN, "r")
     params = audiofile.getparams()

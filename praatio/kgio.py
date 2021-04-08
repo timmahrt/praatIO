@@ -24,13 +24,14 @@ see **examples/klatt_resynthesis.py**
 
 import io
 from os.path import join
+from typing import List, Tuple
 
 from praatio.utilities import utils
 from praatio import tgio
 
 
 class _KlattBaseTier(object):
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.tierNameList = []  # Preserves the order of the tiers
         self.tierDict = {}
         self.name = name
@@ -150,7 +151,7 @@ class KlattPointTier(tgio.TextgridTier):
 
         self.entryList = newEntryList
 
-    def getAsText(self):
+    def getAsText(self) -> str:
         outputList = []
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputList.append("%s? <exists> " % self.name)
@@ -173,7 +174,7 @@ class KlattSubPointTier(KlattPointTier):
     Tiers contained in a KlattIntermediateTier
     """
 
-    def getAsText(self):
+    def getAsText(self) -> str:
         outputList = []
         outputList.append("%s:" % self.name)
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
@@ -443,7 +444,7 @@ def _buildEntryList(sectionTuple):
     return entryList
 
 
-def _processSectionData(sectionData):
+def _processSectionData(sectionData: str) -> List[Tuple[float, float]]:
 
     sectionData += "\n"
 
@@ -468,7 +469,7 @@ def _processSectionData(sectionData):
     return tupleList
 
 
-def _cleanNumericValues(dataStr):
+def _cleanNumericValues(dataStr: str) -> str:
     dataList = dataStr.split("\n")
     newDataList = []
     for row in dataList:
@@ -496,7 +497,7 @@ def _cleanNumericValues(dataStr):
     return outputTxt
 
 
-def toIntOrFloat(val):
+def toIntOrFloat(val: str) -> float:
     if float(val) - float(int(val)) == 0.0:
         val = int(val)
     else:

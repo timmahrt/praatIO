@@ -5,14 +5,22 @@ see **examples/get_vowel_points.py**
 """
 
 import io
+from typing import List, Tuple
 
+# Object classes
 POINT = "PointProcess"
 PITCH = "PitchTier"
 DURATION = "DurationTier"
 
 
 class PointObject(object):
-    def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
+    def __init__(
+        self,
+        pointList: List[list],
+        objectClass: str,
+        minTime: float = 0,
+        maxTime: float = None,
+    ):
 
         # Sanitize input
         pointList = [tuple(row) for row in pointList]
@@ -35,7 +43,7 @@ class PointObject(object):
 
         return isEqual
 
-    def save(self, fn):
+    def save(self, fn: str) -> None:
         header = 'File type = "ooTextFile"\n' 'Object class = "%s"\n' "\n%s\n%s\n%d"
         header %= (
             self.objectClass,
@@ -52,7 +60,9 @@ class PointObject(object):
         with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputStr)
 
-    def getPointsInInterval(self, start, stop, startIndex=0):
+    def getPointsInInterval(
+        self, start: float, stop: float, startIndex: int = 0
+    ) -> List[list]:
 
         returnPointList = []
         for entry in self.pointList[startIndex:]:
@@ -69,7 +79,13 @@ class PointObject(object):
 class PointObject1D(PointObject):
     """Points that only carry temporal information"""
 
-    def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
+    def __init__(
+        self,
+        pointList: List[list],
+        objectClass: str,
+        minTime: float = 0,
+        maxTime: float = None,
+    ):
 
         assert objectClass != PITCH
         assert objectClass != DURATION
@@ -83,7 +99,13 @@ class PointObject1D(PointObject):
 class PointObject2D(PointObject):
     """Points that carry a temporal value and some other value"""
 
-    def __init__(self, pointList, objectClass, minTime=0, maxTime=None):
+    def __init__(
+        self,
+        pointList: List[list],
+        objectClass: str,
+        minTime: float = 0,
+        maxTime: float = None,
+    ):
 
         assert objectClass != POINT
 
@@ -93,7 +115,7 @@ class PointObject2D(PointObject):
         super(PointObject2D, self).__init__(pointList, objectClass, minTime, maxTime)
 
 
-def open1DPointObject(fn):
+def open1DPointObject(fn: str) -> PointObject1D:
     with io.open(fn, "r", encoding="utf-8") as fd:
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
@@ -131,7 +153,7 @@ def open1DPointObject(fn):
     return po
 
 
-def open2DPointObject(fn):
+def open2DPointObject(fn: str) -> PointObject2D:
     with io.open(fn, "r", encoding="utf-8") as fd:
         data = fd.read()
     if "xmin" in data[:100]:  # Kindof lazy
@@ -175,7 +197,7 @@ def open2DPointObject(fn):
     return po
 
 
-def _parseNormalHeader(fn):
+def _parseNormalHeader(fn: str) -> Tuple[str, str, float, float]:
     with io.open(fn, "r", encoding="utf-8") as fd:
         data = fd.read()
 
@@ -192,13 +214,13 @@ def _parseNormalHeader(fn):
     return data, objectType, minT, maxT
 
 
-def _getNextValue(data, start):
+def _getNextValue(data: str, start: float) -> Tuple[str, int]:
     end = data.index("\n", start)
     value = data[start + 1 : end]
     return value, end
 
 
-def _parseShortHeader(fn):
+def _parseShortHeader(fn: str) -> Tuple[str, str, float, float]:
     with io.open(fn, "r", encoding="utf-8") as fd:
         data = fd.read()
 

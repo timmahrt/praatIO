@@ -1,13 +1,15 @@
 """
 Functions for reading, writing, querying, and manipulating audio.
 
-see **examples/anonymize_recording.py**, **examples/delete_vowels.py**, and **examples/extract_subwavs.py**
+see **examples/anonymize_recording.py**, **examples/delete_vowels.py**,
+and **examples/extract_subwavs.py**
 """
 
 import math
 import wave
 import struct
 import copy
+from typing import List
 
 from praatio.utilities import utils
 
@@ -19,7 +21,7 @@ class EndOfAudioData(Exception):
 
 
 class FindZeroCrossingError(Exception):
-    def __init__(self, startTime, endTime):
+    def __init__(self, startTime: float, endTime: float):
         super(FindZeroCrossingError, self).__init__()
 
         self.startTime = startTime
@@ -30,7 +32,7 @@ class FindZeroCrossingError(Exception):
         return retString % (self.startTime, self.endTime)
 
 
-def samplesAsNums(waveData, sampleWidth):
+def samplesAsNums(waveData: str, sampleWidth: float) -> List[float]:
     """Convert samples of a python wave object from bytes to numbers"""
     if len(waveData) == 0:
         raise EndOfAudioData()
@@ -42,7 +44,7 @@ def samplesAsNums(waveData, sampleWidth):
     return audioFrameList
 
 
-def numsAsSamples(sampleWidth, numList):
+def numsAsSamples(sampleWidth: float, numList: List[int]) -> str:
     """Convert audio data from numbers to bytes"""
     byteCode = sampWidthDict[sampleWidth]
     byteStr = struct.pack("<" + byteCode * len(numList), *numList)
@@ -50,30 +52,32 @@ def numsAsSamples(sampleWidth, numList):
     return byteStr
 
 
-def getDuration(wavFN):
+def getDuration(wavFN: str) -> float:
     return WavQueryObj(wavFN).getDuration()
 
 
-def getMaxAmplitude(sampleWidth):
+def getMaxAmplitude(sampleWidth: int) -> int:
     """Gets the maximum possible amplitude for a given sample width"""
     return 2 ** (sampleWidth * 8 - 1) - 1
 
 
-def generateSineWave(duration, freq, samplingFreq, amplitude):
+def generateSineWave(
+    duration: float, freq: int, samplingFreq: int, amplitude: float
+) -> List[int]:
     nSamples = int(duration * samplingFreq)
     wavSpec = 2 * math.pi * freq / float(samplingFreq)
     sinWave = [int(amplitude * math.sin(wavSpec * i)) for i in range(nSamples)]
     return sinWave
 
 
-def generateSilence(duration, samplingFreq):
+def generateSilence(duration: float, samplingFreq: int) -> List[int]:
     silence = [
         0,
     ] * int(duration * samplingFreq)
     return silence
 
 
-def extractSubwav(fn, outputFN, startT, endT):
+def extractSubwav(fn: float, outputFN: str, startT: float, endT: float) -> None:
     audioObj = openAudioFile(
         fn,
         [
@@ -85,7 +89,9 @@ def extractSubwav(fn, outputFN, startT, endT):
 
 
 class AbstractWav(object):
-    def findNearestZeroCrossing(self, targetTime, timeStep=0.002):
+    def findNearestZeroCrossing(
+        self, targetTime: float, timeStep: float = 0.002
+    ) -> float:
         """
         Finds the nearest zero crossing at the given time in an audio file
 
@@ -147,7 +153,9 @@ class AbstractWav(object):
 
         return zeroCrossingTime
 
-    def findNextZeroCrossing(self, targetTime, timeStep=0.002, reverse=False):
+    def findNextZeroCrossing(
+        self, targetTime: float, timeStep: float = 0.002, reverse: bool = False
+    ) -> float:
         """
         Finds the nearest zero crossing, searching in one direction
 
@@ -218,7 +226,7 @@ class WavQueryObj(AbstractWav):
     use a WavObj.
     """
 
-    def __init__(self, fn):
+    def __init__(self, fn: str):
         self.audiofile = wave.open(fn, "r")
         self.params = self.audiofile.getparams()
 
@@ -229,7 +237,9 @@ class WavQueryObj(AbstractWav):
         self.comptype = self.params[4]
         self.compname = self.params[5]
 
-    def concatenate(self, targetFrames, outputFN, prepend=False):
+    def concatenate(
+        self, targetFrames: List[int], outputFN: str, prepend: bool = False
+    ) -> None:
         sourceFrames = self.getFrames()
 
         if prepend is True:
@@ -239,11 +249,11 @@ class WavQueryObj(AbstractWav):
 
         self.outputModifiedWav(newFrames, outputFN)
 
-    def getDuration(self):
+    def getDuration(self) -> float:
         duration = float(self.nframes) / self.framerate
         return duration
 
-    def getFrames(self, startTime=None, endTime=None):
+    def getFrames(self, startTime: float = None, endTime: float = None):
         """
         Get frames with respect to time
         """
@@ -262,7 +272,7 @@ class WavQueryObj(AbstractWav):
 
         return frames
 
-    def getSamples(self, startTime, endTime):
+    def getSamples(self, startTime: float, endTime: float) -> List[float]:
 
         frames = self.getFrames(startTime, endTime)
         audioFrameList = samplesAsNums(frames, self.sampwidth)
@@ -271,11 +281,11 @@ class WavQueryObj(AbstractWav):
 
     def deleteWavSections(
         self,
-        outputFN,
-        keepList=None,
-        deleteList=None,
-        operation="shrink",
-        sineWaveAmplitude=None,
+        outputFN: str,
+        keepList: List[tuple[float, float, str]] = None,
+        deleteList: List[tuple[float, float, str]] = None,
+        operation: str = "shrink",
+        sineWaveAmplitude: float = None,
     ):
         """
         Remove from the audio all of the intervals
@@ -283,7 +293,7 @@ class WavQueryObj(AbstractWav):
         DeleteList can easily be constructed from a textgrid tier
         e.g. deleteList = tg.tierDict["targetTier"].entryList
 
-        operation: "shrink" to shrink the file length or "silence or
+        operation: "shrink" to shrink the file length or "silence" or
                    "sine wave" to replace the segment with silence or
                    a sine wave
         sineWaveAmplitude: if None and operation is "sine wave"
@@ -337,7 +347,7 @@ class WavQueryObj(AbstractWav):
 
             self.outputModifiedWav(audioFrames, outputFN)
 
-    def outputModifiedWav(self, audioFrames, outputFN):
+    def outputModifiedWav(self, audioFrames: List[int], outputFN: str):
         """
         Output frames using the same parameters as this WavQueryObj
         """
@@ -366,7 +376,7 @@ class WavObj(AbstractWav):
     large files.
     """
 
-    def __init__(self, audioSamples, params):
+    def __init__(self, audioSamples: List[int], params: dict):
 
         self.audioSamples = audioSamples
         self.params = params
@@ -376,18 +386,18 @@ class WavObj(AbstractWav):
         self.comptype = params[4]
         self.compname = params[5]
 
-    def getIndexAtTime(self, startTime):
+    def getIndexAtTime(self, startTime: float):
         return int(startTime * self.framerate)
 
-    def insertSilence(self, startTime, silenceDuration):
+    def insertSilence(self, startTime: float, silenceDuration: float):
         audioSamples = generateSilence(silenceDuration, self.framerate)
         self.insertSegment(startTime, audioSamples)
 
-    def insert(self, startTime, valueList):
+    def insert(self, startTime: float, audioSamples: List[int]):
         i = self.getIndexAtTime(startTime)
-        self.audioSamples = self.audioSamples[:i] + valueList + self.audioSamples[i:]
+        self.audioSamples = self.audioSamples[:i] + audioSamples + self.audioSamples[i:]
 
-    def deleteSegment(self, startTime, endTime):
+    def deleteSegment(self, startTime: float, endTime: float):
         i = self.getIndexAtTime(startTime)
         j = self.getIndexAtTime(endTime)
         self.audioSamples = self.audioSamples[:i] + self.audioSamples[j:]
@@ -395,19 +405,19 @@ class WavObj(AbstractWav):
     def getDuration(self):
         return float(len(self.audioSamples)) / self.framerate
 
-    def getSamples(self, startTime, endTime):
+    def getSamples(self, startTime: float, endTime: float):
         i = self.getIndexAtTime(startTime)
         j = self.getIndexAtTime(endTime)
         return self.audioSamples[i:j]
 
-    def getSubsegment(self, startTime, endTime):
+    def getSubsegment(self, startTime: float, endTime: float):
         samples = self.getSamples(startTime, endTime)
         return WavObj(samples, self.params)
 
     def new(self):
         return copy.deepcopy(self)
 
-    def save(self, outputFN):
+    def save(self, outputFN: str):
         # Output resulting wav file
         outParams = [
             self.nchannels,
@@ -428,7 +438,12 @@ class WavObj(AbstractWav):
         outWave.writeframes(byteStr)
 
 
-def openAudioFile(fn, keepList=None, deleteList=None, doShrink=True):
+def openAudioFile(
+    fn: str,
+    keepList: List[tuple[float, float, str]] = None,
+    deleteList: List[tuple[float, float, str]] = None,
+    doShrink: bool = True,
+) -> WavObj:
     """
     Remove from the audio all of the intervals
 

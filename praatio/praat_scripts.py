@@ -8,6 +8,7 @@ see **examples/auto_segment_speech.py**, **examples/get_pitch_and_formants.py**,
 import os
 from os.path import join
 import io
+from typing import List
 
 from praatio import audioio
 from praatio import dataio
@@ -15,17 +16,17 @@ from praatio.utilities import utils
 
 
 def changeGender(
-    praatEXE,
-    wavFN,
-    outputWavFN,
-    pitchFloor,
-    pitchCeiling,
-    formantShiftRatio,
-    pitchMedian=0.0,
-    pitchRange=1.0,
-    duration=1.0,
-    scriptFN=None,
-):
+    praatEXE: str,
+    wavFN: str,
+    outputWavFN: str,
+    pitchFloor: float,
+    pitchCeiling: float,
+    formantShiftRatio: float,
+    pitchMedian: float = 0.0,
+    pitchRange: float = 1.0,
+    duration: float = 1.0,
+    scriptFN: str = None,
+) -> None:
     """
     Changes the speech formants in a file using praat's change gender function
 
@@ -55,7 +56,13 @@ def changeGender(
     )
 
 
-def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
+def changeIntensity(
+    praatEXE: str,
+    wavFN: str,
+    outputWavFN: str,
+    newIntensity: float,
+    scriptFN: str = None,
+) -> None:
     """
     Changes the intensity of the wavFN (in db)
 
@@ -70,16 +77,16 @@ def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
 
 
 def getFormants(
-    praatEXE,
-    inputWavFN,
-    outputTxtFN,
-    maxFormant,
-    stepSize=0.01,
-    window_length=0.025,
-    preemphasis=50,
-    scriptFN=None,
-    undefinedValue=None,
-):
+    praatEXE: str,
+    inputWavFN: str,
+    outputTxtFN: str,
+    maxFormant: float,
+    stepSize: float = 0.01,
+    window_length: float = 0.025,
+    preemphasis: float = 50,
+    scriptFN: str = None,
+    undefinedValue: str = None,
+) -> List:
     """
     Get F1, F2, and F3 for the audio file
 
@@ -130,8 +137,13 @@ def getFormants(
 
 
 def getPulses(
-    praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch, scriptFN=None
-):
+    praatEXE: str,
+    inputWavFN: str,
+    outputPointTierFN: str,
+    minPitch: float,
+    maxPitch: float,
+    scriptFN: float = None,
+) -> dataio.PointObject1D:
     """
     Gets the pitch/glottal pulses for an audio file.
 
@@ -151,14 +163,14 @@ def getPulses(
 
 
 def getSpectralInfo(
-    praatEXE,
-    inputWavFN,
-    inputTGFN,
-    outputCSVFN,
-    tierName,
-    spectralPower=2,
-    spectralMoment=3,
-    scriptFN=None,
+    praatEXE: str,
+    inputWavFN: str,
+    inputTGFN: str,
+    outputCSVFN: str,
+    tierName: str,
+    spectralPower: int = 2,
+    spectralMoment: int = 3,
+    scriptFN: str = None,
 ):
     """
     Extracts various spectral measures from an audio file
@@ -194,13 +206,13 @@ def getSpectralInfo(
 
 
 def resynthesizePitch(
-    praatEXE,
-    inputWavFN,
-    pitchFN,
-    outputWavFN,
-    minPitch,
-    maxPitch,
-    scriptFN=None,
+    praatEXE: str,
+    inputWavFN: str,
+    pitchFN: str,
+    outputWavFN: str,
+    minPitch: float,
+    maxPitch: float,
+    scriptFN: str = None,
     pointList=None,
 ):
     """
@@ -226,8 +238,14 @@ def resynthesizePitch(
 
 
 def resynthesizeDuration(
-    praatEXE, inputWavFN, durationTierFN, outputWavFN, minPitch, maxPitch, scriptFN=None
-):
+    praatEXE: str,
+    inputWavFN: str,
+    durationTierFN: str,
+    outputWavFN: str,
+    minPitch: float,
+    maxPitch: float,
+    scriptFN: str = None,
+) -> None:
     """
     Resynthesizes the duration in a wav file with the given duration tier
 

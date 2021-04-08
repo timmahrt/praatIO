@@ -3,9 +3,10 @@ Various math utilities
 """
 
 import math
+from typing import Callable, List
 
 
-def numToStr(inputNum):
+def numToStr(inputNum: float) -> str:
     if isclose(inputNum, int(inputNum)):
         retVal = "%d" % inputNum
     else:
@@ -13,13 +14,17 @@ def numToStr(inputNum):
     return retVal
 
 
-def isclose(a, b, rel_tol=1e-14, abs_tol=0.0):
+def isclose(a: float, b: float, rel_tol: float = 1e-14, abs_tol: float = 0.0) -> bool:
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
 def filterTimeSeriesData(
-    filterFunc, featureTimeList, windowSize, index, useEdgePadding
-):
+    filterFunc: Callable[[List[float], int, bool], List[float]],
+    featureTimeList: List[list],
+    windowSize: int,
+    index: int,
+    useEdgePadding: bool,
+) -> List[list]:
     """
     Filter time-stamped data values within a window
 
@@ -46,7 +51,9 @@ def filterTimeSeriesData(
     return outputList
 
 
-def znormalizeSpeakerData(featureTimeList, index, filterZeroValues):
+def znormalizeSpeakerData(
+    featureTimeList: List[list], index: int, filterZeroValues: bool
+) -> List[list]:
     """
     znormalize time series data
 
@@ -86,7 +93,7 @@ def znormalizeSpeakerData(featureTimeList, index, filterZeroValues):
     return outputList
 
 
-def medianFilter(dist, window, useEdgePadding):
+def medianFilter(dist: List[int], window: int, useEdgePadding: bool) -> List[int]:
     """
     median filter each value in a dataset; filtering occurs within a given window
 
@@ -101,7 +108,9 @@ def medianFilter(dist, window, useEdgePadding):
     return _stepFilter(median, dist, window, useEdgePadding)
 
 
-def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
+def znormWindowFilter(
+    dist: List[int], window: int, useEdgePadding: bool, filterZeroValues: bool
+) -> List[int]:
     """
     z-normalize each value in a dataset; normalization occurs within a given window
 
@@ -121,7 +130,7 @@ def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
     else:
         zeroIndexList = []
         nonzeroValList = []
-        for i, val in enumerate(dst):
+        for i, val in enumerate(dist):
             if val > 0.0:
                 nonzeroValList.append(val)
             else:
@@ -137,7 +146,9 @@ def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
     return filteredOutput
 
 
-def _stepFilter(filterFunc, dist, window, useEdgePadding):
+def _stepFilter(
+    filterFunc, dist: List[int], window: int, useEdgePadding: bool
+) -> List[int]:
 
     offset = int(math.floor(window / 2.0))
     length = len(dist)
@@ -183,7 +194,7 @@ def _stepFilter(filterFunc, dist, window, useEdgePadding):
     return returnList
 
 
-def median(valList):
+def median(valList: List[float]) -> float:
 
     valList = valList[:]
     valList.sort()
@@ -198,18 +209,18 @@ def median(valList):
     return medianVal
 
 
-def mean(valList):
+def mean(valList: List[float]) -> float:
     return sum(valList) / float(len(valList))
 
 
-def stdDev(valList):
+def stdDev(valList: List[float]) -> float:
     meanVal = mean(valList)
     squaredSum = sum([(val - meanVal) ** 2 for val in valList])
 
     return math.sqrt(squaredSum / float(len(valList) - 1))
 
 
-def znormalizeData(valList):
+def znormalizeData(valList: List[float]) -> List[float]:
     """
     Given a list of floats, return the z-normalized values of the floats
 
@@ -225,7 +236,7 @@ def znormalizeData(valList):
     return [(val - meanVal) / stdDevVal for val in valList]
 
 
-def rms(intensityValues):
+def rms(intensityValues: List[float]) -> float:
     """Return the root mean square for the input set of values"""
     intensityValues = [val ** 2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)
