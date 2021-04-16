@@ -11,131 +11,17 @@ Tiers in a Textgrid are ordered and must contain a unique name.
 openTextgrid() can be used to open a textgrid file.
 Textgrid.save() can be used to save a Textgrid object to a file.
 
-see the **examples/** directory for lots of examples using tgio.py
+see the **examples/** directory for examples using tgio.py
 """
 
 import re
 import copy
-from collections import namedtuple
 from typing import Callable, List, Tuple
 
+from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import myMath
-
-INTERVAL_TIER = "IntervalTier"
-POINT_TIER = "TextTier"
-
-Interval = namedtuple("Interval", ["start", "end", "label"])  # interval entry
-Point = namedtuple("Point", ["time", "label"])  # point entry
-
-
-def intervalOverlapCheck(
-    interval: Interval,
-    cmprInterval: Interval,
-    percentThreshold: float = 0,
-    timeThreshold: float = 0,
-    boundaryInclusive: bool = False,
-) -> bool:
-    """
-    Checks whether two intervals overlap
-
-    Args:
-        interval (Interval):
-        cmprInterval (Interval):
-        percentThreshold (float): if percentThreshold is greater than 0, then
-            if the intervals overlap, they must overlap by at least this threshold
-        timeThreshold (float): if greater than 0, then if the intervals overlap,
-            they must overlap by at least this threshold
-        boundaryInclusive (float): if true, then two intervals are considered to
-            overlap if they share a boundary
-
-    Returns:
-        bool:
-    """
-
-    startTime, endTime = interval[:2]
-    cmprStartTime, cmprEndTime = cmprInterval[:2]
-
-    overlapTime = max(0, min(endTime, cmprEndTime) - max(startTime, cmprStartTime))
-    overlapFlag = overlapTime > 0
-
-    # Do they share a boundary?  Only need to check if one boundary ends
-    # when another begins (because otherwise, they overlap in other ways)
-    boundaryOverlapFlag = False
-    if boundaryInclusive:
-        boundaryOverlapFlag = startTime == cmprEndTime or endTime == cmprStartTime
-
-    # Is the overlap over a certain percent?
-    percentOverlapFlag = False
-    if percentThreshold > 0 and overlapFlag:
-        totalTime = max(endTime, cmprEndTime) - min(startTime, cmprStartTime)
-        percentOverlap = overlapTime / float(totalTime)
-
-        percentOverlapFlag = percentOverlap >= percentThreshold
-
-    # Is the overlap more than a certain threshold?
-    timeOverlapFlag = False
-    if timeThreshold > 0 and overlapFlag:
-        timeOverlapFlag = overlapTime > timeThreshold
-
-    overlapFlag = (
-        overlapFlag or boundaryOverlapFlag or percentOverlapFlag or timeOverlapFlag
-    )
-
-    return overlapFlag
-
-
-class TextgridCollisionException(Exception):
-    def __init__(
-        self,
-        tierName: str,
-        insertInterval: Interval,
-        collisionList: List["TextgridTier"],
-    ):
-        super(TextgridCollisionException, self).__init__()
-        self.tierName = tierName
-        self.insertInterval = insertInterval
-        self.collisionList = collisionList
-
-    def __str__(self):
-        dataTuple = (str(self.insertInterval), self.tierName, str(self.collisionList))
-        return (
-            "Attempted to insert interval %s into tier %s of textgrid"
-            + "but overlapping entries %s already exist" % dataTuple
-        )
-
-
-class TimelessTextgridTierException(Exception):
-    def __str__(self):
-        return "All textgrid tiers much have a min and max duration"
-
-
-class BadIntervalError(Exception):
-    def __init__(self, start: float, stop: float, label: str):
-        super(BadIntervalError, self).__init__()
-        self.start = start
-        self.stop = stop
-        self.label = label
-
-    def __str__(self):
-        dataTuple = (self.start, self.stop, self.label)
-        return (
-            "Problem with interval--could not create textgrid "
-            + "(%s,%s,%s)" % dataTuple
-        )
-
-
-class BadFormatException(Exception):
-    def __init__(self, selectedFormat: str, validFormatOptions: List[str]):
-        super(BadFormatException, self).__init__()
-        self.selectedFormat = selectedFormat
-        self.validFormatOptions = validFormatOptions
-
-    def __str__(self):
-        dataTuple = (self.selectedFormat, ", ".join(self.validFormatOptions))
-        return (
-            "Problem with format.  Received %s but format must be one of %s" % dataTuple
-        )
+from praatio.utilities.constants import Interval, Point, INTERVAL_TIER, POINT_TIER
 
 
 class TextgridTier(object):
@@ -284,6 +170,25 @@ class TextgridTier(object):
 
         return retTier
 
+    def editTimestamps(
+        self, offset: float, allowOvershoot: bool = False
+    ) -> "TextgridTier":
+        raise NotImplementedError()
+
+    def insertEntry(
+        self, entry: Point, warnFlag: bool = True, collisionCode: str = None
+    ) -> None:
+        raise NotImplementedError()
+
+    def eraseRegion(
+        self,
+        start: float,
+        stop: float,
+        collisionCode: str = None,
+        doShrink: bool = True,
+    ) -> "TextgridTier":
+        raise NotImplementedError()
+
 
 class PointTier(TextgridTier):
 
@@ -326,7 +231,7 @@ class PointTier(TextgridTier):
             minT = min(timeList)
             maxT = max(timeList)
         except ValueError:
-            raise TimelessTextgridTierException()
+            raise errors.TimelessTextgridTierException()
 
         super(PointTier, self).__init__(name, entryList, minT, maxT)
 
@@ -543,7 +448,7 @@ class PointTier(TextgridTier):
             self.entryList.append(newEntry)
 
         else:
-            raise TextgridCollisionException(self.name, entry, matchList)
+            raise errors.TextgridCollisionException(self.name, entry, matchList)
 
         self.sort()
 
@@ -643,7 +548,7 @@ class IntervalTier(TextgridTier):
             minT = min(minTimeList)
             maxT = max(maxTimeList)
         except ValueError:
-            raise TimelessTextgridTierException()
+            raise errors.TimelessTextgridTierException()
 
         super(IntervalTier, self).__init__(name, entryList, minT, maxT)
 
@@ -1025,7 +930,7 @@ class IntervalTier(TextgridTier):
             self.entryList.append(Interval(*newEntry))
 
         else:
-            raise TextgridCollisionException(self.name, entry, matchList)
+            raise errors.TextgridCollisionException(self.name, entry, matchList)
 
         self.sort()
 

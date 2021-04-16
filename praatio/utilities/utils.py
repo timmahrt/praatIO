@@ -12,11 +12,77 @@ import wave
 from pkg_resources import resource_filename
 from typing import List
 
+from praatio.utilities import constants
+
 # Get the folder one level above the current folder
 scriptsPath = resource_filename(
     "praatio",
     "praatScripts",
 )
+
+
+def intervalOverlapCheck(
+    interval: constants.Interval,
+    cmprInterval: constants.Interval,
+    percentThreshold: float = 0,
+    timeThreshold: float = 0,
+    boundaryInclusive: bool = False,
+) -> bool:
+    """
+    Checks whether two intervals overlap
+
+    Args:
+        interval (Interval):
+        cmprInterval (Interval):
+        percentThreshold (float): if percentThreshold is greater than 0, then
+            if the intervals overlap, they must overlap by at least this threshold
+        timeThreshold (float): if greater than 0, then if the intervals overlap,
+            they must overlap by at least this threshold
+        boundaryInclusive (float): if true, then two intervals are considered to
+            overlap if they share a boundary
+
+    Returns:
+        bool:
+    """
+
+    startTime, endTime = interval[:2]
+    cmprStartTime, cmprEndTime = cmprInterval[:2]
+
+    overlapTime = max(0, min(endTime, cmprEndTime) - max(startTime, cmprStartTime))
+    overlapFlag = overlapTime > 0
+
+    # Do they share a boundary?  Only need to check if one boundary ends
+    # when another begins (because otherwise, they overlap in other ways)
+    boundaryOverlapFlag = False
+    if boundaryInclusive:
+        boundaryOverlapFlag = startTime == cmprEndTime or endTime == cmprStartTime
+
+    # Is the overlap over a certain percent?
+    percentOverlapFlag = False
+    if percentThreshold > 0 and overlapFlag:
+        totalTime = max(endTime, cmprEndTime) - min(startTime, cmprStartTime)
+        percentOverlap = overlapTime / float(totalTime)
+
+        percentOverlapFlag = percentOverlap >= percentThreshold
+
+    # Is the overlap more than a certain threshold?
+    timeOverlapFlag = False
+    if timeThreshold > 0 and overlapFlag:
+        timeOverlapFlag = overlapTime > timeThreshold
+
+    overlapFlag = (
+        overlapFlag or boundaryOverlapFlag or percentOverlapFlag or timeOverlapFlag
+    )
+
+    return overlapFlag
+
+
+def escapeQuotes(text: str) -> str:
+    return text.replace('"', '""')
+
+
+def strToIntOrFloat(inputStr: str) -> float:
+    return float(inputStr) if "." in inputStr else int(inputStr)
 
 
 def getValueAtTime(

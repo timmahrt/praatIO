@@ -116,10 +116,6 @@ def _fillInBlanks(
     return tier.new(entryList=newEntryList)
 
 
-def _escapeQuotes(text: str) -> str:
-    return text.replace('"', '""')
-
-
 def openTextgrid(
     fnFullPath: str, readRaw: bool = False, readAsJson: bool = False
 ) -> textgrid.Textgrid:
@@ -301,7 +297,7 @@ def _tgToShortTextForm(
         tier = tg.tierDict[tierName]
         text = ""
         text += '"%s"\n' % tier.tierType
-        text += '"%s"\n' % _escapeQuotes(tier.name)
+        text += '"%s"\n' % utils.escapeQuotes(tier.name)
         text += "%s\n%s\n%s\n" % (
             myMath.numToStr(tier.minTimestamp),
             myMath.numToStr(tier.maxTimestamp),
@@ -310,7 +306,7 @@ def _tgToShortTextForm(
 
         for entry in tier.entryList:
             entry = [myMath.numToStr(val) for val in entry[:-1]] + [
-                '"%s"' % _escapeQuotes(entry[-1])
+                '"%s"' % utils.escapeQuotes(entry[-1])
             ]
 
             text += "\n".join([str(val) for val in entry]) + "\n"
@@ -348,7 +344,7 @@ def _tgToLongTextForm(
         # Interval header
         outputTxt += tab + "item [%d]:\n" % (tierNum + 1)
         outputTxt += tab * 2 + 'class = "%s" \n' % tier.tierType
-        outputTxt += tab * 2 + 'name = "%s" \n' % _escapeQuotes(tierName)
+        outputTxt += tab * 2 + 'name = "%s" \n' % utils.escapeQuotes(tierName)
         outputTxt += tab * 2 + "xmin = %s \n" % myMath.numToStr(tier.minTimestamp)
         outputTxt += tab * 2 + "xmax = %s \n" % myMath.numToStr(tier.maxTimestamp)
 
@@ -359,14 +355,14 @@ def _tgToLongTextForm(
                 outputTxt += tab * 2 + "intervals [%d]:\n" % (intervalNum + 1)
                 outputTxt += tab * 3 + "xmin = %s \n" % myMath.numToStr(start)
                 outputTxt += tab * 3 + "xmax = %s \n" % myMath.numToStr(stop)
-                outputTxt += tab * 3 + 'text = "%s" \n' % _escapeQuotes(label)
+                outputTxt += tab * 3 + 'text = "%s" \n' % utils.escapeQuotes(label)
         else:
             outputTxt += tab * 2 + "points: size = %d \n" % len(tier.entryList)
             for pointNum, entry in enumerate(tier.entryList):
                 timestamp, label = entry
                 outputTxt += tab * 2 + "points [%d]:\n" % (pointNum + 1)
                 outputTxt += tab * 3 + "number = %s \n" % myMath.numToStr(timestamp)
-                outputTxt += tab * 3 + 'mark = "%s" \n' % _escapeQuotes(label)
+                outputTxt += tab * 3 + 'mark = "%s" \n' % utils.escapeQuotes(label)
 
     return outputTxt
 
@@ -467,9 +463,9 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
         tierName = header.split("name = ")[1].split("\n", 1)[0]
         tierName, tierNameI = _fetchTextRow(header, 0, "name = ")
         tierStart = header.split("xmin = ")[1].split("\n", 1)[0]
-        tierStart = strToIntOrFloat(tierStart)
+        tierStart = utils.strToIntOrFloat(tierStart)
         tierEnd = header.split("xmax = ")[1].split("\n", 1)[0]
-        tierEnd = strToIntOrFloat(tierEnd)
+        tierEnd = utils.strToIntOrFloat(tierEnd)
 
         # Get the tier entry list
         tierEntryList = []
@@ -545,8 +541,8 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
         tierEndTime, tierEndTimeI = _fetchRow(tierData, tierStartTimeI)
         startTimeI = _fetchRow(tierData, tierEndTimeI)[1]
 
-        tierStartTime = strToIntOrFloat(tierStartTime)
-        tierEndTime = strToIntOrFloat(tierEndTime)
+        tierStartTime = utils.strToIntOrFloat(tierStartTime)
+        tierEndTime = utils.strToIntOrFloat(tierEndTime)
 
         # Tier entry data
         entryList = []
@@ -581,10 +577,6 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
             )
 
     return newTG
-
-
-def strToIntOrFloat(inputStr: str) -> float:
-    return float(inputStr) if "." in inputStr else int(inputStr)
 
 
 def _fetchRow(dataStr: str, index: int, searchStr: str = None) -> [str, int]:
