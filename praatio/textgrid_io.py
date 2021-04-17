@@ -1,14 +1,20 @@
 import io
 import json
+from typing import Optional, Tuple, Union, Type, List
 
 from praatio import textgrid
+from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import myMath
+from praatio.utilities.constants import (
+    TEXTGRID,
+    JSON,
+    MIN_INTERVAL_LENGTH,
+    Interval,
+    Point,
+)
 
-MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
 
-TEXTGRID = "textgrid"
-JSON = "json"
 SUPPORTED_OUTPUT_FORMATS = [TEXTGRID, JSON]
 
 
@@ -29,7 +35,7 @@ def _removeUltrashortIntervals(
     """
 
     # First, remove tiny intervals
-    newEntryList = []
+    newEntryList: List[Interval] = []
     j = 0  # index to newEntryList
     for start, stop, label in tier.entryList:
 
@@ -37,14 +43,14 @@ def _removeUltrashortIntervals(
             # Correct ultra-short entries
             if len(newEntryList) > 0:
                 lastStart, _, lastLabel = newEntryList[j - 1]
-                newEntryList[j - 1] = (lastStart, stop, lastLabel)
+                newEntryList[j - 1] = Interval(lastStart, stop, lastLabel)
         else:
             # Special case: the first entry in oldEntryList was ultra-short
             if len(newEntryList) == 0 and start != minTimestamp:
-                newEntryList.append((minTimestamp, stop, label))
+                newEntryList.append(Interval(minTimestamp, stop, label))
             # Normal case
             else:
-                newEntryList.append((start, stop, label))
+                newEntryList.append(Interval(start, stop, label))
             j += 1
 
     # Next, shift near equivalent tiny boundaries
@@ -54,7 +60,7 @@ def _removeUltrashortIntervals(
     while j < len(newEntryList) - 1:
         diff = abs(newEntryList[j][1] - newEntryList[j + 1][0])
         if diff > 0 and diff < minLength:
-            newEntryList[j] = (
+            newEntryList[j] = Interval(
                 newEntryList[j][0],
                 newEntryList[j + 1][0],
                 newEntryList[j][2],
@@ -67,8 +73,8 @@ def _removeUltrashortIntervals(
 def _fillInBlanks(
     tier: textgrid.TextgridTier,
     blankLabel: str = "",
-    startTime: float = None,
-    endTime: float = None,
+    startTime: Optional[float] = None,
+    endTime: Optional[float] = None,
 ) -> textgrid.TextgridTier:
     """
     Fills in the space between intervals with empty space
@@ -165,8 +171,8 @@ def saveTextgrid(
     tg: textgrid.Textgrid,
     fn: str,
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
-    minTimestamp: float = None,
-    maxTimestamp: float = None,
+    minTimestamp: Optional[float] = None,
+    maxTimestamp: Optional[float] = None,
     useShortForm: bool = True,
     outputFormat: str = TEXTGRID,
     ignoreBlankSpaces: bool = False,
@@ -203,7 +209,7 @@ def saveTextgrid(
     """
 
     if outputFormat not in SUPPORTED_OUTPUT_FORMATS:
-        raise textgrid.BadFormatException(outputFormat, SUPPORTED_OUTPUT_FORMATS)
+        raise errors.BadFormatException(str(outputFormat), SUPPORTED_OUTPUT_FORMATS)
 
     if outputFormat == TEXTGRID:
         if useShortForm:
@@ -238,9 +244,9 @@ def saveTextgrid(
 def _prepTgForSaving(
     tg: textgrid.Textgrid,
     minimumIntervalLength: float,
-    minTimestamp: float,
-    maxTimestamp: float,
-    ignoreBlankSpaces: bool,
+    minTimestamp: Optional[float],
+    maxTimestamp: Optional[float],
+    ignoreBlankSpaces: Optional[bool],
 ) -> textgrid.Textgrid:
     for tier in tg.tierDict.values():
         tier.sort()
@@ -276,9 +282,9 @@ def _prepTgForSaving(
 def _tgToShortTextForm(
     tg: textgrid.Textgrid,
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
-    minTimestamp: float = None,
-    maxTimestamp: float = None,
-    ignoreBlankSpaces: bool = False,
+    minTimestamp: Optional[float] = None,
+    maxTimestamp: Optional[float] = None,
+    ignoreBlankSpaces: Optional[bool] = False,
 ) -> str:
     tg = _prepTgForSaving(
         tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
@@ -319,9 +325,9 @@ def _tgToShortTextForm(
 def _tgToLongTextForm(
     tg: textgrid.Textgrid,
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
-    minTimestamp: float = None,
-    maxTimestamp: float = None,
-    ignoreBlankSpaces: float = False,
+    minTimestamp: Optional[float] = None,
+    maxTimestamp: Optional[float] = None,
+    ignoreBlankSpaces: Optional[bool] = False,
 ) -> str:
     tg = _prepTgForSaving(
         tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
@@ -370,9 +376,9 @@ def _tgToLongTextForm(
 def _tgToJson(
     tg: textgrid.Textgrid,
     minimumIntervalLength: float,
-    minTimestamp: float,
-    maxTimestamp: float,
-    ignoreBlankSpaces: bool,
+    minTimestamp: Optional[float],
+    maxTimestamp: Optional[float],
+    ignoreBlankSpaces: Optional[bool],
 ) -> str:
     """Returns a json representation of a textgrid"""
     tg = _prepTgForSaving(
@@ -407,6 +413,7 @@ def _dictionaryToTg(tgAsDict: dict) -> textgrid.Textgrid:
     tg.maxTimestamp = tgAsDict["xmax"]
 
     for tierAsDict in tgAsDict["tiers"]:
+        klass: Union[Type[textgrid.PointTier], Type[textgrid.IntervalTier]]
         if tierAsDict["class"] == textgrid.INTERVAL_TIER:
             klass = textgrid.IntervalTier
         else:
@@ -462,15 +469,16 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
                 raise
         tierName = header.split("name = ")[1].split("\n", 1)[0]
         tierName, tierNameI = _fetchTextRow(header, 0, "name = ")
-        tierStart = header.split("xmin = ")[1].split("\n", 1)[0]
-        tierStart = utils.strToIntOrFloat(tierStart)
-        tierEnd = header.split("xmax = ")[1].split("\n", 1)[0]
-        tierEnd = utils.strToIntOrFloat(tierEnd)
+        tierStartStr = header.split("xmin = ")[1].split("\n", 1)[0]
+        tierStart = utils.strToIntOrFloat(tierStartStr)
+        tierEndStr = header.split("xmax = ")[1].split("\n", 1)[0]
+        tierEnd = utils.strToIntOrFloat(tierEndStr)
 
         # Get the tier entry list
-        tierEntryList = []
         labelI = 0
+        tier: Union[textgrid.PointTier, textgrid.IntervalTier]
         if tierType == textgrid.INTERVAL_TIER:
+            intervalEntryList = []
             while True:
                 try:
                     timeStart, timeStartI = _fetchRow(tierData, labelI, "xmin = ")
@@ -480,9 +488,12 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
                     break
 
                 label = label.strip()
-                tierEntryList.append((timeStart, timeEnd, label))
-            tier = textgrid.IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
+                intervalEntryList.append(Interval(timeStart, timeEnd, label))
+            tier = textgrid.IntervalTier(
+                tierName, intervalEntryList, tierStart, tierEnd
+            )
         else:
+            pointEntryList = []
             while True:
                 try:
                     time, timeI = _fetchRow(tierData, labelI, "number = ")
@@ -491,8 +502,8 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
                     break
 
                 label = label.strip()
-                tierEntryList.append((time, label))
-            tier = textgrid.PointTier(tierName, tierEntryList, tierStart, tierEnd)
+                pointEntryList.append(Point(time, label))
+            tier = textgrid.PointTier(tierName, pointEntryList, tierStart, tierEnd)
 
         newTG.addTier(tier)
 
@@ -510,8 +521,8 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
     intervalIndicies = [(i, True) for i in utils.findAll(data, '"IntervalTier"')]
     pointIndicies = [(i, False) for i in utils.findAll(data, '"TextTier"')]
 
-    indexList = intervalIndicies + pointIndicies
-    indexList.append((len(data), None))  # The 'end' of the file
+    indexList = [*intervalIndicies, *pointIndicies]
+    indexList.append((len(data), True))  # The 'end' of the file
     indexList.sort()
 
     tupleList = [
@@ -537,16 +548,16 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
 
         # Tier meta-information
         tierName, tierNameEndI = _fetchTextRow(tierData, metaStartI)
-        tierStartTime, tierStartTimeI = _fetchRow(tierData, tierNameEndI)
-        tierEndTime, tierEndTimeI = _fetchRow(tierData, tierStartTimeI)
+        tierStartTimeStr, tierStartTimeI = _fetchRow(tierData, tierNameEndI)
+        tierEndTimeStr, tierEndTimeI = _fetchRow(tierData, tierStartTimeI)
         startTimeI = _fetchRow(tierData, tierEndTimeI)[1]
 
-        tierStartTime = utils.strToIntOrFloat(tierStartTime)
-        tierEndTime = utils.strToIntOrFloat(tierEndTime)
+        tierStartTime = utils.strToIntOrFloat(tierStartTimeStr)
+        tierEndTime = utils.strToIntOrFloat(tierEndTimeStr)
 
         # Tier entry data
-        entryList = []
         if isInterval:
+            intervalEntryList = []
             while True:
                 try:
                     startTime, endTimeI = _fetchRow(tierData, startTimeI)
@@ -556,13 +567,19 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
                     break
 
                 label = label.strip()
-                entryList.append((startTime, endTime, label))
+                intervalEntryList.append(Interval(startTime, endTime, label))
 
             newTG.addTier(
-                textgrid.IntervalTier(tierName, entryList, tierStartTime, tierEndTime)
+                textgrid.IntervalTier(
+                    tierName,
+                    intervalEntryList,
+                    float(tierStartTime),
+                    float(tierEndTime),
+                )
             )
 
         else:
+            pointEntryList = []
             while True:
                 try:
                     time, labelI = _fetchRow(tierData, startTimeI)
@@ -570,16 +587,18 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
                 except (ValueError, IndexError):
                     break
                 label = label.strip()
-                entryList.append((time, label))
+                pointEntryList.append(Point(time, label))
 
             newTG.addTier(
-                textgrid.PointTier(tierName, entryList, tierStartTime, tierEndTime)
+                textgrid.PointTier(tierName, pointEntryList, tierStartTime, tierEndTime)
             )
 
     return newTG
 
 
-def _fetchRow(dataStr: str, index: int, searchStr: str = None) -> [str, int]:
+def _fetchRow(
+    dataStr: str, index: int, searchStr: Optional[str] = None
+) -> Tuple[str, int]:
     if searchStr is None:
         startIndex = index
     else:
@@ -596,7 +615,9 @@ def _fetchRow(dataStr: str, index: int, searchStr: str = None) -> [str, int]:
     return word, endIndex + 1
 
 
-def _fetchTextRow(dataStr: str, index: int, searchStr: str = None) -> [str, int]:
+def _fetchTextRow(
+    dataStr: str, index: int, searchStr: Optional[str] = None
+) -> Tuple[str, int]:
     if searchStr is None:
         startIndex = index
     else:

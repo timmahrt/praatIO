@@ -3,7 +3,7 @@ Various math utilities
 """
 
 import math
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 
 def numToStr(inputNum: float) -> str:
@@ -40,11 +40,7 @@ def filterTimeSeriesData(
     featValues = filterFunc(featValues, windowSize, useEdgePadding)
     assert len(featureTimeList) == len(featValues)
     outputList = [
-        piRow[:index]
-        + [
-            f0Val,
-        ]
-        + piRow[index + 1 :]
+        [*piRow[:index], f0Val, *piRow[index + 1 :]]
         for piRow, f0Val in zip(featureTimeList, featValues)
     ]
 
@@ -52,8 +48,8 @@ def filterTimeSeriesData(
 
 
 def znormalizeSpeakerData(
-    featureTimeList: List[list], index: int, filterZeroValues: bool
-) -> List[list]:
+    featureTimeList: List[Tuple[float, ...]], index: int, filterZeroValues: bool
+) -> List[Tuple[float, ...]]:
     """
     znormalize time series data
 
@@ -66,7 +62,6 @@ def znormalizeSpeakerData(
     filterZeroValues: if True, don't consider zero values in the mean and stdDev
       (recommended value for data like pitch or intensity)
     """
-    featureTimeList = [list(row) for row in featureTimeList]
     featValues = [row[index] for row in featureTimeList]
 
     if not filterZeroValues:
@@ -82,18 +77,14 @@ def znormalizeSpeakerData(
 
     assert len(featureTimeList) == len(featValues)
     outputList = [
-        piRow[:index]
-        + [
-            val,
-        ]
-        + piRow[index + 1 :]
+        tuple([*piRow[:index], val, *piRow[index + 1 :]])
         for piRow, val in zip(featureTimeList, featValues)
     ]
 
     return outputList
 
 
-def medianFilter(dist: List[int], window: int, useEdgePadding: bool) -> List[int]:
+def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[float]:
     """
     median filter each value in a dataset; filtering occurs within a given window
 
@@ -109,8 +100,8 @@ def medianFilter(dist: List[int], window: int, useEdgePadding: bool) -> List[int
 
 
 def znormWindowFilter(
-    dist: List[int], window: int, useEdgePadding: bool, filterZeroValues: bool
-) -> List[int]:
+    dist: List[float], window: int, useEdgePadding: bool, filterZeroValues: bool
+) -> List[float]:
     """
     z-normalize each value in a dataset; normalization occurs within a given window
 
@@ -147,8 +138,8 @@ def znormWindowFilter(
 
 
 def _stepFilter(
-    filterFunc, dist: List[int], window: int, useEdgePadding: bool
-) -> List[int]:
+    filterFunc, dist: List[float], window: int, useEdgePadding: bool
+) -> List[float]:
 
     offset = int(math.floor(window / 2.0))
     length = len(dist)
@@ -159,7 +150,7 @@ def _stepFilter(
         # If using edge padding or if 0 <= context <= length
         if useEdgePadding or (((0 <= x - offset) and (x + offset < length))):
 
-            preContext = []
+            preContext: List[float] = []
             currentContext = [
                 dist[x],
             ]

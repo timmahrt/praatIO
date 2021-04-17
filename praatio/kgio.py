@@ -24,7 +24,7 @@ see **examples/klatt_resynthesis.py**
 
 import io
 from os.path import join
-from typing import List, Tuple
+from typing import List, Tuple, Union, Dict
 
 from praatio.utilities import utils
 from praatio import tgio
@@ -32,8 +32,8 @@ from praatio import tgio
 
 class _KlattBaseTier(object):
     def __init__(self, name: str):
-        self.tierNameList = []  # Preserves the order of the tiers
-        self.tierDict = {}
+        self.tierNameList: List[str] = []  # Preserves the order of the tiers
+        self.tierDict: Dict[str, "_KlattBaseTier"] = {}
         self.name = name
         self.minTimestamp = None
         self.maxTimestamp = None
@@ -143,6 +143,21 @@ class KlattPointTier(tgio.TextgridTier):
             raise tgio.TimelessTextgridTierException()
 
         super(KlattPointTier, self).__init__(name, entryList, minT, maxT)
+
+    def crop(self):
+        raise NotImplementedError
+
+    def editTimestamps(self):
+        raise NotImplementedError
+
+    def eraseRegion(self):
+        raise NotImplementedError
+
+    def insertEntry(self):
+        raise NotImplementedError
+
+    def insertSpace(self):
+        raise NotImplementedError
 
     def modifyValues(self, modFunc):
         newEntryList = [
@@ -497,7 +512,7 @@ def _cleanNumericValues(dataStr: str) -> str:
     return outputTxt
 
 
-def toIntOrFloat(val: str) -> float:
+def toIntOrFloat(val: Union[str, float]) -> float:
     if float(val) - float(int(val)) == 0.0:
         val = int(val)
     else:

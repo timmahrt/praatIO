@@ -10,7 +10,7 @@ import itertools
 import io
 import wave
 from pkg_resources import resource_filename
-from typing import List
+from typing import Any, Iterator, List, Tuple
 
 from praatio.utilities import constants
 
@@ -89,8 +89,8 @@ def getValueAtTime(
     timestamp: float,
     sortedDataTupleList,
     fuzzyMatching: bool = False,
-    startI: float = 0,
-) -> [float, float, int]:
+    startI: int = 0,
+) -> Tuple[float, Any, int]:
     """
     Get the value in the data list (sorted by time) that occurs at this point
 
@@ -160,7 +160,7 @@ def getValueAtTime(
     return retTime, retVal, i
 
 
-def getValuesInInterval(dataTupleList: list, start: float, stop: float) -> list:
+def getValuesInInterval(dataTupleList: List, start: float, stop: float) -> List:
     """
     Gets the values that exist within an interval
 
@@ -188,17 +188,19 @@ def sign(x: float) -> int:
 
 
 def invertIntervalList(
-    inputList: List[List[int]], maxValue: int = None
-) -> List[List[int]]:
+    inputList: List[Tuple[float, float]], maxValue: float = None
+) -> List[Tuple[float, float]]:
     """
     Inverts the segments of a list of intervals
 
     e.g.
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
+    [(0.5, 1.2), (3.4, 5.0)] -> [(0.0, 0.5), (1.2, 3.4)]
     """
     inputList = sorted(inputList)
 
     # Special case -- empty lists
+    invList: List[Tuple[float, float]]
     if len(inputList) == 0 and maxValue is not None:
         invList = [
             (0, maxValue),
@@ -208,12 +210,12 @@ def invertIntervalList(
         # of inverting, in the range does not start and end at the
         # smallest and largest values
         if inputList[0][0] != 0:
-            inputList.insert(0, ["", 0])
+            inputList.insert(0, (-1, 0))
         if maxValue is not None and inputList[-1][1] < maxValue:
-            inputList.append((maxValue, ""))
+            inputList.append((maxValue, maxValue + 1))
 
         invList = [
-            [inputList[i][1], inputList[i + 1][0]] for i in range(0, len(inputList) - 1)
+            (inputList[i][1], inputList[i + 1][0]) for i in range(0, len(inputList) - 1)
         ]
 
     return invList
@@ -277,7 +279,7 @@ class PraatExecutionFailed(Exception):
 
 
 def runPraatScript(
-    praatEXE: str, scriptFN: str, argList: List[str], cwd: str = None
+    praatEXE: str, scriptFN: str, argList: List[Any], cwd: str = None
 ) -> None:
 
     # Popen gives a not-very-transparent error
@@ -347,23 +349,11 @@ def findFiles(
         ]
 
     if filterExt is not None:
-        splitFNList = [
-            [
-                fn,
-            ]
-            + list(os.path.splitext(fn))
-            for fn in fnList
-        ]
+        splitFNList = [[fn, *list(os.path.splitext(fn))] for fn in fnList]
         fnList = [fn for fn, name, ext in splitFNList if ext == filterExt]
 
     if filterPattern is not None:
-        splitFNList = [
-            [
-                fn,
-            ]
-            + list(os.path.splitext(fn))
-            for fn in fnList
-        ]
+        splitFNList = [[fn, *list(os.path.splitext(fn))] for fn in fnList]
         matchFunc = _getMatchFunc(filterPattern)
         fnList = [fn for fn, name, ext in splitFNList if matchFunc(name)]
 
@@ -378,9 +368,7 @@ def findFiles(
     return fnList
 
 
-def openCSV(
-    path: str, fn: str, valueIndex: int = None, encoding: str = "utf-8"
-) -> List[list]:
+def openCSV(path: str, fn: str, encoding: str = "utf-8") -> List[List[str]]:
     """
     Load a feature
 
@@ -394,15 +382,18 @@ def openCSV(
     # Load CSV file
     with io.open(join(path, fn), "r", encoding=encoding) as fd:
         featureList = fd.read().splitlines()
-    featureList = [row.split(",") for row in featureList]
-
-    if valueIndex is not None:
-        featureList = [row[valueIndex] for row in featureList]
-
-    return featureList
+    return [rowStr.split(",") for rowStr in featureList]
 
 
-def safeZip(listOfLists: List[list], enforceLength: bool) -> List[list]:
+def getRowFromCSV(
+    path: str, fn: str, valueIndex: int, encoding: str = "utf-8"
+) -> List[str]:
+    featureListOfLists = openCSV(path, fn, encoding)
+
+    return [row[valueIndex] for row in featureListOfLists]
+
+
+def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
     """
     A safe version of python's zip()
 
@@ -416,12 +407,7 @@ def safeZip(listOfLists: List[list], enforceLength: bool) -> List[list]:
         length = len(listOfLists[0])
         assert all([length == len(subList) for subList in listOfLists])
 
-    try:
-        zipFunc = itertools.izip_longest  # Python 2.x
-    except AttributeError:
-        zipFunc = itertools.zip_longest  # Python 3.x
-
-    return zipFunc(*listOfLists)
+    return itertools.zip_longest(*listOfLists)
 
 
 def getWavDuration(wavFN: str) -> float:

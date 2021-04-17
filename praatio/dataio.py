@@ -5,7 +5,7 @@ see **examples/get_vowel_points.py**
 """
 
 import io
-from typing import List, Tuple
+from typing import List, Tuple, Optional, cast
 
 # Object classes
 POINT = "PointProcess"
@@ -16,16 +16,12 @@ DURATION = "DurationTier"
 class PointObject(object):
     def __init__(
         self,
-        pointList: List[list],
+        pointList: List[Tuple[float, ...]],
         objectClass: str,
         minTime: float = 0,
         maxTime: float = None,
     ):
-
-        # Sanitize input
-        pointList = [tuple(row) for row in pointList]
-
-        self.pointList = pointList
+        self.pointList = [tuple(row) for row in pointList]  # Sanitize input
         self.objectClass = objectClass
         self.minTime = minTime if minTime > 0 else 0
         self.maxTime = maxTime
@@ -62,7 +58,7 @@ class PointObject(object):
 
     def getPointsInInterval(
         self, start: float, stop: float, startIndex: int = 0
-    ) -> List[list]:
+    ) -> List[float]:
 
         returnPointList = []
         for entry in self.pointList[startIndex:]:
@@ -81,19 +77,22 @@ class PointObject1D(PointObject):
 
     def __init__(
         self,
-        pointList: List[list],
+        pointList: List[Tuple[float]],
         objectClass: str,
         minTime: float = 0,
-        maxTime: float = None,
+        maxTime: Optional[float] = None,
     ):
 
         assert objectClass != PITCH
         assert objectClass != DURATION
 
         if maxTime is None:
-            maxTime = max(pointList)
+            maxTime = max([row[0] for row in pointList])
 
-        super(PointObject1D, self).__init__(pointList, objectClass, minTime, maxTime)
+        castPointList = cast(List[Tuple[float, ...]], pointList)
+        super(PointObject1D, self).__init__(
+            castPointList, objectClass, minTime, maxTime
+        )
 
 
 class PointObject2D(PointObject):
@@ -101,7 +100,7 @@ class PointObject2D(PointObject):
 
     def __init__(
         self,
-        pointList: List[list],
+        pointList: List[Tuple[float, float]],
         objectClass: str,
         minTime: float = 0,
         maxTime: float = None,
@@ -112,7 +111,10 @@ class PointObject2D(PointObject):
         if maxTime is None:
             maxTime = max([timeV for timeV, _ in pointList])
 
-        super(PointObject2D, self).__init__(pointList, objectClass, minTime, maxTime)
+        castPointList = cast(List[Tuple[float, ...]], pointList)
+        super(PointObject2D, self).__init__(
+            castPointList, objectClass, minTime, maxTime
+        )
 
 
 def open1DPointObject(fn: str) -> PointObject1D:
@@ -130,24 +132,13 @@ def open1DPointObject(fn: str) -> PointObject1D:
                 break
 
             pointVal, start = _getNextValue(data, start)
-            dataList.append(
-                [
-                    float(pointVal),
-                ]
-            )
+            dataList.append((float(pointVal),))
 
         po = PointObject1D(dataList, objectType, minT, maxT)
 
     else:
         data, objectType, minT, maxT = _parseShortHeader(fn)
-        dataList = data.split("\n")
-        dataList = [
-            [
-                float(val),
-            ]
-            for val in dataList
-            if val.strip() != ""
-        ]
+        dataList = [(float(val),) for val in data.split("\n") if val.strip() != ""]
         po = PointObject1D(dataList, objectType, minT, maxT)
 
     return po
@@ -176,21 +167,21 @@ def open2DPointObject(fn: str) -> PointObject2D:
 
             pointVal, start = _getNextValue(data, start)
             dataList.append(
-                [
+                (
                     float(timeVal),
                     float(pointVal),
-                ]
+                )
             )
 
         po = PointObject2D(dataList, objectType, minT, maxT)
 
     else:
         data, objectType, minT, maxT = _parseShortHeader(fn)
-        dataList = data.split("\n")
+        dataStrList = data.split("\n")
         dataList = [
-            (float(dataList[i]), float(dataList[i + 1]))
-            for i in range(0, len(dataList), 2)
-            if dataList[i].strip() != ""
+            (float(dataStrList[i]), float(dataStrList[i + 1]))
+            for i in range(0, len(dataStrList), 2)
+            if dataStrList[i].strip() != ""
         ]
         po = PointObject2D(dataList, objectType, minT, maxT)
 
@@ -207,14 +198,13 @@ def _parseNormalHeader(fn: str) -> Tuple[str, str, float, float]:
     objectType = objectType.replace('"', "").strip()
 
     data = chunkedData[-1]
-    maxT = chunkedData[-4].split("=")[-1].strip()
-    minT = chunkedData[-5].split("=")[-1].strip()
-    minT, maxT = float(minT), float(maxT)
+    maxT = float(chunkedData[-4].split("=")[-1].strip())
+    minT = float(chunkedData[-5].split("=")[-1].strip())
 
     return data, objectType, minT, maxT
 
 
-def _getNextValue(data: str, start: float) -> Tuple[str, int]:
+def _getNextValue(data: str, start: int) -> Tuple[str, int]:
     end = data.index("\n", start)
     value = data[start + 1 : end]
     return value, end
@@ -230,9 +220,7 @@ def _parseShortHeader(fn: str) -> Tuple[str, str, float, float]:
     objectType = objectType.replace('"', "").strip()
 
     data = chunkedData[-1]
-    maxT = chunkedData[-3]
-    minT = chunkedData[-4]
-
-    minT, maxT = float(minT), float(maxT)
+    maxT = float(chunkedData[-3])
+    minT = float(chunkedData[-4])
 
     return data, objectType, minT, maxT

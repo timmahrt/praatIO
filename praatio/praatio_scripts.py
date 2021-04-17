@@ -9,11 +9,12 @@ import os
 from os.path import join
 import math
 import copy
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 from praatio import textgrid
 from praatio import textgrid_io
 from praatio import audioio
+from praatio.utilities.constants import Point, Interval
 
 
 def _shiftTimes(
@@ -51,7 +52,7 @@ def _shiftTimes(
             entryList = [entry for entry in tier.entryList if entry[0] == timeV]
             for entry in entryList:
                 tier.deleteEntry(entry)
-                tier.insertEntry((newTimeV, entry[1]))
+                tier.insertEntry(Point(newTimeV, entry[1]))
 
     return tg
 
@@ -65,7 +66,7 @@ def audioSplice(
     insertStart: float,
     insertStop: float = None,
     alignToZeroCrossing: bool = True,
-) -> [audioio.WavObj, textgrid.Textgrid]:
+) -> Tuple[audioio.WavObj, textgrid.Textgrid]:
     """
     Splices a segment into an audio file and corresponding textgrid
 
@@ -184,8 +185,8 @@ def spellCheckEntries(
                 mispelledList.append(word)
 
         if len(mispelledList) > 0:
-            mispelledTxt = u", ".join(mispelledList)
-            mispelledEntryList.append((startT, stopT, mispelledTxt))
+            mispelledTxt = ", ".join(mispelledList)
+            mispelledEntryList.append(Interval(startT, stopT, mispelledTxt))
 
             if printEntries is True:
                 print((startT, stopT, mispelledTxt))
@@ -242,7 +243,9 @@ def splitTierEntries(
         intervalLength = (stop - start) / float(len(labelList))
 
         newSubEntryList = [
-            (start + intervalLength * i, start + intervalLength * (i + 1), label)
+            Interval(
+                start + intervalLength * i, start + intervalLength * (i + 1), label
+            )
             for i, label in enumerate(labelList)
         ]
         newEntryList.extend(newSubEntryList)
@@ -266,32 +269,41 @@ def splitTierEntries(
 
 
 def tgBoundariesToZeroCrossings(
-    tg: textgrid.Textgrid, wavObj: audioio.WavObj, adjustPointTiers: bool = True
+    tg: textgrid.Textgrid,
+    wavObj: audioio.WavObj,
+    adjustPointTiers: bool = True,
+    adjustIntervalTiers: bool = True,
 ) -> textgrid.Textgrid:
     """
     Makes all textgrid interval boundaries fall on pressure wave zero crossings
 
-    adjustPointTiers: if True, point tiers will be adjusted too.  Otherwise,
-                      only interval tiers are adjusted.
+    adjustPointTiers: if True, point tiers will be adjusted.
+    adjustIntervalTiers: if True, interval tiers will be adjusted.
     """
-
     for tierName in tg.tierNameList[:]:
         tier = tg.tierDict[tierName]
 
-        newEntryList = []
-        if isinstance(tier, textgrid.PointTier) and adjustPointTiers is True:
+        newTier: textgrid.TextgridTier
+        if isinstance(tier, textgrid.PointTier):
+            if adjustPointTiers is False:
+                continue
+
+            points = []
             for start, label in tier.entryList:
                 newStart = wavObj.findNearestZeroCrossing(start)
-                newEntryList.append((newStart, label))
-
+                points.append(Point(newStart, label))
+            newTier = tier.new(entryList=points)
         elif isinstance(tier, textgrid.IntervalTier):
+            if adjustIntervalTiers is False:
+                continue
 
+            intervals = []
             for start, stop, label in tier.entryList:
                 newStart = wavObj.findNearestZeroCrossing(start)
                 newStop = wavObj.findNearestZeroCrossing(stop)
-                newEntryList.append((newStart, newStop, label))
+                intervals.append(Interval(newStart, newStop, label))
+            newTier = tier.new(entryList=intervals)
 
-        newTier = tier.new(entryList=newEntryList)
         tg.replaceTier(tierName, newTier)
 
     return tg
@@ -306,7 +318,7 @@ def splitAudioOnTier(
     nameStyle: str = None,
     noPartialIntervals: bool = False,
     silenceLabel: str = None,
-) -> List[str]:
+) -> List[Tuple[float, float, str]]:
     """
     Outputs one subwav for each entry in the tier of a textgrid
 
@@ -367,11 +379,8 @@ def splitAudioOnTier(
         if len(multipleInstList) > 0:
             instListTxt = "\n".join(multipleInstList)
             print(
-                (
-                    "Overwriting wave files in: %s\n"
-                    + "Intervals exist with the same name:\n%s"
-                )
-                % (outputPath, instListTxt)
+                f"Overwriting wave files in: {outputPath}\n"
+                f"Intervals exist with the same name:\n{instListTxt}"
             )
             firstWarning = False
 
@@ -394,12 +403,9 @@ def splitAudioOnTier(
 
         if os.path.exists(outputFNFullPath) and firstWarning:
             print(
-                (
-                    "Overwriting wave files in: %s\n"
-                    + "Files existed before or intervals exist with "
-                    + "the same name:\n%s"
-                )
-                % (outputPath, outputName)
+                f"Overwriting wave files in: {outputPath}\n"
+                "Files existed before or intervals exist with "
+                f"the same name:\n{outputName}"
             )
 
         frames = wavQObj.getFrames(start, stop)
@@ -416,7 +422,7 @@ def splitAudioOnTier(
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
 
-            subTG.save(join(outputPath, outputName + ".TextGrid"))
+            textgrid_io.saveTextgrid(subTG, join(outputPath, outputName + ".TextGrid"))
 
     return outputFNList
 
@@ -547,8 +553,8 @@ def _findMisalignments(
 
             newEntry = list(copy.deepcopy(oldEntry))
             newEntry[orderID] = bestVal
-            newEntry = tuple(newEntry)
+            castNewEntry = tg.tierDict[tierName].entryType(*newEntry)
 
             tg.tierDict[tierName].deleteEntry(oldEntry)
-            tg.tierDict[tierName].entryList.append(newEntry)
+            tg.tierDict[tierName].entryList.append(castNewEntry)
             tg.tierDict[tierName].entryList.sort()

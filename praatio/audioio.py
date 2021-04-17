@@ -10,6 +10,7 @@ import wave
 import struct
 import copy
 from typing import List, Tuple
+from abc import ABC, abstractmethod
 
 from praatio.utilities import utils
 
@@ -32,7 +33,7 @@ class FindZeroCrossingError(Exception):
         return retString % (self.startTime, self.endTime)
 
 
-def samplesAsNums(waveData: str, sampleWidth: float) -> List[float]:
+def samplesAsNums(waveData, sampleWidth: int) -> Tuple[int, ...]:
     """Convert samples of a python wave object from bytes to numbers"""
     if len(waveData) == 0:
         raise EndOfAudioData()
@@ -44,7 +45,7 @@ def samplesAsNums(waveData: str, sampleWidth: float) -> List[float]:
     return audioFrameList
 
 
-def numsAsSamples(sampleWidth: float, numList: List[int]) -> str:
+def numsAsSamples(sampleWidth: int, numList: List[int]) -> bytes:
     """Convert audio data from numbers to bytes"""
     byteCode = sampWidthDict[sampleWidth]
     byteStr = struct.pack("<" + byteCode * len(numList), *numList)
@@ -70,25 +71,33 @@ def generateSineWave(
     return sinWave
 
 
-def generateSilence(duration: float, samplingFreq: int) -> List[int]:
-    silence = [
-        0,
-    ] * int(duration * samplingFreq)
+def generateSilence(duration: float, samplingFreq: int) -> Tuple[int, ...]:
+    silence = (0,) * int(duration * samplingFreq)
     return silence
 
 
-def extractSubwav(fn: float, outputFN: str, startT: float, endT: float) -> None:
+def extractSubwav(fn: str, outputFN: str, startT: float, endT: float) -> None:
     audioObj = openAudioFile(
         fn,
         [
-            (startT, endT),
+            (startT, endT, ""),
         ],
         doShrink=True,
     )
     audioObj.save(outputFN)
 
 
-class AbstractWav(object):
+class AbstractWav(ABC):
+    def __init__(self, params):
+        self.params = params
+
+        self.nchannels = params[0]
+        self.sampwidth = params[1]
+        self.framerate = params[2]
+        self.nframes = params[3]
+        self.comptype = params[4]
+        self.compname = params[5]
+
     def findNearestZeroCrossing(
         self, targetTime: float, timeStep: float = 0.002
     ) -> float:
@@ -150,6 +159,9 @@ class AbstractWav(object):
             zeroCrossingTime = smallestLeft
         elif leftDiff > rightDiff:
             zeroCrossingTime = smallestRight
+
+        if zeroCrossingTime is None:
+            raise (FindZeroCrossingError(0, fileDuration))
 
         return zeroCrossingTime
 
@@ -215,6 +227,14 @@ class AbstractWav(object):
 
         return startTime + adjustTime
 
+    @abstractmethod
+    def getDuration(self) -> float:
+        pass
+
+    @abstractmethod
+    def getSamples(self, startTime: float, endTime: float) -> Tuple[int, ...]:
+        pass
+
 
 class WavQueryObj(AbstractWav):
     """
@@ -228,14 +248,7 @@ class WavQueryObj(AbstractWav):
 
     def __init__(self, fn: str):
         self.audiofile = wave.open(fn, "r")
-        self.params = self.audiofile.getparams()
-
-        self.nchannels = self.params[0]
-        self.sampwidth = self.params[1]
-        self.framerate = self.params[2]
-        self.nframes = self.params[3]
-        self.comptype = self.params[4]
-        self.compname = self.params[5]
+        super(WavQueryObj, self).__init__(self.audiofile.getparams())
 
     def concatenate(
         self, targetFrames: List[int], outputFN: str, prepend: bool = False
@@ -272,7 +285,7 @@ class WavQueryObj(AbstractWav):
 
         return frames
 
-    def getSamples(self, startTime: float, endTime: float) -> List[float]:
+    def getSamples(self, startTime: float, endTime: float) -> Tuple[int, ...]:
 
         frames = self.getFrames(startTime, endTime)
         audioFrameList = samplesAsNums(frames, self.sampwidth)
@@ -309,12 +322,18 @@ class WavQueryObj(AbstractWav):
         assert keepList is not None or deleteList is not None
         assert keepList is None or deleteList is None
 
-        if keepList is None:
-            keepList = utils.invertIntervalList(deleteList, duration)
-        else:
-            deleteList = utils.invertIntervalList(keepList, duration)
-        keepList = [[row[0], row[1], "keep"] for row in keepList]
-        deleteList = [[row[0], row[1], "delete"] for row in deleteList]
+        if keepList is None and deleteList is not None:
+            computedKeepList = utils.invertIntervalList(
+                [(row[0], row[1]) for row in deleteList], duration
+            )
+            computedDeleteList = []
+        elif keepList is not None and deleteList is None:
+            computedKeepList = []
+            computedDeleteList = utils.invertIntervalList(
+                [(row[0], row[1]) for row in keepList], duration
+            )
+        keepList = [(row[0], row[1], "keep") for row in computedKeepList]
+        deleteList = [(row[0], row[1], "delete") for row in computedDeleteList]
         iterList = sorted(keepList + deleteList)
 
         zeroBinValue = struct.pack(sampWidthDict[self.sampwidth], 0)
@@ -347,7 +366,7 @@ class WavQueryObj(AbstractWav):
 
             self.outputModifiedWav(audioFrames, outputFN)
 
-    def outputModifiedWav(self, audioFrames: List[int], outputFN: str):
+    def outputModifiedWav(self, audioFrames: bytes, outputFN: str):
         """
         Output frames using the same parameters as this WavQueryObj
         """
@@ -376,24 +395,18 @@ class WavObj(AbstractWav):
     large files.
     """
 
-    def __init__(self, audioSamples: List[int], params: dict):
-
+    def __init__(self, audioSamples: Tuple[int, ...], params: dict):
         self.audioSamples = audioSamples
-        self.params = params
-        self.nchannels = params[0]
-        self.sampwidth = params[1]
-        self.framerate = params[2]
-        self.comptype = params[4]
-        self.compname = params[5]
+        super(WavObj, self).__init__(params)
 
     def getIndexAtTime(self, startTime: float):
         return int(startTime * self.framerate)
 
     def insertSilence(self, startTime: float, silenceDuration: float):
         audioSamples = generateSilence(silenceDuration, self.framerate)
-        self.insertSegment(startTime, audioSamples)
+        self.insert(startTime, audioSamples)
 
-    def insert(self, startTime: float, audioSamples: List[int]):
+    def insert(self, startTime: float, audioSamples: Tuple[int, ...]):
         i = self.getIndexAtTime(startTime)
         self.audioSamples = self.audioSamples[:i] + audioSamples + self.audioSamples[i:]
 
@@ -405,12 +418,12 @@ class WavObj(AbstractWav):
     def getDuration(self):
         return float(len(self.audioSamples)) / self.framerate
 
-    def getSamples(self, startTime: float, endTime: float):
+    def getSamples(self, startTime: float, endTime: float) -> Tuple[int, ...]:
         i = self.getIndexAtTime(startTime)
         j = self.getIndexAtTime(endTime)
-        return self.audioSamples[i:j]
+        return tuple(self.audioSamples[i:j])
 
-    def getSubsegment(self, startTime: float, endTime: float):
+    def getSubsegment(self, startTime: float, endTime: float) -> "WavObj":
         samples = self.getSamples(startTime, endTime)
         return WavObj(samples, self.params)
 
@@ -463,22 +476,28 @@ def openAudioFile(
     # Can't specify both the keepList and the deleteList
     assert keepList is None or deleteList is None
 
-    if keepList is None and deleteList is None:
-        keepList = [
+    if keepList is None and deleteList is not None:
+        computedKeepList = utils.invertIntervalList(
+            [(start, stop) for start, stop, _ in deleteList], duration
+        )
+        computedDeleteList = []
+    elif deleteList is None and keepList is not None:
+        computedKeepList = []
+        computedDeleteList = utils.invertIntervalList(
+            [(start, stop) for start, stop, _ in keepList], duration
+        )
+    else:
+        computedKeepList = [
             (0, duration),
         ]
-        deleteList = []
-    elif keepList is None:
-        keepList = utils.invertIntervalList(deleteList, duration)
-    else:
-        deleteList = utils.invertIntervalList(keepList, duration)
+        computedDeleteList = []
 
-    keepList = [[row[0], row[1], "keep"] for row in keepList]
-    deleteList = [[row[0], row[1], "delete"] for row in deleteList]
+    keepList = [(row[0], row[1], "keep") for row in computedKeepList]
+    deleteList = [(row[0], row[1], "delete") for row in computedDeleteList]
     iterList = sorted(keepList + deleteList)
 
     # Grab the sections to be kept
-    audioSampleList = []
+    audioSampleList: List = []
     byteCode = sampWidthDict[sampwidth]
     for startT, stopT, label in iterList:
         diff = stopT - startT
@@ -494,11 +513,7 @@ def openAudioFile(
         # If we are not keeping a region and we're not shrinking the
         # duration, fill in the deleted portions with zeros
         elif label == "delete" and doShrink is False:
-            audioSampleList.extend(
-                [
-                    0,
-                ]
-                * int(framerate * diff)
-            )
+            zeroPadding = [0] * int(framerate * diff)
+            audioSampleList.extend(zeroPadding)
 
-    return WavObj(audioSampleList, params)
+    return WavObj(tuple(audioSampleList), params)

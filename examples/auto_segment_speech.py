@@ -53,15 +53,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
     pointList = [start + ((stop - start) / 2.0) for _, start, stop, _ in entryList]
     pointList.sort()
 
-    pointList = (
-        [
-            0.0,
-        ]
-        + pointList
-        + [
-            duration,
-        ]
-    )
+    pointList = [0.0] + pointList + [duration]
 
     newEntryList = []
     for i in range(len(pointList) - 1):

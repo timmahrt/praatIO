@@ -142,7 +142,7 @@ def getPulses(
     outputPointTierFN: str,
     minPitch: float,
     maxPitch: float,
-    scriptFN: float = None,
+    scriptFN: str = None,
 ) -> dataio.PointObject1D:
     """
     Gets the pitch/glottal pulses for an audio file.
@@ -199,10 +199,10 @@ def getSpectralInfo(
         data = fd.read()
 
     dataList = data.rstrip().split("\n")
-    dataList = [row.split(",") for row in dataList]
-    titleRow, dataList = dataList[0], dataList[1:]
+    dataListOfLists = [row.split(",") for row in dataList]
+    titleRow, mainDataListOfLists = dataListOfLists[0], dataListOfLists[1:]
 
-    return titleRow, dataList
+    return titleRow, mainDataListOfLists
 
 
 def resynthesizePitch(

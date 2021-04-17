@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from praatio.utilities import constants
 
@@ -7,7 +7,7 @@ class TextgridCollisionException(Exception):
     def __init__(
         self,
         tierName: str,
-        insertInterval: constants.Interval,
+        insertInterval: Union[constants.Point, constants.Interval],
         collisionList: List[constants.Interval],
     ):
         super(TextgridCollisionException, self).__init__()
