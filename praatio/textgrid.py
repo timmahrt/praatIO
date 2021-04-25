@@ -20,10 +20,7 @@ import copy
 from typing import Callable, List, Tuple, Optional, TypeVar, Union, Type, Any, Dict
 from abc import ABC, abstractmethod
 
-from praatio import textgrid_io
-from praatio.utilities import errors
-from praatio.utilities import utils
-from praatio.utilities import myMath
+
 from praatio.utilities.constants import (
     Interval,
     Point,
@@ -32,6 +29,10 @@ from praatio.utilities.constants import (
     SHORT_TEXTGRID,
     MIN_INTERVAL_LENGTH,
 )
+from praatio.utilities import errors
+from praatio.utilities import myMath
+from praatio.utilities import textgrid_io
+from praatio.utilities import utils
 
 T = TypeVar("T", bound="TextgridTier")
 

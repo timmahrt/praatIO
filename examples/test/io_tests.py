@@ -17,13 +17,14 @@ import os
 import io
 from os.path import join
 
-from praatio import textgrid
-from praatio import textgrid_io
+
+from praatio import audioio
 from praatio import dataio
 from praatio import kgio
-from praatio import audioio
-from praatio.utilities import utils
+from praatio import textgrid
 from praatio.utilities import constants
+from praatio.utilities import textgrid_io
+from praatio.utilities import utils
 
 
 def areTheSame(fn1, fn2, fileHandler):
