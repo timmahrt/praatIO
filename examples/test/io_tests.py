@@ -18,9 +18,9 @@ import io
 from os.path import join
 
 
-from praatio import audioio
-from praatio import dataio
-from praatio import kgio
+from praatio import audio
+from praatio import data_points
+from praatio import klattgrid
 from praatio import textgrid
 from praatio.utilities import constants
 from praatio.utilities import textgrid_io
@@ -177,7 +177,7 @@ class IOTests(unittest.TestCase):
         wavFN = join(self.dataRoot, "bobby.wav")
 
         durationA = utils.getWavDuration(wavFN)
-        durationB = audioio.getDuration(wavFN)
+        durationB = audio.getDuration(wavFN)
         self.assertTrue(durationA == durationB)
 
     def test_duration_tier_io(self):
@@ -186,10 +186,10 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        dt = dataio.open2DPointObject(inputFN)
+        dt = data_points.open2DPointObject(inputFN)
         dt.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, dataio.open2DPointObject))
+        self.assertTrue(areTheSame(inputFN, outputFN, data_points.open2DPointObject))
 
     def test_pitch_io(self):
         """Tests for reading/writing pitch tiers"""
@@ -197,10 +197,10 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        pp = dataio.open2DPointObject(inputFN)
+        pp = data_points.open2DPointObject(inputFN)
         pp.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, dataio.open2DPointObject))
+        self.assertTrue(areTheSame(inputFN, outputFN, data_points.open2DPointObject))
 
     def test_pitch_io_long_vs_short(self):
         """Tests reading of long vs short 2d point objects"""
@@ -208,7 +208,7 @@ class IOTests(unittest.TestCase):
         shortFN = join(self.dataRoot, "mary.PitchTier")
         longFN = join(self.dataRoot, "mary_longfile.PitchTier")
 
-        self.assertTrue(areTheSame(shortFN, longFN, dataio.open2DPointObject))
+        self.assertTrue(areTheSame(shortFN, longFN, data_points.open2DPointObject))
 
     def test_point_process_io(self):
         """Tests for reading/writing point processes"""
@@ -216,17 +216,17 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        pp = dataio.open1DPointObject(inputFN)
+        pp = data_points.open1DPointObject(inputFN)
         pp.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, dataio.open1DPointObject))
+        self.assertTrue(areTheSame(inputFN, outputFN, data_points.open1DPointObject))
 
     def test_point_process_io_long_vs_short(self):
 
         shortFN = join(self.dataRoot, "bobby.PointProcess")
         longFN = join(self.dataRoot, "bobby_longfile.PointProcess")
 
-        self.assertTrue(areTheSame(shortFN, longFN, dataio.open1DPointObject))
+        self.assertTrue(areTheSame(shortFN, longFN, data_points.open1DPointObject))
 
     def test_kg_io(self):
         """Tests for reading/writing klattgrids"""
@@ -234,10 +234,10 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        kg = kgio.openKlattgrid(inputFN)
+        kg = klattgrid.openKlattgrid(inputFN)
         kg.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, kgio.openKlattgrid))
+        self.assertTrue(areTheSame(inputFN, outputFN, klattgrid.openKlattgrid))
 
     def test_save(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]

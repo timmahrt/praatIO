@@ -7,10 +7,7 @@ see **examples/get_vowel_points.py**
 import io
 from typing import List, Tuple, Optional, cast
 
-# Object classes
-POINT = "PointProcess"
-PITCH = "PitchTier"
-DURATION = "DurationTier"
+from praatio.utilities import constants
 
 
 class PointObject(object):
@@ -83,8 +80,8 @@ class PointObject1D(PointObject):
         maxTime: Optional[float] = None,
     ):
 
-        assert objectClass != PITCH
-        assert objectClass != DURATION
+        assert objectClass != constants.PITCH
+        assert objectClass != constants.DURATION
 
         if maxTime is None:
             maxTime = max([row[0] for row in pointList])
@@ -106,7 +103,7 @@ class PointObject2D(PointObject):
         maxTime: float = None,
     ):
 
-        assert objectClass != POINT
+        assert objectClass != constants.POINT
 
         if maxTime is None:
             maxTime = max([timeV for timeV, _ in pointList])

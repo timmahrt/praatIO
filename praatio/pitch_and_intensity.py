@@ -19,7 +19,7 @@ import math
 import io
 from typing import List, Tuple, Optional, cast
 
-from praatio import dataio
+from praatio import data_points
 from praatio import textgrid
 from praatio.utilities import utils
 from praatio.utilities import myMath
@@ -221,7 +221,7 @@ def extractPitchTier(
     forceRegenerate: bool = True,
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
-) -> dataio.PointObject2D:
+) -> data_points.PointObject2D:
     """
     Extract pitch at regular intervals from the input wav file
 
@@ -268,7 +268,7 @@ def extractPitchTier(
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    return dataio.open2DPointObject(outputFN)
+    return data_points.open2DPointObject(outputFN)
 
 
 def extractPitch(

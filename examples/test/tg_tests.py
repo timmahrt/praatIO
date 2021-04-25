@@ -9,9 +9,9 @@ import os
 from os.path import join
 
 from praatio import textgrid
-from praatio import dataio
-from praatio import kgio
-from praatio import audioio
+from praatio import data_points
+from praatio import klattgrid
+from praatio import audio
 
 
 class IOTests(unittest.TestCase):

@@ -14,3 +14,7 @@ MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
 LONG_TEXTGRID = "long_textgrid"
 SHORT_TEXTGRID = "short_textgrid"
 JSON = "json"
+
+POINT = "PointProcess"
+PITCH = "PitchTier"
+DURATION = "DurationTier"

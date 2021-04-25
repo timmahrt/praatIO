@@ -10,8 +10,9 @@ from os.path import join
 import io
 from typing import List
 
-from praatio import audioio
-from praatio import dataio
+from praatio import audio
+from praatio import data_points
+from praatio.utilities import constants
 from praatio.utilities import utils
 
 
@@ -143,7 +144,7 @@ def getPulses(
     minPitch: float,
     maxPitch: float,
     scriptFN: str = None,
-) -> dataio.PointObject1D:
+) -> data_points.PointObject1D:
     """
     Gets the pitch/glottal pulses for an audio file.
 
@@ -157,7 +158,7 @@ def getPulses(
     utils.runPraatScript(praatEXE, scriptFN, argList)
 
     # Load the output
-    pointObj = dataio.open1DPointObject(outputPointTierFN)
+    pointObj = data_points.open1DPointObject(outputPointTierFN)
 
     return pointObj
 
@@ -228,8 +229,8 @@ def resynthesizePitch(
         scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
 
     if pointList is not None:
-        dur = audioio.WavQueryObj(inputWavFN).getDuration()
-        pointObj = dataio.PointObject2D(pointList, dataio.PITCH, 0, dur)
+        dur = audio.WavQueryObj(inputWavFN).getDuration()
+        pointObj = data_points.PointObject2D(pointList, constants.PITCH, 0, dur)
         pointObj.save(pitchFN)
 
     utils.runPraatScript(
