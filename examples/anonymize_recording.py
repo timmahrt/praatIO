@@ -9,7 +9,7 @@ import os
 from os.path import join
 
 from praatio import textgrid
-from praatio import audioio
+from praatio import audio
 
 path = join(".", "files")
 outputPath = join(path, "anonymized_data")
@@ -36,5 +36,5 @@ for wavFN, tgFN in (
     deleteList = [(start, stop) for start, stop, _ in deleteList]
 
     # Replace segments with a sine wave
-    wavQObj = audioio.WavQueryObj(join(path, wavFN))
+    wavQObj = audio.WavQueryObj(join(path, wavFN))
     wavQObj.deleteWavSections(outputWavFN, deleteList=deleteList, operation="sine wave")

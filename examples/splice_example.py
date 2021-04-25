@@ -6,7 +6,7 @@ import os
 from os.path import join
 
 from praatio import textgrid
-from praatio import audioio
+from praatio import audio
 from praatio import praatio_scripts
 
 root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
@@ -29,7 +29,7 @@ mEntry = tier.entryList[tier.find("m")[0]]
 bEntry = tier.entryList[tier.find("b")[0]]
 
 
-sourceAudioObj = audioio.openAudioFile(audioFN)
+sourceAudioObj = audio.openAudioFile(audioFN)
 mAudioObj = sourceAudioObj.getSubsegment(mEntry[0], mEntry[1])
 bAudioObj = sourceAudioObj.getSubsegment(bEntry[0], bEntry[1])
 

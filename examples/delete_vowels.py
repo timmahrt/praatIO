@@ -8,7 +8,7 @@ import copy
 
 from praatio import textgrid
 from praatio import praatio_scripts
-from praatio import audioio
+from praatio import audio
 from praatio.utilities import utils
 
 
@@ -31,7 +31,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
         utils.makeDir(zeroCrossingTGPath)
 
         tg = textgrid.openTextgrid(inputTGFN)
-        wavObj = audioio.WavQueryObj(inputWavFN)
+        wavObj = audio.WavQueryObj(inputWavFN)
 
         praatio_scripts.tgBoundariesToZeroCrossings(tg, wavObj, zeroCrossingTGFN)
 
@@ -42,7 +42,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     keepList = [entry for entry in keepList if not isVowel(entry[2])]
     deleteList = utils.invertIntervalList(keepList, tg.maxTimestamp)
 
-    wavObj = audioio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
+    wavObj = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
     wavObj.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)

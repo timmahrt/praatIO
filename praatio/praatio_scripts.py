@@ -12,7 +12,7 @@ import copy
 from typing import Callable, List, Tuple
 
 from praatio import textgrid
-from praatio import audioio
+from praatio import audio
 from praatio.utilities.constants import Point, Interval
 
 
@@ -57,15 +57,15 @@ def _shiftTimes(
 
 
 def audioSplice(
-    audioObj: audioio.WavObj,
-    spliceSegment: audioio.WavObj,
+    audioObj: audio.WavObj,
+    spliceSegment: audio.WavObj,
     tg: textgrid.Textgrid,
     tierName: str,
     newLabel: str,
     insertStart: float,
     insertStop: float = None,
     alignToZeroCrossing: bool = True,
-) -> Tuple[audioio.WavObj, textgrid.Textgrid]:
+) -> Tuple[audio.WavObj, textgrid.Textgrid]:
     """
     Splices a segment into an audio file and corresponding textgrid
 
@@ -269,7 +269,7 @@ def splitTierEntries(
 
 def tgBoundariesToZeroCrossings(
     tg: textgrid.Textgrid,
-    wavObj: audioio.WavObj,
+    wavObj: audio.WavObj,
     adjustPointTiers: bool = True,
     adjustIntervalTiers: bool = True,
 ) -> textgrid.Textgrid:
@@ -385,7 +385,7 @@ def splitAudioOnTier(
 
     # Output wave files
     outputFNList = []
-    wavQObj = audioio.WavQueryObj(wavFN)
+    wavQObj = audio.WavQueryObj(wavFN)
     for i, entry in enumerate(entryList):
         start, stop, label = entry
 

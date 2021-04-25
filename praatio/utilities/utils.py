@@ -411,7 +411,7 @@ def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
 
 
 def getWavDuration(wavFN: str) -> float:
-    "For internal use.  See praatio.audioio.WavQueryObj() for general use."
+    "For internal use.  See praatio.audio.WavQueryObj() for general use."
     audiofile = wave.open(wavFN, "r")
     params = audiofile.getparams()
     framerate = params[2]
