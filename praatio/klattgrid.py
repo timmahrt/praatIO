@@ -26,8 +26,9 @@ import io
 from os.path import join
 from typing import List, Tuple, Union, Dict
 
+from praatio import textgrid
+from praatio.utilities import errors
 from praatio.utilities import utils
-from praatio import tgio
 
 
 class _KlattBaseTier(object):
@@ -120,7 +121,7 @@ class KlattIntermediateTier(_KlattBaseTier):
         return outputTxt
 
 
-class KlattPointTier(tgio.TextgridTier):
+class KlattPointTier(textgrid.TextgridTier):
     """
     A Klatt tier not contained within another tier
     """
@@ -140,7 +141,7 @@ class KlattPointTier(tgio.TextgridTier):
             minT = min(timeList)
             maxT = max(timeList)
         except ValueError:
-            raise tgio.TimelessTextgridTierException()
+            raise errors.TimelessTextgridTierException()
 
         super(KlattPointTier, self).__init__(name, entryList, minT, maxT)
 
@@ -205,7 +206,7 @@ class KlattSubPointTier(KlattPointTier):
         return "\n".join(outputList) + "\n"
 
 
-class Klattgrid(tgio.Textgrid):
+class Klattgrid(textgrid.Textgrid):
     def save(self, fn, minimumIntervalLength=None):
         """
 

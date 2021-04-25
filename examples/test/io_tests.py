@@ -31,8 +31,9 @@ def areTheSame(fn1, fn2, fileHandler):
     """
     Tests that files contain the same data
 
-    If fileHandler is tgio file reader like tgio.openTextgrid then
-    we can compare a shortTextgrid and a longTextgrid.
+    If fileHandler is a textgrid file reader like
+    textgrid.openTextgrid then we can compare
+    a shortTextgrid and a longTextgrid.
 
     If fileHandler is readFile or io.open, etc then the raw
     text will be compared.
