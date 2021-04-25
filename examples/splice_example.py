@@ -5,7 +5,7 @@ Example of using praatio's audio splice functions
 import os
 from os.path import join
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import audioio
 from praatio import praatio_scripts
 
@@ -23,7 +23,7 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 # Find the region to replace and the region that we'll replace it with
-tg = tgio.openTextgrid(tgFN)
+tg = textgrid.openTextgrid(tgFN)
 tier = tg.tierDict[tierName]
 mEntry = tier.entryList[tier.find("m")[0]]
 bEntry = tier.entryList[tier.find("b")[0]]

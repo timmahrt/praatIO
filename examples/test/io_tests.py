@@ -17,11 +17,13 @@ import os
 import io
 from os.path import join
 
-from praatio import tgio
+from praatio import textgrid
+from praatio import textgrid_io
 from praatio import dataio
 from praatio import kgio
 from praatio import audioio
 from praatio.utilities import utils
+from praatio.utilities import constants
 
 
 def areTheSame(fn1, fn2, fileHandler):
@@ -59,15 +61,16 @@ def run_save(
     before and after saving can be different
     """
 
-    tg.save(
-        "garbage.Textgrid",
+    tgAsDict = textgrid._tgToDictionary(tg)
+    textgrid_io.getTextgridAsStr(
+        tgAsDict,
         minimumIntervalLength=minimumIntervalLength,
         minTimestamp=minTimestamp,
         maxTimestamp=maxTimestamp,
         ignoreBlankSpaces=ignoreBlankSpaces,
     )
 
-    entryList = tg.tierDict[tg.tierNameList[0]].entryList
+    entryList = tgAsDict["tiers"][0]["entries"]
     entryList = [[start, end, label] for start, end, label in entryList]
 
     return entryList
@@ -94,7 +97,7 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = tgio.openTextgrid(inputFN)
+        tg = textgrid.openTextgrid(inputFN)
         tg.save(outputFN)
 
         self.assertTrue(areTheSame(inputFN, outputFN, readFile))
@@ -105,8 +108,8 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = tgio.openTextgrid(inputFN)
-        tg.save(outputFN, useShortForm=False)
+        tg = textgrid.openTextgrid(inputFN)
+        tg.save(outputFN, outputFormat=constants.LONG_TEXTGRID)
 
         self.assertTrue(areTheSame(inputFN, outputFN, readFile))
 
@@ -116,7 +119,7 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = tgio.openTextgrid(inputFN)
+        tg = textgrid.openTextgrid(inputFN)
         tg.save(outputFN)
 
         self.assertTrue(areTheSame(inputFN, outputFN, readFile))
@@ -127,7 +130,7 @@ class IOTests(unittest.TestCase):
         shortFN = join(self.dataRoot, "textgrid_to_merge.TextGrid")
         longFN = join(self.dataRoot, "textgrid_to_merge_longfile.TextGrid")
 
-        self.assertTrue(areTheSame(shortFN, longFN, tgio.openTextgrid))
+        self.assertTrue(areTheSame(shortFN, longFN, textgrid.openTextgrid))
 
     def test_saving_short_textgrid(self):
         """Tests that short textgrid files are saved non-destructively"""
@@ -135,7 +138,7 @@ class IOTests(unittest.TestCase):
         shortFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_short_file.textgrid")
 
-        tg = tgio.openTextgrid(shortFN)
+        tg = textgrid.openTextgrid(shortFN)
         tg.save(outputFN)
 
         self.assertTrue(areTheSame(shortFN, outputFN, readFile))
@@ -146,8 +149,8 @@ class IOTests(unittest.TestCase):
         longFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_long_file.textgrid")
 
-        tg = tgio.openTextgrid(longFN)
-        tg.save(outputFN, useShortForm=False)
+        tg = textgrid.openTextgrid(longFN)
+        tg.save(outputFN, outputFormat=constants.LONG_TEXTGRID)
 
         self.assertTrue(areTheSame(longFN, outputFN, readFile))
 
@@ -160,10 +163,10 @@ class IOTests(unittest.TestCase):
             self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid"
         )
 
-        tgFromTgFile = tgio.openTextgrid(shortFN)
-        tgFromTgFile.save(outputFN, outputFormat=tgio.JSON)
+        tgFromTgFile = textgrid.openTextgrid(shortFN)
+        tgFromTgFile.save(outputFN, outputFormat=constants.JSON)
 
-        tgFromJsonFile = tgio.openTextgrid(outputFN, readAsJson=True)
+        tgFromJsonFile = textgrid.openTextgrid(outputFN)
         tgFromJsonFile.save(outputLastFN)
 
         self.assertTrue(areTheSame(shortFN, outputLastFN, readFile))
@@ -247,8 +250,8 @@ class IOTests(unittest.TestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = tgio.IntervalTier("test", userEntryList, 0, 2.0)
-        tg = tgio.Textgrid()
+        tier = textgrid.IntervalTier("test", userEntryList, 0, 2.0)
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg)
 
@@ -266,8 +269,8 @@ class IOTests(unittest.TestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = tgio.IntervalTier("test", userEntryList, 0.3, 2.0)
-        tg = tgio.Textgrid()
+        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg)
 
@@ -285,8 +288,8 @@ class IOTests(unittest.TestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = tgio.IntervalTier("test", userEntryList, 0.3, 2.0)
-        tg = tgio.Textgrid()
+        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg, minTimestamp=0)
 
@@ -304,8 +307,8 @@ class IOTests(unittest.TestCase):
             [1.3, 3.0, ""],
         ]
 
-        tier = tgio.IntervalTier("test", userEntryList, 0.3, 2.0)
-        tg = tgio.Textgrid()
+        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg, maxTimestamp=3.0)
 
@@ -316,8 +319,8 @@ class IOTests(unittest.TestCase):
         # of your entries must be higher than that minTimestamp
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
 
-        tier = tgio.IntervalTier("test", userEntryList, 0.3, 2.0)
-        tg = tgio.Textgrid()
+        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
 
         self.assertRaises(AssertionError, run_save, tg, minTimestamp=1.0)
@@ -336,8 +339,8 @@ class IOTests(unittest.TestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = tgio.IntervalTier("test", userEntryList, 0.3, 2.0)
-        tg = tgio.Textgrid()
+        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg, minimumIntervalLength=0.06)
 
@@ -349,9 +352,9 @@ class IOTests(unittest.TestCase):
         """
         entryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
         expectedEntryList = entryList  # Blank intervals should not be inserted
-        tier = tgio.IntervalTier("test", entryList)
+        tier = textgrid.IntervalTier("test", entryList)
 
-        tg = tgio.Textgrid()
+        tg = textgrid.Textgrid()
         tg.addTier(tier)
         actualEntryList = run_save(tg, ignoreBlankSpaces=True)
 

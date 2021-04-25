@@ -7,7 +7,7 @@ from os.path import join
 
 from praatio import pitch_and_intensity
 from praatio import praat_scripts
-from praatio import tgio
+from praatio import textgrid
 from praatio.utilities import utils
 
 wavPath = os.path.abspath(join(".", "files"))
@@ -74,7 +74,7 @@ maryPitchData = pitch_and_intensity.extractPI(
     450,
     forceRegenerate=False,
 )
-tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
+tg = textgrid.openTextgrid(join(tgPath, "mary.TextGrid"))
 tier = tg.tierDict["phone"]
 filteredData = tier.getValuesInIntervals(maryPitchData)
 
@@ -125,15 +125,15 @@ pitch_and_intensity.generatePIMeasures(
     medianFilterWindowSize=9,
 )
 
-tg = tgio.openTextgrid(join(tgPath, "bobby_words.TextGrid"))
+tg = textgrid.openTextgrid(join(tgPath, "bobby_words.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "bobby_errors.TextGrid"))
 
-tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
+tg = textgrid.openTextgrid(join(tgPath, "mary.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(bobbyPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_errors.TextGrid"))
 
-tg = tgio.openTextgrid(join(tgPath, "mary.TextGrid"))
+tg = textgrid.openTextgrid(join(tgPath, "mary.TextGrid"))
 tg = pitch_and_intensity.detectPitchErrors(maryFilteredPitchData, 0.75, tg)[1]
 tg.save(join(rootOutputFolder, "mary_filtered_errors.TextGrid"))
 

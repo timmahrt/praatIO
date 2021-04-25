@@ -8,7 +8,7 @@ import unittest
 import os
 from os.path import join
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import dataio
 from praatio import kgio
 from praatio import audioio
@@ -28,7 +28,7 @@ class IOTests(unittest.TestCase):
     def test_openTextgrid(self):
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = tgio.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN)
         tier = tg.tierDict["word"]
         numEntries = len(tier.entryList)
 
@@ -37,7 +37,7 @@ class IOTests(unittest.TestCase):
     def test_openTextgrid_with_readRaw(self):
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = tgio.openTextgrid(tgFN, True)
+        tg = textgrid.openTextgrid(tgFN, True)
         tier = tg.tierDict["word"]
         numEntries = len(tier.entryList)
 
@@ -47,7 +47,7 @@ class IOTests(unittest.TestCase):
         """Testing adjustments to textgrid times"""
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = tgio.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN)
         shiftedTG = tg.editTimestamps(0.1, True)
         unshiftedTG = shiftedTG.editTimestamps(-0.1, True)
 
@@ -57,7 +57,7 @@ class IOTests(unittest.TestCase):
         """Testing insertion and deletion of space in a textgrid"""
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = tgio.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN)
         stretchedTG = tg.insertSpace(1, 1, "stretch")
         unstretchedTG = stretchedTG.eraseRegion(1, 2, doShrink=True)
 
@@ -68,7 +68,7 @@ class IOTests(unittest.TestCase):
 
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = tgio.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN)
 
         tg.renameTier("phone", "candy")
 
@@ -79,19 +79,19 @@ class IOTests(unittest.TestCase):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
 
         # By default, the min and max timestamp values come from the entry list
-        tier = tgio.IntervalTier("test", userEntryList)
+        tier = textgrid.IntervalTier("test", userEntryList)
         self.assertEqual(0.4, tier.minTimestamp)
         self.assertEqual(1.3, tier.maxTimestamp)
 
         # The user can specify the min and max timestamp
-        tier = tgio.IntervalTier("test", userEntryList, 0.2, 2.0)
+        tier = textgrid.IntervalTier("test", userEntryList, 0.2, 2.0)
         self.assertEqual(0.2, tier.minTimestamp)
         self.assertEqual(2.0, tier.maxTimestamp)
 
         # When the user specified min/max timestamps are less/greater
         # than the min/max specified in the entry list, use the values
         # specified in the entry list
-        tier = tgio.IntervalTier("test", userEntryList, 1.0, 1.1)
+        tier = textgrid.IntervalTier("test", userEntryList, 1.0, 1.1)
         self.assertEqual(0.4, tier.minTimestamp)
         self.assertEqual(1.3, tier.maxTimestamp)
 

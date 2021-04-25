@@ -6,7 +6,7 @@ import os
 from os.path import join
 import copy
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import praatio_scripts
 from praatio import audioio
 from praatio.utilities import utils
@@ -30,13 +30,13 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
 
-        tg = tgio.openTextgrid(inputTGFN)
+        tg = textgrid.openTextgrid(inputTGFN)
         wavObj = audioio.WavQueryObj(inputWavFN)
 
         praatio_scripts.tgBoundariesToZeroCrossings(tg, wavObj, zeroCrossingTGFN)
 
     else:
-        tg = tgio.openTextgrid(inputTGFN)
+        tg = textgrid.openTextgrid(inputTGFN)
 
     keepList = tg.tierDict["phone"].entryList
     keepList = [entry for entry in keepList if not isVowel(entry[2])]

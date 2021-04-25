@@ -18,12 +18,12 @@ I've added union and intersection here just to show their effect.
 import os
 from os.path import join
 
-from praatio import tgio
+from praatio import textgrid
 
 
 def doSetOperations(fromFN, toFN):
 
-    tg = tgio.openTextgrid(fromFN)
+    tg = textgrid.openTextgrid(fromFN)
 
     syllableTier = tg.tierDict["tonicSyllable"]
     phoneTier = tg.tierDict["tonicVowel"]

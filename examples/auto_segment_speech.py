@@ -12,7 +12,7 @@ Probably only useful in limited circumstances.
 from os.path import join
 import math
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import praat_scripts
 from praatio.utilities import utils
 
@@ -28,7 +28,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     Assumes the speaker is speaking for most of the recording.
     """
-    tg = tgio.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN)
 
     duration = tg.maxTimestamp
     numEntries = int(math.ceil(duration * proportion))
@@ -59,8 +59,8 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
     for i in range(len(pointList) - 1):
         newEntryList.append((pointList[i], pointList[i + 1], "%d" % i))
 
-    outputTG = tgio.Textgrid()
-    tier = tgio.IntervalTier("toTranscribe", newEntryList, 0, duration)
+    outputTG = textgrid.Textgrid()
+    tier = textgrid.IntervalTier("toTranscribe", newEntryList, 0, duration)
     outputTG.addTier(tier)
 
     outputTG.save(outputTGFN)

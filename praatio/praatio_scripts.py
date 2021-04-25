@@ -12,7 +12,6 @@ import copy
 from typing import Callable, List, Tuple
 
 from praatio import textgrid
-from praatio import textgrid_io
 from praatio import audioio
 from praatio.utilities.constants import Point, Interval
 
@@ -351,7 +350,7 @@ def splitAudioOnTier(
     else:
         mode = "truncated"
 
-    tg = textgrid_io.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
 
     if silenceLabel is not None:
@@ -422,7 +421,7 @@ def splitAudioOnTier(
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
 
-            textgrid_io.saveTextgrid(subTG, join(outputPath, outputName + ".TextGrid"))
+            subTG.save(join(outputPath, outputName + ".TextGrid"))
 
     return outputFNList
 
@@ -443,7 +442,7 @@ def alignBoundariesAcrossTiers(
     value found within /maxDifference/ or, if no majority exists, than
     the value used in the search query.
     """
-    tg = textgrid_io.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN)
 
     for tierName in tg.tierNameList:
         altNameList = [tmpName for tmpName in tg.tierNameList if tmpName != tierName]

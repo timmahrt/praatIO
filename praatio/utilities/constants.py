@@ -11,5 +11,6 @@ Point = namedtuple("Point", ["time", "label"])  # point entry
 
 MIN_INTERVAL_LENGTH = 0.00000001  # Arbitrary threshold
 
-TEXTGRID = "textgrid"
+LONG_TEXTGRID = "long_textgrid"
+SHORT_TEXTGRID = "short_textgrid"
 JSON = "json"

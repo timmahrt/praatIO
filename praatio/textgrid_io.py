@@ -1,31 +1,33 @@
-import io
 import json
-from typing import Optional, Tuple, Union, Type, List
+from typing import Optional, Tuple, List, Any, Dict
 
-from praatio import textgrid
 from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import myMath
 from praatio.utilities.constants import (
-    TEXTGRID,
+    LONG_TEXTGRID,
+    SHORT_TEXTGRID,
     JSON,
     MIN_INTERVAL_LENGTH,
     Interval,
     Point,
+    INTERVAL_TIER,
+    POINT_TIER,
 )
 
+SUPPORTED_OUTPUT_FORMATS = [LONG_TEXTGRID, SHORT_TEXTGRID, JSON]
 
-SUPPORTED_OUTPUT_FORMATS = [TEXTGRID, JSON]
 
+def _removeBlanks(tier: Dict) -> None:
+    def hasContent(entry):
+        return entry[-1] != ""
 
-def _removeBlanks(tier: textgrid.TextgridTier) -> textgrid.TextgridTier:
-    entryList = [entry for entry in tier.entryList if entry[-1] != ""]
-    return tier.new(entryList=entryList)
+    tier["entries"] = filter(hasContent, tier["entries"])
 
 
 def _removeUltrashortIntervals(
-    tier: textgrid.TextgridTier, minLength: float, minTimestamp: float
-) -> textgrid.TextgridTier:
+    tier: Dict, minLength: float, minTimestamp: float
+) -> None:
     """
     Remove intervals that are very tiny
 
@@ -37,7 +39,7 @@ def _removeUltrashortIntervals(
     # First, remove tiny intervals
     newEntryList: List[Interval] = []
     j = 0  # index to newEntryList
-    for start, stop, label in tier.entryList:
+    for start, stop, label in tier["entries"]:
 
         if stop - start < minLength:
             # Correct ultra-short entries
@@ -67,32 +69,32 @@ def _removeUltrashortIntervals(
             )
         j += 1
 
-    return tier.new(entryList=newEntryList)
+    tier["entries"] = newEntryList
 
 
 def _fillInBlanks(
-    tier: textgrid.TextgridTier,
+    tier: Dict,
     blankLabel: str = "",
     startTime: Optional[float] = None,
     endTime: Optional[float] = None,
-) -> textgrid.TextgridTier:
+) -> None:
     """
     Fills in the space between intervals with empty space
 
     This is necessary to do when saving to create a well-formed textgrid
     """
     if startTime is None:
-        startTime = tier.minTimestamp
+        startTime = tier["xmin"]
 
     if endTime is None:
-        endTime = tier.maxTimestamp
+        endTime = tier["xmax"]
 
     # Special case: empty textgrid
-    if len(tier.entryList) == 0:
-        tier.entryList.append((startTime, endTime, blankLabel))
+    if len(tier["entries"]) == 0:
+        tier["entries"].append((startTime, endTime, blankLabel))
 
     # Create a new entry list
-    entryList = tier.entryList[:]
+    entryList = tier["entries"]
     entry = entryList[0]
     prevEnd = float(entry[1])
     newEntryList = [entry]
@@ -118,15 +120,12 @@ def _fillInBlanks(
             newEntryList.append((newEntryList[-1][1], endTime, blankLabel))
 
     newEntryList.sort()
+    tier["entries"] = newEntryList
 
-    return tier.new(entryList=newEntryList)
 
-
-def openTextgrid(
-    fnFullPath: str, readRaw: bool = False, readAsJson: bool = False
-) -> textgrid.Textgrid:
+def parseTextgridStr(data: str, readRaw: bool = False) -> Dict:
     """
-    Opens a textgrid for editing
+    Converts a string representation of a Textgrid into a dictionary
 
     Args:
         fnFullPath (str): the path to the textgrid to open
@@ -136,49 +135,38 @@ def openTextgrid(
             as Json rather than in its native format
 
     Returns:
-        Textgrid
+        Dictionary
 
     https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
     """
-    try:
-        with io.open(fnFullPath, "r", encoding="utf-16") as fd:
-            data = fd.read()
-    except UnicodeError:
-        with io.open(fnFullPath, "r", encoding="utf-8") as fd:
-            data = fd.read()
 
-    if readAsJson:
+    try:
         tgAsDict = json.loads(data)
-        textgrid = _dictionaryToTg(tgAsDict)
-    else:
+    except ValueError:
         caseA = "ooTextFile short" in data
         caseB = "item [" not in data
         if caseA or caseB:
-            textgrid = _parseShortTextgrid(data)
+            tgAsDict = _parseShortTextgrid(data)
         else:
-            textgrid = _parseNormalTextgrid(data)
+            tgAsDict = _parseNormalTextgrid(data)
 
     if readRaw is False:
-        for tierName in textgrid.tierNameList:
-            tier = textgrid.tierDict[tierName]
-            tier = _removeBlanks(tier)
-            textgrid.replaceTier(tierName, tier)
+        for tier in tgAsDict["tiers"]:
+            _removeBlanks(tier)
 
-    return textgrid
+    return tgAsDict
 
 
-def saveTextgrid(
-    tg: textgrid.Textgrid,
-    fn: str,
+def getTextgridAsStr(
+    tg: Dict,
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
     minTimestamp: Optional[float] = None,
     maxTimestamp: Optional[float] = None,
-    useShortForm: bool = True,
-    outputFormat: str = TEXTGRID,
+    outputFormat: str = SHORT_TEXTGRID,
     ignoreBlankSpaces: bool = False,
-):
+) -> str:
     """
-    To save the current textgrid
+    Converts a textgrid to a string, suitable for saving
 
     Args:
         fn (str): the fullpath filename of the output
@@ -195,11 +183,7 @@ def saveTextgrid(
             if None, use whatever is defined in the Textgrid object.
             If maxTimestamp is smaller than timestamps in your textgrid,
             an exception will be thrown.
-        useShortForm (bool): if True, save the textgrid as a short
-            textgrid. Otherwise, use the long-form textgrid format.
-            For backwards compatibility, is True by default. Ignored if
-            format is not 'Textgrid'
-        outputFormat (str): one of ['textgrid', 'json']
+        outputFormat (str): one of ['short_textgrid', 'long_textgrid', 'json']
         ignoreBlankSpaces (bool): if False, blank sections in interval
             tiers will be filled in with an empty interval
             (with a label of "")
@@ -211,106 +195,85 @@ def saveTextgrid(
     if outputFormat not in SUPPORTED_OUTPUT_FORMATS:
         raise errors.BadFormatException(str(outputFormat), SUPPORTED_OUTPUT_FORMATS)
 
-    if outputFormat == TEXTGRID:
-        if useShortForm:
-            outputTxt = _tgToShortTextForm(
-                tg,
-                minimumIntervalLength,
-                minTimestamp,
-                maxTimestamp,
-                ignoreBlankSpaces,
-            )
-        else:
-            outputTxt = _tgToLongTextForm(
-                tg,
-                minimumIntervalLength,
-                minTimestamp,
-                maxTimestamp,
-                ignoreBlankSpaces,
-            )
-    elif outputFormat == JSON:
-        outputTxt = _tgToJson(
-            tg,
-            minimumIntervalLength,
-            minTimestamp,
-            maxTimestamp,
-            ignoreBlankSpaces,
-        )
+    tg = _prepTgForSaving(
+        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
+    )
 
-    with io.open(fn, "w", encoding="utf-8") as fd:
-        fd.write(outputTxt)
+    if outputFormat == LONG_TEXTGRID:
+        outputTxt = _tgToLongTextForm(tg)
+    elif outputFormat == SHORT_TEXTGRID:
+        outputTxt = _tgToShortTextForm(tg)
+    elif outputFormat == JSON:
+        outputTxt = _tgToJson(tg)
+
+    return outputTxt
+
+
+def _sortEntries(tg: Dict) -> None:
+    for tier in tg["tiers"]:
+        tier["entries"] = sorted(tier["entries"])
 
 
 def _prepTgForSaving(
-    tg: textgrid.Textgrid,
+    tg: Dict,
     minimumIntervalLength: float,
     minTimestamp: Optional[float],
     maxTimestamp: Optional[float],
     ignoreBlankSpaces: Optional[bool],
-) -> textgrid.Textgrid:
-    for tier in tg.tierDict.values():
-        tier.sort()
+) -> Dict:
+    _sortEntries(tg)
 
     if minTimestamp is None:
-        minTimestamp = tg.minTimestamp
+        minTimestamp = tg["xmin"]
     else:
-        tg.minTimestamp = minTimestamp
+        tg["xmin"] = minTimestamp
 
     if maxTimestamp is None:
-        maxTimestamp = tg.maxTimestamp
+        maxTimestamp = tg["xmax"]
     else:
-        tg.maxTimestamp = maxTimestamp
+        tg["xmax"] = maxTimestamp
 
     # Fill in the blank spaces for interval tiers
     if not ignoreBlankSpaces:
-        for name in tg.tierNameList:
-            tier = tg.tierDict[name]
-            if isinstance(tier, textgrid.IntervalTier):
-                tier = _fillInBlanks(tier, "", minTimestamp, maxTimestamp)
-                if minimumIntervalLength is not None:
-                    tier = _removeUltrashortIntervals(
-                        tier, minimumIntervalLength, minTimestamp
-                    )
-                tg.tierDict[name] = tier
+        newTierList = []
+        for tier in tg["tiers"]:
+            if tier["class"] == POINT_TIER:
+                newTierList.append(tier)
+                continue
 
-    for tier in tg.tierDict.values():
-        tier.sort()
+            _fillInBlanks(tier, "", minTimestamp, maxTimestamp)
+            if minimumIntervalLength is not None:
+                _removeUltrashortIntervals(tier, minimumIntervalLength, minTimestamp)
+
+    _sortEntries(tg)
 
     return tg
 
 
 def _tgToShortTextForm(
-    tg: textgrid.Textgrid,
-    minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
-    minTimestamp: Optional[float] = None,
-    maxTimestamp: Optional[float] = None,
-    ignoreBlankSpaces: Optional[bool] = False,
+    tg: Dict,
 ) -> str:
-    tg = _prepTgForSaving(
-        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
-    )
 
     # Header
     outputTxt = ""
     outputTxt += 'File type = "ooTextFile"\n'
     outputTxt += 'Object class = "TextGrid"\n\n'
     outputTxt += "%s\n%s\n" % (
-        myMath.numToStr(tg.minTimestamp),
-        myMath.numToStr(tg.maxTimestamp),
+        myMath.numToStr(tg["xmin"]),
+        myMath.numToStr(tg["xmax"]),
     )
-    outputTxt += "<exists>\n%d\n" % len(tg.tierNameList)
-    for tierName in tg.tierNameList:
-        tier = tg.tierDict[tierName]
+    outputTxt += "<exists>\n%d\n" % len(tg["tiers"])
+    for tier in tg["tiers"]:
         text = ""
-        text += '"%s"\n' % tier.tierType
-        text += '"%s"\n' % utils.escapeQuotes(tier.name)
+        text += '"%s"\n' % tier["class"]
+        text += '"%s"\n' % utils.escapeQuotes(tier["name"])
         text += "%s\n%s\n%s\n" % (
-            myMath.numToStr(tier.minTimestamp),
-            myMath.numToStr(tier.maxTimestamp),
-            len(tier.entryList),
+            myMath.numToStr(tier["xmin"]),
+            myMath.numToStr(tier["xmax"]),
+            len(tier["entries"]),
         )
 
-        for entry in tier.entryList:
+        for entry in tier["entries"]:
             entry = [myMath.numToStr(val) for val in entry[:-1]] + [
                 '"%s"' % utils.escapeQuotes(entry[-1])
             ]
@@ -322,16 +285,7 @@ def _tgToShortTextForm(
     return outputTxt
 
 
-def _tgToLongTextForm(
-    tg: textgrid.Textgrid,
-    minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
-    minTimestamp: Optional[float] = None,
-    maxTimestamp: Optional[float] = None,
-    ignoreBlankSpaces: Optional[bool] = False,
-) -> str:
-    tg = _prepTgForSaving(
-        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
-    )
+def _tgToLongTextForm(tg: Dict) -> str:
     outputTxt = ""
     outputTxt += 'File type = "ooTextFile"\n'
     outputTxt += 'Object class = "TextGrid"\n\n'
@@ -339,32 +293,32 @@ def _tgToLongTextForm(
     tab = " " * 4
 
     # Header
-    outputTxt += "xmin = %s \n" % myMath.numToStr(tg.minTimestamp)
-    outputTxt += "xmax = %s \n" % myMath.numToStr(tg.maxTimestamp)
+    outputTxt += "xmin = %s \n" % myMath.numToStr(tg["xmin"])
+    outputTxt += "xmax = %s \n" % myMath.numToStr(tg["xmax"])
     outputTxt += "tiers? <exists> \n"
-    outputTxt += "size = %d \n" % len(tg.tierNameList)
+    outputTxt += "size = %d \n" % len(tg["tiers"])
     outputTxt += "item []: \n"
 
-    for tierNum, tierName in enumerate(tg.tierNameList):
-        tier = tg.tierDict[tierName]
+    for tierNum, tier in enumerate(tg["tiers"]):
         # Interval header
         outputTxt += tab + "item [%d]:\n" % (tierNum + 1)
-        outputTxt += tab * 2 + 'class = "%s" \n' % tier.tierType
-        outputTxt += tab * 2 + 'name = "%s" \n' % utils.escapeQuotes(tierName)
-        outputTxt += tab * 2 + "xmin = %s \n" % myMath.numToStr(tier.minTimestamp)
-        outputTxt += tab * 2 + "xmax = %s \n" % myMath.numToStr(tier.maxTimestamp)
+        outputTxt += tab * 2 + 'class = "%s" \n' % tier["class"]
+        outputTxt += tab * 2 + 'name = "%s" \n' % utils.escapeQuotes(tier["name"])
+        outputTxt += tab * 2 + "xmin = %s \n" % myMath.numToStr(tier["xmin"])
+        outputTxt += tab * 2 + "xmax = %s \n" % myMath.numToStr(tier["xmax"])
 
-        if tier.tierType == textgrid.INTERVAL_TIER:
-            outputTxt += tab * 2 + "intervals: size = %d \n" % len(tier.entryList)
-            for intervalNum, entry in enumerate(tier.entryList):
+        entries = tier["entries"]
+        if tier["class"] == INTERVAL_TIER:
+            outputTxt += tab * 2 + "intervals: size = %d \n" % len(entries)
+            for intervalNum, entry in enumerate(entries):
                 start, stop, label = entry
                 outputTxt += tab * 2 + "intervals [%d]:\n" % (intervalNum + 1)
                 outputTxt += tab * 3 + "xmin = %s \n" % myMath.numToStr(start)
                 outputTxt += tab * 3 + "xmax = %s \n" % myMath.numToStr(stop)
                 outputTxt += tab * 3 + 'text = "%s" \n' % utils.escapeQuotes(label)
         else:
-            outputTxt += tab * 2 + "points: size = %d \n" % len(tier.entryList)
-            for pointNum, entry in enumerate(tier.entryList):
+            outputTxt += tab * 2 + "points: size = %d \n" % len(entries)
+            for pointNum, entry in enumerate(entries):
                 timestamp, label = entry
                 outputTxt += tab * 2 + "points [%d]:\n" % (pointNum + 1)
                 outputTxt += tab * 3 + "number = %s \n" % myMath.numToStr(timestamp)
@@ -373,69 +327,16 @@ def _tgToLongTextForm(
     return outputTxt
 
 
-def _tgToJson(
-    tg: textgrid.Textgrid,
-    minimumIntervalLength: float,
-    minTimestamp: Optional[float],
-    maxTimestamp: Optional[float],
-    ignoreBlankSpaces: Optional[bool],
-) -> str:
+def _tgToJson(tgAsDict: Dict) -> str:
     """Returns a json representation of a textgrid"""
-    tg = _prepTgForSaving(
-        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
-    )
-    tgAsDict = _tgToDictionary(tg)
     return json.dumps(tgAsDict, ensure_ascii=False)
 
 
-def _tgToDictionary(tg: textgrid.Textgrid) -> dict:
-    tiers = []
-    for tierName in tg.tierNameList:
-        tier = tg.tierDict[tierName]
-        tierDict = {
-            "class": tier.tierType,
-            "name": tierName,
-            "xmin": tier.minTimestamp,
-            "xmax": tier.maxTimestamp,
-            "entries": tier.entryList,
-        }
-        tiers.append(tierDict)
-
-    tgAsDict = {"xmin": tg.minTimestamp, "xmax": tg.maxTimestamp, "tiers": tiers}
-
-    return tgAsDict
-
-
-def _dictionaryToTg(tgAsDict: dict) -> textgrid.Textgrid:
-    """Converts a dictionary representation of a textgrid to a Textgrid"""
-    tg = textgrid.Textgrid()
-    tg.minTimestamp = tgAsDict["xmin"]
-    tg.maxTimestamp = tgAsDict["xmax"]
-
-    for tierAsDict in tgAsDict["tiers"]:
-        klass: Union[Type[textgrid.PointTier], Type[textgrid.IntervalTier]]
-        if tierAsDict["class"] == textgrid.INTERVAL_TIER:
-            klass = textgrid.IntervalTier
-        else:
-            klass = textgrid.PointTier
-        tier = klass(
-            tierAsDict["name"],
-            tierAsDict["entries"],
-            tierAsDict["xmin"],
-            tierAsDict["xmax"],
-        )
-        tg.addTier(tier)
-
-    return tg
-
-
-def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
+def _parseNormalTextgrid(data: str) -> Dict:
     """
     Reads a normal textgrid
     """
     data = data.replace("\r\n", "\n")
-
-    newTG = textgrid.Textgrid()
 
     # Toss textgrid header
     header, data = data.split("item [", 1)
@@ -444,17 +345,15 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
     tgMin = float(headerList[3].split("=")[1].strip())
     tgMax = float(headerList[4].split("=")[1].strip())
 
-    newTG.minTimestamp = tgMin
-    newTG.maxTimestamp = tgMax
-
     # Process each tier individually (will be output to separate folders)
+    tiers = []
     tierList = data.split("item [")[1:]
     for tierTxt in tierList:
         if 'class = "IntervalTier"' in tierTxt:
-            tierType = textgrid.INTERVAL_TIER
+            tierType = INTERVAL_TIER
             searchWord = "intervals ["
         else:
-            tierType = textgrid.POINT_TIER
+            tierType = POINT_TIER
             searchWord = "points ["
 
         # Get tier meta-information
@@ -470,15 +369,14 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
         tierName = header.split("name = ")[1].split("\n", 1)[0]
         tierName, tierNameI = _fetchTextRow(header, 0, "name = ")
         tierStartStr = header.split("xmin = ")[1].split("\n", 1)[0]
-        tierStart = utils.strToIntOrFloat(tierStartStr)
+        tierStartTime = utils.strToIntOrFloat(tierStartStr)
         tierEndStr = header.split("xmax = ")[1].split("\n", 1)[0]
-        tierEnd = utils.strToIntOrFloat(tierEndStr)
+        tierEndTime = utils.strToIntOrFloat(tierEndStr)
 
         # Get the tier entry list
         labelI = 0
-        tier: Union[textgrid.PointTier, textgrid.IntervalTier]
-        if tierType == textgrid.INTERVAL_TIER:
-            intervalEntryList = []
+        entryList: List[Any] = []
+        if tierType == INTERVAL_TIER:
             while True:
                 try:
                     timeStart, timeStartI = _fetchRow(tierData, labelI, "xmin = ")
@@ -488,12 +386,8 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
                     break
 
                 label = label.strip()
-                intervalEntryList.append(Interval(timeStart, timeEnd, label))
-            tier = textgrid.IntervalTier(
-                tierName, intervalEntryList, tierStart, tierEnd
-            )
+                entryList.append(Interval(timeStart, timeEnd, label))
         else:
-            pointEntryList = []
             while True:
                 try:
                     time, timeI = _fetchRow(tierData, labelI, "number = ")
@@ -502,21 +396,27 @@ def _parseNormalTextgrid(data: str) -> textgrid.Textgrid:
                     break
 
                 label = label.strip()
-                pointEntryList.append(Point(time, label))
-            tier = textgrid.PointTier(tierName, pointEntryList, tierStart, tierEnd)
+                entryList.append(Point(time, label))
 
-        newTG.addTier(tier)
+        tierDict = {
+            "class": tierType,
+            "name": tierName,
+            "xmin": float(tierStartTime),
+            "xmax": float(tierEndTime),
+            "entries": entryList,
+        }
+        tiers.append(tierDict)
 
-    return newTG
+    tgDict = {"xmin": tgMin, "xmax": tgMax, "tiers": tiers}
+
+    return tgDict
 
 
-def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
+def _parseShortTextgrid(data: str) -> Dict:
     """
     Reads a short textgrid file
     """
     data = data.replace("\r\n", "\n")
-
-    newTG = textgrid.Textgrid()
 
     intervalIndicies = [(i, True) for i in utils.findAll(data, '"IntervalTier"')]
     pointIndicies = [(i, False) for i in utils.findAll(data, '"TextTier"')]
@@ -536,10 +436,8 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
     tgMin = float(headerList[3].strip())
     tgMax = float(headerList[4].strip())
 
-    newTG.minTimestamp = tgMin
-    newTG.maxTimestamp = tgMax
-
     # Load the data for each tier
+    tiers = []
     for blockStartI, blockEndI, isInterval in tupleList:
         tierData = data[blockStartI:blockEndI]
 
@@ -556,8 +454,9 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
         tierEndTime = utils.strToIntOrFloat(tierEndTimeStr)
 
         # Tier entry data
+        entryList: List[Any] = []
         if isInterval:
-            intervalEntryList = []
+            className = INTERVAL_TIER
             while True:
                 try:
                     startTime, endTimeI = _fetchRow(tierData, startTimeI)
@@ -567,19 +466,9 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
                     break
 
                 label = label.strip()
-                intervalEntryList.append(Interval(startTime, endTime, label))
-
-            newTG.addTier(
-                textgrid.IntervalTier(
-                    tierName,
-                    intervalEntryList,
-                    float(tierStartTime),
-                    float(tierEndTime),
-                )
-            )
-
+                entryList.append(Interval(startTime, endTime, label))
         else:
-            pointEntryList = []
+            className = POINT_TIER
             while True:
                 try:
                     time, labelI = _fetchRow(tierData, startTimeI)
@@ -587,13 +476,20 @@ def _parseShortTextgrid(data: str) -> textgrid.Textgrid:
                 except (ValueError, IndexError):
                     break
                 label = label.strip()
-                pointEntryList.append(Point(time, label))
+                entryList.append(Point(time, label))
 
-            newTG.addTier(
-                textgrid.PointTier(tierName, pointEntryList, tierStartTime, tierEndTime)
-            )
+        tierDict = {
+            "class": className,
+            "name": tierName,
+            "xmin": float(tierStartTime),
+            "xmax": float(tierEndTime),
+            "entries": entryList,
+        }
+        tiers.append(tierDict)
 
-    return newTG
+    tgDict = {"xmin": tgMin, "xmax": tgMax, "tiers": tiers}
+
+    return tgDict
 
 
 def _fetchRow(

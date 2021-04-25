@@ -5,7 +5,7 @@ Praatio example for extracting points in a PointProcess for the vowels specified
 import os
 from os.path import join
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import dataio
 
 path = join(".", "files")
@@ -14,7 +14,7 @@ outputPath = join(path, "point_process_output")
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-tg = tgio.openTextgrid(join(path, "bobby_phones.TextGrid"))
+tg = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"))
 pp = dataio.open1DPointObject(join(path, "bobby.PointProcess"))
 
 newPoints = []

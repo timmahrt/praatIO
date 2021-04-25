@@ -14,15 +14,24 @@ Textgrid.save() can be used to save a Textgrid object to a file.
 see the **examples/** directory for examples using tgio.py
 """
 
+import io
 import re
 import copy
 from typing import Callable, List, Tuple, Optional, TypeVar, Union, Type, Any, Dict
 from abc import ABC, abstractmethod
 
+from praatio import textgrid_io
 from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import myMath
-from praatio.utilities.constants import Interval, Point, INTERVAL_TIER, POINT_TIER
+from praatio.utilities.constants import (
+    Interval,
+    Point,
+    INTERVAL_TIER,
+    POINT_TIER,
+    SHORT_TEXTGRID,
+    MIN_INTERVAL_LENGTH,
+)
 
 T = TypeVar("T", bound="TextgridTier")
 
@@ -1429,6 +1438,28 @@ class Textgrid:
         """Returns a copy of this Textgrid"""
         return copy.deepcopy(self)
 
+    def save(
+        self,
+        outputFn: str,
+        minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
+        minTimestamp: Optional[float] = None,
+        maxTimestamp: Optional[float] = None,
+        outputFormat: str = SHORT_TEXTGRID,
+        ignoreBlankSpaces: bool = False,
+    ) -> None:
+        tgAsDict = _tgToDictionary(self)
+        textgridStr = textgrid_io.getTextgridAsStr(
+            tgAsDict,
+            minimumIntervalLength,
+            minTimestamp,
+            maxTimestamp,
+            outputFormat,
+            ignoreBlankSpaces,
+        )
+
+        with io.open(outputFn, "w", encoding="utf-8") as fd:
+            fd.write(textgridStr)
+
     def renameTier(self, oldName: str, newName: str) -> None:
         oldTier = self.tierDict[oldName]
         tierIndex = self.tierNameList.index(oldName)
@@ -1443,3 +1474,56 @@ class Textgrid:
         tierIndex = self.tierNameList.index(name)
         self.removeTier(name)
         self.addTier(newTier, tierIndex)
+
+
+def openTextgrid(fnFullPath: str, readRaw: bool = False) -> Textgrid:
+    try:
+        with io.open(fnFullPath, "r", encoding="utf-16") as fd:
+            data = fd.read()
+    except UnicodeError:
+        with io.open(fnFullPath, "r", encoding="utf-8") as fd:
+            data = fd.read()
+
+    tgAsDict = textgrid_io.parseTextgridStr(data, readRaw)
+    return _dictionaryToTg(tgAsDict)
+
+
+def _tgToDictionary(tg: Textgrid) -> dict:
+    tiers = []
+    for tierName in tg.tierNameList:
+        tier = tg.tierDict[tierName]
+        tierDict = {
+            "class": tier.tierType,
+            "name": tierName,
+            "xmin": tier.minTimestamp,
+            "xmax": tier.maxTimestamp,
+            "entries": tier.entryList,
+        }
+        tiers.append(tierDict)
+
+    tgAsDict = {"xmin": tg.minTimestamp, "xmax": tg.maxTimestamp, "tiers": tiers}
+
+    return tgAsDict
+
+
+def _dictionaryToTg(tgAsDict: dict) -> Textgrid:
+    """Converts a dictionary representation of a textgrid to a Textgrid"""
+    tg = Textgrid()
+    tg.minTimestamp = tgAsDict["xmin"]
+    tg.maxTimestamp = tgAsDict["xmax"]
+
+    for tierAsDict in tgAsDict["tiers"]:
+        klass: Union[Type[PointTier], Type[IntervalTier]]
+        if tierAsDict["class"] == INTERVAL_TIER:
+            klass = IntervalTier
+        else:
+            klass = PointTier
+        tier = klass(
+            tierAsDict["name"],
+            tierAsDict["entries"],
+            tierAsDict["xmin"],
+            tierAsDict["xmax"],
+        )
+        tg.addTier(tier)
+
+    return tg

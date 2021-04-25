@@ -20,7 +20,6 @@ import io
 from typing import List, Tuple, Optional, cast
 
 from praatio import dataio
-from praatio import textgrid_io
 from praatio import textgrid
 from praatio.utilities import utils
 from praatio.utilities import myMath
@@ -504,7 +503,7 @@ def generatePIMeasures(
     # Raw values should have 0 filtered; normalized values are centered around 0, so don't filter
     filterZeroFlag = not globalZNormalization
 
-    tg = textgrid_io.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN)
     piData = tg.tierDict[tierName].getValuesInIntervals(castDataList)
 
     outputList: List[List[float]] = []
