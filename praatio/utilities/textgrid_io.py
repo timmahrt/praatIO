@@ -41,20 +41,20 @@ def _removeUltrashortIntervals(
     # First, remove tiny intervals
     newEntryList: List[Interval] = []
     j = 0  # index to newEntryList
-    for start, stop, label in tier["entries"]:
+    for start, end, label in tier["entries"]:
 
-        if stop - start < minLength:
+        if end - start < minLength:
             # Correct ultra-short entries
             if len(newEntryList) > 0:
                 lastStart, _, lastLabel = newEntryList[j - 1]
-                newEntryList[j - 1] = Interval(lastStart, stop, lastLabel)
+                newEntryList[j - 1] = Interval(lastStart, end, lastLabel)
         else:
             # Special case: the first entry in oldEntryList was ultra-short
             if len(newEntryList) == 0 and start != minTimestamp:
-                newEntryList.append(Interval(minTimestamp, stop, label))
+                newEntryList.append(Interval(minTimestamp, end, label))
             # Normal case
             else:
-                newEntryList.append(Interval(start, stop, label))
+                newEntryList.append(Interval(start, end, label))
             j += 1
 
     # Next, shift near equivalent tiny boundaries
@@ -315,10 +315,10 @@ def _tgToLongTextForm(tg: Dict) -> str:
         if tier["class"] == INTERVAL_TIER:
             outputTxt += tab * 2 + "intervals: size = %d \n" % len(entries)
             for intervalNum, entry in enumerate(entries):
-                start, stop, label = entry
+                start, end, label = entry
                 outputTxt += tab * 2 + "intervals [%d]:\n" % (intervalNum + 1)
                 outputTxt += tab * 3 + "xmin = %s \n" % myMath.numToStr(start)
-                outputTxt += tab * 3 + "xmax = %s \n" % myMath.numToStr(stop)
+                outputTxt += tab * 3 + "xmax = %s \n" % myMath.numToStr(end)
                 outputTxt += tab * 3 + 'text = "%s" \n' % utils.escapeQuotes(label)
         else:
             outputTxt += tab * 2 + "points: size = %d \n" % len(entries)

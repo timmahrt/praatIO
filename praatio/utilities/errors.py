@@ -28,16 +28,16 @@ class TimelessTextgridTierException(Exception):
 
 
 class BadIntervalError(Exception):
-    def __init__(self, start: float, stop: float, label: str):
+    def __init__(self, start: float, end: float, label: str):
         super(BadIntervalError, self).__init__()
         self.start = start
-        self.stop = stop
+        self.end = end
         self.label = label
 
     def __str__(self):
         return (
             "Problem with interval--could not create textgrid "
-            f"({self.start},{self.stop},{self.label})"
+            f"({self.start},{self.end},{self.label})"
         )
 
 

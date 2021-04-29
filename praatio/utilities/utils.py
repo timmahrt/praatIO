@@ -160,7 +160,7 @@ def getValueAtTime(
     return retTime, retVal, i
 
 
-def getValuesInInterval(dataTupleList: List, start: float, stop: float) -> List:
+def getValuesInInterval(dataTupleList: List, start: float, end: float) -> List:
     """
     Gets the values that exist within an interval
 
@@ -171,7 +171,7 @@ def getValuesInInterval(dataTupleList: List, start: float, stop: float) -> List:
     intervalDataList = []
     for dataTuple in dataTupleList:
         time = dataTuple[0]
-        if start <= time and stop >= time:
+        if start <= time and end >= time:
             intervalDataList.append(dataTuple)
 
     return intervalDataList

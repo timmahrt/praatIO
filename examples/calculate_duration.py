@@ -19,11 +19,11 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid", "mary.TextGrid"]:
         tier = tg.tierDict[tierName]
         if not isinstance(tier, textgrid.IntervalTier):
             continue
-        for start, stop, label in tier.entryList:
+        for start, end, label in tier.entryList:
             txt = u"%s,%s,%s,%0.2f" % (
                 name,
                 tierName,
                 label,
-                float(stop) - float(start),
+                float(end) - float(start),
             )
             print(txt.encode("utf-8"))

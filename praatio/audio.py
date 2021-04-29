@@ -217,14 +217,14 @@ class AbstractWav(ABC):
         # (iterate backwards if reverse is true)
         if reverse is True:
             start = len(changeList) - 1
-            stop = 0
+            end = 0
             step = -1
         else:
             start = 0
-            stop = len(changeList) - 1
+            end = len(changeList) - 1
             step = 1
 
-        changeIndexList = [i for i in range(start, stop, step) if changeList[i] == 1]
+        changeIndexList = [i for i in range(start, end, step) if changeList[i] == 1]
 
         # 4 return the zeroed frame closest to starting point
         try:
@@ -359,11 +359,11 @@ class WavQueryObj(AbstractWav):
 
         # Grab the sections to be kept
         audioFrames = b""
-        for startT, stopT, label in iterList:
-            diff = stopT - startT
+        for start, end, label in iterList:
+            diff = end - start
 
             if label == _KEEP:
-                self.audiofile.setpos(int(self.framerate * startT))
+                self.audiofile.setpos(int(self.framerate * start))
                 frames = self.audiofile.readframes(int(self.framerate * diff))
                 audioFrames += frames
 
@@ -497,13 +497,13 @@ def openAudioFile(
 
     if keepList is None and deleteList is not None:
         computedKeepList = utils.invertIntervalList(
-            [(start, stop) for start, stop, _ in deleteList], duration
+            [(start, end) for start, end, _ in deleteList], duration
         )
         computedDeleteList = []
     elif deleteList is None and keepList is not None:
         computedKeepList = []
         computedDeleteList = utils.invertIntervalList(
-            [(start, stop) for start, stop, _ in keepList], duration
+            [(start, end) for start, end, _ in keepList], duration
         )
     else:
         computedKeepList = [
@@ -518,11 +518,11 @@ def openAudioFile(
     # Grab the sections to be kept
     audioSampleList: List = []
     byteCode = sampWidthDict[sampwidth]
-    for startT, stopT, label in iterList:
-        diff = stopT - startT
+    for start, end, label in iterList:
+        diff = end - start
 
         if label == _KEEP:
-            audiofile.setpos(int(framerate * startT))
+            audiofile.setpos(int(framerate * start))
             frames = audiofile.readframes(int(framerate * diff))
 
             actualNumFrames = int(len(frames) / float(sampwidth))

@@ -33,7 +33,7 @@ for wavFN, tgFN in (
     deleteList.append(tg.tierDict["word"].entryList[0])
 
     # Get only time information from entries (i.e. remove label information)
-    deleteList = [(start, stop) for start, stop, _ in deleteList]
+    deleteList = [(start, end) for start, end, _ in deleteList]
 
     # Replace segments with a sine wave
     wavQObj = audio.WavQueryObj(join(path, wavFN))

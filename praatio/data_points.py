@@ -54,14 +54,14 @@ class PointObject(object):
             fd.write(outputStr)
 
     def getPointsInInterval(
-        self, start: float, stop: float, startIndex: int = 0
+        self, start: float, end: float, startIndex: int = 0
     ) -> List[float]:
 
         returnPointList = []
         for entry in self.pointList[startIndex:]:
             time = entry[0]
             if time >= start:
-                if time <= stop:
+                if time <= end:
                     returnPointList.append(time)
                 else:
                     break

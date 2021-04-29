@@ -46,8 +46,8 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     wavObj.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)
-    for start, stop in sorted(deleteList, reverse=True):
-        shrunkTG = shrunkTG.eraseRegion(start, stop, doShrink=doShrink)
+    for start, end in sorted(deleteList, reverse=True):
+        shrunkTG = shrunkTG.eraseRegion(start, end, doShrink=doShrink)
 
     shrunkTG.save(outputTGFN)
 

@@ -36,8 +36,8 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     # Get all silent intervals
     entryList = [
-        (stop - start, start, stop, label)
-        for start, stop, label in entryList
+        (end - start, start, end, label)
+        for start, end, label in entryList
         if label == "silent"
     ]
 
@@ -50,7 +50,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
     # Get the mid point of the longest n intervals and convert them
     # into intervals to be transcribed
     entryList = entryList[:numEntries]
-    pointList = [start + ((stop - start) / 2.0) for _, start, stop, _ in entryList]
+    pointList = [start + ((end - start) / 2.0) for _, start, end, _ in entryList]
     pointList.sort()
 
     pointList = [0.0] + pointList + [duration]

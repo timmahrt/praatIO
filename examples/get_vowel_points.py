@@ -20,14 +20,11 @@ pp = data_points.open1DPointObject(join(path, "bobby.PointProcess"))
 
 newPoints = []
 tier = tg.tierDict["phone"]
-for start, stop, label in tier.entryList:
-    if label.lower()[0] not in ["a", "e", "i", "o", "u"]:
+for interval in tier.entryList:
+    if interval.label.lower()[0] not in ["a", "e", "i", "o", "u"]:
         continue
-    newPoints.extend(
-        [
-            pp.getPointsInInterval(start, stop),
-        ]
-    )
+    for val in pp.getPointsInInterval(interval.start, interval.end):
+        newPoints.append((val,))
 
 outputPP = data_points.PointObject1D(newPoints, constants.POINT, pp.minTime, pp.maxTime)
 outputPP.save(join(outputPath, "bobby_vowels.PointProcess"))

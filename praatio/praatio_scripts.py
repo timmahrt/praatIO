@@ -9,11 +9,17 @@ import os
 from os.path import join
 import math
 import copy
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Final, Literal, Optional
 
 from praatio import textgrid
 from praatio import audio
 from praatio.utilities.constants import Point, Interval
+
+
+class NameStyle:
+    APPEND = "append"
+    APPEND_NO_I = "append_no_i"
+    LABEL = "label"
 
 
 def _shiftTimes(
@@ -171,7 +177,7 @@ def spellCheckEntries(
     tier = tg.tierDict[targetTierName]
 
     mispelledEntryList = []
-    for startT, stopT, label in tier.entryList:
+    for start, end, label in tier.entryList:
 
         # Remove punctuation
         for char in punctuationList:
@@ -185,10 +191,10 @@ def spellCheckEntries(
 
         if len(mispelledList) > 0:
             mispelledTxt = ", ".join(mispelledList)
-            mispelledEntryList.append(Interval(startT, stopT, mispelledTxt))
+            mispelledEntryList.append(Interval(start, end, mispelledTxt))
 
             if printEntries is True:
-                print((startT, stopT, mispelledTxt))
+                print((start, end, mispelledTxt))
 
     tier = textgrid.IntervalTier(
         newTierName, mispelledEntryList, tg.minTimestamp, tg.maxTimestamp
@@ -237,9 +243,9 @@ def splitTierEntries(
 
     # Split the entries in the source tier
     newEntryList = []
-    for start, stop, label in sourceTier.entryList:
+    for start, end, label in sourceTier.entryList:
         labelList = label.split()
-        intervalLength = (stop - start) / float(len(labelList))
+        intervalLength = (end - start) / float(len(labelList))
 
         newSubEntryList = [
             Interval(
@@ -297,9 +303,9 @@ def tgBoundariesToZeroCrossings(
                 continue
 
             intervals = []
-            for start, stop, label in tier.entryList:
+            for start, end, label in tier.entryList:
                 newStart = wavObj.findNearestZeroCrossing(start)
-                newStop = wavObj.findNearestZeroCrossing(stop)
+                newStop = wavObj.findNearestZeroCrossing(end)
                 intervals.append(Interval(newStart, newStop, label))
             newTier = tier.new(entryList=intervals)
 
@@ -314,7 +320,7 @@ def splitAudioOnTier(
     tierName: str,
     outputPath: str,
     outputTGFlag: bool = False,
-    nameStyle: str = None,
+    nameStyle: Optional[Literal["append", "append_no_i", "label"]] = None,
     noPartialIntervals: bool = False,
     silenceLabel: str = None,
 ) -> List[Tuple[float, float, str]]:
@@ -345,16 +351,20 @@ def splitAudioOnTier(
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
 
-    if noPartialIntervals is True:
-        mode = "strict"
-    else:
-        mode = "truncated"
+    def getValue(myBool) -> Literal["strict", "lax", "truncated"]:
+        # This will make mypy happy
+        if myBool:
+            return textgrid.CropCollision.STRICT
+        else:
+            return textgrid.CropCollision.TRUNCATED
+
+    mode: Final = getValue(noPartialIntervals)
 
     tg = textgrid.openTextgrid(tgFN)
     entryList = tg.tierDict[tierName].entryList
 
     if silenceLabel is not None:
-        entryList = [entry for entry in entryList if entry[2] != silenceLabel]
+        entryList = [entry for entry in entryList if entry.label != silenceLabel]
 
     # Build the output name template
     name = os.path.splitext(os.path.split(wavFN)[1])[0]
@@ -368,8 +378,8 @@ def splitAudioOnTier(
     # If we're using the 'label' namestyle for outputs, all of the
     # interval labels have to be unique, or wave files with those
     # labels as names, will be overwritten
-    if nameStyle == "label":
-        wordList = [word for _, _, word in entryList]
+    if nameStyle == NameStyle.LABEL:
+        wordList = [interval.label for interval in entryList]
         multipleInstList = []
         for word in set(wordList):
             if wordList.count(word) > 1:
@@ -387,16 +397,17 @@ def splitAudioOnTier(
     outputFNList = []
     wavQObj = audio.WavQueryObj(wavFN)
     for i, entry in enumerate(entryList):
-        start, stop, label = entry
+        start, end, label = entry
 
         # Resolve output name
-        outputName = outputTemplate % i
-        if nameStyle == "append":
-            outputName += "_" + label
-        elif nameStyle == "append_no_i":
-            outputName = name + "_" + label
-        elif nameStyle == "label":
+        if nameStyle == NameStyle.APPEND_NO_I:
+            outputName = f"{name}_{label}"
+        elif nameStyle == NameStyle.LABEL:
             outputName = label
+        else:
+            outputName = outputTemplate % i
+            if nameStyle == NameStyle.APPEND:
+                outputName += f"_{label}"
 
         outputFNFullPath = join(outputPath, outputName + ".wav")
 
@@ -407,14 +418,14 @@ def splitAudioOnTier(
                 f"the same name:\n{outputName}"
             )
 
-        frames = wavQObj.getFrames(start, stop)
+        frames = wavQObj.getFrames(start, end)
         wavQObj.outputModifiedWav(frames, outputFNFullPath)
 
-        outputFNList.append((start, stop, outputName + ".wav"))
+        outputFNList.append((start, end, outputName + ".wav"))
 
         # Output the textgrid if requested
         if outputTGFlag is not False:
-            subTG = tg.crop(start, stop, mode, True)
+            subTG = tg.crop(start, end, mode, True)
 
             if isinstance(outputTGFlag, str):
                 for tierName in subTG.tierNameList:
