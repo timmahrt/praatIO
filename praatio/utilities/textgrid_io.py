@@ -125,16 +125,14 @@ def _fillInBlanks(
     tier["entries"] = newEntryList
 
 
-def parseTextgridStr(data: str, readRaw: bool = False) -> Dict:
+def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
     """
     Converts a string representation of a Textgrid into a dictionary
 
     Args:
         fnFullPath (str): the path to the textgrid to open
-        readRaw (bool): points and intervals with an empty label
-            '' are removed unless readRaw=True
-        readAsJson (bool): if True, assume the Textgrid is saved
-            as Json rather than in its native format
+        includeEmptyIntervals (bool): if False, points and intervals with
+             an empty label '' are not included in the returned dictionary
 
     Returns:
         Dictionary
@@ -152,7 +150,7 @@ def parseTextgridStr(data: str, readRaw: bool = False) -> Dict:
         else:
             tgAsDict = _parseNormalTextgrid(data)
 
-    if readRaw is False:
+    if includeEmptyIntervals is False:
         for tier in tgAsDict["tiers"]:
             _removeBlanks(tier)
 
@@ -193,7 +191,7 @@ def getTextgridAsStr(
             (with a label of "")
 
     Returns:
-        None
+        a string representation of the textgrid
     """
 
     if outputFormat not in SUPPORTED_OUTPUT_FORMATS:

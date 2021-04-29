@@ -1590,7 +1590,20 @@ class Textgrid:
         self.addTier(newTier, tierIndex)
 
 
-def openTextgrid(fnFullPath: str, readRaw: bool = False) -> Textgrid:
+def openTextgrid(fnFullPath: str, includeEmptyIntervals: bool = False) -> Textgrid:
+    """
+    Opens a textgrid file (.TextGrid and .json are both fine)
+
+    Args:
+        fnFullPath (str): the path to the textgrid to open
+        includeEmptyIntervals (bool): if False, points and intervals with
+             an empty label '' are not included in the returned Textgrid
+
+    Returns:
+        Textgrid
+
+    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
+    """
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
@@ -1598,7 +1611,7 @@ def openTextgrid(fnFullPath: str, readRaw: bool = False) -> Textgrid:
         with io.open(fnFullPath, "r", encoding="utf-8") as fd:
             data = fd.read()
 
-    tgAsDict = textgrid_io.parseTextgridStr(data, readRaw)
+    tgAsDict = textgrid_io.parseTextgridStr(data, includeEmptyIntervals)
     return _dictionaryToTg(tgAsDict)
 
 
