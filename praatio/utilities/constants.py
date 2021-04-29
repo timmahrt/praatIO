@@ -2,7 +2,8 @@
 Constant values and primitive definitions that can be shared throughout the code
 """
 from collections import namedtuple
-from typing import Final
+
+from typing_extensions import Final
 
 INTERVAL_TIER: Final = "IntervalTier"
 POINT_TIER: Final = "TextTier"

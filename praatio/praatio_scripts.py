@@ -9,7 +9,9 @@ import os
 from os.path import join
 import math
 import copy
-from typing import Callable, List, Tuple, Final, Literal, Optional
+from typing import Callable, List, Tuple, Optional
+
+from typing_extensions import Literal, Final
 
 from praatio import textgrid
 from praatio import audio

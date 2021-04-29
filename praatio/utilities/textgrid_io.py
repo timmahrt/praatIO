@@ -1,5 +1,7 @@
 import json
-from typing import Optional, Tuple, List, Any, Dict, Literal, Final
+from typing import Optional, Tuple, List, Any, Dict
+
+from typing_extensions import Literal, Final
 
 from praatio.utilities import errors
 from praatio.utilities import myMath

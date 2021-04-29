@@ -22,6 +22,9 @@ setup(
             "praatScripts/*.praat",
         ]
     },
+    install_requires=[
+        "typing_extensions",
+    ],
     license="LICENSE",
     description=(
         "A library for working with praat, textgrids, "

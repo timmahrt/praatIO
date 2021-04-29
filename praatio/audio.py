@@ -9,8 +9,10 @@ import math
 import wave
 import struct
 import copy
-from typing import List, Tuple, Literal, Final
+from typing import List, Tuple
 from abc import ABC, abstractmethod
+
+from typing_extensions import Literal, Final
 
 from praatio.utilities import utils
 

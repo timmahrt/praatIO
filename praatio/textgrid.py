@@ -27,10 +27,10 @@ from typing import (
     Type,
     Any,
     Dict,
-    Literal,
-    Final,
 )
 from abc import ABC, abstractmethod
+
+from typing_extensions import Literal, Final
 
 
 from praatio.utilities.constants import (
