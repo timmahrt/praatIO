@@ -154,6 +154,9 @@ class KlattPointTier(textgrid.TextgridTier):
     def crop(self):
         raise NotImplementedError
 
+    def deleteEntry(self, entry):
+        raise NotImplementedError
+
     def editTimestamps(self):
         raise NotImplementedError
 

@@ -138,10 +138,6 @@ class TextgridTier(ABC):
             self.name, entryList, minTimestamp=minTime, maxTimestamp=maxTime
         )
 
-    def deleteEntry(self, entry) -> None:
-        """Removes an entry from the entryList"""
-        self.entryList.pop(self.entryList.index(entry))
-
     def find(
         self,
         matchLabel: str,
@@ -275,6 +271,10 @@ class TextgridTier(ABC):
     ) -> "TextgridTier":
         pass
 
+    @abstractmethod
+    def deleteEntry(self, entry) -> None:
+        pass
+
 
 class PointTier(TextgridTier):
 
@@ -357,6 +357,10 @@ class PointTier(TextgridTier):
             maxT = cropEnd
 
         return PointTier(self.name, newEntryList, minT, maxT)
+
+    def deleteEntry(self, entry: Point) -> None:
+        """Removes an entry from the entryList"""
+        self.entryList.pop(self.entryList.index(entry))
 
     def editTimestamps(
         self, offset: float, allowOvershoot: bool = False
@@ -765,6 +769,10 @@ class IntervalTier(TextgridTier):
         #                      firstIntervalKeptProportion, lastIntervalKeptProportion)
 
         return croppedTier
+
+    def deleteEntry(self, entry: Interval) -> None:
+        """Removes an entry from the entryList"""
+        self.entryList.pop(self.entryList.index(entry))
 
     def difference(self, tier: "IntervalTier") -> "IntervalTier":
         """
