@@ -9,12 +9,24 @@ import math
 import wave
 import struct
 import copy
-from typing import List, Tuple
+from typing import List, Tuple, Literal, Final
 from abc import ABC, abstractmethod
 
 from praatio.utilities import utils
 
-sampWidthDict = {1: "b", 2: "h", 4: "i", 8: "q"}
+sampWidthDict: Final = {1: "b", 2: "h", 4: "i", 8: "q"}
+
+
+class AudioDeletion:
+    SHRINK: Final = "shrink"
+    SILENCE: Final = "silence"
+    SINE_WAVE: Final = "sine wave"
+
+
+_KEEP: Final = "keep"
+_DELETE: Final = "delete"
+
+ZERO_CROSSING_TIMESTEP: Final = 0.002
 
 
 class EndOfAudioData(Exception):
@@ -99,7 +111,7 @@ class AbstractWav(ABC):
         self.compname = params[5]
 
     def findNearestZeroCrossing(
-        self, targetTime: float, timeStep: float = 0.002
+        self, targetTime: float, timeStep: float = ZERO_CROSSING_TIMESTEP
     ) -> float:
         """
         Finds the nearest zero crossing at the given time in an audio file
@@ -166,7 +178,10 @@ class AbstractWav(ABC):
         return zeroCrossingTime
 
     def findNextZeroCrossing(
-        self, targetTime: float, timeStep: float = 0.002, reverse: bool = False
+        self,
+        targetTime: float,
+        timeStep: float = ZERO_CROSSING_TIMESTEP,
+        reverse: bool = False,
     ) -> float:
         """
         Finds the nearest zero crossing, searching in one direction
@@ -297,7 +312,7 @@ class WavQueryObj(AbstractWav):
         outputFN: str,
         keepList: List[Tuple[float, float, str]] = None,
         deleteList: List[Tuple[float, float, str]] = None,
-        operation: str = "shrink",
+        operation: Literal["shrink", "silence", "sine wave"] = AudioDeletion.SHRINK,
         sineWaveAmplitude: float = None,
     ):
         """
@@ -313,7 +328,11 @@ class WavQueryObj(AbstractWav):
                            use max amplitude.
         """
 
-        assert operation in ["shrink", "silence", "sine wave"]
+        assert operation in [
+            AudioDeletion.SHRINK,
+            AudioDeletion.SILENCE,
+            AudioDeletion.SINE_WAVE,
+        ]
 
         duration = float(self.nframes) / self.framerate
 
@@ -332,8 +351,8 @@ class WavQueryObj(AbstractWav):
             computedDeleteList = utils.invertIntervalList(
                 [(row[0], row[1]) for row in keepList], duration
             )
-        keepList = [(row[0], row[1], "keep") for row in computedKeepList]
-        deleteList = [(row[0], row[1], "delete") for row in computedDeleteList]
+        keepList = [(row[0], row[1], _KEEP) for row in computedKeepList]
+        deleteList = [(row[0], row[1], _DELETE) for row in computedDeleteList]
         iterList = sorted(keepList + deleteList)
 
         zeroBinValue = struct.pack(sampWidthDict[self.sampwidth], 0)
@@ -343,18 +362,18 @@ class WavQueryObj(AbstractWav):
         for startT, stopT, label in iterList:
             diff = stopT - startT
 
-            if label == "keep":
+            if label == _KEEP:
                 self.audiofile.setpos(int(self.framerate * startT))
                 frames = self.audiofile.readframes(int(self.framerate * diff))
                 audioFrames += frames
 
             # If we are not keeping a region and we're not shrinking the
             # duration, fill in the deleted portions with zeros
-            elif label == "delete" and operation == "silence":
+            elif label == _DELETE and operation == AudioDeletion.SILENCE:
                 frames = zeroBinValue * int(self.framerate * diff)
                 audioFrames += frames
             # Or fill it with a sine wave
-            elif label == "delete" and operation == "sine wave":
+            elif label == _DELETE and operation == AudioDeletion.SINE_WAVE:
                 frequency = 200
                 if sineWaveAmplitude is None:
                     sineWaveAmplitude = getMaxAmplitude(self.sampwidth)
@@ -492,8 +511,8 @@ def openAudioFile(
         ]
         computedDeleteList = []
 
-    keepList = [(row[0], row[1], "keep") for row in computedKeepList]
-    deleteList = [(row[0], row[1], "delete") for row in computedDeleteList]
+    keepList = [(row[0], row[1], _KEEP) for row in computedKeepList]
+    deleteList = [(row[0], row[1], _DELETE) for row in computedDeleteList]
     iterList = sorted(keepList + deleteList)
 
     # Grab the sections to be kept
@@ -502,7 +521,7 @@ def openAudioFile(
     for startT, stopT, label in iterList:
         diff = stopT - startT
 
-        if label == "keep":
+        if label == _KEEP:
             audiofile.setpos(int(framerate * startT))
             frames = audiofile.readframes(int(framerate * diff))
 
@@ -512,7 +531,7 @@ def openAudioFile(
 
         # If we are not keeping a region and we're not shrinking the
         # duration, fill in the deleted portions with zeros
-        elif label == "delete" and doShrink is False:
+        elif label == _DELETE and doShrink is False:
             zeroPadding = [0] * int(framerate * diff)
             audioSampleList.extend(zeroPadding)
 

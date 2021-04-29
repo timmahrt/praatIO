@@ -11,13 +11,25 @@ Tiers in a Textgrid are ordered and must contain a unique name.
 openTextgrid() can be used to open a textgrid file.
 Textgrid.save() can be used to save a Textgrid object to a file.
 
-see the **examples/** directory for examples using tgio.py
+see the **examples/** directory for examples using textgrid.py
 """
 
 import io
 import re
 import copy
-from typing import Callable, List, Tuple, Optional, TypeVar, Union, Type, Any, Dict
+from typing import (
+    Callable,
+    List,
+    Tuple,
+    Optional,
+    TypeVar,
+    Union,
+    Type,
+    Any,
+    Dict,
+    Literal,
+    Final,
+)
 from abc import ABC, abstractmethod
 
 
@@ -35,6 +47,34 @@ from praatio.utilities import textgrid_io
 from praatio.utilities import utils
 
 T = TypeVar("T", bound="TextgridTier")
+
+# CollisionCode = enum.Enum("CollisionCode", "REPLACE MERGE")
+
+# WhiteSpaceCollisionCode = enum.Enum(
+#     "WhiteSpaceCollisionCode", "STRETCH SPLIT NO_CHANGE"
+# )
+
+
+class IntervalCollision:
+    REPLACE: Final = "replace"
+    MERGE: Final = "merge"
+
+
+class WhitespaceCollision:
+    STRETCH: Final = "stretch"
+    SPLIT: Final = "split"
+    NO_CHANGE: Final = "no_change"
+
+
+class CropCollision:
+    STRICT: Final = "strict"
+    LAX: Final = "lax"
+    TRUNCATED: Final = "truncated"
+
+
+class EraseCollision:
+    TRUNCATE: Final = "truncate"
+    CATEGORICAL: Final = "categorical"
 
 
 class TextgridTier(ABC):
@@ -179,7 +219,7 @@ class TextgridTier(ABC):
         retTier = self.new()
 
         for entry in tier.entryList:
-            retTier.insertEntry(entry, False, collisionCode="merge")
+            retTier.insertEntry(entry, False, collisionCode=IntervalCollision.MERGE)
 
         retTier.sort()
 
@@ -196,7 +236,7 @@ class TextgridTier(ABC):
         self,
         entry,
         warnFlag: bool = True,
-        collisionCode: Optional[str] = None,
+        collisionCode: Optional[Literal["replace", "merge"]] = None,
     ) -> None:
         pass
 
@@ -205,7 +245,7 @@ class TextgridTier(ABC):
         self,
         start: float,
         stop: float,
-        collisionCode: Optional[str] = None,
+        collisionCode: Optional[Literal["truncate", "categorical"]] = None,
         doShrink: bool = True,
     ) -> "TextgridTier":
         pass
@@ -215,14 +255,17 @@ class TextgridTier(ABC):
         self,
         cropStart: float,
         cropEnd: float,
-        mode: str,
+        mode: Literal["strict", "lax", "truncated"],
         rebaseToZero: bool,
     ) -> "TextgridTier":
         pass
 
     @abstractmethod
     def insertSpace(
-        self, start: float, duration: float, collisionCode: Optional[str] = None
+        self,
+        start: float,
+        duration: float,
+        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
     ) -> "TextgridTier":
         pass
 
@@ -272,7 +315,7 @@ class PointTier(TextgridTier):
         self,
         cropStart: float,
         cropEnd: float,
-        mode: str = "None",
+        mode: Literal["strict", "lax", "truncated"] = CropCollision.LAX,
         rebaseToZero: bool = True,
     ) -> "PointTier":
         """
@@ -395,7 +438,7 @@ class PointTier(TextgridTier):
         self,
         start: float,
         stop: float,
-        collisionCode: Optional[str] = None,
+        collisionCode: Optional[Literal["truncate", "categorical"]] = None,
         doShrink: bool = True,
     ) -> "PointTier":
         """
@@ -414,7 +457,7 @@ class PointTier(TextgridTier):
         """
 
         newTier = self.new()
-        croppedTier = newTier.crop(start, stop, "truncated", False)
+        croppedTier = newTier.crop(start, stop, CropCollision.TRUNCATED, False)
         matchList = croppedTier.entryList
 
         if len(matchList) == 0:
@@ -445,7 +488,7 @@ class PointTier(TextgridTier):
         self,
         entry: Point,
         warnFlag: bool = True,
-        collisionCode: Optional[str] = None,
+        collisionCode: Optional[Literal["replace", "merge"]] = None,
     ) -> None:
         """
         inserts an interval into the tier
@@ -480,11 +523,11 @@ class PointTier(TextgridTier):
         if len(matchList) == 0:
             self.entryList.append(entry)
 
-        elif collisionCode is not None and collisionCode.lower() == "replace":
+        elif collisionCode == IntervalCollision.REPLACE:
             self.deleteEntry(self.entryList[i])
             self.entryList.append(entry)
 
-        elif collisionCode is not None and collisionCode.lower() == "merge":
+        elif collisionCode == IntervalCollision.MERGE:
             oldEntry = self.entryList[i]
             newEntry = Point(timestamp, "-".join([oldEntry[-1], label]))
             self.deleteEntry(self.entryList[i])
@@ -500,7 +543,10 @@ class PointTier(TextgridTier):
             print((fmtStr % (str(entry), str(matchList), self.name)))
 
     def insertSpace(
-        self, start: float, duration: float, collisionCode: Optional[str] = None
+        self,
+        start: float,
+        duration: float,
+        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
     ) -> "PointTier":
         """
         Inserts a region into the tier
@@ -593,7 +639,11 @@ class IntervalTier(TextgridTier):
         super(IntervalTier, self).__init__(name, entryList, resolvedMinT, resolvedMaxT)
 
     def crop(
-        self, cropStart: float, cropEnd: float, mode: str, rebaseToZero: bool
+        self,
+        cropStart: float,
+        cropEnd: float,
+        mode: Literal["strict", "lax", "truncated"],
+        rebaseToZero: bool,
     ) -> "IntervalTier":
         """
         Creates a new tier with all entries that fit inside the new interval
@@ -601,7 +651,7 @@ class IntervalTier(TextgridTier):
         Args:
             cropStart (float):
             cropEnd (float):
-            mode (string): one of ['strict', 'lax', or 'truncated']
+            mode (CropMode): one of ['strict', 'lax', or 'truncated']
                 - 'strict', only intervals wholly contained by the crop
                     interval will be kept
                 - 'lax', partially contained intervals will be kept
@@ -614,7 +664,11 @@ class IntervalTier(TextgridTier):
             IntervalTier: the modified version of the current tier
         """
 
-        assert mode in ["strict", "lax", "truncated"]
+        assert mode in [
+            CropCollision.STRICT,
+            CropCollision.LAX,
+            CropCollision.TRUNCATED,
+        ]
 
         # Debugging variables
         # cutTStart = 0
@@ -722,7 +776,10 @@ class IntervalTier(TextgridTier):
 
         for entry in tier.entryList:
             retTier = retTier.eraseRegion(
-                entry[0], entry[1], collisionCode="truncate", doShrink=False
+                entry[0],
+                entry[1],
+                collisionCode=EraseCollision.TRUNCATE,
+                doShrink=False,
             )
 
         return retTier
@@ -777,7 +834,7 @@ class IntervalTier(TextgridTier):
         self,
         start: float,
         stop: float,
-        collisionCode: Optional[str] = None,
+        collisionCode: Optional[Literal["truncate", "categorical"]] = None,
         doShrink: bool = True,
     ) -> "IntervalTier":
         """
@@ -786,9 +843,9 @@ class IntervalTier(TextgridTier):
         Args:
             start (float):
             stop (float):
-            collisionCode (bool): determines the behavior when the region to
-                erase overlaps with existing intervals. One of ['truncate',
-                'categorical', None]
+            collisionCode (EraseRegionCollisionCode): determines the behavior when
+                the region to erase overlaps with existing intervals. One of
+                ['truncate', 'categorical', None]
                 - 'truncate' partially contained entries will have the portion
                     removed that overlaps with the target entry
                 - 'categorical' all entries that overlap, even partially, with
@@ -801,11 +858,14 @@ class IntervalTier(TextgridTier):
             IntervalTier: the modified version of the current tier
         """
 
-        matchList = self.crop(start, stop, "lax", False).entryList
+        matchList = self.crop(start, stop, CropCollision.LAX, False).entryList
         newTier = self.new()
 
         # if the collisionCode is not properly set it isn't clear what to do
-        assert collisionCode in ["truncate", "categorical"]
+        assert collisionCode in [
+            EraseCollision.TRUNCATE,
+            EraseCollision.CATEGORICAL,
+        ]
 
         if len(matchList) == 0:
             pass
@@ -818,7 +878,8 @@ class IntervalTier(TextgridTier):
 
             # If we're only truncating, reinsert entries on the left and
             # right edges
-            if collisionCode == "truncate":
+            # if categorical, it doesn't make it into the list at all
+            if collisionCode == EraseCollision.TRUNCATE:
 
                 # Check left edge
                 if matchList[0][0] < start:
@@ -921,7 +982,7 @@ class IntervalTier(TextgridTier):
         self,
         entry: Interval,
         warnFlag: bool = True,
-        collisionCode: Optional[str] = None,
+        collisionCode: Optional[Literal["replace", "merge"]] = None,
     ) -> None:
         """
         inserts an interval into the tier
@@ -943,17 +1004,17 @@ class IntervalTier(TextgridTier):
         """
         startTime, endTime = entry[:2]
 
-        matchList = self.crop(startTime, endTime, "lax", False).entryList
+        matchList = self.crop(startTime, endTime, CropCollision.LAX, False).entryList
 
         if len(matchList) == 0:
             self.entryList.append(entry)
 
-        elif collisionCode is not None and collisionCode.lower() == "replace":
+        elif collisionCode == IntervalCollision.REPLACE:
             for matchEntry in matchList:
                 self.deleteEntry(matchEntry)
             self.entryList.append(entry)
 
-        elif collisionCode is not None and collisionCode.lower() == "merge":
+        elif collisionCode == IntervalCollision.MERGE:
             for matchEntry in matchList:
                 self.deleteEntry(matchEntry)
             matchList.append(entry)
@@ -976,7 +1037,10 @@ class IntervalTier(TextgridTier):
             print((fmtStr % (str(entry), str(matchList), self.name)))
 
     def insertSpace(
-        self, start: float, duration: float, collisionCode: Optional[str] = None
+        self,
+        start: float,
+        duration: float,
+        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
     ) -> "IntervalTier":
         """
         Inserts a blank region into the tier
@@ -997,7 +1061,11 @@ class IntervalTier(TextgridTier):
         """
 
         # if the collisionCode is not properly set it isn't clear what to do
-        assert collisionCode in ["stretch", "split", "no change"]
+        assert collisionCode in [
+            WhitespaceCollision.STRETCH,
+            WhitespaceCollision.SPLIT,
+            WhitespaceCollision.NO_CHANGE,
+        ]
 
         newEntryList = []
         for entry in self.entryList:
@@ -1011,9 +1079,9 @@ class IntervalTier(TextgridTier):
                 )
             # Entry straddles the insertion point
             elif entry[0] <= start and entry[1] > start:
-                if collisionCode == "stretch":
+                if collisionCode == WhitespaceCollision.STRETCH:
                     newEntryList.append((entry[0], entry[1] + duration, entry[2]))
-                elif collisionCode == "split":
+                elif collisionCode == WhitespaceCollision.SPLIT:
                     # Left side of the split
                     newEntryList.append((entry[0], start, entry[2]))
                     # Right side of the split
@@ -1024,7 +1092,7 @@ class IntervalTier(TextgridTier):
                             entry[2],
                         )
                     )
-                elif collisionCode == "no change":
+                elif collisionCode == WhitespaceCollision.NO_CHANGE:
                     newEntryList.append(entry)
 
         newTier = self.new(
@@ -1049,7 +1117,7 @@ class IntervalTier(TextgridTier):
         """
         retEntryList = []
         for start, stop, label in tier.entryList:
-            subTier = self.crop(start, stop, "truncated", False)
+            subTier = self.crop(start, stop, CropCollision.TRUNCATED, False)
 
             # Combine the labels in the two tiers
             stub = "%s-%%s" % label
@@ -1235,7 +1303,11 @@ class Textgrid:
         return retTG
 
     def crop(
-        self, cropStart: float, cropEnd: float, mode: str, rebaseToZero: bool
+        self,
+        cropStart: float,
+        cropEnd: float,
+        mode: Literal["strict", "lax", "truncated"],
+        rebaseToZero: bool,
     ) -> "Textgrid":
         """
         Creates a textgrid where all intervals fit within the crop region
@@ -1256,7 +1328,11 @@ class Textgrid:
             Textgrid: the modified version of the current textgrid
         """
 
-        assert mode in ["strict", "lax", "truncated"]
+        assert mode in [
+            CropCollision.STRICT,
+            CropCollision.LAX,
+            CropCollision.TRUNCATED,
+        ]
 
         newTG = Textgrid()
 
@@ -1302,7 +1378,7 @@ class Textgrid:
         newTG = Textgrid()
         for name in self.tierNameList:
             tier = self.tierDict[name]
-            tier = tier.eraseRegion(start, stop, "truncate", doShrink)
+            tier = tier.eraseRegion(start, stop, EraseCollision.TRUNCATE, doShrink)
             newTG.addTier(tier)
 
         newTG.maxTimestamp = maxTimestamp
@@ -1334,7 +1410,10 @@ class Textgrid:
         return tg
 
     def insertSpace(
-        self, start: float, duration: float, collisionCode: Optional[str] = None
+        self,
+        start: float,
+        duration: float,
+        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
     ) -> "Textgrid":
         """
         Inserts a blank region into a textgrid

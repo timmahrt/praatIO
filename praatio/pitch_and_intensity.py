@@ -15,16 +15,22 @@ see **examples/get_pitch_and_formants.py**
 
 import os
 from os.path import join
-import math
 import io
+import math
 from typing import List, Tuple, Optional, cast
 
 from praatio import data_points
-from praatio import textgrid
-from praatio.utilities import utils
-from praatio.utilities import myMath
-from praatio.utilities.constants import Point
 from praatio import praatio_scripts
+from praatio import textgrid
+from praatio.utilities import errors
+from praatio.utilities import myMath
+from praatio.utilities import utils
+from praatio.utilities.constants import Point
+
+
+HERTZ = "Hertz"
+UNSPECIFIED = "unspecified"
+_PITCH_ERROR_TIER_NAME = "pitch errors"
 
 
 class NormalizationException(Exception):
@@ -58,7 +64,7 @@ def _extractPIPiecewise(
     tmpOutputPath: str,
     sampleStep: float = 0.01,
     silenceThreshold: float = 0.03,
-    pitchUnit: str = "Hertz",
+    pitchUnit: str = HERTZ,
     forceRegenerate: bool = True,
     undefinedValue: float = None,
     medianFilterWindowSize: int = 0,
@@ -124,7 +130,7 @@ def _extractPIFile(
     maxPitch: float,
     sampleStep: float = 0.01,
     silenceThreshold: float = 0.03,
-    pitchUnit: str = "Hertz",
+    pitchUnit: str = HERTZ,
     forceRegenerate: bool = True,
     undefinedValue: float = None,
     medianFilterWindowSize: int = 0,
@@ -345,7 +351,7 @@ def extractPI(
     maxPitch: float,
     sampleStep: float = 0.01,
     silenceThreshold: float = 0.03,
-    pitchUnit: str = "Hertz",
+    pitchUnit: str = HERTZ,
     forceRegenerate: bool = True,
     tgFN: str = None,
     tierName: str = None,
@@ -504,7 +510,11 @@ def generatePIMeasures(
     filterZeroFlag = not globalZNormalization
 
     tg = textgrid.openTextgrid(tgFN)
-    piData = tg.tierDict[tierName].getValuesInIntervals(castDataList)
+    if not isinstance(tg.tierDict[tierName], textgrid.IntervalTier):
+        raise errors.IncompatibleTierError(tg.tierDict[tierName])
+
+    tier = cast(textgrid.IntervalTier, tg.tierDict[tierName])
+    piData = tier.getValuesInIntervals(castDataList)
 
     outputList: List[List[float]] = []
     for interval, entryList in piData:
@@ -565,9 +575,9 @@ def getPitchMeasures(
     """
 
     if name is None:
-        name = "unspecified"
+        name = UNSPECIFIED
     if label is None:
-        label = "unspecified"
+        label = UNSPECIFIED
 
     if medianFilterWindowSize is not None:
         f0Values = myMath.medianFilter(
@@ -624,7 +634,7 @@ def detectPitchErrors(
             errorList.append(Point(currentTime, currentPitch / lastPitch))
 
     if tgToMark is not None:
-        tierName = "pitch errors"
+        tierName = _PITCH_ERROR_TIER_NAME
         assert tierName not in tgToMark.tierNameList
         pointTier = textgrid.PointTier(
             tierName, errorList, tgToMark.minTimestamp, tgToMark.maxTimestamp

@@ -53,3 +53,19 @@ class BadFormatException(Exception):
             f"Problem with format.  Received {self.selectedFormat} "
             f"but format must be one of {validFormatOptionsStr}"
         )
+
+
+class IncompatibleTierError(Exception):
+    def __init__(self, tier):
+        super(IncompatibleTierError, self).__init__()
+        self.tier = tier
+        if self.tier.tierType == constants.INTERVAL_TIER:
+            self.otherTierType = constants.POINT_TIER
+        else:
+            self.otherTierType = constants.INTERVAL_TIER
+
+    def __str__(self):
+        return (
+            f"Incompatible tier type.  Tier with name {self.tier.name} has type"
+            f"{self.tier.tierType} but expected {self.otherTierType}"
+        )
