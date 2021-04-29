@@ -8,12 +8,15 @@ see **examples/auto_segment_speech.py**, **examples/get_pitch_and_formants.py**,
 import os
 from os.path import join
 import io
-from typing import List
+from typing import List, Optional, Tuple
 
 from praatio import audio
 from praatio import data_points
 from praatio.utilities import constants
 from praatio.utilities import utils
+
+SILENCE_LABEL = "silent"
+SOUND_LABEL = "sound"
 
 
 def changeGender(
@@ -26,7 +29,7 @@ def changeGender(
     pitchMedian: float = 0.0,
     pitchRange: float = 1.0,
     duration: float = 1.0,
-    scriptFN: str = None,
+    scriptFN: Optional[str] = None,
 ) -> None:
     """
     Changes the speech formants in a file using praat's change gender function
@@ -62,7 +65,7 @@ def changeIntensity(
     wavFN: str,
     outputWavFN: str,
     newIntensity: float,
-    scriptFN: str = None,
+    scriptFN: Optional[str] = None,
 ) -> None:
     """
     Changes the intensity of the wavFN (in db)
@@ -85,8 +88,8 @@ def getFormants(
     stepSize: float = 0.01,
     window_length: float = 0.025,
     preemphasis: float = 50,
-    scriptFN: str = None,
-    undefinedValue: str = None,
+    scriptFN: Optional[str] = None,
+    undefinedValue: Optional[str] = None,
 ) -> List:
     """
     Get F1, F2, and F3 for the audio file
@@ -143,7 +146,7 @@ def getPulses(
     outputPointTierFN: str,
     minPitch: float,
     maxPitch: float,
-    scriptFN: str = None,
+    scriptFN: Optional[str] = None,
 ) -> data_points.PointObject1D:
     """
     Gets the pitch/glottal pulses for an audio file.
@@ -171,8 +174,8 @@ def getSpectralInfo(
     tierName: str,
     spectralPower: int = 2,
     spectralMoment: int = 3,
-    scriptFN: str = None,
-):
+    scriptFN: Optional[str] = None,
+) -> Tuple[List, List]:
     """
     Extracts various spectral measures from an audio file
 
@@ -213,9 +216,9 @@ def resynthesizePitch(
     outputWavFN: str,
     minPitch: float,
     maxPitch: float,
-    scriptFN: str = None,
-    pointList=None,
-):
+    scriptFN: Optional[str] = None,
+    pointList: Optional[List] = None,
+) -> None:
     """
     Resynthesizes the pitch in a wav file with the given pitch contour file
 
@@ -245,7 +248,7 @@ def resynthesizeDuration(
     outputWavFN: str,
     minPitch: float,
     maxPitch: float,
-    scriptFN: str = None,
+    scriptFN: Optional[str] = None,
 ) -> None:
     """
     Resynthesizes the duration in a wav file with the given duration tier
@@ -264,18 +267,18 @@ def resynthesizeDuration(
 
 
 def annotateSilences(
-    praatEXE,
-    inputWavPath,
-    outputTGPath,
-    minPitch=100,
-    timeStep=0.0,
-    silenceThreshold=-25.0,
-    minSilDur=0.1,
-    minSoundDur=0.1,
-    silentLabel="silence",
-    soundLabel="sound",
-    scriptFN=None,
-):
+    praatEXE: str,
+    inputWavPath: str,
+    outputTGPath: str,
+    minPitch: float = 100,
+    timeStep: float = 0.0,
+    silenceThreshold: float = -25.0,
+    minSilDur: float = 0.1,
+    minSoundDur: float = 0.1,
+    silentLabel: str = SILENCE_LABEL,
+    soundLabel: str = SOUND_LABEL,
+    scriptFN: Optional[str] = None,
+) -> None:
     """
     Marks the silences and non-silences of an audio file
 

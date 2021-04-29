@@ -24,7 +24,7 @@ see **examples/klatt_resynthesis.py**
 
 import io
 from os.path import join
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Union, Dict, Optional, Callable
 
 from praatio import textgrid
 from praatio.utilities import errors
@@ -52,7 +52,7 @@ class _KlattBaseTier(object):
 
         return isEqual
 
-    def addTier(self, tier, tierIndex=None):
+    def addTier(self, tier, tierIndex=None) -> None:
 
         if tierIndex is None:
             self.tierNameList.append(tier.name)
@@ -94,7 +94,7 @@ class KlattContainerTier(_KlattBaseTier):
 
         return outputTxt
 
-    def modifySubtiers(self, tierName, modFunc):
+    def modifySubtiers(self, tierName: str, modFunc) -> None:
         """
         Modify values in every tier contained in the named intermediate tier
         """
@@ -126,7 +126,13 @@ class KlattPointTier(textgrid.TextgridTier):
     A Klatt tier not contained within another tier
     """
 
-    def __init__(self, name, entryList, minT=None, maxT=None):
+    def __init__(
+        self,
+        name: str,
+        entryList: List,
+        minT: Optional[float] = None,
+        maxT: Optional[float] = None,
+    ):
 
         entryList = [(float(time), label) for time, label in entryList]
 
@@ -138,12 +144,12 @@ class KlattPointTier(textgrid.TextgridTier):
             timeList.append(float(maxT))
 
         try:
-            minT = min(timeList)
-            maxT = max(timeList)
+            setMinT = min(timeList)
+            setMaxT = max(timeList)
         except ValueError:
             raise errors.TimelessTextgridTierException()
 
-        super(KlattPointTier, self).__init__(name, entryList, minT, maxT)
+        super(KlattPointTier, self).__init__(name, entryList, setMinT, setMaxT)
 
     def crop(self):
         raise NotImplementedError
@@ -160,7 +166,7 @@ class KlattPointTier(textgrid.TextgridTier):
     def insertSpace(self):
         raise NotImplementedError
 
-    def modifyValues(self, modFunc):
+    def modifyValues(self, modFunc: Callable[[float], bool]) -> None:
         newEntryList = [
             (timestamp, modFunc(float(value))) for timestamp, value in self.entryList
         ]
@@ -207,7 +213,7 @@ class KlattSubPointTier(KlattPointTier):
 
 
 class Klattgrid(textgrid.Textgrid):
-    def save(self, fn, minimumIntervalLength=None):
+    def save(self, fn: str, minimumIntervalLength: Optional[float] = None):
         """
 
         minimumIntervalLength is used for compatibility with Textgrid.save()
@@ -233,7 +239,7 @@ class Klattgrid(textgrid.Textgrid):
             fd.write(outputTxt)
 
 
-def openKlattgrid(fnFullPath):
+def openKlattgrid(fnFullPath: str) -> Klattgrid:
 
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
@@ -250,20 +256,20 @@ def openKlattgrid(fnFullPath):
 
 
 def wavToKlattgrid(
-    praatEXE,
-    inputFullPath,
-    outputFullPath,
-    timeStep=0.005,
-    numFormants=5,
-    maxFormantFreq=5500.0,
-    windowLength=0.025,
-    preEmphasis=50.0,
-    pitchFloor=60.0,
-    pitchCeiling=600.0,
-    minPitch=50.0,
-    subtractMean=True,
-    scriptFN=None,
-):
+    praatEXE: str,
+    inputFullPath: str,
+    outputFullPath: str,
+    timeStep: float = 0.005,
+    numFormants: int = 5,
+    maxFormantFreq: float = 5500.0,
+    windowLength: float = 0.025,
+    preEmphasis: float = 50.0,
+    pitchFloor: float = 60.0,
+    pitchCeiling: float = 600.0,
+    minPitch: float = 50.0,
+    subtractMean: bool = True,
+    scriptFN: Optional[str] = None,
+) -> None:
     """
     Extracts the klattgrid from a wav file
 
@@ -271,9 +277,9 @@ def wavToKlattgrid(
     """
 
     if subtractMean is True:
-        subtractMean = "yes"
+        subtractMeanStr = "yes"
     else:
-        subtractMean = "no"
+        subtractMeanStr = "no"
 
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "sound_to_klattgrid.praat")
@@ -292,12 +298,19 @@ def wavToKlattgrid(
             pitchFloor,
             pitchCeiling,
             minPitch,
-            subtractMean,
+            subtractMeanStr,
         ],
     )
 
 
-def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True, scriptFN=None):
+def resynthesize(
+    praatEXE: str,
+    wavFN: str,
+    klattFN: str,
+    outputWavFN: str,
+    doCascade: bool = True,
+    scriptFN: Optional[str] = None,
+) -> None:
 
     if doCascade:
         method = "Cascade"
@@ -311,7 +324,7 @@ def resynthesize(praatEXE, wavFN, klattFN, outputWavFN, doCascade=True, scriptFN
     utils.runPraatScript(praatEXE, scriptFN, [wavFN, klattFN, outputWavFN, method])
 
 
-def _openNormalKlattgrid(data):
+def _openNormalKlattgrid(data: str) -> Klattgrid:
 
     kg = Klattgrid()
 
@@ -355,7 +368,7 @@ def _openNormalKlattgrid(data):
     return kg
 
 
-def _proccessContainerTierInput(sectionData, name):
+def _proccessContainerTierInput(sectionData: str, name: str):
     sectionData = sectionData.split("\n", 3)[-1]
 
     formantIndexList = _findIndicies(sectionData, "formants")
