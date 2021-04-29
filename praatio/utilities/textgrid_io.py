@@ -1,13 +1,11 @@
 import json
-from typing import Optional, Tuple, List, Any, Dict
+from typing import Optional, Tuple, List, Any, Dict, Literal, Final
 
 from praatio.utilities import errors
-from praatio.utilities import utils
 from praatio.utilities import myMath
+from praatio.utilities import utils
 from praatio.utilities.constants import (
-    LONG_TEXTGRID,
-    SHORT_TEXTGRID,
-    JSON,
+    TextgridFormats,
     MIN_INTERVAL_LENGTH,
     Interval,
     Point,
@@ -15,7 +13,11 @@ from praatio.utilities.constants import (
     POINT_TIER,
 )
 
-SUPPORTED_OUTPUT_FORMATS = [LONG_TEXTGRID, SHORT_TEXTGRID, JSON]
+SUPPORTED_OUTPUT_FORMATS: Final = [
+    TextgridFormats.LONG_TEXTGRID,
+    TextgridFormats.SHORT_TEXTGRID,
+    TextgridFormats.JSON,
+]
 
 
 def _removeBlanks(tier: Dict) -> None:
@@ -162,7 +164,9 @@ def getTextgridAsStr(
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
     minTimestamp: Optional[float] = None,
     maxTimestamp: Optional[float] = None,
-    outputFormat: str = SHORT_TEXTGRID,
+    outputFormat: Literal[
+        "short_textgrid", "long_textgrid", "json"
+    ] = TextgridFormats.SHORT_TEXTGRID,
     ignoreBlankSpaces: bool = False,
 ) -> str:
     """
@@ -199,11 +203,11 @@ def getTextgridAsStr(
         tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
     )
 
-    if outputFormat == LONG_TEXTGRID:
+    if outputFormat == TextgridFormats.LONG_TEXTGRID:
         outputTxt = _tgToLongTextForm(tg)
-    elif outputFormat == SHORT_TEXTGRID:
+    elif outputFormat == TextgridFormats.SHORT_TEXTGRID:
         outputTxt = _tgToShortTextForm(tg)
-    elif outputFormat == JSON:
+    elif outputFormat == TextgridFormats.JSON:
         outputTxt = _tgToJson(tg)
 
     return outputTxt

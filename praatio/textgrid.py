@@ -38,7 +38,7 @@ from praatio.utilities.constants import (
     Point,
     INTERVAL_TIER,
     POINT_TIER,
-    SHORT_TEXTGRID,
+    TextgridFormats,
     MIN_INTERVAL_LENGTH,
 )
 from praatio.utilities import errors
@@ -1524,7 +1524,9 @@ class Textgrid:
         minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
-        outputFormat: str = SHORT_TEXTGRID,
+        outputFormat: Literal[
+            "short_textgrid", "long_textgrid", "json"
+        ] = TextgridFormats.SHORT_TEXTGRID,
         ignoreBlankSpaces: bool = False,
     ) -> None:
         tgAsDict = _tgToDictionary(self)
