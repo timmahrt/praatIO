@@ -14,11 +14,11 @@ from praatio import klattgrid
 from praatio import audio
 
 
-class IOTests(unittest.TestCase):
+class TextgridTests(unittest.TestCase):
     """Testing input and output"""
 
     def __init__(self, *args, **kargs):
-        super(IOTests, self).__init__(*args, **kargs)
+        super(TextgridTests, self).__init__(*args, **kargs)
 
         cwd = os.path.dirname(os.path.realpath(__file__))
         root = os.path.split(cwd)[0]

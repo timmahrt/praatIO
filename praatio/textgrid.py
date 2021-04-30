@@ -42,7 +42,7 @@ from praatio.utilities.constants import (
     MIN_INTERVAL_LENGTH,
 )
 from praatio.utilities import errors
-from praatio.utilities import myMath
+from praatio.utilities import my_math
 from praatio.utilities import textgrid_io
 from praatio.utilities import utils
 
@@ -100,15 +100,15 @@ class TextgridTier(ABC):
     def __eq__(self, other):
         isEqual = True
         isEqual &= self.name == other.name
-        isEqual &= myMath.isclose(self.minTimestamp, other.minTimestamp)
-        isEqual &= myMath.isclose(self.maxTimestamp, other.maxTimestamp)
+        isEqual &= my_math.isclose(self.minTimestamp, other.minTimestamp)
+        isEqual &= my_math.isclose(self.maxTimestamp, other.maxTimestamp)
         isEqual &= len(self.entryList) == len(self.entryList)
 
         if isEqual:
             for selfEntry, otherEntry in zip(self.entryList, other.entryList):
                 for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
                     try:
-                        isEqual &= myMath.isclose(selfSubEntry, otherSubEntry)
+                        isEqual &= my_math.isclose(selfSubEntry, otherSubEntry)
                     except TypeError:
                         isEqual &= selfSubEntry == otherSubEntry
 
@@ -1226,8 +1226,8 @@ class Textgrid:
 
     def __eq__(self, other):
         isEqual = True
-        isEqual &= myMath.isclose(self.minTimestamp, other.minTimestamp)
-        isEqual &= myMath.isclose(self.maxTimestamp, other.maxTimestamp)
+        isEqual &= my_math.isclose(self.minTimestamp, other.minTimestamp)
+        isEqual &= my_math.isclose(self.maxTimestamp, other.maxTimestamp)
 
         isEqual &= self.tierNameList == other.tierNameList
         if isEqual:

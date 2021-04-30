@@ -4,7 +4,7 @@ from typing import Optional, Tuple, List, Any, Dict
 from typing_extensions import Literal, Final
 
 from praatio.utilities import errors
-from praatio.utilities import myMath
+from praatio.utilities import my_math
 from praatio.utilities import utils
 from praatio.utilities.constants import (
     TextgridFormats,
@@ -263,8 +263,8 @@ def _tgToShortTextForm(
     outputTxt += 'File type = "ooTextFile"\n'
     outputTxt += 'Object class = "TextGrid"\n\n'
     outputTxt += "%s\n%s\n" % (
-        myMath.numToStr(tg["xmin"]),
-        myMath.numToStr(tg["xmax"]),
+        my_math.numToStr(tg["xmin"]),
+        my_math.numToStr(tg["xmax"]),
     )
     outputTxt += "<exists>\n%d\n" % len(tg["tiers"])
     for tier in tg["tiers"]:
@@ -272,13 +272,13 @@ def _tgToShortTextForm(
         text += '"%s"\n' % tier["class"]
         text += '"%s"\n' % utils.escapeQuotes(tier["name"])
         text += "%s\n%s\n%s\n" % (
-            myMath.numToStr(tier["xmin"]),
-            myMath.numToStr(tier["xmax"]),
+            my_math.numToStr(tier["xmin"]),
+            my_math.numToStr(tier["xmax"]),
             len(tier["entries"]),
         )
 
         for entry in tier["entries"]:
-            entry = [myMath.numToStr(val) for val in entry[:-1]] + [
+            entry = [my_math.numToStr(val) for val in entry[:-1]] + [
                 '"%s"' % utils.escapeQuotes(entry[-1])
             ]
 
@@ -297,8 +297,8 @@ def _tgToLongTextForm(tg: Dict) -> str:
     tab = " " * 4
 
     # Header
-    outputTxt += "xmin = %s \n" % myMath.numToStr(tg["xmin"])
-    outputTxt += "xmax = %s \n" % myMath.numToStr(tg["xmax"])
+    outputTxt += "xmin = %s \n" % my_math.numToStr(tg["xmin"])
+    outputTxt += "xmax = %s \n" % my_math.numToStr(tg["xmax"])
     outputTxt += "tiers? <exists> \n"
     outputTxt += "size = %d \n" % len(tg["tiers"])
     outputTxt += "item []: \n"
@@ -308,8 +308,8 @@ def _tgToLongTextForm(tg: Dict) -> str:
         outputTxt += tab + "item [%d]:\n" % (tierNum + 1)
         outputTxt += tab * 2 + 'class = "%s" \n' % tier["class"]
         outputTxt += tab * 2 + 'name = "%s" \n' % utils.escapeQuotes(tier["name"])
-        outputTxt += tab * 2 + "xmin = %s \n" % myMath.numToStr(tier["xmin"])
-        outputTxt += tab * 2 + "xmax = %s \n" % myMath.numToStr(tier["xmax"])
+        outputTxt += tab * 2 + "xmin = %s \n" % my_math.numToStr(tier["xmin"])
+        outputTxt += tab * 2 + "xmax = %s \n" % my_math.numToStr(tier["xmax"])
 
         entries = tier["entries"]
         if tier["class"] == INTERVAL_TIER:
@@ -317,15 +317,15 @@ def _tgToLongTextForm(tg: Dict) -> str:
             for intervalNum, entry in enumerate(entries):
                 start, end, label = entry
                 outputTxt += tab * 2 + "intervals [%d]:\n" % (intervalNum + 1)
-                outputTxt += tab * 3 + "xmin = %s \n" % myMath.numToStr(start)
-                outputTxt += tab * 3 + "xmax = %s \n" % myMath.numToStr(end)
+                outputTxt += tab * 3 + "xmin = %s \n" % my_math.numToStr(start)
+                outputTxt += tab * 3 + "xmax = %s \n" % my_math.numToStr(end)
                 outputTxt += tab * 3 + 'text = "%s" \n' % utils.escapeQuotes(label)
         else:
             outputTxt += tab * 2 + "points: size = %d \n" % len(entries)
             for pointNum, entry in enumerate(entries):
                 timestamp, label = entry
                 outputTxt += tab * 2 + "points [%d]:\n" % (pointNum + 1)
-                outputTxt += tab * 3 + "number = %s \n" % myMath.numToStr(timestamp)
+                outputTxt += tab * 3 + "number = %s \n" % my_math.numToStr(timestamp)
                 outputTxt += tab * 3 + 'mark = "%s" \n' % utils.escapeQuotes(label)
 
     return outputTxt

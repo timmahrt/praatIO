@@ -23,7 +23,7 @@ from praatio import data_points
 from praatio import praatio_scripts
 from praatio import textgrid
 from praatio.utilities import errors
-from praatio.utilities import myMath
+from praatio.utilities import my_math
 from praatio.utilities import utils
 from praatio.utilities.constants import Point
 
@@ -502,9 +502,9 @@ def generatePIMeasures(
     castDataList = cast(List[Tuple[float, ...]], dataList)
     if globalZNormalization is True:
         if doPitch:
-            castDataList = myMath.znormalizeSpeakerData(castDataList, 1, True)
+            castDataList = my_math.znormalizeSpeakerData(castDataList, 1, True)
         else:
-            castDataList = myMath.znormalizeSpeakerData(castDataList, 2, True)
+            castDataList = my_math.znormalizeSpeakerData(castDataList, 2, True)
 
     # Raw values should have 0 filtered; normalized values are centered around 0, so don't filter
     filterZeroFlag = not globalZNormalization
@@ -535,7 +535,7 @@ def generatePIMeasures(
 
             rmsIntensity = 0.0
             if len(tmpValList) != 0:
-                rmsIntensity = myMath.rms(tmpValList)
+                rmsIntensity = my_math.rms(tmpValList)
             outputList.append(
                 [
                     rmsIntensity,
@@ -547,7 +547,7 @@ def generatePIMeasures(
         for colI in range(len(outputList[0])):
             featValList = [row[colI] for row in outputList]
 
-            featValList = myMath.znormWindowFilter(
+            featValList = my_math.znormWindowFilter(
                 featValList, localZNormalizationWindowSize, True, True
             )
             assert len(featValList) == len(outputList)
@@ -580,7 +580,7 @@ def getPitchMeasures(
         label = UNSPECIFIED
 
     if medianFilterWindowSize is not None:
-        f0Values = myMath.medianFilter(
+        f0Values = my_math.medianFilter(
             f0Values, medianFilterWindowSize, useEdgePadding=True
         )
 
