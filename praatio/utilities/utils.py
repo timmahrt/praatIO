@@ -37,6 +37,9 @@ def intervalOverlapCheck(
         cmprInterval (Interval):
         percentThreshold (float): if percentThreshold is greater than 0, then
             if the intervals overlap, they must overlap by at least this threshold
+            (0.2 would mean 20% overlap considering both intervals)
+            (eg [0, 6] and [3,8] have an overlap of 50%. If percentThreshold is set
+             to higher than 50%, the intervals will be considered to not overlap.)
         timeThreshold (float): if greater than 0, then if the intervals overlap,
             they must overlap by at least this threshold
         boundaryInclusive (float): if true, then two intervals are considered to
@@ -65,11 +68,13 @@ def intervalOverlapCheck(
         percentOverlap = overlapTime / float(totalTime)
 
         percentOverlapFlag = percentOverlap >= percentThreshold
+        overlapFlag = percentOverlapFlag
 
     # Is the overlap more than a certain threshold?
     timeOverlapFlag = False
     if timeThreshold > 0 and overlapFlag:
-        timeOverlapFlag = overlapTime > timeThreshold
+        timeOverlapFlag = overlapTime >= timeThreshold
+        overlapFlag = timeOverlapFlag
 
     overlapFlag = (
         overlapFlag or boundaryOverlapFlag or percentOverlapFlag or timeOverlapFlag
@@ -88,10 +93,10 @@ def strToIntOrFloat(inputStr: str) -> float:
 
 def getValueAtTime(
     timestamp: float,
-    sortedDataTupleList,
+    sortedDataTupleList: List[Tuple[Any, ...]],
     fuzzyMatching: bool = False,
     startI: int = 0,
-) -> Tuple[float, Any, int]:
+) -> Tuple[Tuple[Any, ...], int]:
     """
     Get the value in the data list (sorted by time) that occurs at this point
 
@@ -111,54 +116,52 @@ def getValueAtTime(
     """
 
     i = startI
+    bestRow: Tuple[Any, ...] = ()
 
     # Only find exact timestamp matches
     if fuzzyMatching is False:
         while True:
             try:
-                dataTuple = sortedDataTupleList[i]
+                currRow = sortedDataTupleList[i]
             except IndexError:
-                currTime = timestamp
-                currVal = "--"
                 break
 
-            currTime = dataTuple[0]
-            currVal = dataTuple[1]
-            if timestamp == currTime:
+            currTime = currRow[0]
+            if currTime >= timestamp:
+                if timestamp == currTime:
+                    bestRow = currRow
                 break
             i += 1
-        retTime = currTime
-        retVal = currVal
 
     # Find the closest timestamp
     else:
         bestTime = sortedDataTupleList[i][0]
-        bestVal = sortedDataTupleList[i][1]
-        i += 1
+        bestRow = sortedDataTupleList[i]
         while True:
             try:
                 dataTuple = sortedDataTupleList[i]
             except IndexError:
+                i -= 1
                 break  # Last known value is the closest one
 
             currTime = dataTuple[0]
-            currVal = dataTuple[1]
+            currRow = dataTuple
 
             currDiff = abs(currTime - timestamp)
             bestDiff = abs(bestTime - timestamp)
             if currDiff < bestDiff:  # We're closer to the target val
                 bestTime = currTime
-                bestVal = currVal
+                bestRow = currRow
                 if currDiff == 0:
                     break  # Can't do better than a perfect match
             elif currDiff > bestDiff:
+                i -= 1
                 break  # We've past the best value.
             i += 1
 
-        retTime = bestTime
-        retVal = bestVal
+    retRow = bestRow
 
-    return retTime, retVal, i
+    return retRow, i
 
 
 def getValuesInInterval(dataTupleList: List, start: float, end: float) -> List:

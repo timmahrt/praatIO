@@ -407,7 +407,7 @@ class PointTier(TextgridTier):
         self,
         dataTupleList: List[Tuple[float, ...]],
         fuzzyMatching: bool = False,
-    ) -> List[Tuple[float, str, Any]]:
+    ) -> List[Tuple[Any, ...]]:
         """
         Get the values that occur at points in the point tier
 
@@ -422,6 +422,9 @@ class PointTier(TextgridTier):
         The procedure assumes that all data is ordered in time.
         dataTupleList should be in the form
         [(t1, v1a, v1b, ..), (t2, v2a, v2b, ..), ..]
+
+        It returns the data in the form of
+        [(t1, v1a, v1b, ..), (t2, v2a, v2b), ..]
 
         The procedure makes one pass through dataTupleList and one
         pass through self.entryList.  If the data is not sequentially
@@ -439,8 +442,8 @@ class PointTier(TextgridTier):
                 fuzzyMatching=fuzzyMatching,
                 startI=currentIndex,
             )
-            retTime, retVal, currentIndex = retTuple
-            retList.append((retTime, label, retVal))
+            retRow, currentIndex = retTuple
+            retList.append(retRow)
 
         return retList
 
@@ -525,7 +528,7 @@ class PointTier(TextgridTier):
 
         matchList = []
         i = None
-        for i, point in self.entryList:
+        for i, point in enumerate(self.entryList):
             if point.time == newPoint.time:
                 matchList.append(point)
                 break
@@ -946,7 +949,7 @@ class IntervalTier(TextgridTier):
 
         return newTier
 
-    def getValuesInIntervals(self, dataTupleList: List) -> List[Tuple[Interval, List]]:
+    def getValuesInIntervals(self, dataTupleList: List) -> List[List]:
         """
         Returns data from dataTupleList contained in labeled intervals
 
@@ -960,7 +963,7 @@ class IntervalTier(TextgridTier):
             intervalDataList = utils.getValuesInInterval(
                 dataTupleList, interval.start, interval.end
             )
-            returnList.append((interval, intervalDataList))
+            returnList.append(intervalDataList)
 
         return returnList
 
@@ -1156,7 +1159,7 @@ class IntervalTier(TextgridTier):
                 (
                     subInterval.start,
                     subInterval.end,
-                    f"{interval.label}-{subInterval.label}",
+                    f"{subInterval.label}-{interval.label}",
                 )
                 for subInterval in subTier.entryList
             ]
@@ -1190,23 +1193,23 @@ class IntervalTier(TextgridTier):
             IntervalTier: the modified version of the current tier
         """
         cumulativeAdjustAmount = 0
-        lastFromEnd = 0
         newEntryList = []
         allIntervals = [self.entryList, targetTier.entryList]
         for sourceInterval, targetInterval in utils.safeZip(allIntervals, True):
 
             # sourceInterval.start - lastFromEnd -> was this interval and the
             # last one adjacent?
-            newStart = (sourceInterval.start - lastFromEnd) + cumulativeAdjustAmount
+            newStart = sourceInterval.start + cumulativeAdjustAmount
 
-            currAdjustAmount = sourceInterval.end - sourceInterval.start
+            currIntervalDuration = sourceInterval.end - sourceInterval.start
             if filterFunc is None or filterFunc(sourceInterval.label):
-                currAdjustAmount = targetInterval.end - targetInterval.start
+                newIntervalDuration = targetInterval.end - targetInterval.start
+                cumulativeAdjustAmount += newIntervalDuration - currIntervalDuration
+                newEnd = newStart + newIntervalDuration
+            else:
+                newEnd = newStart + currIntervalDuration
 
-            newEnd = cumulativeAdjustAmount = newStart + currAdjustAmount
             newEntryList.append(Interval(newStart, newEnd, sourceInterval.label))
-
-            lastFromEnd = sourceInterval.start
 
         newMin = self.minTimestamp
         cumulativeDifference = newEntryList[-1].end - self.entryList[-1].end
