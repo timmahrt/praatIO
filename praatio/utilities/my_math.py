@@ -3,6 +3,7 @@ Various math utilities
 """
 
 import math
+import statistics
 from typing import Callable, List, Tuple
 
 
@@ -68,8 +69,8 @@ def znormalizeSpeakerData(
         featValues = znormalizeData(featValues)
     else:
         featValuesNoZeroes = [val for val in featValues if val != ""]
-        meanVal = mean(featValuesNoZeroes)
-        stdDevVal = stdDev(featValuesNoZeroes)
+        meanVal = statistics.mean(featValuesNoZeroes)
+        stdDevVal = statistics.stdev(featValuesNoZeroes)
 
         featValues = [
             (val - meanVal) / stdDevVal if val > 0 else 0 for val in featValues
@@ -96,7 +97,7 @@ def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[f
     medianFilter(x, 5, False)
     >> [1 1 1 2 4 5 4 4 4 5 1 5]
     """
-    return _stepFilter(median, dist, window, useEdgePadding)
+    return _stepFilter(statistics.median, dist, window, useEdgePadding)
 
 
 def znormWindowFilter(
@@ -114,7 +115,7 @@ def znormWindowFilter(
 
     def znormalizeCenterVal(valList):
         valToNorm = valList[int(len(valList) / 2.0)]
-        return (valToNorm - mean(valList)) / stdDev(valList)
+        return (valToNorm - statistics.mean(valList)) / statistics.stdev(valList)
 
     if not filterZeroValues:
         filteredOutput = _stepFilter(znormalizeCenterVal, dist, window, useEdgePadding)
@@ -185,32 +186,6 @@ def _stepFilter(
     return returnList
 
 
-def median(valList: List[float]) -> float:
-
-    valList = valList[:]
-    valList.sort()
-
-    if len(valList) % 2 == 0:  # Even
-        i = int(len(valList) / 2.0)
-        medianVal = (valList[i - 1] + valList[i]) / 2.0
-    else:  # Odd
-        i = int(len(valList) / 2.0)
-        medianVal = valList[i]
-
-    return medianVal
-
-
-def mean(valList: List[float]) -> float:
-    return sum(valList) / float(len(valList))
-
-
-def stdDev(valList: List[float]) -> float:
-    meanVal = mean(valList)
-    squaredSum = sum([(val - meanVal) ** 2 for val in valList])
-
-    return math.sqrt(squaredSum / float(len(valList) - 1))
-
-
 def znormalizeData(valList: List[float]) -> List[float]:
     """
     Given a list of floats, return the z-normalized values of the floats
@@ -221,8 +196,8 @@ def znormalizeData(valList: List[float]) -> List[float]:
     naturally have different pitch ranges.
     """
     valList = valList[:]
-    meanVal = mean(valList)
-    stdDevVal = stdDev(valList)
+    meanVal = statistics.mean(valList)
+    stdDevVal = statistics.stdev(valList)
 
     return [(val - meanVal) / stdDevVal for val in valList]
 
