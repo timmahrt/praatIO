@@ -63,10 +63,6 @@ def run_save(
 class IOTests(PraatioTestCase):
     """Testing input and output"""
 
-    def setUp(self):
-        if not os.path.exists(self.outputRoot):
-            os.mkdir(self.outputRoot)
-
     def test_reading_textgrids_with_newlines_in_labels(self):
         """Tests for reading/writing textgrids with newlines"""
         fn = "bobby_words_with_newlines.TextGrid"

@@ -8,7 +8,11 @@ class PraatioTestCase(unittest.TestCase):
 
         root = os.path.dirname(os.path.realpath(__file__))
         self.dataRoot = os.path.join(root, "files")
-        self.outputRoot = os.path.join(self.dataRoot, "io_test_output")
+        self.outputRoot = os.path.join(self.dataRoot, "test_output")
+
+    def setUp(self):
+        if not os.path.exists(self.outputRoot):
+            os.mkdir(self.outputRoot)
 
     def assertAllAlmostEqual(self, listA, listB):
         for valA, valB in zip(listA, listB):
