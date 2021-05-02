@@ -230,7 +230,7 @@ class TextgridTier(ABC):
     @abstractmethod
     def editTimestamps(
         self, offset: float, allowOvershoot: bool = False
-    ) -> "TextgridTier":
+    ) -> "TextgridTier":  # pragma: no cover
         pass
 
     @abstractmethod
@@ -239,7 +239,7 @@ class TextgridTier(ABC):
         entry,
         warnFlag: bool = True,
         collisionCode: Optional[Literal["replace", "merge"]] = None,
-    ) -> None:
+    ) -> None:  # pragma: no cover
         pass
 
     @abstractmethod
@@ -249,7 +249,7 @@ class TextgridTier(ABC):
         end: float,
         collisionCode: Optional[Literal["truncate", "categorical"]] = None,
         doShrink: bool = True,
-    ) -> "TextgridTier":
+    ) -> "TextgridTier":  # pragma: no cover
         pass
 
     @abstractmethod
@@ -259,7 +259,7 @@ class TextgridTier(ABC):
         cropEnd: float,
         mode: Literal["strict", "lax", "truncated"],
         rebaseToZero: bool,
-    ) -> "TextgridTier":
+    ) -> "TextgridTier":  # pragma: no cover
         pass
 
     @abstractmethod
@@ -268,11 +268,11 @@ class TextgridTier(ABC):
         start: float,
         duration: float,
         collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
-    ) -> "TextgridTier":
+    ) -> "TextgridTier":  # pragma: no cover
         pass
 
     @abstractmethod
-    def deleteEntry(self, entry) -> None:
+    def deleteEntry(self, entry) -> None:  # pragma: no cover
         pass
 
 
@@ -723,7 +723,7 @@ class IntervalTier(TextgridTier):
                 #    intervalEnd - intervalStart
                 # )
 
-                if mode == "truncated":
+                if mode == CropCollision.TRUNCATED:
                     matchedEntry = (entry.start, cropEnd, entry.label)
 
                 else:
@@ -735,7 +735,7 @@ class IntervalTier(TextgridTier):
                 # firstIntervalKeptProportion = (intervalEnd - cropStart) / (
                 #     intervalEnd - intervalStart
                 # )
-                if mode == "truncated":
+                if mode == CropCollision.TRUNCATED:
                     matchedEntry = (cropStart, entry.end, entry.label)
                 else:
                     cutTWithin += cropEnd - cropStart
@@ -743,9 +743,9 @@ class IntervalTier(TextgridTier):
             # The current interval contains the new interval completely
             elif entry.start <= cropStart and entry.end >= cropEnd:
 
-                if mode == "lax":
+                if mode == CropCollision.LAX:
                     matchedEntry = entry
-                elif mode == "truncated":
+                elif mode == CropCollision.TRUNCATED:
                     matchedEntry = (cropStart, cropEnd, entry.label)
                 else:
                     cutTWithin += cropEnd - cropStart
