@@ -18,30 +18,12 @@ import io
 from os.path import join
 
 
-from praatio import audio
-from praatio import data_points
-from praatio import klattgrid
 from praatio import textgrid
 from praatio.utilities import constants
 from praatio.utilities import textgrid_io
-from praatio.utilities import utils
 
-
-def areTheSame(fn1, fn2, fileHandler):
-    """
-    Tests that files contain the same data
-
-    If fileHandler is a textgrid file reader like
-    textgrid.openTextgrid then we can compare
-    a shortTextgrid and a longTextgrid.
-
-    If fileHandler is readFile or io.open, etc then the raw
-    text will be compared.
-    """
-    data1 = fileHandler(fn1)
-    data2 = fileHandler(fn2)
-
-    return data1 == data2
+from test.testing_utils import areTheSameFiles
+from test.praatio_test_case import PraatioTestCase
 
 
 def readFile(fn):
@@ -78,16 +60,8 @@ def run_save(
     return entryList
 
 
-class IOTests(unittest.TestCase):
+class IOTests(PraatioTestCase):
     """Testing input and output"""
-
-    def __init__(self, *args, **kargs):
-        super(IOTests, self).__init__(*args, **kargs)
-
-        cwd = os.path.dirname(os.path.realpath(__file__))
-        root = os.path.split(cwd)[0]
-        self.dataRoot = join(root, "files")
-        self.outputRoot = join(self.dataRoot, "io_test_output")
 
     def setUp(self):
         if not os.path.exists(self.outputRoot):
@@ -102,7 +76,7 @@ class IOTests(unittest.TestCase):
         tg = textgrid.openTextgrid(inputFN)
         tg.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, readFile))
+        self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
     def test_reading_long_textgrids_with_newlines_in_labels(self):
         """Tests for reading/writing textgrids with newlines"""
@@ -113,7 +87,7 @@ class IOTests(unittest.TestCase):
         tg = textgrid.openTextgrid(inputFN)
         tg.save(outputFN, outputFormat=constants.TextgridFormats.LONG_TEXTGRID)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, readFile))
+        self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
     def test_tg_io(self):
         """Tests for reading/writing textgrid io"""
@@ -124,7 +98,7 @@ class IOTests(unittest.TestCase):
         tg = textgrid.openTextgrid(inputFN)
         tg.save(outputFN)
 
-        self.assertTrue(areTheSame(inputFN, outputFN, readFile))
+        self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
     def test_tg_io_long_vs_short(self):
         """Tests reading of long vs short textgrids"""
@@ -132,7 +106,7 @@ class IOTests(unittest.TestCase):
         shortFN = join(self.dataRoot, "textgrid_to_merge.TextGrid")
         longFN = join(self.dataRoot, "textgrid_to_merge_longfile.TextGrid")
 
-        self.assertTrue(areTheSame(shortFN, longFN, textgrid.openTextgrid))
+        self.assertTrue(areTheSameFiles(shortFN, longFN, textgrid.openTextgrid))
 
     def test_saving_short_textgrid(self):
         """Tests that short textgrid files are saved non-destructively"""
@@ -143,7 +117,7 @@ class IOTests(unittest.TestCase):
         tg = textgrid.openTextgrid(shortFN)
         tg.save(outputFN, outputFormat=constants.TextgridFormats.SHORT_TEXTGRID)
 
-        self.assertTrue(areTheSame(shortFN, outputFN, readFile))
+        self.assertTrue(areTheSameFiles(shortFN, outputFN, readFile))
 
     def test_saving_long_textgrid(self):
         """Tests that long textgrid files are saved non-destructively"""
@@ -154,7 +128,7 @@ class IOTests(unittest.TestCase):
         tg = textgrid.openTextgrid(longFN)
         tg.save(outputFN, outputFormat=constants.TextgridFormats.LONG_TEXTGRID)
 
-        self.assertTrue(areTheSame(longFN, outputFN, readFile))
+        self.assertTrue(areTheSameFiles(longFN, outputFN, readFile))
 
     def test_saving_and_loading_json(self):
         """Tests that json files are saved non-destructively"""
@@ -171,74 +145,7 @@ class IOTests(unittest.TestCase):
         tgFromJsonFile = textgrid.openTextgrid(outputFN)
         tgFromJsonFile.save(outputLastFN)
 
-        self.assertTrue(areTheSame(shortFN, outputLastFN, readFile))
-
-    def test_get_audio_duration(self):
-        """Tests that the two audio duration methods output the same value."""
-        wavFN = join(self.dataRoot, "bobby.wav")
-
-        durationA = utils.getWavDuration(wavFN)
-        durationB = audio.getDuration(wavFN)
-        self.assertTrue(durationA == durationB)
-
-    def test_duration_tier_io(self):
-        """Tests for reading/writing duration tiers"""
-        fn = "mary.DurationTier"
-        inputFN = join(self.dataRoot, fn)
-        outputFN = join(self.outputRoot, fn)
-
-        dt = data_points.open2DPointObject(inputFN)
-        dt.save(outputFN)
-
-        self.assertTrue(areTheSame(inputFN, outputFN, data_points.open2DPointObject))
-
-    def test_pitch_io(self):
-        """Tests for reading/writing pitch tiers"""
-        fn = "mary.PitchTier"
-        inputFN = join(self.dataRoot, fn)
-        outputFN = join(self.outputRoot, fn)
-
-        pp = data_points.open2DPointObject(inputFN)
-        pp.save(outputFN)
-
-        self.assertTrue(areTheSame(inputFN, outputFN, data_points.open2DPointObject))
-
-    def test_pitch_io_long_vs_short(self):
-        """Tests reading of long vs short 2d point objects"""
-
-        shortFN = join(self.dataRoot, "mary.PitchTier")
-        longFN = join(self.dataRoot, "mary_longfile.PitchTier")
-
-        self.assertTrue(areTheSame(shortFN, longFN, data_points.open2DPointObject))
-
-    def test_point_process_io(self):
-        """Tests for reading/writing point processes"""
-        fn = "bobby.PointProcess"
-        inputFN = join(self.dataRoot, fn)
-        outputFN = join(self.outputRoot, fn)
-
-        pp = data_points.open1DPointObject(inputFN)
-        pp.save(outputFN)
-
-        self.assertTrue(areTheSame(inputFN, outputFN, data_points.open1DPointObject))
-
-    def test_point_process_io_long_vs_short(self):
-
-        shortFN = join(self.dataRoot, "bobby.PointProcess")
-        longFN = join(self.dataRoot, "bobby_longfile.PointProcess")
-
-        self.assertTrue(areTheSame(shortFN, longFN, data_points.open1DPointObject))
-
-    def test_kg_io(self):
-        """Tests for reading/writing klattgrids"""
-        fn = "bobby.KlattGrid"
-        inputFN = join(self.dataRoot, fn)
-        outputFN = join(self.outputRoot, fn)
-
-        kg = klattgrid.openKlattgrid(inputFN)
-        kg.save(outputFN)
-
-        self.assertTrue(areTheSame(inputFN, outputFN, klattgrid.openKlattgrid))
+        self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
 
     def test_save(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
