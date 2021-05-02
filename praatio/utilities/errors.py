@@ -69,3 +69,49 @@ class IncompatibleTierError(Exception):
             f"Incompatible tier type.  Tier with name {self.tier.name} has type"
             f"{self.tier.tierType} but expected {self.otherTierType}"
         )
+
+
+class FileNotFound(Exception):
+    def __init__(self, fullPath: str):
+        super(FileNotFound, self).__init__()
+        self.fullPath = fullPath
+
+    def __str__(self):
+        return "File not found:\n%s" % self.fullPath
+
+
+class PraatExecutionFailed(Exception):
+    def __init__(self, cmdList: List[str]):
+        super(PraatExecutionFailed, self).__init__()
+        self.cmdList = cmdList
+
+    def __str__(self):
+        errorStr = (
+            "\nPraat Execution Failed.  Please check the following:\n"
+            "- Praat exists in the location specified\n"
+            "- Praat script can execute ok outside of praat\n"
+            "- script arguments are correct\n\n"
+            "If you can't locate the problem, I recommend using "
+            "absolute paths rather than relative "
+            "paths and using paths without spaces in any folder "
+            "or file names\n\n"
+            "Here is the command that python attempted to run:\n"
+        )
+        cmdTxt = " ".join(self.cmdList)
+        return errorStr + cmdTxt
+
+
+class EndOfAudioData(Exception):
+    pass
+
+
+class FindZeroCrossingError(Exception):
+    def __init__(self, startTime: float, endTime: float):
+        super(FindZeroCrossingError, self).__init__()
+
+        self.startTime = startTime
+        self.endTime = endTime
+
+    def __str__(self):
+        retString = "No zero crossing found between %f and %f"
+        return retString % (self.startTime, self.endTime)

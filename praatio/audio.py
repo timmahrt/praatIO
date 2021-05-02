@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 
 from typing_extensions import Literal, Final
 
+from praatio.utilities import errors
 from praatio.utilities import utils
 
 sampWidthDict: Final = {1: "b", 2: "h", 4: "i", 8: "q"}
@@ -31,26 +32,10 @@ _DELETE: Final = "delete"
 ZERO_CROSSING_TIMESTEP: Final = 0.002
 
 
-class EndOfAudioData(Exception):
-    pass
-
-
-class FindZeroCrossingError(Exception):
-    def __init__(self, startTime: float, endTime: float):
-        super(FindZeroCrossingError, self).__init__()
-
-        self.startTime = startTime
-        self.endTime = endTime
-
-    def __str__(self):
-        retString = "No zero crossing found between %f and %f"
-        return retString % (self.startTime, self.endTime)
-
-
 def samplesAsNums(waveData, sampleWidth: int) -> Tuple[int, ...]:
     """Convert samples of a python wave object from bytes to numbers"""
     if len(waveData) == 0:
-        raise EndOfAudioData()
+        raise errors.EndOfAudioData()
 
     byteCode = sampWidthDict[sampleWidth]
     actualNumFrames = int(len(waveData) / float(sampleWidth))
@@ -134,7 +119,7 @@ class AbstractWav(ABC):
                     timeStamp = self.findNextZeroCrossing(
                         leftStartTime, timeStep, reverse=True
                     )
-            except FindZeroCrossingError:
+            except errors.FindZeroCrossingError:
                 pass
             else:
                 smallestLeft = timeStamp
@@ -145,7 +130,7 @@ class AbstractWav(ABC):
                     timestamp = self.findNextZeroCrossing(
                         rightStartTime, timeStep, reverse=False
                     )
-            except FindZeroCrossingError:
+            except errors.FindZeroCrossingError:
                 pass
             else:
                 smallestRight = timestamp
@@ -153,7 +138,7 @@ class AbstractWav(ABC):
             if smallestLeft is not None or smallestRight is not None:
                 break
             elif leftStartTime < 0 and rightStartTime > fileDuration:
-                raise (FindZeroCrossingError(0, fileDuration))
+                raise (errors.FindZeroCrossingError(0, fileDuration))
             else:
                 leftStartTime -= timeStep
                 rightStartTime += timeStep
@@ -175,7 +160,7 @@ class AbstractWav(ABC):
             zeroCrossingTime = smallestRight
 
         if zeroCrossingTime is None:
-            raise (FindZeroCrossingError(0, fileDuration))
+            raise (errors.FindZeroCrossingError(0, fileDuration))
 
         return zeroCrossingTime
 
@@ -232,7 +217,7 @@ class AbstractWav(ABC):
         try:
             zeroedFrame = changeIndexList[0]
         except IndexError:
-            raise (FindZeroCrossingError(startTime, endTime))
+            raise (errors.FindZeroCrossingError(startTime, endTime))
 
         # We found the zero by comparing points to the point adjacent to them.
         # It is possible the adjacent point is closer to zero than this one,

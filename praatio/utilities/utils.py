@@ -12,6 +12,7 @@ import wave
 from pkg_resources import resource_filename
 from typing import Any, Iterator, List, Tuple
 
+from praatio.utilities import errors
 from praatio.utilities import constants
 
 # Get the folder one level above the current folder
@@ -248,45 +249,15 @@ def findAll(txt: str, subStr: str) -> List[int]:
     return indexList
 
 
-class FileNotFound(Exception):
-    def __init__(self, fullPath: str):
-        super(FileNotFound, self).__init__()
-        self.fullPath = fullPath
-
-    def __str__(self):
-        return "File not found:\n%s" % self.fullPath
-
-
-class PraatExecutionFailed(Exception):
-    def __init__(self, cmdList: List[str]):
-        super(PraatExecutionFailed, self).__init__()
-        self.cmdList = cmdList
-
-    def __str__(self):
-        errorStr = (
-            "\nPraat Execution Failed.  Please check the following:\n"
-            "- Praat exists in the location specified\n"
-            "- Praat script can execute ok outside of praat\n"
-            "- script arguments are correct\n\n"
-            "If you can't locate the problem, I recommend using "
-            "absolute paths rather than relative "
-            "paths and using paths without spaces in any folder "
-            "or file names\n\n"
-            "Here is the command that python attempted to run:\n"
-        )
-        cmdTxt = " ".join(self.cmdList)
-        return errorStr + cmdTxt
-
-
 def runPraatScript(
     praatEXE: str, scriptFN: str, argList: List[Any], cwd: str = None
 ) -> None:
 
     # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
-        raise FileNotFound(praatEXE)
+        raise errors.FileNotFound(praatEXE)
     if not os.path.exists(scriptFN):
-        raise FileNotFound(scriptFN)
+        raise errors.FileNotFound(scriptFN)
 
     argList = ["%s" % arg for arg in argList]
     cmdList = [praatEXE, "--run", scriptFN] + argList
@@ -294,7 +265,7 @@ def runPraatScript(
     myProcess = subprocess.Popen(cmdList, cwd=cwd)
 
     if myProcess.wait():
-        raise PraatExecutionFailed(cmdList)
+        raise errors.PraatExecutionFailed(cmdList)
 
 
 def _getMatchFunc(pattern: str):
