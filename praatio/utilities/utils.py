@@ -12,6 +12,8 @@ import wave
 from pkg_resources import resource_filename
 from typing import Any, Iterator, List, Tuple
 
+from typing_extensions import Literal
+
 from praatio.utilities import errors
 from praatio.utilities import constants
 

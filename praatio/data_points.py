@@ -5,7 +5,9 @@ see **examples/get_vowel_points.py**
 """
 
 import io
-from typing import List, Tuple, Optional, cast, Literal
+from typing import List, Tuple, Optional, cast
+
+from typing_extensions import Literal
 
 from praatio.utilities import errors
 from praatio.utilities import constants
