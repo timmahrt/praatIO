@@ -243,7 +243,7 @@ class IntervalTierTests(PraatioTestCase):
             maxT=100,
         )
 
-        self.assertRaises(AssertionError, sourceTier.morph, targetTier)
+        self.assertRaises(errors.SafeZipException, sourceTier.morph, targetTier)
 
     def test_interval_tier_mintimestamp_behaviour(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]

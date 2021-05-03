@@ -1,7 +1,7 @@
 import json
 from typing import Optional, Tuple, List, Any, Dict
 
-from typing_extensions import Literal, Final
+from typing_extensions import Literal
 
 from praatio.utilities import errors
 from praatio.utilities import my_math
@@ -14,12 +14,6 @@ from praatio.utilities.constants import (
     INTERVAL_TIER,
     POINT_TIER,
 )
-
-SUPPORTED_OUTPUT_FORMATS: Final = [
-    TextgridFormats.LONG_TEXTGRID,
-    TextgridFormats.SHORT_TEXTGRID,
-    TextgridFormats.JSON,
-]
 
 
 def _removeBlanks(tier: Dict) -> None:
@@ -179,7 +173,7 @@ def getTextgridAsStr(
     Converts a textgrid to a string, suitable for saving
 
     Args:
-        fn (str): the fullpath filename of the output
+        tg (Textgrid): the textgrid to convert to a string
         minimumIntervalLength (float): any labeled intervals smaller
             than this will be removed, useful for removing ultrashort
             or fragmented intervals; if None, don't remove any.
@@ -202,8 +196,13 @@ def getTextgridAsStr(
         a string representation of the textgrid
     """
 
-    if outputFormat not in SUPPORTED_OUTPUT_FORMATS:
-        raise errors.BadFormatException(str(outputFormat), SUPPORTED_OUTPUT_FORMATS)
+    validOutputFormats = [
+        TextgridFormats.LONG_TEXTGRID,
+        TextgridFormats.SHORT_TEXTGRID,
+        TextgridFormats.JSON,
+    ]
+    if outputFormat not in validOutputFormats:
+        raise errors.WrongOption("outputFormat", outputFormat, validOutputFormats)
 
     tg = _prepTgForSaving(
         tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces

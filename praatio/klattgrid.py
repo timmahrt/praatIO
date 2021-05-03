@@ -512,7 +512,7 @@ def _cleanNumericValues(dataStr: str) -> str:
         try:
             if "min" in row or "max" in row:
                 raise errors.ParsingError(
-                    f"Found unexpected keyword 'min' or 'max' in row {row}"
+                    f"Found unexpected keyword 'min' or 'max' in row '{row}'"
                 )
 
             head, tail = row.split("=")
@@ -525,7 +525,7 @@ def _cleanNumericValues(dataStr: str) -> str:
                 if float(tail) == 0:
                     tail = "0"
             row = "%s = %s" % (head, tail)
-        except (ValueError, AssertionError):
+        except (ValueError, errors.ParsingError):  # TODO: Is it really ok?
             pass
         finally:
             newDataList.append(row.rstrip())

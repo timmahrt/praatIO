@@ -5,7 +5,7 @@ see **examples/get_vowel_points.py**
 """
 
 import io
-from typing import List, Tuple, Optional, cast
+from typing import List, Tuple, Optional, cast, Literal
 
 from praatio.utilities import errors
 from praatio.utilities import constants
@@ -76,7 +76,7 @@ class PointObject1D(PointObject):
     def __init__(
         self,
         pointList: List[Tuple[float]],
-        objectClass: str,
+        objectClass: Literal["point"],
         minTime: float = 0,
         maxTime: Optional[float] = None,
     ):
@@ -100,7 +100,7 @@ class PointObject2D(PointObject):
     def __init__(
         self,
         pointList: List[Tuple[float, float]],
-        objectClass: str,
+        objectClass: Literal["pitch", "duration"],
         minTime: float = 0,
         maxTime: float = None,
     ):

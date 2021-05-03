@@ -445,7 +445,7 @@ def loadTimeSeriesData(
         with io.open(fn, "r", encoding="utf-8") as fd:
             data = fd.read()
     except IOError:
-        print("No pitch track for: %s" % name)
+        print(f"No pitch track for: {name}")
         raise
 
     dataList = [row.split(",") for row in data.splitlines() if row != ""]
@@ -602,7 +602,7 @@ def getPitchMeasures(
         f0Values = [f0Val for f0Val in f0Values if int(f0Val) != 0]
 
     if len(f0Values) == 0:
-        myStr = u"No pitch data for file: %s, label: %s" % (name, label)
+        myStr = f"No pitch data for file: {name}, label: {label}"
         print(myStr.encode("ascii", "replace"))
         counts = 0.0
         meanF0 = 0.0

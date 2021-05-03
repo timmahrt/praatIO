@@ -24,3 +24,9 @@ class DataPointTypes:
     POINT: Final = "PointProcess"
     PITCH: Final = "PitchTier"
     DURATION: Final = "DurationTier"
+
+
+class CropCollision:
+    STRICT: Final = "strict"
+    LAX: Final = "lax"
+    TRUNCATED: Final = "truncated"

@@ -40,6 +40,7 @@ from praatio.utilities.constants import (
     POINT_TIER,
     TextgridFormats,
     MIN_INTERVAL_LENGTH,
+    CropCollision,
 )
 from praatio.utilities import errors
 from praatio.utilities import my_math
@@ -73,6 +74,7 @@ def overshootCheck(
 class IntervalCollision:
     REPLACE: Final = "replace"
     MERGE: Final = "merge"
+    ERROR: Final = "error"
 
 
 class WhitespaceCollision:
@@ -82,15 +84,10 @@ class WhitespaceCollision:
     ERROR: Final = "error"
 
 
-class CropCollision:
-    STRICT: Final = "strict"
-    LAX: Final = "lax"
-    TRUNCATED: Final = "truncated"
-
-
 class EraseCollision:
     TRUNCATE: Final = "truncate"
     CATEGORICAL: Final = "categorical"
+    ERROR: Final = "error"
 
 
 class TextgridTier(ABC):
@@ -149,7 +146,7 @@ class TextgridTier(ABC):
         entryList.sort()
 
         return self.new(
-            self.name, entryList, minTimestamp=minTime, maxTimestamp=maxTime
+            self.name, entryList, minTimestamp=self.minTimestamp, maxTimestamp=maxTime
         )
 
     def find(
@@ -252,7 +249,7 @@ class TextgridTier(ABC):
         self,
         entry,
         warnFlag: bool = True,
-        collisionCode: Optional[Literal["replace", "merge"]] = None,
+        collisionCode: Literal["replace", "merge", "error"] = "error",
     ) -> None:  # pragma: no cover
         pass
 
@@ -261,7 +258,7 @@ class TextgridTier(ABC):
         self,
         start: float,
         end: float,
-        collisionCode: Optional[Literal["truncate", "categorical"]] = None,
+        collisionCode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "TextgridTier":  # pragma: no cover
         pass
@@ -281,7 +278,7 @@ class TextgridTier(ABC):
         self,
         start: float,
         duration: float,
-        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
+        collisionCode: Literal["stretch", "split", "no_change", "error"],
     ) -> "TextgridTier":  # pragma: no cover
         pass
 
@@ -335,7 +332,7 @@ class PointTier(TextgridTier):
         self,
         cropStart: float,
         cropEnd: float,
-        mode: Literal["strict", "lax", "truncated"] = CropCollision.LAX,
+        mode: Literal["strict", "lax", "truncated"] = "lax",
         rebaseToZero: bool = True,
     ) -> "PointTier":
         """
@@ -466,7 +463,7 @@ class PointTier(TextgridTier):
         self,
         start: float,
         end: float,
-        collisionCode: Optional[Literal["truncate", "categorical"]] = None,
+        collisionCode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "PointTier":
         """
@@ -516,7 +513,7 @@ class PointTier(TextgridTier):
         self,
         entry: Point,
         warnFlag: bool = True,
-        collisionCode: Optional[Literal["replace", "merge"]] = None,
+        collisionCode: Literal["replace", "merge", "error"] = "error",
     ) -> None:
         """
         inserts an interval into the tier
@@ -528,7 +525,7 @@ class PointTier(TextgridTier):
                 the insertion area. One of ('replace', 'merge', or None)
                 - 'replace', existing items will be removed
                 - 'merge', inserting item will be fused with existing items
-                - None or any other value will thrown TextgridCollisionException
+                - 'error', will throw TextgridCollisionException
 
         Returns:
             None
@@ -536,6 +533,14 @@ class PointTier(TextgridTier):
         If warnFlag is True and collisionCode is not None, the user is notified
         of each collision
         """
+        validCollisionCodes = [
+            IntervalCollision.REPLACE,
+            IntervalCollision.MERGE,
+            IntervalCollision.ERROR,
+        ]
+        if collisionCode not in validCollisionCodes:
+            errors.WrongOption("collisionCode", collisionCode, validCollisionCodes)
+
         if not isinstance(entry, Point):
             newPoint = Point(entry[0], entry[1])
         else:
@@ -576,7 +581,7 @@ class PointTier(TextgridTier):
         self,
         start: float,
         duration: float,
-        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
+        _collisionCode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "PointTier":
         """
         Inserts a region into the tier
@@ -873,7 +878,7 @@ class IntervalTier(TextgridTier):
         self,
         start: float,
         end: float,
-        collisionCode: Optional[Literal["truncate", "categorical"]] = None,
+        collisionCode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "IntervalTier":
         """
@@ -884,7 +889,7 @@ class IntervalTier(TextgridTier):
             end (float):
             collisionCode (EraseRegionCollisionCode): determines the behavior when
                 the region to erase overlaps with existing intervals. One of
-                ['truncate', 'categorical', None]
+                ['truncate', 'categorical', 'error']
                 - 'truncate' partially contained entries will have the portion
                     removed that overlaps with the target entry
                 - 'categorical' all entries that overlap, even partially, with
@@ -904,6 +909,7 @@ class IntervalTier(TextgridTier):
         eraseCollisionCodes = [
             EraseCollision.TRUNCATE,
             EraseCollision.CATEGORICAL,
+            EraseCollision.ERROR,
         ]
         if collisionCode not in eraseCollisionCodes:
             raise errors.WrongOption(
@@ -1027,7 +1033,7 @@ class IntervalTier(TextgridTier):
         self,
         entry: Interval,
         warnFlag: bool = True,
-        collisionCode: Optional[Literal["replace", "merge"]] = None,
+        collisionCode: Literal["replace", "merge", "error"] = "error",
     ) -> None:
         """
         inserts an interval into the tier
@@ -1047,6 +1053,14 @@ class IntervalTier(TextgridTier):
         Returns:
             IntervalTier: the modified version of the current tier
         """
+        validCollisionCodes = [
+            IntervalCollision.REPLACE,
+            IntervalCollision.MERGE,
+            IntervalCollision.ERROR,
+        ]
+        if collisionCode not in validCollisionCodes:
+            errors.WrongOption("collisionCode", collisionCode, validCollisionCodes)
+
         if not isinstance(entry, Interval):
             interval = Interval(*entry)
         else:
@@ -1259,8 +1273,9 @@ class Textgrid:
         self.tierNameList: List[str] = []  # Preserves the order of the tiers
         self.tierDict: Dict[str, TextgridTier] = {}
 
-        self.minTimestamp = None
-        self.maxTimestamp = None
+        # Timestamps are determined by the first tier added
+        self.minTimestamp: float = None  # type: ignore[assignment]
+        self.maxTimestamp: float = None  # type: ignore[assignment]
 
     def __eq__(self, other):
         isEqual = True
@@ -1298,10 +1313,20 @@ class Textgrid:
 
         minV = tier.minTimestamp
         if self.minTimestamp is None or minV < self.minTimestamp:
+            if minV < self.minTimestamp:
+                self.errorReporter(
+                    errors.TextgridException,
+                    f"Minimum timestamp in Textgrid changed from ({self.minTimestamp}) to ({minV})",
+                )
             self.minTimestamp = minV
 
         maxV = tier.maxTimestamp
         if self.maxTimestamp is None or maxV > self.maxTimestamp:
+            if maxV < self.maxTimestamp:
+                self.errorReporter(
+                    errors.TextgridException,
+                    f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
+                )
             self.maxTimestamp = maxV
 
     def appendTextgrid(
@@ -1486,7 +1511,7 @@ class Textgrid:
         self,
         start: float,
         duration: float,
-        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
+        collisionCode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "Textgrid":
         """
         Inserts a blank region into a textgrid
@@ -1509,6 +1534,16 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
+        availableCollisionCodes = [
+            WhitespaceCollision.STRETCH,
+            WhitespaceCollision.SPLIT,
+            WhitespaceCollision.NO_CHANGE,
+            WhitespaceCollision.ERROR,
+        ]
+        if collisionCode not in availableCollisionCodes:
+            raise errors.WrongOption(
+                "collisionCode", collisionCode, availableCollisionCodes
+            )
 
         newTG = Textgrid()
         newTG.minTimestamp = self.minTimestamp
@@ -1523,7 +1558,6 @@ class Textgrid:
 
     def mergeTiers(
         self,
-        includeFunc: Optional[Callable] = None,
         tierList: Optional[List[str]] = None,
         preserveOtherTiers: bool = True,
     ) -> "Textgrid":
@@ -1531,8 +1565,6 @@ class Textgrid:
         Combine tiers
 
         Args:
-            includeFunc (functor): regulates which intervals to include in the
-                merging with all others being tossed (default accepts all)
             tierList (list): A list of tier names to combine. If none, combine
                 all tiers.
             preserveOtherTiers (bool): If false, uncombined tiers are not
@@ -1541,16 +1573,8 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
-
         if tierList is None:
             tierList = self.tierNameList
-
-        def acceptAll(_entryList):
-            return True
-
-        # TODO: Not being used???
-        if includeFunc is None:
-            includeFunc = acceptAll
 
         # Determine the tiers to merge
         intervalTierNameList = []
@@ -1593,7 +1617,7 @@ class Textgrid:
 
     def save(
         self,
-        outputFn: str,
+        fn: str,
         minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
@@ -1602,6 +1626,40 @@ class Textgrid:
         ] = TextgridFormats.SHORT_TEXTGRID,
         ignoreBlankSpaces: bool = False,
     ) -> None:
+        """
+        Save the current textgrid to a file
+
+        Args:
+            fn (str): the fullpath filename of the output
+            minimumIntervalLength (float): any labeled intervals smaller
+                than this will be removed, useful for removing ultrashort
+                or fragmented intervals; if None, don't remove any.
+                Removed intervals are merged (without their label) into
+                adjacent entries.
+            minTimestamp (float): the minTimestamp of the saved Textgrid;
+                if None, use whatever is defined in the Textgrid object.
+                If minTimestamp is larger than timestamps in your textgrid,
+                an exception will be thrown.
+            maxTimestamp (float): the maxTimestamp of the saved Textgrid;
+                if None, use whatever is defined in the Textgrid object.
+                If maxTimestamp is smaller than timestamps in your textgrid,
+                an exception will be thrown.
+            outputFormat (str): one of ['short_textgrid', 'long_textgrid', 'json']
+            ignoreBlankSpaces (bool): if False, blank sections in interval
+                tiers will be filled in with an empty interval
+                (with a label of "")
+
+        Returns:
+            a string representation of the textgrid
+        """
+        validOutputFormats = [
+            TextgridFormats.SHORT_TEXTGRID,
+            TextgridFormats.LONG_TEXTGRID,
+            TextgridFormats.JSON,
+        ]
+        if outputFormat not in validOutputFormats:
+            raise errors.WrongOption("outputFormat", outputFormat, validOutputFormats)
+
         tgAsDict = _tgToDictionary(self)
         textgridStr = textgrid_io.getTextgridAsStr(
             tgAsDict,
@@ -1612,7 +1670,7 @@ class Textgrid:
             ignoreBlankSpaces,
         )
 
-        with io.open(outputFn, "w", encoding="utf-8") as fd:
+        with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(textgridStr)
 
     def renameTier(self, oldName: str, newName: str) -> None:
@@ -1674,9 +1732,11 @@ def _tgToDictionary(tg: Textgrid) -> dict:
     return tgAsDict
 
 
-def _dictionaryToTg(tgAsDict: dict) -> Textgrid:
+def _dictionaryToTg(
+    tgAsDict: dict, errorMode: Literal["silence", "warning", "exception"]
+) -> Textgrid:
     """Converts a dictionary representation of a textgrid to a Textgrid"""
-    tg = Textgrid()
+    tg = Textgrid(errorMode)
     tg.minTimestamp = tgAsDict["xmin"]
     tg.maxTimestamp = tgAsDict["xmax"]
 
