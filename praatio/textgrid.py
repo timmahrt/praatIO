@@ -1242,21 +1242,21 @@ class Textgrid:
         self.tierDict[tier.name] = tier
 
         minV = tier.minTimestamp
+        if self.minTimestamp is not None and minV < self.minTimestamp:
+            self.errorReporter(
+                errors.TextgridException,
+                f"Minimum timestamp in Textgrid changed from ({self.minTimestamp}) to ({minV})",
+            )
         if self.minTimestamp is None or minV < self.minTimestamp:
-            if minV < self.minTimestamp:
-                self.errorReporter(
-                    errors.TextgridException,
-                    f"Minimum timestamp in Textgrid changed from ({self.minTimestamp}) to ({minV})",
-                )
             self.minTimestamp = minV
 
         maxV = tier.maxTimestamp
+        if self.maxTimestamp is not None and maxV < self.maxTimestamp:
+            self.errorReporter(
+                errors.TextgridException,
+                f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
+            )
         if self.maxTimestamp is None or maxV > self.maxTimestamp:
-            if maxV < self.maxTimestamp:
-                self.errorReporter(
-                    errors.TextgridException,
-                    f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
-                )
             self.maxTimestamp = maxV
 
     def appendTextgrid(
