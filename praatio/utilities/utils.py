@@ -15,6 +15,8 @@ from typing import Any, Iterator, List, Tuple
 from praatio.utilities import errors
 from praatio.utilities import constants
 
+Interval = constants.Interval
+
 # Get the folder one level above the current folder
 scriptsPath = resource_filename(
     "praatio",
@@ -23,8 +25,8 @@ scriptsPath = resource_filename(
 
 
 def intervalOverlapCheck(
-    interval: constants.Interval,
-    cmprInterval: constants.Interval,
+    interval: Interval,
+    cmprInterval: Interval,
     percentThreshold: float = 0,
     timeThreshold: float = 0,
     boundaryInclusive: bool = False,
@@ -81,6 +83,82 @@ def intervalOverlapCheck(
     )
 
     return overlapFlag
+
+
+def getIntervalsInInterval(
+    start: float,
+    end: float,
+    intervals: List[Interval],
+    mode: Literal["strict", "lax", "truncated"],
+) -> List[Interval]:
+    """
+    Gets all intervals that exist between /start/ and /end/
+
+    Args:
+        cropStart (float):
+        cropEnd (float):
+        mode (CropMode): one of ['strict', 'lax', or 'truncated']
+            - 'strict', only intervals wholly contained by the crop
+                interval will be kept
+            - 'lax', partially contained intervals will be kept
+            - 'truncated', partially contained intervals will be
+                truncated to fit within the crop region.
+        rebaseToZero (bool): if True, the cropped textgrid values
+            will be subtracted by the cropStart
+
+    Returns:
+        bool:
+    """
+    cropCollisionCodes = [
+        constants.CropCollision.STRICT,
+        constants.CropCollision.LAX,
+        constants.CropCollision.TRUNCATED,
+    ]
+    if mode not in cropCollisionCodes:
+        raise errors.WrongOption("mode", mode, cropCollisionCodes)
+
+    containedIntervals = []
+    for interval in intervals:
+        matchedEntry = None
+
+        # Don't need to investigate if the current interval is
+        # before start or after end
+        if interval.end <= start or interval.start >= end:
+            continue
+
+        # Determine if the current interval is wholly contained
+        # within the superEntry
+        if interval.start >= start and interval.end <= end:
+            matchedEntry = interval
+
+        # If the current interval is only partially contained within the
+        # target interval AND inclusion is 'lax', include it anyways
+        elif mode == constants.CropCollision.LAX and (
+            interval.start >= start or interval.end <= end
+        ):
+            matchedEntry = interval
+
+        # The current interval stradles the end of the target interval
+        elif interval.start >= start and interval.end > end:
+            if mode == constants.CropCollision.TRUNCATED:
+                matchedEntry = Interval(interval.start, end, interval.label)
+
+        # The current interval stradles the start of the target interval
+        elif interval.start < start and interval.end <= end:
+            if mode == constants.CropCollision.TRUNCATED:
+                matchedEntry = Interval(start, interval.end, interval.label)
+
+        # The current interval contains the target interval completely
+        elif interval.start <= start and interval.end >= end:
+            if mode == constants.CropCollision.LAX:
+                matchedEntry = interval
+            elif mode == constants.CropCollision.TRUNCATED:
+                matchedEntry = Interval(start, end, interval.label)
+
+        if matchedEntry is not None:
+            containedIntervals.append(matchedEntry)
+
+    return containedIntervals
 
 
 def escapeQuotes(text: str) -> str:

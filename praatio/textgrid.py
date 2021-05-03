@@ -711,74 +711,9 @@ class IntervalTier(TextgridTier):
         if mode not in cropCollisionCodes:
             raise errors.WrongOption("mode", mode, cropCollisionCodes)
 
-        # Debugging variables
-        # cutTStart = 0
-        cutTWithin = 0.0
-        # cutTEnd = 0
-        # firstIntervalKeptProportion = 0
-        # lastIntervalKeptProportion = 0
-
-        newEntryList = []
-        for entry in self.entryList:
-            matchedEntry = None
-
-            # Don't need to investigate if the interval is before or after
-            # the crop region
-            if entry.end <= cropStart or entry.start >= cropEnd:
-                continue
-
-            # Determine if the current subEntry is wholly contained
-            # within the superEntry
-            if entry.start >= cropStart and entry.end <= cropEnd:
-                matchedEntry = entry
-
-            # If it is only partially contained within the superEntry AND
-            # inclusion is 'lax', include it anyways
-            elif mode == "lax" and (entry.start >= cropStart or entry.end <= cropEnd):
-                matchedEntry = entry
-
-            # If not strict, include partial tiers on the edges
-            # -- regardless, record how much information was lost
-            #        - for strict=True, the total time of the cut interval
-            #        - for strict=False, the portion of the interval that lies
-            #            outside the new interval
-
-            # The current interval stradles the end of the new interval
-            elif entry.start >= cropStart and entry.end > cropEnd:
-                # cutTEnd = intervalEnd - cropEnd
-                # lastIntervalKeptProportion = (cropEnd - intervalStart) / (
-                #    intervalEnd - intervalStart
-                # )
-
-                if mode == CropCollision.TRUNCATED:
-                    matchedEntry = (entry.start, cropEnd, entry.label)
-
-                else:
-                    cutTWithin += cropEnd - cropStart
-
-            # The current interval stradles the start of the new interval
-            elif entry.start < cropStart and entry.end <= cropEnd:
-                # cutTStart = cropStart - intervalStart
-                # firstIntervalKeptProportion = (intervalEnd - cropStart) / (
-                #     intervalEnd - intervalStart
-                # )
-                if mode == CropCollision.TRUNCATED:
-                    matchedEntry = (cropStart, entry.end, entry.label)
-                else:
-                    cutTWithin += cropEnd - cropStart
-
-            # The current interval contains the new interval completely
-            elif entry.start <= cropStart and entry.end >= cropEnd:
-
-                if mode == CropCollision.LAX:
-                    matchedEntry = entry
-                elif mode == CropCollision.TRUNCATED:
-                    matchedEntry = (cropStart, cropEnd, entry.label)
-                else:
-                    cutTWithin += cropEnd - cropStart
-
-            if matchedEntry is not None:
-                newEntryList.append(matchedEntry)
+        newEntryList = utils.getIntervalsInInterval(
+            cropStart, cropEnd, self.entryList, mode
+        )
 
         if rebaseToZero is True:
             newEntryList = [
@@ -791,12 +726,7 @@ class IntervalTier(TextgridTier):
             minT = cropStart
             maxT = cropEnd
 
-        # Create subtier
         croppedTier = IntervalTier(self.name, newEntryList, minT, maxT)
-
-        # DEBUG info
-        #         debugInfo = (subTier, cutTStart, cutTWithin, cutTEnd,
-        #                      firstIntervalKeptProportion, lastIntervalKeptProportion)
 
         return croppedTier
 
