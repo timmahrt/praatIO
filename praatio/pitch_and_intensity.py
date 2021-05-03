@@ -85,7 +85,9 @@ def _extractPIPiecewise(
 
     windowSize = medianFilterWindowSize
 
-    assert os.path.exists(inputFN)
+    if not os.path.exists(inputFN):
+        raise errors.PraatioException(f"Required folder does not exist: f{inputFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
 
@@ -145,7 +147,9 @@ def _extractPIFile(
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
 
-    assert os.path.exists(inputFN)
+    if not os.path.exists(inputFN):
+        raise errors.PraatioException(f"Required folder does not exist: f{inputFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
 
@@ -198,7 +202,9 @@ def extractIntensity(
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
 
-    assert os.path.exists(inputFN)
+    if not os.path.exists(inputFN):
+        raise errors.PraatioException(f"Required folder does not exist: f{inputFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
 
@@ -253,7 +259,9 @@ def extractPitchTier(
     else:
         doInterpolation = 0
 
-    assert os.path.exists(wavFN)
+    if not os.path.exists(wavFN):
+        raise errors.PraatioException(f"Required file does not exist: f{wavFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         if os.path.exists(outputFN):
@@ -317,7 +325,9 @@ def extractPitch(
     else:
         doInterpolation = 0
 
-    assert os.path.exists(wavFN)
+    if not os.path.exists(wavFN):
+        raise errors.PraatioException(f"Required file does not exist: f{wavFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         if os.path.exists(outputFN):
@@ -550,7 +560,11 @@ def generatePIMeasures(
             featValList = my_math.znormWindowFilter(
                 featValList, localZNormalizationWindowSize, True, True
             )
-            assert len(featValList) == len(outputList)
+            if len(featValList) != len(outputList):
+                raise errors.PraatioException(
+                    "Lists must be of the same length but are not: "
+                    f"({len(featValList)}), ({len(outputList)})"
+                )
 
             for i, val in enumerate(featValList):
                 outputList[i][colI] = val
@@ -620,7 +634,10 @@ def detectPitchErrors(
 
     If a textgrid is passed in, it adds the markings to the textgrid
     """
-    assert maxJumpThreshold >= 0.0 and maxJumpThreshold <= 1.0
+    if maxJumpThreshold < 0 or maxJumpThreshold > 1:
+        raise errors.PraatioException(
+            f"'maxJumpThreshold' must be between 0 and 1.  Was given ({maxJumpThreshold})"
+        )
 
     errorList = []
     for i in range(1, len(pitchList)):
@@ -635,7 +652,10 @@ def detectPitchErrors(
 
     if tgToMark is not None:
         tierName = _PITCH_ERROR_TIER_NAME
-        assert tierName not in tgToMark.tierNameList
+        if tierName in tgToMark.tierNameList:
+            raise errors.PraatioException(
+                f"Tier name {tierName} is already in textgrid"
+            )
         pointTier = textgrid.PointTier(
             tierName, errorList, tgToMark.minTimestamp, tgToMark.maxTimestamp
         )

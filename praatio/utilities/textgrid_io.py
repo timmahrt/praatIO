@@ -79,23 +79,23 @@ def _removeUltrashortIntervals(
 def _fillInBlanks(
     tier: Dict,
     blankLabel: str = "",
-    startTime: Optional[float] = None,
-    endTime: Optional[float] = None,
+    minTime: Optional[float] = None,
+    maxTime: Optional[float] = None,
 ) -> None:
     """
     Fills in the space between intervals with empty space
 
     This is necessary to do when saving to create a well-formed textgrid
     """
-    if startTime is None:
-        startTime = tier["xmin"]
+    if minTime is None:
+        minTime = tier["xmin"]
 
-    if endTime is None:
-        endTime = tier["xmax"]
+    if maxTime is None:
+        maxTime = tier["xmax"]
 
     # Special case: empty textgrid
     if len(tier["entries"]) == 0:
-        tier["entries"].append((startTime, endTime, blankLabel))
+        tier["entries"].append((minTime, maxTime, blankLabel))
 
     # Create a new entry list
     entryList = tier["entries"]
@@ -113,15 +113,21 @@ def _fillInBlanks(
         prevEnd = newEnd
 
     # Special case: If there is a gap at the start of the file
-    assert float(newEntryList[0][0]) >= float(startTime)
-    if float(newEntryList[0][0]) > float(startTime):
-        newEntryList.insert(0, (startTime, newEntryList[0][0], blankLabel))
+    if float(newEntryList[0][0]) < float(minTime):
+        raise errors.ParsingError(
+            "The entries are shorter than the min time specified in the textgrid."
+        )
+    if float(newEntryList[0][0]) > float(minTime):
+        newEntryList.insert(0, (minTime, newEntryList[0][0], blankLabel))
 
     # Special case -- if there is a gap at the end of the file
-    if endTime is not None:
-        assert float(newEntryList[-1][1]) <= float(endTime)
-        if float(newEntryList[-1][1]) < float(endTime):
-            newEntryList.append((newEntryList[-1][1], endTime, blankLabel))
+    if maxTime is not None:
+        if float(newEntryList[-1][1]) > float(maxTime):
+            raise errors.ParsingError(
+                "The entries are longer than the max time specified in the textgrid."
+            )
+        if float(newEntryList[-1][1]) < float(maxTime):
+            newEntryList.append((newEntryList[-1][1], maxTime, blankLabel))
 
     newEntryList.sort()
     tier["entries"] = newEntryList

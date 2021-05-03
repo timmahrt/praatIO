@@ -6,6 +6,8 @@ import math
 import statistics
 from typing import Callable, List, Tuple
 
+from praatio.utilities import errors
+
 
 def numToStr(inputNum: float) -> str:
     if isclose(inputNum, int(inputNum)):
@@ -39,7 +41,12 @@ def filterTimeSeriesData(
     featureTimeList = [list(row) for row in featureTimeList]
     featValues = [row[index] for row in featureTimeList]
     featValues = filterFunc(featValues, windowSize, useEdgePadding)
-    assert len(featureTimeList) == len(featValues)
+
+    if len(featureTimeList) != len(featValues):
+        errors.PraatioException(
+            "The length of the time values {len(featureTimeList)} does not "
+            "match the length of the data values {len(featValues)}"
+        )
     outputList = [
         [*piRow[:index], f0Val, *piRow[index + 1 :]]
         for piRow, f0Val in zip(featureTimeList, featValues)
@@ -76,7 +83,11 @@ def znormalizeSpeakerData(
             (val - meanVal) / stdDevVal if val > 0 else 0 for val in featValues
         ]
 
-    assert len(featureTimeList) == len(featValues)
+    if len(featureTimeList) != len(featValues):
+        errors.PraatioException(
+            "The length of the time values {len(featureTimeList)} does not "
+            "match the length of the data values {len(featValues)}"
+        )
     outputList = [
         tuple([*piRow[:index], val, *piRow[index + 1 :]])
         for piRow, val in zip(featureTimeList, featValues)

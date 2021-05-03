@@ -278,7 +278,8 @@ def _getMatchFunc(pattern: str):
 
     # '#' Marks word boundaries, so if there is more than one we need to do
     #    something special to make sure we're not mis-representings them
-    assert pattern.count("#") < 2
+    if pattern.count("#") >= 2:
+        raise errors.ParsingError("Found more than one '#' which was not expected.")
 
     def startsWith(subStr, fullStr):
         return fullStr[: len(subStr)] == subStr
@@ -379,7 +380,8 @@ def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
     """
     if enforceLength is True:
         length = len(listOfLists[0])
-        assert all([length == len(subList) for subList in listOfLists])
+        if not all([length == len(subList) for subList in listOfLists]):
+            raise errors.SafeZipException("Lists to zip have different sizes.")
 
     return itertools.zip_longest(*listOfLists)
 

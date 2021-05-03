@@ -13,7 +13,6 @@ generated files.
 """
 
 import unittest
-import os
 import io
 from os.path import join
 
@@ -21,6 +20,7 @@ from os.path import join
 from praatio import textgrid
 from praatio.utilities import constants
 from praatio.utilities import textgrid_io
+from praatio.utilities import errors
 
 from test.testing_utils import areTheSameFiles
 from test.praatio_test_case import PraatioTestCase
@@ -219,7 +219,7 @@ class IOTests(PraatioTestCase):
 
         self.assertEqual(expectedEntryList, actualEntryList)
 
-    def test_save_with_force_too_large_minimum_time(self):
+    def test_save_with_force_too_small_minimum_time(self):
         # If you choose to force save to use a minTimestamp, all
         # of your entries must be higher than that minTimestamp
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
@@ -228,7 +228,7 @@ class IOTests(PraatioTestCase):
         tg = textgrid.Textgrid()
         tg.addTier(tier)
 
-        self.assertRaises(AssertionError, run_save, tg, minTimestamp=1.0)
+        self.assertRaises(errors.ParsingError, run_save, tg, minTimestamp=1.0)
 
     def test_save_with_minimum_interval_length(self):
         # The first entry will be stretched to fill the unlabeled region in

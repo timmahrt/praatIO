@@ -20,6 +20,7 @@ class TextgridFormats:
     JSON: Final = "json"
 
 
-POINT: Final = "PointProcess"
-PITCH: Final = "PitchTier"
-DURATION: Final = "DurationTier"
+class DataPointTypes:
+    POINT: Final = "PointProcess"
+    PITCH: Final = "PitchTier"
+    DURATION: Final = "DurationTier"

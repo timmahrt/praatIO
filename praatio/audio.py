@@ -314,19 +314,22 @@ class WavQueryObj(AbstractWav):
         sineWaveAmplitude: if None and operation is "sine wave"
                            use max amplitude.
         """
-
-        assert operation in [
+        operationOptions = [
             AudioDeletion.SHRINK,
             AudioDeletion.SILENCE,
             AudioDeletion.SINE_WAVE,
         ]
+        if operation not in operationOptions:
+            raise errors.WrongOption("operation", operation, operationOptions)
 
         duration = float(self.nframes) / self.framerate
 
-        # Need to specify what to keep or what to delete, but can't
-        # specify both
-        assert keepList is not None or deleteList is not None
-        assert keepList is None or deleteList is None
+        if (keepList is not None and deleteList is not None) or (
+            keepList is None and deleteList is None
+        ):
+            raise errors.PraatioException(
+                "You must specify 'keepList' or 'deleteList' but not both."
+            )
 
         if keepList is None and deleteList is not None:
             computedKeepList = utils.invertIntervalList(
@@ -479,8 +482,10 @@ def openAudioFile(
 
     duration = nframes / float(framerate)
 
-    # Can't specify both the keepList and the deleteList
-    assert keepList is None or deleteList is None
+    if keepList is not None and deleteList is not None:
+        raise errors.PraatioException(
+            "You cannot specify both 'keepList' or 'deleteList'."
+        )
 
     if keepList is None and deleteList is not None:
         computedKeepList = utils.invertIntervalList(

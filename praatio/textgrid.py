@@ -55,6 +55,21 @@ T = TypeVar("T", bound="TextgridTier")
 # )
 
 
+def overshootCheck(
+    start: float, end: float, minTimestamp: float, maxTimestamp: float
+) -> None:
+    if start < minTimestamp:
+        raise errors.TextgridException(
+            f"Time ({start}) exceed Textgrid's minimum "
+            "({minTimestamp}). If this is desired, set overshoot=True)"
+        )
+    if end > maxTimestamp:
+        raise errors.TextgridException(
+            f"Time ({end}) exceed Textgrid's maximum "
+            "({maxTimestamp}). If this is desired, set overshoot=True)"
+        )
+
+
 class IntervalCollision:
     REPLACE: Final = "replace"
     MERGE: Final = "merge"
@@ -64,6 +79,7 @@ class WhitespaceCollision:
     STRETCH: Final = "stretch"
     SPLIT: Final = "split"
     NO_CHANGE: Final = "no_change"
+    ERROR: Final = "error"
 
 
 class CropCollision:
@@ -120,16 +136,14 @@ class TextgridTier(ABC):
 
         This tier's maxtimestamp will be lengthened by the amount in the passed in tier.
         """
-
-        minTime = self.minTimestamp
-        if tier.minTimestamp < minTime:
-            minTime = tier.minTimestamp
+        if self.tierType != tier.tierType:
+            raise errors.TextgridException(
+                f"Cannot append a tier of type {type(self)} to a tier of type {type(tier)}."
+            )
 
         maxTime = self.maxTimestamp + tier.maxTimestamp
 
         appendTier = tier.editTimestamps(self.maxTimestamp, allowOvershoot=True)
-
-        assert self.tierType == tier.tierType
 
         entryList = self.entryList + appendTier.entryList
         entryList.sort()
@@ -382,8 +396,9 @@ class PointTier(TextgridTier):
 
             newTimestamp = timestamp + offset
             if not allowOvershoot:
-                assert newTimestamp > self.minTimestamp
-                assert newTimestamp <= self.maxTimestamp
+                overshootCheck(
+                    newTimestamp, newTimestamp, self.minTimestamp, self.maxTimestamp
+                )
 
             if newTimestamp < 0:
                 continue
@@ -627,7 +642,12 @@ class IntervalTier(TextgridTier):
             if entry[0] >= entry[1]:
                 fmtStr = "Anomaly: startTime=%f, endTime=%f, label=%s"
                 print((fmtStr % (entry[0], entry[1], entry[2])))
-            assert entry[0] < entry[1]
+
+            if entry[0] >= entry[1]:
+                raise errors.TextgridException(
+                    "The start time of an interval ({entry[0]}) "
+                    "cannot occur after its end time ({entry[1]})"
+                )
 
         # Remove whitespace
         tmpEntryList = []
@@ -678,11 +698,13 @@ class IntervalTier(TextgridTier):
             IntervalTier: the modified version of the current tier
         """
 
-        assert mode in [
+        cropCollisionCodes = [
             CropCollision.STRICT,
             CropCollision.LAX,
             CropCollision.TRUNCATED,
         ]
+        if mode not in cropCollisionCodes:
+            raise errors.WrongOption("mode", mode, cropCollisionCodes)
 
         # Debugging variables
         # cutTStart = 0
@@ -823,8 +845,7 @@ class IntervalTier(TextgridTier):
             newStart = offset + interval.start
             newEnd = offset + interval.end
             if allowOvershoot is not True:
-                assert newStart >= self.minTimestamp
-                assert newEnd <= self.maxTimestamp
+                overshootCheck(newStart, newEnd, self.minTimestamp, self.maxTimestamp)
 
             if newEnd < 0:
                 continue
@@ -880,10 +901,14 @@ class IntervalTier(TextgridTier):
         newTier = self.new()
 
         # if the collisionCode is not properly set it isn't clear what to do
-        assert collisionCode in [
+        eraseCollisionCodes = [
             EraseCollision.TRUNCATE,
             EraseCollision.CATEGORICAL,
         ]
+        if collisionCode not in eraseCollisionCodes:
+            raise errors.WrongOption(
+                "collisionCode", collisionCode, eraseCollisionCodes
+            )
 
         if len(matchList) == 0:
             pass
@@ -1065,7 +1090,7 @@ class IntervalTier(TextgridTier):
         self,
         start: float,
         duration: float,
-        collisionCode: Optional[Literal["stretch", "split", "no_change"]] = None,
+        collisionCode: Literal["stretch", "split", "no_change", "error"],
     ) -> "IntervalTier":
         """
         Inserts a blank region into the tier
@@ -1074,23 +1099,28 @@ class IntervalTier(TextgridTier):
             start (float):
             duration (float)
             collisionCode (str): determines the behavior that occurs if
-                an interval stradles the starting pointone of ['stretch',
-                'split', 'no change']
+                an interval stradles the starting point
+                one of ['stretch', 'split', 'no change', 'error']
                 - 'stretch' stretches the interval by /duration/ amount
                 - 'split' splits the interval into two--everything to the
                     right of 'start' will be advanced by 'duration' seconds
                 - 'no change' leaves the interval as is with no change
+                - 'error' will stop execution and raise an error
 
         Returns:
             IntervalTier: the modified version of the current tier
         """
 
-        # if the collisionCode is not properly set it isn't clear what to do
-        assert collisionCode in [
+        availableCollisionCodes = [
             WhitespaceCollision.STRETCH,
             WhitespaceCollision.SPLIT,
             WhitespaceCollision.NO_CHANGE,
+            WhitespaceCollision.ERROR,
         ]
+        if collisionCode not in availableCollisionCodes:
+            raise errors.WrongOption(
+                "collisionCode", collisionCode, availableCollisionCodes
+            )
 
         newEntryList = []
         for interval in self.entryList:
@@ -1127,6 +1157,11 @@ class IntervalTier(TextgridTier):
                     )
                 elif collisionCode == WhitespaceCollision.NO_CHANGE:
                     newEntryList.append(interval)
+                else:
+                    raise errors.PraatioException(
+                        f"Collision occured during insertSpace() for interval '{interval}' "
+                        f"and given white space insertion interval ({start}, {start + duration})"
+                    )
 
         newTier = self.new(
             entryList=newEntryList, maxTimestamp=self.maxTimestamp + duration
@@ -1251,7 +1286,8 @@ class Textgrid:
             None
         """
 
-        assert tier.name not in list(self.tierDict.keys())
+        if tier.name in list(self.tierDict.keys()):
+            raise errors.TextgridException("Tier name already in tier")
 
         if tierIndex is None:
             self.tierNameList.append(tier.name)
@@ -1363,11 +1399,13 @@ class Textgrid:
             Textgrid: the modified version of the current textgrid
         """
 
-        assert mode in [
+        availableModes = [
             CropCollision.STRICT,
             CropCollision.LAX,
             CropCollision.TRUNCATED,
         ]
+        if mode not in availableModes:
+            raise errors.WrongOption("mode", mode, availableModes)
 
         newTG = Textgrid()
 

@@ -1,6 +1,7 @@
 import unittest
 
 from praatio.utilities import utils
+from praatio.utilities import errors
 
 
 class UtilsTests(unittest.TestCase):
@@ -39,7 +40,7 @@ class UtilsTests(unittest.TestCase):
     def test_safe_zip(self):
         listToZip = [[1, 2, 3], [4, 5, 6, 7]]
 
-        self.assertRaises(AssertionError, utils.safeZip, listToZip, True)
+        self.assertRaises(errors.SafeZipException, utils.safeZip, listToZip, True)
 
         expectedZippedResult = [(1, 4), (2, 5), (3, 6), (None, 7)]
         self.assertEqual(expectedZippedResult, list(utils.safeZip(listToZip, False)))

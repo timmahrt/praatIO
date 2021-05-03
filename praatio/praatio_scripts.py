@@ -16,6 +16,7 @@ from typing_extensions import Literal, Final
 from praatio import textgrid
 from praatio import audio
 from praatio.utilities.constants import Point, Interval
+from praatio.utilities import errors
 
 
 class NameStyle:
@@ -522,8 +523,10 @@ def _findMisalignments(
                 if subEnd >= filterStartT and subEnd <= filterStopT:
                     rightMatchVal = subEnd
 
-                # There should be at most one matching boundary
-                assert leftMatchVal is None or rightMatchVal is None
+                if leftMatchVal is not None and rightMatchVal is not None:
+                    raise errors.PraatioException(
+                        "There should be at most one matching boundary."
+                    )
 
                 # Set the matching boundary info
                 if leftMatchVal is not None:
@@ -560,7 +563,8 @@ def _findMisalignments(
     if len(valUniqueList) > 1:
         countList = [valList.count(val) for val in valUniqueList]
         bestVal = valUniqueList[countList.index(max(countList))]
-        assert bestVal is not None
+        if bestVal is None:
+            raise errors.PraatioException("Could not find the optimal value")
         for tierName, _, oldEntry, orderID in matchList:
 
             newEntry = list(copy.deepcopy(oldEntry))

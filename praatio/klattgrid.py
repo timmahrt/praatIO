@@ -59,7 +59,10 @@ class _KlattBaseTier(object):
         else:
             self.tierNameList.insert(tierIndex, tier.name)
 
-        assert tier.name not in list(self.tierDict.keys())
+        if tier.name in list(self.tierDict.keys()):
+            raise errors.TextgridException(
+                f"Cannot add tier with name {tier.name} as it already exists in the Klattgrid"
+            )
         self.tierDict[tier.name] = tier
 
         minV = tier.minTimestamp
@@ -507,7 +510,10 @@ def _cleanNumericValues(dataStr: str) -> str:
     for row in dataList:
         row = row.rstrip()
         try:
-            assert "min" not in row and "max" not in row
+            if "min" in row or "max" in row:
+                raise errors.ParsingError(
+                    f"Found unexpected keyword 'min' or 'max' in row {row}"
+                )
 
             head, tail = row.split("=")
             head = head.rstrip()

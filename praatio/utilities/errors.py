@@ -3,6 +3,35 @@ from typing import List, Union
 from praatio.utilities import constants
 
 
+class SafeZipException(Exception):
+    pass
+
+
+class ParsingError(Exception):
+    pass
+
+
+class WrongOption(Exception):
+    def __init__(self, argumentName: str, givenValue: str, availableOptions: List[str]):
+        self.argumentName = argumentName
+        self.givenValue = givenValue
+        self.availableOptions = availableOptions
+
+    def __str__(self):
+        return (
+            f"For argument '{self.argumentName}' was given the value '{self.givenValue}'. "
+            f"However, expected one of [{', '.join(self.availableOptions)}]"
+        )
+
+
+class PraatioException(Exception):
+    pass
+
+
+class TextgridException(Exception):
+    pass
+
+
 class TextgridCollisionException(Exception):
     def __init__(
         self,
