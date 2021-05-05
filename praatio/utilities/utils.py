@@ -10,7 +10,7 @@ import itertools
 import io
 import wave
 from pkg_resources import resource_filename
-from typing import Any, Iterator, List, Tuple
+from typing import Any, Iterator, List, Tuple, NoReturn, Type
 
 from typing_extensions import Literal
 
@@ -24,6 +24,23 @@ scriptsPath = resource_filename(
     "praatio",
     "praatScripts",
 )
+
+
+def reportNoop(_exception: Type[BaseException], _text: str) -> None:
+    pass
+
+
+def reportException(exception: Type[BaseException], text: str) -> NoReturn:
+    raise exception(text)
+
+
+def reportWarning(_exception: Type[BaseException], text: str) -> None:
+    print(text)
+
+
+def validateOption(variableName, value, optionClass):
+    if value not in optionClass.validOptions:
+        raise errors.WrongOption(variableName, value, optionClass.validOptions)
 
 
 def intervalOverlapCheck(
@@ -111,13 +128,7 @@ def getIntervalsInInterval(
     Returns:
         bool:
     """
-    cropCollisionCodes = [
-        constants.CropCollision.STRICT,
-        constants.CropCollision.LAX,
-        constants.CropCollision.TRUNCATED,
-    ]
-    if mode not in cropCollisionCodes:
-        raise errors.WrongOption("mode", mode, cropCollisionCodes)
+    validateOption("mode", mode, constants.CropCollision)
 
     containedIntervals = []
     for interval in intervals:

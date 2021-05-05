@@ -49,12 +49,6 @@ from praatio.utilities import utils
 
 T = TypeVar("T", bound="TextgridTier")
 
-# CollisionCode = enum.Enum("CollisionCode", "REPLACE MERGE")
-
-# WhiteSpaceCollisionCode = enum.Enum(
-#     "WhiteSpaceCollisionCode", "STRETCH SPLIT NO_CHANGE"
-# )
-
 
 def overshootCheck(
     start: float, end: float, minTimestamp: float, maxTimestamp: float
@@ -71,10 +65,26 @@ def overshootCheck(
         )
 
 
+class ErrorReportingMode:
+    SILENCE: Final = "silence"
+    WARNING: Final = "warning"
+    ERROR: Final = "error"
+
+    validOptions = [SILENCE, WARNING, ERROR]
+
+    modeToFunc = {
+        SILENCE: utils.reportNoop,
+        WARNING: utils.reportWarning,
+        ERROR: utils.reportException,
+    }
+
+
 class IntervalCollision:
     REPLACE: Final = "replace"
     MERGE: Final = "merge"
     ERROR: Final = "error"
+
+    validOptions = [REPLACE, MERGE, ERROR]
 
 
 class WhitespaceCollision:
@@ -83,11 +93,15 @@ class WhitespaceCollision:
     NO_CHANGE: Final = "no_change"
     ERROR: Final = "error"
 
+    validOptions = [STRETCH, SPLIT, NO_CHANGE, ERROR]
+
 
 class EraseCollision:
     TRUNCATE: Final = "truncate"
     CATEGORICAL: Final = "categorical"
     ERROR: Final = "error"
+
+    validOptions = [TRUNCATE, CATEGORICAL, ERROR]
 
 
 class TextgridTier(ABC):
@@ -101,7 +115,11 @@ class TextgridTier(ABC):
         entryList: List,
         minT: float,
         maxT: float,
+        errorMode: Literal["silence", "warning", "error"] = "warning",
     ):
+        "A container that stores and operates over interval and point tiers"
+        utils.validateOption("errorMode", errorMode, ErrorReportingMode)
+
         """See PointTier or IntervalTier"""
         entryList.sort()
 
@@ -109,6 +127,7 @@ class TextgridTier(ABC):
         self.entryList = entryList
         self.minTimestamp = minT
         self.maxTimestamp = maxT
+        self.errorReporter = ErrorReportingMode.modeToFunc[errorMode]
 
     def __eq__(self, other):
         isEqual = True
@@ -232,7 +251,11 @@ class TextgridTier(ABC):
         retTier = self.new()
 
         for entry in tier.entryList:
-            retTier.insertEntry(entry, False, collisionCode=IntervalCollision.MERGE)
+            retTier.insertEntry(
+                entry,
+                collisionMode=IntervalCollision.MERGE,
+                collisionReportingMode=ErrorReportingMode.SILENCE,
+            )
 
         retTier.sort()
 
@@ -248,8 +271,8 @@ class TextgridTier(ABC):
     def insertEntry(
         self,
         entry,
-        warnFlag: bool = True,
-        collisionCode: Literal["replace", "merge", "error"] = "error",
+        collisionMode: Literal["replace", "merge", "error"] = "error",
+        collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:  # pragma: no cover
         pass
 
@@ -258,7 +281,7 @@ class TextgridTier(ABC):
         self,
         start: float,
         end: float,
-        collisionCode: Literal["truncate", "categorical", "error"] = "error",
+        collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "TextgridTier":  # pragma: no cover
         pass
@@ -278,12 +301,16 @@ class TextgridTier(ABC):
         self,
         start: float,
         duration: float,
-        collisionCode: Literal["stretch", "split", "no_change", "error"],
+        collisionMode: Literal["stretch", "split", "no_change", "error"],
     ) -> "TextgridTier":  # pragma: no cover
         pass
 
     @abstractmethod
     def deleteEntry(self, entry) -> None:  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def validate(self, reportingMode) -> bool:  # pragma: no cover
         pass
 
 
@@ -463,7 +490,7 @@ class PointTier(TextgridTier):
         self,
         start: float,
         end: float,
-        collisionCode: Literal["truncate", "categorical", "error"] = "error",
+        collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "PointTier":
         """
@@ -472,7 +499,7 @@ class PointTier(TextgridTier):
         Args:
             start (float): the start of the deletion interval
             end (float): the end of the deletion interval
-            collisionCode (str): Ignored for the moment (added for compatibility with
+            collisionMode (str): Ignored for the moment (added for compatibility with
                 eraseRegion() for Interval Tiers)
             doShrink (bool): if True, moves leftward by (/end/ - /start/) all points
                 to the right of /end/
@@ -512,8 +539,8 @@ class PointTier(TextgridTier):
     def insertEntry(
         self,
         entry: Point,
-        warnFlag: bool = True,
-        collisionCode: Literal["replace", "merge", "error"] = "error",
+        collisionMode: Literal["replace", "merge", "error"] = "error",
+        collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
         """
         inserts an interval into the tier
@@ -521,7 +548,7 @@ class PointTier(TextgridTier):
         Args:
             entry (tuple|Point): the entry to insert
             warnFlag (bool): see below for details
-            collisionCode (str): determines the behavior if intervals exist in
+            collisionMode (str): determines the behavior if intervals exist in
                 the insertion area. One of ('replace', 'merge', or None)
                 - 'replace', existing items will be removed
                 - 'merge', inserting item will be fused with existing items
@@ -530,16 +557,15 @@ class PointTier(TextgridTier):
         Returns:
             None
 
-        If warnFlag is True and collisionCode is not None, the user is notified
+        If warnFlag is True and collisionMode is not None, the user is notified
         of each collision
         """
-        validCollisionCodes = [
-            IntervalCollision.REPLACE,
-            IntervalCollision.MERGE,
-            IntervalCollision.ERROR,
-        ]
-        if collisionCode not in validCollisionCodes:
-            errors.WrongOption("collisionCode", collisionCode, validCollisionCodes)
+
+        utils.validateOption("collisionMode", collisionMode, IntervalCollision)
+        utils.validateOption(
+            "collisionReportingMode", collisionReportingMode, ErrorReportingMode
+        )
+        collisionReporter = ErrorReportingMode.modeToFunc[collisionReportingMode]
 
         if not isinstance(entry, Point):
             newPoint = Point(entry[0], entry[1])
@@ -556,11 +582,11 @@ class PointTier(TextgridTier):
         if len(matchList) == 0:
             self.entryList.append(newPoint)
 
-        elif collisionCode == IntervalCollision.REPLACE:
+        elif collisionMode == IntervalCollision.REPLACE:
             self.deleteEntry(self.entryList[i])
             self.entryList.append(newPoint)
 
-        elif collisionCode == IntervalCollision.MERGE:
+        elif collisionMode == IntervalCollision.MERGE:
             oldPoint = self.entryList[i]
             mergedPoint = Point(
                 newPoint.time, "-".join([oldPoint.label, newPoint.label])
@@ -573,15 +599,17 @@ class PointTier(TextgridTier):
 
         self.sort()
 
-        if len(matchList) != 0 and warnFlag is True:
-            fmtStr = "Collision warning for %s with items %s of tier %s"
-            print((fmtStr % (str(entry), str(matchList), self.name)))
+        if len(matchList) != 0:
+            collisionReporter(
+                errors.TextgridException,
+                f"Collision warning for ({point}) with items ({matchList}) of tier '{self.name}'",
+            )
 
     def insertSpace(
         self,
         start: float,
         duration: float,
-        _collisionCode: Literal["stretch", "split", "no_change", "error"] = "error",
+        _collisionMode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "PointTier":
         """
         Inserts a region into the tier
@@ -589,7 +617,7 @@ class PointTier(TextgridTier):
         Args:
             start (float): the start time to insert a space at
             duration (float): the duration of the space to insert
-            collisionCode (str): Ignored for the moment (added for compatibility
+            collisionMode (str): Ignored for the moment (added for compatibility
                 with insertSpace() for Interval Tiers)
 
         Returns:
@@ -608,6 +636,55 @@ class PointTier(TextgridTier):
         )
 
         return newTier
+
+    def validate(
+        self, reportingMode: Literal["silence", "warning", "error"] = "warning"
+    ) -> bool:
+        """
+        Validate this tier
+
+        Returns whether the tier is valid or not. If reportingMode is "warning"
+        or "error" this will also print on error or stop execution, respectively.
+
+        Args:
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if there is a size difference between the
+                maxTimestamp in the tier and the current textgrid.
+
+        Returns:
+            bool
+        """
+        utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
+        errorReporter = ErrorReportingMode.modeToFunc[reportingMode]
+
+        isValid = True
+        previousPoint = None
+        for point in self.entryList:
+            if previousPoint and previousPoint.time > point.time:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Points are not sorted in time: "
+                    f"[({previousPoint}), ({point})]",
+                )
+
+            if self.minTimestamp > point.time:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Point ({point})occurs before tier's minimum timestamp ({self.minTimestamp})",
+                )
+
+            if self.maxTimestamp < point.time:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Point ({point})occurs after tier's maximum timestamp ({self.maxTimestamp})",
+                )
+
+            previousPoint = point
+
+        return isValid
 
 
 class IntervalTier(TextgridTier):
@@ -703,13 +780,7 @@ class IntervalTier(TextgridTier):
             IntervalTier: the modified version of the current tier
         """
 
-        cropCollisionCodes = [
-            CropCollision.STRICT,
-            CropCollision.LAX,
-            CropCollision.TRUNCATED,
-        ]
-        if mode not in cropCollisionCodes:
-            raise errors.WrongOption("mode", mode, cropCollisionCodes)
+        utils.validateOption("mode", mode, CropCollision)
 
         newEntryList = utils.getIntervalsInInterval(
             cropStart, cropEnd, self.entryList, mode
@@ -753,7 +824,7 @@ class IntervalTier(TextgridTier):
             retTier = retTier.eraseRegion(
                 entry.start,
                 entry.end,
-                collisionCode=EraseCollision.TRUNCATE,
+                collisionMode=EraseCollision.TRUNCATE,
                 doShrink=False,
             )
 
@@ -808,7 +879,7 @@ class IntervalTier(TextgridTier):
         self,
         start: float,
         end: float,
-        collisionCode: Literal["truncate", "categorical", "error"] = "error",
+        collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "IntervalTier":
         """
@@ -817,7 +888,7 @@ class IntervalTier(TextgridTier):
         Args:
             start (float):
             end (float):
-            collisionCode (EraseRegionCollisionCode): determines the behavior when
+            collisionMode (EraseRegionCollisionMode): determines the behavior when
                 the region to erase overlaps with existing intervals. One of
                 ['truncate', 'categorical', 'error']
                 - 'truncate' partially contained entries will have the portion
@@ -831,20 +902,10 @@ class IntervalTier(TextgridTier):
         Returns:
             IntervalTier: the modified version of the current tier
         """
+        utils.validateOption("collisionMode", collisionMode, EraseCollision)
 
         matchList = self.crop(start, end, CropCollision.LAX, False).entryList
         newTier = self.new()
-
-        # if the collisionCode is not properly set it isn't clear what to do
-        eraseCollisionCodes = [
-            EraseCollision.TRUNCATE,
-            EraseCollision.CATEGORICAL,
-            EraseCollision.ERROR,
-        ]
-        if collisionCode not in eraseCollisionCodes:
-            raise errors.WrongOption(
-                "collisionCode", collisionCode, eraseCollisionCodes
-            )
 
         if len(matchList) == 0:
             pass
@@ -858,7 +919,7 @@ class IntervalTier(TextgridTier):
             # If we're only truncating, reinsert entries on the left and
             # right edges
             # if categorical, it doesn't make it into the list at all
-            if collisionCode == EraseCollision.TRUNCATE:
+            if collisionMode == EraseCollision.TRUNCATE:
 
                 # Check left edge
                 if matchList[0].start < start:
@@ -962,8 +1023,8 @@ class IntervalTier(TextgridTier):
     def insertEntry(
         self,
         entry: Interval,
-        warnFlag: bool = True,
-        collisionCode: Literal["replace", "merge", "error"] = "error",
+        collisionMode: Literal["replace", "merge", "error"] = "error",
+        collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
         """
         inserts an interval into the tier
@@ -971,25 +1032,23 @@ class IntervalTier(TextgridTier):
         Args:
             entry (list|Interval): the Interval to insert
             warnFlag (bool):
-            collisionCode: determines the behavior in the event that intervals
+            collisionMode: determines the behavior in the event that intervals
                 exist in the insertion area.  One of ['replace', 'merge' None]
                 - 'replace' will remove existing items
                 - 'merge' will fuse the inserting item with existing items
                 - None or any other value will throw a TextgridCollisionException
 
-        if *warnFlag* is True and *collisionCode* is not None,
+        if *warnFlag* is True and *collisionMode* is not None,
         the user is notified of each collision
 
         Returns:
             IntervalTier: the modified version of the current tier
         """
-        validCollisionCodes = [
-            IntervalCollision.REPLACE,
-            IntervalCollision.MERGE,
-            IntervalCollision.ERROR,
-        ]
-        if collisionCode not in validCollisionCodes:
-            errors.WrongOption("collisionCode", collisionCode, validCollisionCodes)
+        utils.validateOption("collisionMode", collisionMode, IntervalCollision)
+        utils.validateOption(
+            "collisionReportingMode", collisionReportingMode, ErrorReportingMode
+        )
+        collisionReporter = ErrorReportingMode.modeToFunc[collisionReportingMode]
 
         if not isinstance(entry, Interval):
             interval = Interval(*entry)
@@ -1003,12 +1062,12 @@ class IntervalTier(TextgridTier):
         if len(matchList) == 0:
             self.entryList.append(interval)
 
-        elif collisionCode == IntervalCollision.REPLACE:
+        elif collisionMode == IntervalCollision.REPLACE:
             for matchEntry in matchList:
                 self.deleteEntry(matchEntry)
             self.entryList.append(interval)
 
-        elif collisionCode == IntervalCollision.MERGE:
+        elif collisionMode == IntervalCollision.MERGE:
             for matchEntry in matchList:
                 self.deleteEntry(matchEntry)
             matchList.append(interval)
@@ -1026,15 +1085,18 @@ class IntervalTier(TextgridTier):
 
         self.sort()
 
-        if len(matchList) != 0 and warnFlag is True:
-            fmtStr = "Collision warning for %s with items %s of tier %s"
-            print((fmtStr % (str(interval), str(matchList), self.name)))
+        if len(matchList) != 0:
+            collisionReporter(
+                errors.TextgridException,
+                f"Collision warning for ({interval}) with items "
+                f"({matchList}) of tier '{self.name}'",
+            )
 
     def insertSpace(
         self,
         start: float,
         duration: float,
-        collisionCode: Literal["stretch", "split", "no_change", "error"],
+        collisionMode: Literal["stretch", "split", "no_change", "error"],
     ) -> "IntervalTier":
         """
         Inserts a blank region into the tier
@@ -1042,7 +1104,7 @@ class IntervalTier(TextgridTier):
         Args:
             start (float):
             duration (float)
-            collisionCode (str): determines the behavior that occurs if
+            collisionMode (str): determines the behavior that occurs if
                 an interval stradles the starting point
                 one of ['stretch', 'split', 'no change', 'error']
                 - 'stretch' stretches the interval by /duration/ amount
@@ -1054,17 +1116,7 @@ class IntervalTier(TextgridTier):
         Returns:
             IntervalTier: the modified version of the current tier
         """
-
-        availableCollisionCodes = [
-            WhitespaceCollision.STRETCH,
-            WhitespaceCollision.SPLIT,
-            WhitespaceCollision.NO_CHANGE,
-            WhitespaceCollision.ERROR,
-        ]
-        if collisionCode not in availableCollisionCodes:
-            raise errors.WrongOption(
-                "collisionCode", collisionCode, availableCollisionCodes
-            )
+        utils.validateOption("collisionMode", collisionMode, WhitespaceCollision)
 
         newEntryList = []
         for interval in self.entryList:
@@ -1082,13 +1134,13 @@ class IntervalTier(TextgridTier):
                 )
             # Entry straddles the insertion point
             elif interval.start <= start and interval.end > start:
-                if collisionCode == WhitespaceCollision.STRETCH:
+                if collisionMode == WhitespaceCollision.STRETCH:
                     newEntryList.append(
                         Interval(
                             interval.start, interval.end + duration, interval.label
                         )
                     )
-                elif collisionCode == WhitespaceCollision.SPLIT:
+                elif collisionMode == WhitespaceCollision.SPLIT:
                     # Left side of the split
                     newEntryList.append(Interval(interval.start, start, interval.label))
                     # Right side of the split
@@ -1099,7 +1151,7 @@ class IntervalTier(TextgridTier):
                             interval.label,
                         )
                     )
-                elif collisionCode == WhitespaceCollision.NO_CHANGE:
+                elif collisionMode == WhitespaceCollision.NO_CHANGE:
                     newEntryList.append(interval)
                 else:
                     raise errors.PraatioException(
@@ -1196,10 +1248,77 @@ class IntervalTier(TextgridTier):
 
         return IntervalTier(self.name, newEntryList, newMin, newMax)
 
+    def validate(
+        self, reportingMode: Literal["silence", "warning", "error"] = "warning"
+    ) -> bool:
+        """
+        Validate this tier
+
+        Returns whether the tier is valid or not. If reportingMode is "warning"
+        or "error" this will also print on error or stop execution, respectively.
+
+        Args:
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if there is a size difference between the
+                maxTimestamp in the tier and the current textgrid.
+
+        Returns:
+            bool
+        """
+        utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
+        errorReporter = ErrorReportingMode.modeToFunc[reportingMode]
+
+        isValid = True
+        previousInterval = None
+        for interval in self.entryList:
+            if interval.start >= interval.end:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Invalid interval. End time occurs before or on the start time({interval}).",
+                )
+
+            if previousInterval and previousInterval.end > interval.start:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Intervals are not sorted in time: "
+                    f"[({previousInterval}), ({interval})]",
+                )
+
+            if self.minTimestamp > interval.start:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Interval ({interval})starts before tier's minimum "
+                    f"timestamp ({self.minTimestamp})",
+                )
+
+            if self.maxTimestamp < interval.end:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Interval ({interval})ends after tier's maximum "
+                    f"timestamp ({self.maxTimestamp})",
+                )
+
+            previousInterval = interval
+
+        return isValid
+
 
 class Textgrid:
     def __init__(self):
-        "A container that stores and operates over interval and point tiers"
+        """
+        A container that stores and operates over interval and point tiers
+
+        Args:
+            errorMode (str): one of "silence", "warning" or "error". Determines
+            the behavior for some non-fatal errors (generally involving incompatibilities
+            between tiers, such as tiers having different maximum lengths -- which may
+            be surprising or expected, depending on the use-case.)
+        """
+
         self.tierNameList: List[str] = []  # Preserves the order of the tiers
         self.tierDict: Dict[str, TextgridTier] = {}
 
@@ -1219,17 +1338,27 @@ class Textgrid:
 
         return isEqual
 
-    def addTier(self, tier: "TextgridTier", tierIndex: Optional[int] = None) -> None:
+    def addTier(
+        self,
+        tier: "TextgridTier",
+        tierIndex: Optional[int] = None,
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
+    ) -> None:
         """
         Add a tier to this textgrid.
 
         Args:
             tier (TextgridTier):
             tierIndex (int): if specified, insert the tier into the specified position
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if there is a size difference between the
+                maxTimestamp in the tier and the current textgrid.
 
         Returns:
             None
         """
+        utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
+        errorReporter = ErrorReportingMode.modeToFunc[reportingMode]
 
         if tier.name in list(self.tierDict.keys()):
             raise errors.TextgridException("Tier name already in tier")
@@ -1243,7 +1372,7 @@ class Textgrid:
 
         minV = tier.minTimestamp
         if self.minTimestamp is not None and minV < self.minTimestamp:
-            self.errorReporter(
+            errorReporter(
                 errors.TextgridException,
                 f"Minimum timestamp in Textgrid changed from ({self.minTimestamp}) to ({minV})",
             )
@@ -1252,7 +1381,7 @@ class Textgrid:
 
         maxV = tier.maxTimestamp
         if self.maxTimestamp is not None and maxV < self.maxTimestamp:
-            self.errorReporter(
+            errorReporter(
                 errors.TextgridException,
                 f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
             )
@@ -1353,14 +1482,7 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
-
-        availableModes = [
-            CropCollision.STRICT,
-            CropCollision.LAX,
-            CropCollision.TRUNCATED,
-        ]
-        if mode not in availableModes:
-            raise errors.WrongOption("mode", mode, availableModes)
+        utils.validateOption("mode", mode, CropCollision)
 
         newTG = Textgrid()
 
@@ -1441,7 +1563,7 @@ class Textgrid:
         self,
         start: float,
         duration: float,
-        collisionCode: Literal["stretch", "split", "no_change", "error"] = "error",
+        collisionMode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "Textgrid":
         """
         Inserts a blank region into a textgrid
@@ -1452,7 +1574,7 @@ class Textgrid:
         Args:
             start (float):
             duration (float):
-            collisionCode (str): Determines behaviour in the event that an
+            collisionMode (str): Determines behavior in the event that an
                 interval stradles the starting point.
                 One of ['stretch', 'split', 'no change', None]
                 - 'stretch' stretches the interval by /duration/ amount
@@ -1464,16 +1586,7 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
-        availableCollisionCodes = [
-            WhitespaceCollision.STRETCH,
-            WhitespaceCollision.SPLIT,
-            WhitespaceCollision.NO_CHANGE,
-            WhitespaceCollision.ERROR,
-        ]
-        if collisionCode not in availableCollisionCodes:
-            raise errors.WrongOption(
-                "collisionCode", collisionCode, availableCollisionCodes
-            )
+        utils.validateOption("collisionMode", collisionMode, WhitespaceCollision)
 
         newTG = Textgrid()
         newTG.minTimestamp = self.minTimestamp
@@ -1481,7 +1594,7 @@ class Textgrid:
 
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
-            newTier = tier.insertSpace(start, duration, collisionCode)
+            newTier = tier.insertSpace(start, duration, collisionMode)
             newTG.addTier(newTier)
 
         return newTG
@@ -1553,8 +1666,9 @@ class Textgrid:
         maxTimestamp: Optional[float] = None,
         outputFormat: Literal[
             "short_textgrid", "long_textgrid", "json"
-        ] = TextgridFormats.SHORT_TEXTGRID,
+        ] = "short_textgrid",
         ignoreBlankSpaces: bool = False,
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
         """
         Save the current textgrid to a file
@@ -1577,18 +1691,19 @@ class Textgrid:
             outputFormat (str): one of ['short_textgrid', 'long_textgrid', 'json']
             ignoreBlankSpaces (bool): if False, blank sections in interval
                 tiers will be filled in with an empty interval
-                (with a label of "")
+                (with a label of ""). Praat needs blanks to render textgrids properly.
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if there is a size difference between the
+                maxTimestamp in the tier and the current textgrid.
 
         Returns:
             a string representation of the textgrid
         """
-        validOutputFormats = [
-            TextgridFormats.SHORT_TEXTGRID,
-            TextgridFormats.LONG_TEXTGRID,
-            TextgridFormats.JSON,
-        ]
-        if outputFormat not in validOutputFormats:
-            raise errors.WrongOption("outputFormat", outputFormat, validOutputFormats)
+
+        utils.validateOption("outputFormat", outputFormat, TextgridFormats)
+        utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
+
+        self.validate(reportingMode)
 
         tgAsDict = _tgToDictionary(self)
         textgridStr = textgrid_io.getTextgridAsStr(
@@ -1613,13 +1728,72 @@ class Textgrid:
         self.tierNameList.pop(self.tierNameList.index(name))
         return self.tierDict.pop(name)
 
-    def replaceTier(self, name: str, newTier: "TextgridTier") -> None:
+    def replaceTier(
+        self,
+        name: str,
+        newTier: "TextgridTier",
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
+    ) -> None:
         tierIndex = self.tierNameList.index(name)
         self.removeTier(name)
-        self.addTier(newTier, tierIndex)
+        self.addTier(newTier, tierIndex, reportingMode)
+
+    def validate(
+        self, reportingMode: Literal["silence", "warning", "error"] = "warning"
+    ) -> bool:
+        """
+        Validate this textgrid
+
+        Returns whether the tier is valid or not. If reportingMode is "warning"
+        or "error" this will also print on error or stop execution, respectively.
+
+        Args:
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if there is a size difference between the
+                maxTimestamp in the tier and the current textgrid.
+
+        Returns:
+            bool
+        """
+        utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
+        errorReporter = ErrorReportingMode.modeToFunc[reportingMode]
+
+        isValid = True
+        if len(self.tierNameList) != len(set(self.tierNameList)):
+            isValid = False
+            errorReporter(
+                errors.TextgridException, f"Tier names not unique: {self.tierNameList}"
+            )
+
+        for tierName in self.tierNameList:
+            tier = self.tierDict[tierName]
+
+            if self.minTimestamp != tier.minTimestamp:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Textgrid has a min timestamp of ({self.minTimestamp}) "
+                    "but tier has ({tier.minTimestamp})",
+                )
+
+            if self.maxTimestamp != tier.maxTimestamp:
+                isValid = False
+                errorReporter(
+                    errors.TextgridException,
+                    f"Textgrid has a max timestamp of ({self.maxTimestamp}) "
+                    "but tier has ({tier.maxTimestamp})",
+                )
+
+            isValid = isValid and tier.validate(reportingMode)
+
+        return isValid
 
 
-def openTextgrid(fnFullPath: str, includeEmptyIntervals: bool = False) -> Textgrid:
+def openTextgrid(
+    fnFullPath: str,
+    includeEmptyIntervals: bool = False,
+    reportingMode: Literal["silence", "warning", "error"] = "warning",
+) -> Textgrid:
     """
     Opens a textgrid file (.TextGrid and .json are both fine)
 
@@ -1633,6 +1807,7 @@ def openTextgrid(fnFullPath: str, includeEmptyIntervals: bool = False) -> Textgr
 
     https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
     """
+    utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
@@ -1641,7 +1816,7 @@ def openTextgrid(fnFullPath: str, includeEmptyIntervals: bool = False) -> Textgr
             data = fd.read()
 
     tgAsDict = textgrid_io.parseTextgridStr(data, includeEmptyIntervals)
-    return _dictionaryToTg(tgAsDict)
+    return _dictionaryToTg(tgAsDict, reportingMode)
 
 
 def _tgToDictionary(tg: Textgrid) -> dict:
@@ -1663,10 +1838,12 @@ def _tgToDictionary(tg: Textgrid) -> dict:
 
 
 def _dictionaryToTg(
-    tgAsDict: dict, errorMode: Literal["silence", "warning", "exception"]
+    tgAsDict: dict, reportingMode: Literal["silence", "warning", "error"]
 ) -> Textgrid:
     """Converts a dictionary representation of a textgrid to a Textgrid"""
-    tg = Textgrid(errorMode)
+    utils.validateOption("reportingMode", reportingMode, ErrorReportingMode)
+
+    tg = Textgrid()
     tg.minTimestamp = tgAsDict["xmin"]
     tg.maxTimestamp = tgAsDict["xmax"]
 
@@ -1682,6 +1859,6 @@ def _dictionaryToTg(
             tierAsDict["xmin"],
             tierAsDict["xmax"],
         )
-        tg.addTier(tier)
+        tg.addTier(tier, reportingMode=reportingMode)
 
     return tg

@@ -172,6 +172,9 @@ class KlattPointTier(textgrid.TextgridTier):
     def insertSpace(self):
         raise NotImplementedError
 
+    def validate(self):
+        raise NotImplementedError
+
     def modifyValues(self, modFunc: Callable[[float], bool]) -> None:
         newEntryList = [
             (timestamp, modFunc(float(value))) for timestamp, value in self.entryList
