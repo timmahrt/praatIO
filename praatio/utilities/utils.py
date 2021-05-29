@@ -10,9 +10,7 @@ import itertools
 import io
 import wave
 from pkg_resources import resource_filename
-from typing import Any, Iterator, List, Tuple, NoReturn, Type
-
-from typing_extensions import Literal
+from typing import Any, Iterator, List, Tuple, NoReturn, Type, Literal
 
 from praatio.utilities import errors
 from praatio.utilities import constants
@@ -36,6 +34,31 @@ def reportException(exception: Type[BaseException], text: str) -> NoReturn:
 
 def reportWarning(_exception: Type[BaseException], text: str) -> None:
     print(text)
+
+
+def getErrorReporter(reportingMode: Literal["silence", "warning", "error"]):
+    modeToFunc = {
+        constants.ErrorReportingMode.SILENCE: reportNoop,
+        constants.ErrorReportingMode.WARNING: reportWarning,
+        constants.ErrorReportingMode.ERROR: reportException,
+    }
+
+    return modeToFunc[reportingMode]
+
+
+def overshootCheck(
+    start: float, end: float, minTimestamp: float, maxTimestamp: float
+) -> None:
+    if start < minTimestamp:
+        raise errors.TextgridException(
+            f"Time ({start}) exceed Textgrid's minimum "
+            "({minTimestamp}). If this is desired, set overshoot=True)"
+        )
+    if end > maxTimestamp:
+        raise errors.TextgridException(
+            f"Time ({end}) exceed Textgrid's maximum "
+            "({maxTimestamp}). If this is desired, set overshoot=True)"
+        )
 
 
 def validateOption(variableName, value, optionClass):

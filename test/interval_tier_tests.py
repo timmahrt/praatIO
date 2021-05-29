@@ -1,7 +1,7 @@
 import unittest
 
 from praatio import textgrid
-from praatio.utilities.constants import Interval, Point, POINT_TIER, INTERVAL_TIER
+from praatio.utilities.constants import Interval, INTERVAL_TIER
 from praatio.utilities import errors
 
 from test.praatio_test_case import PraatioTestCase
@@ -74,7 +74,7 @@ class IntervalTierTests(PraatioTestCase):
     @testing_utils.supressStdout
     def test_interval_tier_creation_with_invalid_entries(self):
         self.assertRaises(
-            AssertionError,
+            errors.TextgridException,
             textgrid.IntervalTier,
             "phones",
             [Interval(1.0, 0.0, "")],

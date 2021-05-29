@@ -36,3 +36,36 @@ class CropCollision:
     TRUNCATED: Final = "truncated"
 
     validOptions = [STRICT, LAX, TRUNCATED]
+
+
+class ErrorReportingMode:
+    SILENCE: Final = "silence"
+    WARNING: Final = "warning"
+    ERROR: Final = "error"
+
+    validOptions = [SILENCE, WARNING, ERROR]
+
+
+class IntervalCollision:
+    REPLACE: Final = "replace"
+    MERGE: Final = "merge"
+    ERROR: Final = "error"
+
+    validOptions = [REPLACE, MERGE, ERROR]
+
+
+class WhitespaceCollision:
+    STRETCH: Final = "stretch"
+    SPLIT: Final = "split"
+    NO_CHANGE: Final = "no_change"
+    ERROR: Final = "error"
+
+    validOptions = [STRETCH, SPLIT, NO_CHANGE, ERROR]
+
+
+class EraseCollision:
+    TRUNCATE: Final = "truncate"
+    CATEGORICAL: Final = "categorical"
+    ERROR: Final = "error"
+
+    validOptions = [TRUNCATE, CATEGORICAL, ERROR]

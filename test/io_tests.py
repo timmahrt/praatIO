@@ -18,6 +18,7 @@ from os.path import join
 
 
 from praatio import textgrid
+from praatio.data_classes import textgrid as tg_data_class
 from praatio.utilities import constants
 from praatio.utilities import textgrid_io
 from praatio.utilities import errors
@@ -45,7 +46,7 @@ def run_save(
     before and after saving can be different
     """
 
-    tgAsDict = textgrid._tgToDictionary(tg)
+    tgAsDict = tg_data_class._tgToDictionary(tg)
     textgrid_io.getTextgridAsStr(
         tgAsDict,
         minimumIntervalLength=minimumIntervalLength,

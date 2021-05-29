@@ -16,7 +16,7 @@ setup(
     author_email="timmahrt@gmail.com",
     url="https://github.com/timmahrt/praatIO",
     package_dir={"praatio": "praatio"},
-    packages=["praatio", "praatio.utilities"],
+    packages=["praatio", "praatio.utilities", "praatio.data_classes"],
     package_data={
         "praatio": [
             "praatScripts/*.praat",

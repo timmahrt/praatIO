@@ -1,11 +1,11 @@
 import unittest
 
 from praatio import textgrid
-from praatio.utilities.constants import Interval, Point, POINT_TIER, INTERVAL_TIER
+from praatio.utilities.constants import Interval, Point, POINT_TIER
+from praatio.utilities import constants
 from praatio.utilities import errors
 
 from test.praatio_test_case import PraatioTestCase
-from test import testing_utils
 
 
 class PointTierTests(PraatioTestCase):
@@ -20,6 +20,8 @@ class PointTierTests(PraatioTestCase):
             maxT=5.0,
         )
         self.assertRaises(errors.TextgridException, pointTier.appendTier, intervalTier)
+
+    # def test_append_tier_will_adjust the
 
     def test_append_tier_with_point_tiers(self):
         pointTier = textgrid.PointTier(
@@ -181,8 +183,8 @@ class PointTierTests(PraatioTestCase):
             errors.TextgridCollisionException,
             sut.insertEntry,
             Point(3.7, "hello"),
-            False,
-            None,
+            constants.ErrorReportingMode.ERROR,
+            constants.ErrorReportingMode.SILENCE,
         )
 
     def test_insert_point_when_collision_occurs_and_merge(self):
@@ -193,7 +195,11 @@ class PointTierTests(PraatioTestCase):
             maxT=5,
         )
 
-        sut.insertEntry(Point(3.7, "hello"), False, textgrid.IntervalCollision.MERGE)
+        sut.insertEntry(
+            Point(3.7, "hello"),
+            constants.IntervalCollision.MERGE,
+            constants.ErrorReportingMode.SILENCE,
+        )
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "99-hello"), Point(4.5, "32")],
             sut.entryList,
@@ -207,7 +213,11 @@ class PointTierTests(PraatioTestCase):
             maxT=5,
         )
 
-        sut.insertEntry(Point(3.7, "hello"), False, textgrid.IntervalCollision.REPLACE)
+        sut.insertEntry(
+            Point(3.7, "hello"),
+            constants.IntervalCollision.REPLACE,
+            constants.ErrorReportingMode.SILENCE,
+        )
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "hello"), Point(4.5, "32")],
             sut.entryList,
