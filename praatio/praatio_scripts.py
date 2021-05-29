@@ -15,6 +15,8 @@ from typing_extensions import Literal, Final
 
 from praatio import textgrid
 from praatio import audio
+from praatio.data_classes import textgrid_tier
+from praatio.utilities import constants
 from praatio.utilities.constants import Point, Interval
 from praatio.utilities import errors
 
@@ -266,7 +268,7 @@ def splitTierEntries(
     else:
 
         for entry in newEntryList:
-            targetTier.insertEntry(entry, True)
+            targetTier.insertEntry(entry, constants.IntervalCollision.ERROR)
 
     # Insert the tier into the textgrid
     if targetTierName in tg.tierNameList:
@@ -291,7 +293,7 @@ def tgBoundariesToZeroCrossings(
     for tierName in tg.tierNameList[:]:
         tier = tg.tierDict[tierName]
 
-        newTier: textgrid.TextgridTier
+        newTier: textgrid_tier.TextgridTier
         if isinstance(tier, textgrid.PointTier):
             if adjustPointTiers is False:
                 continue
@@ -357,9 +359,9 @@ def splitAudioOnTier(
     def getValue(myBool) -> Literal["strict", "lax", "truncated"]:
         # This will make mypy happy
         if myBool:
-            return textgrid.CropCollision.STRICT
+            return constants.CropCollision.STRICT
         else:
-            return textgrid.CropCollision.TRUNCATED
+            return constants.CropCollision.TRUNCATED
 
     mode: Final = getValue(noPartialIntervals)
 
@@ -542,7 +544,7 @@ def _findMisalignments(
                 if matchVal is None:
                     continue
 
-            elif subCroppedTier.tierType == textgrid.POINT_TIER:
+            elif subCroppedTier.tierType == constants.POINT_TIER:
                 subStart, _ = subCroppedEntry
                 if subStart >= filterStartT and subStart <= filterStopT:
                     matchVal = subStart

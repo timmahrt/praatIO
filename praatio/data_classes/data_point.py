@@ -1,6 +1,7 @@
 import io
 
-from typing import List, Optional, Tuple, Literal, cast
+from typing_extensions import Literal
+from typing import List, Optional, Tuple, cast
 
 from praatio.utilities import constants
 from praatio.utilities import errors

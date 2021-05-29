@@ -10,7 +10,8 @@ import itertools
 import io
 import wave
 from pkg_resources import resource_filename
-from typing import Any, Iterator, List, Tuple, NoReturn, Type, Literal
+from typing_extensions import Literal
+from typing import Any, Iterator, List, Tuple, NoReturn, Type
 
 from praatio.utilities import errors
 from praatio.utilities import constants
