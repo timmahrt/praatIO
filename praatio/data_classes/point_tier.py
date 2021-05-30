@@ -110,7 +110,8 @@ class PointTier(textgrid_tier.TextgridTier):
         Args:
             offset (float):
             allowOvershoot (bool): if True, an interval can go beyond
-                the bounds of the textgrid
+                the bounds of the textgrid; points that are moved before
+                0 are dropped--negative time is not allowed
 
         Returns:
             PointTier: the modified version of the current tier

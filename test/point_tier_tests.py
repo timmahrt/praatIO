@@ -72,6 +72,70 @@ class PointTierTests(PraatioTestCase):
             None,
         )
 
+    def test_crop_when_rebase_to_zero_is_true(self):
+        pointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+        sut = pointTier.crop(1.0, 3.8, rebaseToZero=True)
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.3, "55"), Point(2.7, "99")],
+            minT=0,
+            maxT=2.8,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_crop_when_rebase_to_zero_is_false(self):
+        pointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+        sut = pointTier.crop(1.0, 3.8, rebaseToZero=False)
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99")],
+            minT=1,
+            maxT=3.8,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_erase_region_when_do_shrink_is_true(self):
+        pointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+        sut = pointTier.eraseRegion(1.0, 2.1, doShrink=True)
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.5, "12"), Point(2.6, "99"), Point(3.4, "32")],
+            minT=0,
+            maxT=3.9,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_erase_region_when_do_shrink_is_false(self):
+        pointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+        sut = pointTier.eraseRegion(1.0, 2.1, doShrink=False)
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.5, "12"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
     def test_get_values_at_points_when_fuzzy_matching_is_false(self):
         sut = textgrid.PointTier(
             "pitch_values",
@@ -156,6 +220,30 @@ class PointTierTests(PraatioTestCase):
             sut.entryList,
         )
 
+    def test_insert_entry_works_with_points_tuples_or_lists(self):
+        sut = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        sut.insertEntry(Point(3.9, "21"))
+        sut.insertEntry((4.0, "23"))
+        sut.insertEntry((4.1, "99"))
+
+        self.assertEqual(
+            [
+                Point(1.3, "55"),
+                Point(3.7, "99"),
+                Point(3.9, "21"),
+                Point(4.0, "23"),
+                Point(4.1, "99"),
+                Point(4.5, "32"),
+            ],
+            sut.entryList,
+        )
+
     def test_insert_point_at_end_of_point_tier(self):
         sut = textgrid.PointTier(
             "pitch_values",
@@ -222,6 +310,150 @@ class PointTierTests(PraatioTestCase):
             [Point(1.3, "55"), Point(3.7, "hello"), Point(4.5, "32")],
             sut.entryList,
         )
+
+    def test_edit_timestamps_can_make_points_appear_later(self):
+        originalPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = originalPointTier.editTimestamps(0.4)
+
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.7, "55"), Point(4.1, "99"), Point(4.9, "32")],
+            minT=0,
+            maxT=5,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_edit_timestamps_can_make_points_appear_earlier(self):
+        originalPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = originalPointTier.editTimestamps(-0.4)
+
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(0.9, "55"), Point(3.3, "99"), Point(4.1, "32")],
+            minT=0,
+            maxT=5,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_edit_timestamp_can_raise_exception_when_allowovershoot_is_false(self):
+        sut = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        self.assertRaises(
+            errors.TextgridException,
+            sut.editTimestamps,
+            -1.4,
+            allowOvershoot=False,
+        )
+        self.assertRaises(
+            errors.TextgridException,
+            sut.editTimestamps,
+            1.4,
+            allowOvershoot=False,
+        )
+
+    def test_edit_timestamp_can_exceed_maxtimestamp_when_allowovershoot_is_true(self):
+        originalPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = originalPointTier.editTimestamps(1.4, allowOvershoot=True)
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(2.7, "55"), Point(5.1, "99"), Point(5.9, "32")],
+            minT=0,
+            maxT=5.9,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_edit_timestamp_drops_points_that_are_moved_before_zero(self):
+        originalPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = originalPointTier.editTimestamps(-1.4, allowOvershoot=True)
+        expectedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(2.3, "99"), Point(3.1, "32")],
+            minT=0,
+            maxT=5,
+        )
+        self.assertEqual(expectedPointTier, sut)
+
+    def test_insert_space(self):
+        originalPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = originalPointTier.insertSpace(2.0, 1.1)
+        predictedPointTier = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(4.8, "99"), Point(5.6, "32")],
+            minT=0,
+            maxT=6.1,
+        )
+        self.assertEqual(predictedPointTier, sut)
+
+    def test_validate_throws_error_if_points_are_not_in_sequence(self):
+        sut = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        self.assertTrue(sut.validate())
+        sut.entryList.append(Point(3.9, "21"))
+        self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
+
+    def test_validate_throws_error_if_points_are_less_than_minimum_time(self):
+        sut = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        self.assertTrue(sut.validate())
+        sut.minTimestamp = 2.0
+        self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
+
+    def test_validate_throws_error_if_points_are_more_than_minimum_time(self):
+        sut = textgrid.PointTier(
+            "pitch_values",
+            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+            minT=0,
+            maxT=5,
+        )
+
+        self.assertTrue(sut.validate())
+        sut.maxTimestamp = 3.0
+        self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
 
 if __name__ == "__main__":
