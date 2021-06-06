@@ -189,13 +189,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     newStart, newEnd, self.minTimestamp, self.maxTimestamp
                 )
 
-            if newEnd < 0:
+            if newEnd <= 0:
                 continue
             if newStart < 0:
                 newStart = 0
-
-            if newStart < 0:
-                continue
 
             newEntryList.append(Interval(newStart, newEnd, interval.label))
 
@@ -263,12 +260,12 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 # Check left edge
                 if matchList[0].start < start:
                     newEntry = Interval(matchList[0].start, start, matchList[0].label)
-                    newTier.entryList.append(newEntry)
+                    newTier.insertEntry(newEntry)
 
                 # Check right edge
                 if matchList[-1].end > end:
                     newEntry = Interval(end, matchList[-1].end, matchList[-1].label)
-                    newTier.entryList.append(newEntry)
+                    newTier.insertEntry(newEntry)
 
         if doShrink is True:
 

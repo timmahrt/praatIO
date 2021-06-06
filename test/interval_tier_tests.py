@@ -384,14 +384,29 @@ class IntervalTierTests(PraatioTestCase):
         )
         self.assertEqual(expectedIntervalTier, sut)
 
-    def test_edit_timestamps_raises_error_if_times_go_below_zero_even_with_overshoot_true(
+    def test_edit_timestamps_are_dropped_if_they_go_below_zero_even_with_overshoot_true(
         self,
     ):
-        sut = makeIntervalTier(
-            intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")], minT=0.0
+        initialIntervalTier = makeIntervalTier(
+            intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")]
         )
 
-        self.assertRaises(errors.TextgridException, sut.editTimestamps, -2.0, True)
+        sut = initialIntervalTier.editTimestamps(-2.0, True)
+        expectedIntervalTier = makeIntervalTier(intervals=[Interval(1, 2, "world")])
+        self.assertEqual(expectedIntervalTier, sut)
+
+    def test_edit_timestamps_are_trimmed_if_they_partially_go_below_zero_even_with_overshoot_true(
+        self,
+    ):
+        initialIntervalTier = makeIntervalTier(
+            intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")]
+        )
+
+        sut = initialIntervalTier.editTimestamps(-1.5, True)
+        expectedIntervalTier = makeIntervalTier(
+            intervals=[Interval(0, 0.5, "hello"), Interval(1.5, 2.5, "world")]
+        )
+        self.assertEqual(expectedIntervalTier, sut)
 
     def test_erase_region_raises_error_if_collision_mode_is_invalid(self):
         sut = makeIntervalTier()
@@ -435,6 +450,57 @@ class IntervalTierTests(PraatioTestCase):
             3.5,
             constants.EraseCollision.ERROR,
         )
+
+    def test_erase_region_with_truncate_mode_and_interval_covers_erase_region_and_shrink_is_true(
+        self,
+    ):
+        originalIntervalTier = makeIntervalTier(
+            intervals=[
+                Interval(0.3, 0.5, "hello"),
+                Interval(1.2, 3.8, "big"),
+                Interval(4.5, 4.8, "world"),
+            ],
+            maxT=5.0,
+        )
+
+        sut = originalIntervalTier.eraseRegion(
+            1.5, 3.5, constants.EraseCollision.TRUNCATE, doShrink=True
+        )
+
+        expectedIntervalTier = makeIntervalTier(
+            intervals=[
+                Interval(0.3, 0.5, "hello"),
+                Interval(1.2, 1.8, "big"),
+                Interval(2.5, 2.8, "world"),
+            ],
+            maxT=3.0,
+        )
+        self.assertEqual(expectedIntervalTier, sut)
+
+    def test_erase_region_with_truncate_mode_and_interval_covers_erase_region_and_shrink_is_false(
+        self,
+    ):
+        originalIntervalTier = makeIntervalTier(
+            intervals=[
+                Interval(0.3, 0.5, "hello"),
+                Interval(1.2, 3.8, "big"),
+                Interval(4.5, 4.8, "world"),
+            ]
+        )
+
+        sut = originalIntervalTier.eraseRegion(
+            1.5, 3.5, constants.EraseCollision.TRUNCATE, doShrink=False
+        )
+
+        expectedIntervalTier = makeIntervalTier(
+            intervals=[
+                Interval(0.3, 0.5, "hello"),
+                Interval(1.2, 1.5, "big"),
+                Interval(3.5, 3.8, "big"),
+                Interval(4.5, 4.8, "world"),
+            ]
+        )
+        self.assertEqual(expectedIntervalTier, sut)
 
     def test_erase_region_with_truncate_mode_and_shrink_is_true(self):
         originalIntervalTier = makeIntervalTier(
@@ -535,6 +601,12 @@ class IntervalTierTests(PraatioTestCase):
     def test_insert_entry_accepts_a_list(self):
         sut = makeIntervalTier(intervals=[])
         sut.insertEntry([1, 2, "hello"])
+
+        self.assertEqual([Interval(1, 2, "hello")], sut.entryList)
+
+    def test_insert_entry_accepts_an_interval(self):
+        sut = makeIntervalTier(intervals=[])
+        sut.insertEntry(Interval(1, 2, "hello"))
 
         self.assertEqual([Interval(1, 2, "hello")], sut.entryList)
 
