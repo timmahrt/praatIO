@@ -214,10 +214,7 @@ class PointTier(textgrid_tier.TextgridTier):
         croppedTier = newTier.crop(start, end, constants.CropCollision.TRUNCATED, False)
         matchList = croppedTier.entryList
 
-        if len(matchList) == 0:
-            pass
-        else:
-
+        if len(matchList) > 0:
             # Remove all the matches from the entryList
             # Go in reverse order because we're destructively altering
             # the order of the list (messes up index order)

@@ -60,8 +60,8 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
             if entry[0] >= entry[1]:
                 raise errors.TextgridException(
-                    "The start time of an interval ({entry[0]}) "
-                    "cannot occur after its end time ({entry[1]})"
+                    f"The start time of an interval ({entry[0]}) "
+                    f"cannot occur after its end time ({entry[1]})"
                 )
 
         # Remove whitespace
@@ -120,15 +120,16 @@ class IntervalTier(textgrid_tier.TextgridTier):
         )
 
         if rebaseToZero is True:
+            newSmallestValue = newEntryList[0][0]
             newEntryList = [
-                Interval(start - cropStart, end - cropStart, label)
+                Interval(start - newSmallestValue, end - newSmallestValue, label)
                 for start, end, label in newEntryList
             ]
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
-            minT = cropStart
-            maxT = cropEnd
+            minT = self.minTimestamp
+            maxT = self.maxTimestamp
 
         croppedTier = IntervalTier(self.name, newEntryList, minT, maxT)
 
@@ -245,6 +246,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
         if len(matchList) == 0:
             pass
         else:
+            if collisionMode == constants.EraseCollision.ERROR:
+                raise errors.TextgridException()
+
             # Remove all the matches from the entryList
             # Go in reverse order because we're destructively altering
             # the order of the list (messes up index order)
@@ -547,7 +551,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
     def morph(
         self,
         targetTier: "IntervalTier",
-        filterFunc: Optional[Callable[[Interval], bool]] = None,
+        filterFunc: Optional[Callable[[str], bool]] = None,
     ) -> "IntervalTier":
         """
         Morphs the duration of segments in this tier to those in another
