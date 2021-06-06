@@ -430,6 +430,9 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.entryList.append(Point(3.9, "21"))
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
+        self.assertRaises(
+            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
+        )
 
     def test_validate_throws_error_if_points_are_less_than_minimum_time(self):
         sut = textgrid.PointTier(
@@ -442,6 +445,9 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.minTimestamp = 2.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
+        self.assertRaises(
+            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
+        )
 
     def test_validate_throws_error_if_points_are_more_than_minimum_time(self):
         sut = textgrid.PointTier(
@@ -454,6 +460,9 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.maxTimestamp = 3.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
+        self.assertRaises(
+            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
+        )
 
 
 if __name__ == "__main__":
