@@ -55,10 +55,6 @@ class IntervalTier(textgrid_tier.TextgridTier):
         # Prevent poorly-formed textgrids from being created
         for entry in entryList:
             if entry[0] >= entry[1]:
-                fmtStr = "Anomaly: startTime=%f, endTime=%f, label=%s"
-                print((fmtStr % (entry[0], entry[1], entry[2])))
-
-            if entry[0] >= entry[1]:
                 raise errors.TextgridException(
                     f"The start time of an interval ({entry[0]}) "
                     f"cannot occur after its end time ({entry[1]})"

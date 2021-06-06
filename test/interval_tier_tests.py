@@ -16,6 +16,14 @@ def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
 
 
 class IntervalTierTests(PraatioTestCase):
+    def test_creating_an_interval_tier_with_invalid_intervals_raises_an_error(self):
+        self.assertRaises(
+            errors.TextgridException,
+            textgrid.IntervalTier,
+            "words",
+            [Interval(2.0, 1.0, "hello world")],
+        )
+
     def test_append_tier_with_interval_tiers(self):
         intervalTier = textgrid.IntervalTier(
             "words",
