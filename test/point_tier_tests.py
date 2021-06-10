@@ -8,11 +8,15 @@ from praatio.utilities import errors
 from test.praatio_test_case import PraatioTestCase
 
 
+def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
+    if points is None:
+        points = [Point(1.3, "55"), Point(3.7, "99")]
+    return textgrid.PointTier(name, points, minT, maxT)
+
+
 class PointTierTests(PraatioTestCase):
     def test_append_tier_with_mixed_type_throws_exception(self):
-        pointTier = textgrid.PointTier(
-            "pitch_values", [Point(1.3, "55"), Point(3.7, "99")], minT=0, maxT=5
-        )
+        pointTier = makePointTier()
         intervalTier = textgrid.IntervalTier(
             "words",
             [Interval(1, 2, "hello"), Interval(3.5, 4.0, "world")],
@@ -38,15 +42,12 @@ class PointTierTests(PraatioTestCase):
         self.assertEqual(POINT_TIER, sut.tierType)
 
     def test_find_with_point_tiers(self):
-        sut = textgrid.PointTier(
-            "word_start",
-            [
+        sut = makePointTier(
+            points=[
                 Point(1, "hello"),
                 Point(2.5, "the"),
                 Point(3.5, "world"),
-            ],
-            minT=0,
-            maxT=5.0,
+            ]
         )
         self.assertEqual([], sut.find("mage", substrMatchFlag=False, usingRE=False))
         self.assertEqual([1], sut.find("the", substrMatchFlag=False, usingRE=False))
@@ -71,75 +72,80 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_crop_when_rebase_to_zero_is_true(self):
-        pointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+        pointTier = makePointTier(
+            points=[
+                Point(0.5, "12"),
+                Point(1.3, "55"),
+                Point(3.7, "99"),
+                Point(4.5, "32"),
+            ],
             minT=0,
             maxT=5,
         )
         sut = pointTier.crop(1.0, 3.8, rebaseToZero=True)
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.3, "55"), Point(2.7, "99")],
+        expectedPointTier = makePointTier(
+            points=[Point(0.3, "55"), Point(2.7, "99")],
             minT=0,
             maxT=2.8,
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_crop_when_rebase_to_zero_is_false(self):
-        pointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+        pointTier = makePointTier(
+            points=[
+                Point(0.5, "12"),
+                Point(1.3, "55"),
+                Point(3.7, "99"),
+                Point(4.5, "32"),
+            ],
             minT=0,
             maxT=5,
         )
         sut = pointTier.crop(1.0, 3.8, rebaseToZero=False)
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99")],
+        expectedPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99")],
             minT=1,
             maxT=3.8,
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_erase_region_when_do_shrink_is_true(self):
-        pointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+        pointTier = makePointTier(
+            points=[
+                Point(0.5, "12"),
+                Point(1.3, "55"),
+                Point(3.7, "99"),
+                Point(4.5, "32"),
+            ],
             minT=0,
             maxT=5,
         )
         sut = pointTier.eraseRegion(1.0, 2.1, doShrink=True)
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.5, "12"), Point(2.6, "99"), Point(3.4, "32")],
+        expectedPointTier = makePointTier(
+            points=[Point(0.5, "12"), Point(2.6, "99"), Point(3.4, "32")],
             minT=0,
             maxT=3.9,
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_erase_region_when_do_shrink_is_false(self):
-        pointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.5, "12"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        pointTier = makePointTier(
+            points=[
+                Point(0.5, "12"),
+                Point(1.3, "55"),
+                Point(3.7, "99"),
+                Point(4.5, "32"),
+            ]
         )
         sut = pointTier.eraseRegion(1.0, 2.1, doShrink=False)
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.5, "12"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        expectedPointTier = makePointTier(
+            points=[Point(0.5, "12"), Point(3.7, "99"), Point(4.5, "32")],
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_get_values_at_points_when_fuzzy_matching_is_false(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
         dataList = [
             (0.9, 100, 55),
@@ -162,11 +168,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_get_values_at_points_when_fuzzy_matching_is_true(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         dataList = [
@@ -189,11 +192,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_point_at_start_of_point_tier(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut.insertEntry(Point(0.5, "21"))
@@ -204,11 +204,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_point_at_middle_of_point_tier(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut.insertEntry(Point(3.9, "21"))
@@ -219,11 +216,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_entry_works_with_points_tuples_or_lists(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut.insertEntry(Point(3.9, "21"))
@@ -243,11 +237,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_point_at_end_of_point_tier(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut.insertEntry(Point(4.9, "21"))
@@ -258,11 +249,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_point_when_collision_occurs(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         self.assertRaises(
@@ -274,11 +262,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_point_when_collision_occurs_and_merge(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut.insertEntry(
@@ -292,11 +277,8 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_insert_point_when_collision_occurs_and_replace(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut.insertEntry(
@@ -310,45 +292,32 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_edit_timestamps_can_make_points_appear_later(self):
-        originalPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        originalPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut = originalPointTier.editTimestamps(0.4)
 
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.7, "55"), Point(4.1, "99"), Point(4.9, "32")],
-            minT=0,
-            maxT=5,
+        expectedPointTier = makePointTier(
+            points=[Point(1.7, "55"), Point(4.1, "99"), Point(4.9, "32")],
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_edit_timestamps_can_make_points_appear_earlier(self):
-        originalPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        originalPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut = originalPointTier.editTimestamps(-0.4)
 
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(0.9, "55"), Point(3.3, "99"), Point(4.1, "32")],
-            minT=0,
-            maxT=5,
+        expectedPointTier = makePointTier(
+            points=[Point(0.9, "55"), Point(3.3, "99"), Point(4.1, "32")],
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_edit_timestamp_can_raise_exception_when_allowovershoot_is_false(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
             minT=0,
             maxT=5,
         )
@@ -367,62 +336,45 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_edit_timestamp_can_exceed_maxtimestamp_when_allowovershoot_is_true(self):
-        originalPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
+        originalPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
             maxT=5,
         )
 
         sut = originalPointTier.editTimestamps(1.4, allowOvershoot=True)
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(2.7, "55"), Point(5.1, "99"), Point(5.9, "32")],
-            minT=0,
+        expectedPointTier = makePointTier(
+            points=[Point(2.7, "55"), Point(5.1, "99"), Point(5.9, "32")],
             maxT=5.9,
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_edit_timestamp_drops_points_that_are_moved_before_zero(self):
-        originalPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        originalPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         sut = originalPointTier.editTimestamps(-1.4, allowOvershoot=True)
-        expectedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(2.3, "99"), Point(3.1, "32")],
-            minT=0,
-            maxT=5,
+        expectedPointTier = makePointTier(
+            points=[Point(2.3, "99"), Point(3.1, "32")],
         )
         self.assertEqual(expectedPointTier, sut)
 
     def test_insert_space(self):
-        originalPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
+        originalPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
             maxT=5,
         )
 
         sut = originalPointTier.insertSpace(2.0, 1.1)
-        predictedPointTier = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(4.8, "99"), Point(5.6, "32")],
-            minT=0,
+        predictedPointTier = makePointTier(
+            points=[Point(1.3, "55"), Point(4.8, "99"), Point(5.6, "32")],
             maxT=6.1,
         )
         self.assertEqual(predictedPointTier, sut)
 
     def test_validate_throws_error_if_points_are_not_in_sequence(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
-            maxT=5,
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
         self.assertTrue(sut.validate())
@@ -433,11 +385,9 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_validate_throws_error_if_points_are_less_than_minimum_time(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
-            [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
             minT=0,
-            maxT=5,
         )
 
         self.assertTrue(sut.validate())
@@ -447,11 +397,9 @@ class PointTierTests(PraatioTestCase):
             errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
         )
 
-    def test_validate_throws_error_if_points_are_more_than_minimum_time(self):
-        sut = textgrid.PointTier(
-            "pitch_values",
+    def test_validate_throws_error_if_points_are_more_than_maximum_time(self):
+        sut = makePointTier(
             [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            minT=0,
             maxT=5,
         )
 
