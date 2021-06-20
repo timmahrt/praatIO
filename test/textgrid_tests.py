@@ -22,7 +22,17 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
 
 
 class TextgridTests(PraatioTestCase):
-    pass
+    def test_crop_raises_error_if_mode_invalid(self):
+        sut = textgrid.Textgrid()
+
+        with self.assertRaises(errors.WrongOption) as cm:
+            sut.crop(1, 2, "cat", True)
+
+        self.assertEqual(
+            "For argument 'mode' was given the value 'cat'. However, expected one of [strict, lax, truncated]",
+            str(cm.exception),
+        )
+
 
 
     def test_erase_region_removes_entries(self):
