@@ -99,7 +99,7 @@ class Textgrid:
             self.minTimestamp = minV
 
         maxV = tier.maxTimestamp
-        if self.maxTimestamp is not None and maxV < self.maxTimestamp:
+        if self.maxTimestamp is not None and maxV > self.maxTimestamp:
             errorReporter(
                 errors.TextgridException,
                 f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
@@ -224,9 +224,7 @@ class Textgrid:
 
         return newTG
 
-    def eraseRegion(
-        self, start: float, end: float, doShrink: bool = True
-    ) -> "Textgrid":
+    def eraseRegion(self, start: float, end: float, doShrink: bool) -> "Textgrid":
         """
         Makes a region in a tier blank (removes all contained entries)
 
