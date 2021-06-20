@@ -75,7 +75,12 @@ class TextgridTier(ABC):
 
         maxTime = self.maxTimestamp + tier.maxTimestamp
 
-        appendTier = tier.editTimestamps(self.maxTimestamp, allowOvershoot=True)
+        # We're increasing the size of the tier, so of course its intervals
+        # may exceed the bounds of the tier's maxTimestamp, triggering
+        # errors/warnings--we can ignore those
+        appendTier = tier.editTimestamps(
+            self.maxTimestamp, constants.ErrorReportingMode.SILENCE
+        )
 
         entryList = self.entryList + appendTier.entryList
         entryList.sort()
@@ -179,7 +184,9 @@ class TextgridTier(ABC):
 
     @abstractmethod
     def editTimestamps(
-        self, offset: float, allowOvershoot: bool = False
+        self,
+        offset: float,
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "TextgridTier":  # pragma: no cover
         pass
 

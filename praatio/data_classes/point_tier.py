@@ -102,20 +102,26 @@ class PointTier(textgrid_tier.TextgridTier):
         self.entryList.pop(self.entryList.index(entry))
 
     def editTimestamps(
-        self, offset: float, allowOvershoot: bool = False
+        self,
+        offset: float,
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "PointTier":
         """
         Modifies all timestamps by a constant amount
 
         Args:
             offset (float):
-            allowOvershoot (bool): if True, an interval can go beyond
-                the bounds of the textgrid; points that are moved before
-                0 are dropped--negative time is not allowed
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if an entries moves outside of minTimestamp
+                or maxTimestamp after being edited
 
         Returns:
             PointTier: the modified version of the current tier
         """
+        utils.validateOption(
+            "reportingMode", reportingMode, constants.ErrorReportingMode
+        )
+        errorReporter = utils.getErrorReporter(reportingMode)
 
         newEntryList: List[constants.Point] = []
         for timestamp, label in self.entryList:

@@ -256,27 +256,34 @@ class Textgrid:
 
         return newTG
 
-    def editTimestamps(self, offset: float, allowOvershoot: bool = False) -> "Textgrid":
+    def editTimestamps(
+        self,
+        offset: float,
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
+    ) -> "Textgrid":
         """
         Modifies all timestamps by a constant amount
 
         Args:
             offset (float): the amount to offset in seconds
-            allowOvershoot (bool): if True, entries can go
-                beyond the min and max timestamp set by the
-                Textgrid
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if there is a size difference between the
+                maxTimestamp in the tier and the current textgrid.
 
         Returns:
             Textgrid: the modified version of the current textgrid
         """
+        utils.validateOption(
+            "reportingMode", reportingMode, constants.ErrorReportingMode
+        )
 
         tg = Textgrid()
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             if len(tier.entryList) > 0:
-                tier = tier.editTimestamps(offset, allowOvershoot)
+                tier = tier.editTimestamps(offset, reportingMode)
 
-            tg.addTier(tier)
+            tg.addTier(tier, reportingMode=reportingMode)
 
         return tg
 

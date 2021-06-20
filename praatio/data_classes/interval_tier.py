@@ -161,19 +161,26 @@ class IntervalTier(textgrid_tier.TextgridTier):
         return retTier
 
     def editTimestamps(
-        self, offset: float, allowOvershoot: bool = False
+        self,
+        offset: float,
+        reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "IntervalTier":
         """
         Modifies all timestamps by a constant amount
 
         Args:
             offset (start): the amount to shift all intervals
-            allowOvershoot (bool): if True, an interval can
-                go beyond the bounds of the textgrid
+            reportingMode (str): one of "silence", "warning", or "error". This flag
+                determines the behavior if an entries moves outside of minTimestamp
+                or maxTimestamp after being edited
 
         Returns:
             IntervalTier: the modified version of the current tier
         """
+        utils.validateOption(
+            "reportingMode", reportingMode, constants.ErrorReportingMode
+        )
+        errorReporter = utils.getErrorReporter(reportingMode)
 
         newEntryList = []
         for interval in self.entryList:
