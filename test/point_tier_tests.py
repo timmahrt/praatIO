@@ -71,6 +71,17 @@ class PointTierTests(PraatioTestCase):
             None,
         )
 
+    def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):
+        sut = makePointTier()
+
+        with self.assertRaises(errors.PraatioException) as cm:
+            sut.crop(2.1, 1.1, "lax", True)
+
+        self.assertEqual(
+            "Crop error: start time (2.1) must occur before end time (1.1)",
+            str(cm.exception),
+        )
+
     def test_crop_when_rebase_to_zero_is_true(self):
         pointTier = makePointTier(
             points=[
@@ -291,6 +302,18 @@ class PointTierTests(PraatioTestCase):
             sut.entryList,
         )
 
+    def test_edit_timestamps_throws_error_if_reporting_mode_is_invalid(self):
+        sut = makePointTier(
+            points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
+        )
+
+        self.assertRaises(
+            errors.WrongOption,
+            sut.editTimestamps,
+            2.0,
+            "cats",
+        )
+
     def test_edit_timestamps_can_make_points_appear_later(self):
         originalPointTier = makePointTier(
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
@@ -315,7 +338,7 @@ class PointTierTests(PraatioTestCase):
         )
         self.assertEqual(expectedPointTier, sut)
 
-    def test_edit_timestamp_can_raise_exception_when_allowovershoot_is_false(self):
+    def test_edit_timestamp_can_raise_exception_when_reporting_mode_is_silence(self):
         sut = makePointTier(
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
             minT=0,
@@ -326,22 +349,26 @@ class PointTierTests(PraatioTestCase):
             errors.TextgridException,
             sut.editTimestamps,
             -1.4,
-            allowOvershoot=False,
+            constants.ErrorReportingMode.ERROR,
         )
         self.assertRaises(
             errors.TextgridException,
             sut.editTimestamps,
             1.4,
-            allowOvershoot=False,
+            constants.ErrorReportingMode.ERROR,
         )
 
-    def test_edit_timestamp_can_exceed_maxtimestamp_when_allowovershoot_is_true(self):
+    def test_edit_timestamp_can_exceed_maxtimestamp_when_reporting_mode_is_silence(
+        self,
+    ):
         originalPointTier = makePointTier(
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
             maxT=5,
         )
 
-        sut = originalPointTier.editTimestamps(1.4, allowOvershoot=True)
+        sut = originalPointTier.editTimestamps(
+            1.4, constants.ErrorReportingMode.SILENCE
+        )
         expectedPointTier = makePointTier(
             points=[Point(2.7, "55"), Point(5.1, "99"), Point(5.9, "32")],
             maxT=5.9,
@@ -353,7 +380,9 @@ class PointTierTests(PraatioTestCase):
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
-        sut = originalPointTier.editTimestamps(-1.4, allowOvershoot=True)
+        sut = originalPointTier.editTimestamps(
+            -1.4, constants.ErrorReportingMode.SILENCE
+        )
         expectedPointTier = makePointTier(
             points=[Point(2.3, "99"), Point(3.1, "32")],
         )

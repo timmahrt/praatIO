@@ -161,9 +161,26 @@ class IntervalTierTests(PraatioTestCase):
         )
 
     def test_crop_raises_error_if_mode_invalid(self):
+        sut = textgrid.Textgrid()
+
+        with self.assertRaises(errors.WrongOption) as cm:
+            sut.crop(1, 2, "cat", True)
+
+        self.assertEqual(
+            "For argument 'mode' was given the value 'cat'. However, expected one of [strict, lax, truncated]",
+            str(cm.exception),
+        )
+
+    def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):
         sut = makeIntervalTier()
 
-        self.assertRaises(errors.WrongOption, sut.crop, 1, 2, "bird", False)
+        with self.assertRaises(errors.PraatioException) as cm:
+            sut.crop(2.1, 1.1, "lax", True)
+
+        self.assertEqual(
+            "Crop error: start time (2.1) must occur before end time (1.1)",
+            str(cm.exception),
+        )
 
     def test_crop_truncates_overlapping_intervals_if_mode_is_truncate_and_rebase_true(
         self,
@@ -340,25 +357,47 @@ class IntervalTierTests(PraatioTestCase):
         )
         self.assertEqual(expectedIntervalTier, sut)
 
-    def test_edit_timestamps_raises_error_when_edit_exceeds_max_time_and_allow_overshoot_is_false(
+    def test_edit_timestamps_raises_error_when_reporting_mode_is_invalid(self):
+        sut = makeIntervalTier(
+            intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")], maxT=5.0
+        )
+
+        self.assertRaises(
+            errors.WrongOption,
+            sut.editTimestamps,
+            2.0,
+            "cats",
+        )
+
+    def test_edit_timestamps_raises_error_when_edit_exceeds_max_time_and_reporting_mode_is_error(
         self,
     ):
         sut = makeIntervalTier(
             intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")], maxT=5.0
         )
 
-        self.assertRaises(errors.TextgridException, sut.editTimestamps, 2.0, False)
+        self.assertRaises(
+            errors.TextgridException,
+            sut.editTimestamps,
+            2.0,
+            constants.ErrorReportingMode.ERROR,
+        )
 
-    def test_edit_timestamps_raises_error_when_edit_exceeds_min_time_and_allow_overshoot_is_false(
+    def test_edit_timestamps_raises_error_when_edit_exceeds_min_time_and_reporting_mode_is_error(
         self,
     ):
         sut = makeIntervalTier(
             intervals=[Interval(2, 2.5, "hello"), Interval(3, 4, "world")], minT=1.0
         )
 
-        self.assertRaises(errors.TextgridException, sut.editTimestamps, -2.0, False)
+        self.assertRaises(
+            errors.TextgridException,
+            sut.editTimestamps,
+            -2.0,
+            constants.ErrorReportingMode.ERROR,
+        )
 
-    def test_edit_timestamps_when_edit_amount_is_positive_and_allow_overshoot_is_true(
+    def test_edit_timestamps_when_edit_amount_is_positive_and_reporting_mode_is_silence(
         self,
     ):
         initialIntervalTier = makeIntervalTier(
@@ -367,7 +406,9 @@ class IntervalTierTests(PraatioTestCase):
             maxT=5.0,
         )
 
-        sut = initialIntervalTier.editTimestamps(2.0, True)
+        sut = initialIntervalTier.editTimestamps(
+            2.0, constants.ErrorReportingMode.SILENCE
+        )
         expectedIntervalTier = makeIntervalTier(
             intervals=[Interval(3, 4, "hello"), Interval(5, 6, "world")],
             minT=0.0,
@@ -375,7 +416,7 @@ class IntervalTierTests(PraatioTestCase):
         )
         self.assertEqual(expectedIntervalTier, sut)
 
-    def test_edit_timestamps_when_edit_amount_is_negative_and_allow_overshoot_is_true(
+    def test_edit_timestamps_when_edit_amount_is_negative_and_reporting_mode_is_silence(
         self,
     ):
         initialIntervalTier = makeIntervalTier(
@@ -384,7 +425,9 @@ class IntervalTierTests(PraatioTestCase):
             maxT=5.0,
         )
 
-        sut = initialIntervalTier.editTimestamps(-1.0, True)
+        sut = initialIntervalTier.editTimestamps(
+            -1.0, constants.ErrorReportingMode.SILENCE
+        )
         expectedIntervalTier = makeIntervalTier(
             intervals=[Interval(0, 1, "hello"), Interval(2, 3, "world")],
             minT=0.0,  # Modified by the smallest timestamp, not by the edit amount
@@ -392,25 +435,29 @@ class IntervalTierTests(PraatioTestCase):
         )
         self.assertEqual(expectedIntervalTier, sut)
 
-    def test_edit_timestamps_are_dropped_if_they_go_below_zero_even_with_overshoot_true(
+    def test_edit_timestamps_are_dropped_if_they_go_below_zero_even_with_reporting_mode_as_silence(
         self,
     ):
         initialIntervalTier = makeIntervalTier(
             intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")]
         )
 
-        sut = initialIntervalTier.editTimestamps(-2.0, True)
+        sut = initialIntervalTier.editTimestamps(
+            -2.0, constants.ErrorReportingMode.SILENCE
+        )
         expectedIntervalTier = makeIntervalTier(intervals=[Interval(1, 2, "world")])
         self.assertEqual(expectedIntervalTier, sut)
 
-    def test_edit_timestamps_are_trimmed_if_they_partially_go_below_zero_even_with_overshoot_true(
+    def test_edit_timestamps_are_trimmed_if_they_partially_go_below_zero_even_reporting_mode_as_silence(
         self,
     ):
         initialIntervalTier = makeIntervalTier(
             intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")]
         )
 
-        sut = initialIntervalTier.editTimestamps(-1.5, True)
+        sut = initialIntervalTier.editTimestamps(
+            -1.5, constants.ErrorReportingMode.SILENCE
+        )
         expectedIntervalTier = makeIntervalTier(
             intervals=[Interval(0, 0.5, "hello"), Interval(1.5, 2.5, "world")]
         )
