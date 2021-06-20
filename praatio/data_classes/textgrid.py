@@ -228,6 +228,8 @@ class Textgrid:
         """
         Makes a region in a tier blank (removes all contained entries)
 
+        Intervals that span the region to erase will be truncated.
+
         Args:
             start (float):
             end (float):
@@ -336,9 +338,7 @@ class Textgrid:
         return newTG
 
     def mergeTiers(
-        self,
-        tierList: Optional[List[str]] = None,
-        preserveOtherTiers: bool = True,
+        self, tierList: Optional[List[str]] = None, preserveOtherTiers: bool = True
     ) -> "Textgrid":
         """
         Combine tiers
@@ -381,6 +381,11 @@ class Textgrid:
 
         # Create the final textgrid to output
         tg = Textgrid(self.minTimestamp, self.maxTimestamp)
+
+        if preserveOtherTiers:
+            for tierName in self.tierNameList:
+                if tierName not in tierList:
+                    tg.addTier(self.tierDict[tierName])
 
         if intervalTier is not None:
             tg.addTier(intervalTier)
@@ -482,13 +487,13 @@ class Textgrid:
         """
         Validate this textgrid
 
-        Returns whether the tier is valid or not. If reportingMode is "warning"
+        Returns whether the textgrid is valid or not. If reportingMode is "warning"
         or "error" this will also print on error or stop execution, respectively.
 
         Args:
             reportingMode (str): one of "silence", "warning", or "error". This flag
                 determines the behavior if there is a size difference between the
-                maxTimestamp in the tier and the current textgrid.
+                maxTimestamp in a tier and the current textgrid.
 
         Returns:
             bool
