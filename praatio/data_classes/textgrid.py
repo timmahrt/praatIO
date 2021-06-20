@@ -203,6 +203,11 @@ class Textgrid:
         """
         utils.validateOption("mode", mode, CropCollision)
 
+        if cropStart >= cropEnd:
+            raise errors.PraatioException(
+                f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
+            )
+
         newTG = Textgrid()
 
         if rebaseToZero is True:
@@ -237,6 +242,10 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
+        if start >= end:
+            raise errors.PraatioException(
+                f"EraseRegion error: start time ({start}) must occur before end time ({end})"
+            )
 
         diff = end - start
 

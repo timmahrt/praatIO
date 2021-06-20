@@ -76,6 +76,11 @@ class PointTier(textgrid_tier.TextgridTier):
         Returns:
             PointTier: the modified version of the current tier
         """
+        if cropStart >= cropEnd:
+            raise errors.PraatioException(
+                f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
+            )
+
         newEntryList = []
 
         for entry in self.entryList:
@@ -127,10 +132,8 @@ class PointTier(textgrid_tier.TextgridTier):
         for timestamp, label in self.entryList:
 
             newTimestamp = timestamp + offset
-            if not allowOvershoot:
-                utils.overshootCheck(
-                    newTimestamp, newTimestamp, self.minTimestamp, self.maxTimestamp
-                )
+            utils.checkIsUndershoot(newTimestamp, self.minTimestamp, errorReporter)
+            utils.checkIsOvershoot(newTimestamp, self.maxTimestamp, errorReporter)
 
             if newTimestamp < 0:
                 continue
@@ -379,19 +382,11 @@ class PointTier(textgrid_tier.TextgridTier):
                     f"[({previousPoint}), ({point})]",
                 )
 
-            if self.minTimestamp > point.time:
+            if utils.checkIsUndershoot(point.time, self.minTimestamp, errorReporter):
                 isValid = False
-                errorReporter(
-                    errors.TextgridException,
-                    f"Point ({point})occurs before tier's minimum timestamp ({self.minTimestamp})",
-                )
 
-            if self.maxTimestamp < point.time:
+            if utils.checkIsOvershoot(point.time, self.maxTimestamp, errorReporter):
                 isValid = False
-                errorReporter(
-                    errors.TextgridException,
-                    f"Point ({point})occurs after tier's maximum timestamp ({self.maxTimestamp})",
-                )
 
             previousPoint = point
 

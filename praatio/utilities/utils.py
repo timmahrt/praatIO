@@ -47,6 +47,28 @@ def getErrorReporter(reportingMode: Literal["silence", "warning", "error"]):
     return modeToFunc[reportingMode]
 
 
+def checkIsUndershoot(time: float, referenceTime: float, errorReporter) -> bool:
+    if time < referenceTime:
+        errorReporter(
+            errors.TextgridException,
+            f"'{time}' occurs before minimum allowed time '{referenceTime}'",
+        )
+        return True
+    else:
+        return False
+
+
+def checkIsOvershoot(time: float, referenceTime: float, errorReporter) -> bool:
+    if time > referenceTime:
+        errorReporter(
+            errors.TextgridException,
+            f"'{time}' occurs after maximum allowed time '{referenceTime}'",
+        )
+        return True
+    else:
+        return False
+
+
 def overshootCheck(
     start: float, end: float, minTimestamp: float, maxTimestamp: float
 ) -> None:

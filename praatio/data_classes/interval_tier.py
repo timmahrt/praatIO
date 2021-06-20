@@ -111,6 +111,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         utils.validateOption("mode", mode, CropCollision)
 
+        if cropStart >= cropEnd:
+            raise errors.PraatioException(
+                f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
+            )
+
         newEntryList = utils.getIntervalsInInterval(
             cropStart, cropEnd, self.entryList, mode
         )
@@ -187,10 +192,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
             newStart = offset + interval.start
             newEnd = offset + interval.end
-            if allowOvershoot is not True:
-                utils.overshootCheck(
-                    newStart, newEnd, self.minTimestamp, self.maxTimestamp
-                )
+
+            utils.checkIsUndershoot(newStart, self.minTimestamp, errorReporter)
+            utils.checkIsOvershoot(newEnd, self.maxTimestamp, errorReporter)
 
             if newEnd <= 0:
                 continue
@@ -428,6 +432,12 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         self.sort()
 
+        if self.entryList[0][0] < self.minTimestamp:
+            self.minTimestamp = self.entryList[0][0]
+
+        if self.entryList[-1][1] > self.maxTimestamp:
+            self.maxTimestamp = self.entryList[-1][1]
+
         if len(matchList) != 0:
             collisionReporter(
                 errors.TextgridException,
@@ -633,21 +643,13 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     f"[({previousInterval}), ({interval})]",
                 )
 
-            if self.minTimestamp > interval.start:
+            if utils.checkIsUndershoot(
+                interval.start, self.minTimestamp, errorReporter
+            ):
                 isValid = False
-                errorReporter(
-                    errors.TextgridException,
-                    f"Interval ({interval})starts before tier's minimum "
-                    f"timestamp ({self.minTimestamp})",
-                )
 
-            if self.maxTimestamp < interval.end:
+            if utils.checkIsOvershoot(interval.end, self.maxTimestamp, errorReporter):
                 isValid = False
-                errorReporter(
-                    errors.TextgridException,
-                    f"Interval ({interval})ends after tier's maximum "
-                    f"timestamp ({self.maxTimestamp})",
-                )
 
             previousInterval = interval
 
