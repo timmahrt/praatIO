@@ -25,7 +25,7 @@ from praatio.utilities import utils
 
 
 class Textgrid:
-    def __init__(self):
+    def __init__(self, minTimestamp: float = None, maxTimestamp: float = None):
         """
         A container that stores and operates over interval and point tiers
 
@@ -40,8 +40,8 @@ class Textgrid:
         self.tierDict: Dict[str, textgrid_tier.TextgridTier] = {}
 
         # Timestamps are determined by the first tier added
-        self.minTimestamp: float = None  # type: ignore[assignment]
-        self.maxTimestamp: float = None  # type: ignore[assignment]
+        self.minTimestamp: float = minTimestamp  # type: ignore[assignment]
+        self.maxTimestamp: float = maxTimestamp  # type: ignore[assignment]
 
     def __eq__(self, other):
         isEqual = True
@@ -121,10 +121,9 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
-        retTG = Textgrid()
-
         minTime = self.minTimestamp
         maxTime = self.maxTimestamp + tg.maxTimestamp
+        retTG = Textgrid(minTime, maxTime)
 
         # Get all tier names.  Ordered first by this textgrid and
         # then by the other textgrid.
@@ -208,7 +207,7 @@ class Textgrid:
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
-        newTG = Textgrid()
+        newTG = Textgrid(self.minTimestamp, self.maxTimestamp)
 
         if rebaseToZero is True:
             minT = 0.0
@@ -253,7 +252,7 @@ class Textgrid:
         if doShrink is True:
             maxTimestamp -= diff
 
-        newTG = Textgrid()
+        newTG = Textgrid(self.minTimestamp, self.maxTimestamp)
         for name in self.tierNameList:
             tier = self.tierDict[name]
             tier = tier.eraseRegion(
@@ -286,7 +285,7 @@ class Textgrid:
             "reportingMode", reportingMode, constants.ErrorReportingMode
         )
 
-        tg = Textgrid()
+        tg = Textgrid(self.minTimestamp, self.maxTimestamp)
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             if len(tier.entryList) > 0:
@@ -327,7 +326,7 @@ class Textgrid:
             "collisionMode", collisionMode, constants.WhitespaceCollision
         )
 
-        newTG = Textgrid()
+        newTG = Textgrid(self.minTimestamp, self.maxTimestamp)
         newTG.minTimestamp = self.minTimestamp
         newTG.maxTimestamp = self.maxTimestamp + duration
 
@@ -383,7 +382,7 @@ class Textgrid:
                 pointTier = pointTier.union(self.tierDict[tierName])
 
         # Create the final textgrid to output
-        tg = Textgrid()
+        tg = Textgrid(self.minTimestamp, self.maxTimestamp)
 
         if intervalTier is not None:
             tg.addTier(intervalTier)
