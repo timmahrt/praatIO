@@ -207,20 +207,25 @@ class Textgrid:
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
-        newTG = Textgrid(self.minTimestamp, self.maxTimestamp)
-
         if rebaseToZero is True:
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
             minT = cropStart
             maxT = cropEnd
-        newTG.minTimestamp = minT
-        newTG.maxTimestamp = maxT
+        newTG = Textgrid(minT, maxT)
+
         for tierName in self.tierNameList:
             tier = self.tierDict[tierName]
             newTier = tier.crop(cropStart, cropEnd, mode, rebaseToZero)
-            newTG.addTier(newTier)
+
+            reportingMode = constants.ErrorReportingMode.WARNING
+            if mode == constants.CropCollision.LAX:
+                # We expect that there will be changes to the size
+                # of the textgrid when the mode is LAX
+                reportingMode = constants.ErrorReportingMode.SILENCE
+
+            newTG.addTier(newTier, reportingMode=reportingMode)
 
         return newTG
 

@@ -221,6 +221,8 @@ class IntervalTierTests(PraatioTestCase):
         )
         expectedIntervalTier = makeIntervalTier(
             intervals=[Interval(2.0, 2.5, "hello"), Interval(3.0, 3.3, "world")],
+            minT=2.0,
+            maxT=3.3,
         )
         self.assertEqual(expectedIntervalTier, sut)
 
@@ -259,6 +261,8 @@ class IntervalTierTests(PraatioTestCase):
         sut = originalIntervalTier.crop(2.0, 3.3, constants.CropCollision.LAX, False)
         expectedIntervalTier = makeIntervalTier(
             intervals=[Interval(1.0, 2.5, "hello"), Interval(3.0, 3.5, "world")],
+            minT=1.0,
+            maxT=3.5,
         )
         self.assertEqual(expectedIntervalTier, sut)
 
@@ -277,7 +281,7 @@ class IntervalTierTests(PraatioTestCase):
 
         sut = originalIntervalTier.crop(2.0, 3.3, constants.CropCollision.STRICT, True)
         expectedIntervalTier = makeIntervalTier(
-            intervals=[Interval(0.0, 0.2, "fun")],
+            intervals=[Interval(0.7, 0.9, "fun")],
             minT=0,
             maxT=1.3,
         )
@@ -298,7 +302,7 @@ class IntervalTierTests(PraatioTestCase):
 
         sut = originalIntervalTier.crop(2.0, 3.3, constants.CropCollision.STRICT, False)
         expectedIntervalTier = makeIntervalTier(
-            intervals=[Interval(2.7, 2.9, "fun")],
+            intervals=[Interval(2.7, 2.9, "fun")], minT=2.0, maxT=3.3
         )
         self.assertEqual(expectedIntervalTier, sut)
 

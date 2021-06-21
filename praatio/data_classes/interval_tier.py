@@ -122,15 +122,19 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         if rebaseToZero is True:
             newSmallestValue = newEntryList[0][0]
+            if newSmallestValue < cropStart:
+                timeDiff = newSmallestValue
+            else:
+                timeDiff = cropStart
             newEntryList = [
-                Interval(start - newSmallestValue, end - newSmallestValue, label)
+                Interval(start - timeDiff, end - timeDiff, label)
                 for start, end, label in newEntryList
             ]
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
-            minT = self.minTimestamp
-            maxT = self.maxTimestamp
+            minT = cropStart
+            maxT = cropEnd
 
         croppedTier = IntervalTier(self.name, newEntryList, minT, maxT)
 

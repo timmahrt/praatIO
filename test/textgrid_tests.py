@@ -33,7 +33,148 @@ class TextgridTests(PraatioTestCase):
             str(cm.exception),
         )
 
+    def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):
+        sut = textgrid.Textgrid()
 
+        with self.assertRaises(errors.PraatioException) as cm:
+            sut.crop(2.1, 1.1, "lax", True)
+
+        self.assertEqual(
+            "Crop error: start time (2.1) must occur before end time (1.1)",
+            str(cm.exception),
+        )
+
+    def test_crop_truncates_overlapping_intervals_if_mode_is_truncate_and_rebase_true(
+        self,
+    ):
+        originalTextgrid = textgrid.Textgrid()
+        for tier in [
+            makeIntervalTier(
+                "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
+            ),
+            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+        ]:
+            originalTextgrid.addTier(tier)
+
+        sut = originalTextgrid.crop(2.5, 3.7, constants.CropCollision.TRUNCATED, True)
+        expectedTextgrid = textgrid.Textgrid(0, 1.2)
+        for tier in [
+            makeIntervalTier("phrases", [[0.5, 1.2, "world"]], maxT=1.2),
+            makePointTier("cats", [[1.1, "soda"]], maxT=1.2),
+        ]:
+            expectedTextgrid.addTier(tier)
+
+        self.assertEqual(expectedTextgrid, sut)
+
+    def test_crop_truncates_overlapping_intervals_if_mode_is_truncate_and_rebase_false(
+        self,
+    ):
+        originalTextgrid = textgrid.Textgrid(0, 6)
+        for tier in [
+            makeIntervalTier(
+                "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
+            ),
+            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+        ]:
+            originalTextgrid.addTier(tier)
+
+        sut = originalTextgrid.crop(2.5, 3.7, constants.CropCollision.TRUNCATED, False)
+        expectedTextgrid = textgrid.Textgrid(2.5, 3.7)
+        for tier in [
+            makeIntervalTier("phrases", [[3, 3.7, "world"]], 2.5, 3.7),
+            makePointTier("cats", [[3.6, "soda"]], 2.5, 3.7),
+        ]:
+            expectedTextgrid.addTier(tier)
+
+        self.assertEqual(expectedTextgrid, sut)
+
+    def test_crop_truncates_overlapping_intervals_if_mode_is_strict_and_rebase_true(
+        self,
+    ):
+        originalTextgrid = textgrid.Textgrid()
+        for tier in [
+            makeIntervalTier(
+                "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
+            ),
+            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+        ]:
+            originalTextgrid.addTier(tier)
+
+        sut = originalTextgrid.crop(2.5, 5.8, constants.CropCollision.STRICT, True)
+        expectedTextgrid = textgrid.Textgrid(0, 3.3)
+        for tier in [
+            makeIntervalTier("phrases", [[0.5, 1.5, "world"]], maxT=3.3),
+            makePointTier("cats", [[1.1, "soda"]], maxT=3.3),
+        ]:
+            expectedTextgrid.addTier(tier)
+
+        self.assertEqual(expectedTextgrid, sut)
+
+    def test_crop_truncates_overlapping_intervals_if_mode_is_strict_and_rebase_false(
+        self,
+    ):
+        originalTextgrid = textgrid.Textgrid(0, 6)
+        for tier in [
+            makeIntervalTier(
+                "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
+            ),
+            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+        ]:
+            originalTextgrid.addTier(tier)
+
+        sut = originalTextgrid.crop(2.5, 5.8, constants.CropCollision.STRICT, False)
+        expectedTextgrid = textgrid.Textgrid(2.5, 5.8)
+        for tier in [
+            makeIntervalTier("phrases", [[3, 4, "world"]], 2.5, 5.8),
+            makePointTier("cats", [[3.6, "soda"]], 2.5, 5.8),
+        ]:
+            expectedTextgrid.addTier(tier)
+
+        self.assertEqual(expectedTextgrid, sut)
+
+    def test_crop_truncates_overlapping_intervals_if_mode_is_lax_and_rebase_true(
+        self,
+    ):
+        originalTextgrid = textgrid.Textgrid()
+        for tier in [
+            makeIntervalTier(
+                "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
+            ),
+            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+        ]:
+            originalTextgrid.addTier(tier)
+
+        sut = originalTextgrid.crop(2.5, 3.7, constants.CropCollision.LAX, True)
+        expectedTextgrid = textgrid.Textgrid(0, 1.5)
+        for tier in [
+            makeIntervalTier("phrases", [[0.5, 1.5, "world"]], maxT=1.5),
+            makePointTier("cats", [[1.1, "soda"]], maxT=1.2),
+        ]:
+            expectedTextgrid.addTier(tier)
+
+        self.assertEqual(expectedTextgrid, sut)
+
+    def test_crop_truncates_overlapping_intervals_if_mode_is_lax_and_rebase_false(
+        self,
+    ):
+        originalTextgrid = textgrid.Textgrid(0, 6)
+        for tier in [
+            makeIntervalTier(
+                "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
+            ),
+            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+        ]:
+            originalTextgrid.addTier(tier)
+
+        sut = originalTextgrid.crop(2.5, 3.7, constants.CropCollision.LAX, False)
+        expectedTextgrid = textgrid.Textgrid(2.5, 4)
+        for tier in [
+            makeIntervalTier("phrases", [[3, 4, "world"]], 2.5, 4),
+            makePointTier("cats", [[3.6, "soda"]], 2.5, 3.7),
+        ]:
+            expectedTextgrid.addTier(tier)
+
+        self.assertEqual(expectedTextgrid, sut)
 
     def test_erase_region_removes_entries(self):
         originalTextgrid = textgrid.Textgrid()
