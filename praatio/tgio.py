@@ -1918,6 +1918,7 @@ def _parseNormalTextgrid(data):
             else:
                 raise
         tierName = re.search(r"name ?= ?\"(.*)\"\s*$", header, flags=re.MULTILINE).groups()[0]
+        tierName = re.sub(r'""', '"', tierName)
 
         tierStart = re.search(r"xmin ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE).groups()[0]
         tierStart = strToIntOrFloat(tierStart)
@@ -1932,9 +1933,10 @@ def _parseNormalTextgrid(data):
             for element in tierData:
                 timeStart = re.search(r"xmin ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE).groups()[0]
                 timeEnd = re.search(r"xmax ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE).groups()[0]
-                label = re.search(r"text ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE).groups()[0]
+                label = re.search(r"text ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE|re.DOTALL).groups()[0]
 
                 label = label.strip()
+                label = re.sub(r'""', '"', label)
                 tierEntryList.append((timeStart, timeEnd, label))
             tier = IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
 
@@ -1942,7 +1944,7 @@ def _parseNormalTextgrid(data):
         else:
             for element in tierData:
                 time = re.search(r"number ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE).groups()[0]
-                label = re.search(r"mark ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE).groups()[0]
+                label = re.search(r"mark ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE|re.DOTALL).groups()[0]
                 label = label.strip()
                 tierEntryList.append((time, label))
             tier = PointTier(tierName, tierEntryList, tierStart, tierEnd)
