@@ -1861,7 +1861,7 @@ def openTextgrid(fnFullPath, readRaw=False, readAsJson=False):
         data = data.replace("\r\n", "\n")
 
         caseA = "ooTextFile short" in data
-        caseB = "item [" not in data
+        caseB = not re.search(r"item ?\[", data)
         if caseA or caseB:
             textgrid = _parseShortTextgrid(data)
         else:
@@ -1883,7 +1883,7 @@ def _parseNormalTextgrid(data):
     newTG = Textgrid()
 
     # Toss textgrid header
-    header, data = data.split("item [", 1)
+    header, data = re.split(r'item ?\[', data, maxsplit=1, flags=re.MULTILINE)
 
     headerList = header.split("\n")
     tgMin = float(headerList[3].split("=")[1].strip())
@@ -1893,59 +1893,56 @@ def _parseNormalTextgrid(data):
     newTG.maxTimestamp = tgMax
 
     # Process each tier individually (will be output to separate folders)
-    tierList = data.split("item [")[1:]
+    tierList = re.split(r"item ?\[", data, flags=re.MULTILINE)[1:]
     for tierTxt in tierList:
 
         hasData = True
 
         if 'class = "IntervalTier"' in tierTxt:
             tierType = INTERVAL_TIER
-            searchWord = "intervals ["
+            searchWord = r"intervals ?\["
         else:
             tierType = POINT_TIER
-            searchWord = "points ["
+            searchWord = r"points ?\["
 
         # Get tier meta-information
         try:
-            header, tierData = tierTxt.split(searchWord, 1)
+            d = re.split(searchWord, tierTxt, flags=re.MULTILINE)
+            header, tierData = d[0], d[1:]
         except ValueError:
             # A tier with no entries
-            if "size = 0" in tierTxt:
+            if re.search(r"size ?= ?0", tierTxt):
                 header = tierTxt
                 tierData = ""
                 hadData = False
             else:
                 raise
-        tierName = header.split("name = ")[1].split("\n", 1)[0]
-        tierName, tierNameI = _fetchTextRow(header, 0, "name = ")
-        tierStart = header.split("xmin = ")[1].split("\n", 1)[0]
+        tierName = re.search(r"name ?= ?\"(.*)\"\s*$", header, flags=re.MULTILINE).groups()[0]
+
+        tierStart = re.search(r"xmin ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE).groups()[0]
         tierStart = strToIntOrFloat(tierStart)
-        tierEnd = header.split("xmax = ")[1].split("\n", 1)[0]
+
+        tierEnd = re.search(r"xmax ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE).groups()[0]
         tierEnd = strToIntOrFloat(tierEnd)
 
         # Get the tier entry list
         tierEntryList = []
         labelI = 0
         if tierType == INTERVAL_TIER:
-            while True:
-                try:
-                    timeStart, timeStartI = _fetchRow(tierData, labelI, "xmin = ")
-                    timeEnd, timeEndI = _fetchRow(tierData, timeStartI, "xmax = ")
-                    label, labelI = _fetchTextRow(tierData, timeEndI, "text = ")
-                except (ValueError, IndexError):
-                    break
+            for element in tierData:
+                timeStart = re.search(r"xmin ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE).groups()[0]
+                timeEnd = re.search(r"xmax ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE).groups()[0]
+                label = re.search(r"text ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE).groups()[0]
 
                 label = label.strip()
                 tierEntryList.append((timeStart, timeEnd, label))
             tier = IntervalTier(tierName, tierEntryList, tierStart, tierEnd)
-        else:
-            while True:
-                try:
-                    time, timeI = _fetchRow(tierData, labelI, "number = ")
-                    label, labelI = _fetchTextRow(tierData, timeI, "mark = ")
-                except (ValueError, IndexError):
-                    break
 
+
+        else:
+            for element in tierData:
+                time = re.search(r"number ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE).groups()[0]
+                label = re.search(r"mark ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE).groups()[0]
                 label = label.strip()
                 tierEntryList.append((time, label))
             tier = PointTier(tierName, tierEntryList, tierStart, tierEnd)
