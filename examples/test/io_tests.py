@@ -110,6 +110,15 @@ class IOTests(unittest.TestCase):
 
         self.assertTrue(areTheSame(inputFN, outputFN, readFile))
 
+        fn = "bobby_words_with_newlines_longfile_elan.TextGrid"
+        elanInputFN = join(self.dataRoot, fn)
+        elanOutputFN = join(self.outputRoot, fn)
+
+        tg = tgio.openTextgrid(elanInputFN)
+        tg.save(elanOutputFN, useShortForm=False)
+
+        self.assertTrue(areTheSame(inputFN, elanOutputFN, readFile))
+
     def test_tg_io(self):
         """Tests for reading/writing textgrid io"""
         fn = "textgrid_to_merge.TextGrid"
