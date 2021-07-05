@@ -96,6 +96,13 @@ Ver 4.3 (Apr 5, 2021)
 - Textgrids can now be saved without creating blank intervals
     - For backwards compatibility, by default, segments with no intervals will be given a blank entry with a label of ""
 
+Ver 4.4 (Jul 5, 2021)
+- Textgrid reading now more robust (fix for files created in Elan)
+
+Ver 4.3 (Apr 5, 2021)
+- Properly handle quote marks that appear in tier names and entry labels
+- New option to open Textgrids with unlabeled intervals
+
 Ver 4.2 (Aug 14, 2020)
 - Textgrids can now be written to/read from a json file
     - tg.save("blah.json", outputFormat=tgio.JSON)
