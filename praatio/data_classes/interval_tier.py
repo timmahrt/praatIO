@@ -1,8 +1,4 @@
-from typing import (
-    Callable,
-    List,
-    Optional,
-)
+from typing import Callable, List, Optional, Tuple
 
 from typing_extensions import Literal
 
@@ -318,9 +314,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         return newTier
 
-    def getValuesInIntervals(self, dataTupleList: List) -> List[List]:
+    def getValuesInIntervals(self, dataTupleList: List) -> List[Tuple[Interval, List]]:
         """
         Returns data from dataTupleList contained in labeled intervals
+
+        Each labeled interval will get its own list of data values.
 
         dataTupleList should be of the form:
         [(time1, value1a, value1b,...), (time2, value2a, value2b...), ...]
@@ -332,7 +330,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
             intervalDataList = utils.getValuesInInterval(
                 dataTupleList, interval.start, interval.end
             )
-            returnList.append(intervalDataList)
+            returnList.append((interval, intervalDataList))
 
         return returnList
 

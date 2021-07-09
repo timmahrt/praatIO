@@ -110,19 +110,22 @@ class IntervalTierTests(PraatioTestCase):
             (3.5, 31, 2),
             (3.8, 99, 44),
         ]
-
         self.assertEqual(
             [
-                [(1.3, 34, 92), (1.5, 32, 15)],
-                [(2.6, 21, 34)],
-                [(3.5, 31, 2), (3.8, 99, 44)],
+                (Interval(1.0, 2.0, "hello"), [(1.3, 34, 92), (1.5, 32, 15)]),
+                (Interval(2.5, 3.0, "the"), [(2.6, 21, 34)]),
+                (Interval(3.5, 4.0, "world"), [(3.5, 31, 2), (3.8, 99, 44)]),
             ],
             sut.getValuesInIntervals(dataList),
         )
 
         dataList2 = [(0.9, 100), (1.3, 34), (1.5, 32), (4.8, 21)]
         self.assertEqual(
-            [[(1.3, 34), (1.5, 32)], [], []],
+            [
+                (Interval(1.0, 2.0, "hello"), [(1.3, 34), (1.5, 32)]),
+                (Interval(2.5, 3.0, "the"), []),
+                (Interval(3.5, 4.0, "world"), []),
+            ],
             sut.getValuesInIntervals(dataList2),
         )
 
