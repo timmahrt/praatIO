@@ -8,6 +8,7 @@ see **examples/auto_segment_speech.py**, **examples/get_pitch_and_formants.py**,
 import os
 from os.path import join
 import io
+import csv
 from typing import List, Optional, Tuple
 
 from praatio import audio
@@ -116,7 +117,9 @@ def getFormants(
 
     # Load the output
     path, fn = os.path.split(outputTxtFN)
-    dataList = utils.openCSV(path, fn)
+    with open(os.path.join(path, fn), "r", encoding="utf-8") as fd:
+        csvFile = csv.reader(fd)
+        dataList = [row for row in csvFile]
 
     # The new praat script includes a header
     if dataList[0][0] == "time":
