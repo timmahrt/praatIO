@@ -320,7 +320,7 @@ def invertIntervalList(
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
     [(0.5, 1.2), (3.4, 5.0)] -> [(0.0, 0.5), (1.2, 3.4)]
     """
-    if any([start >= end for start, end in inputList]):
+    if any([interval[0] >= interval[1] for interval in inputList]):
         raise errors.PraatioException("Interval start occured before interval end")
 
     inputList = sorted(inputList)
@@ -343,6 +343,10 @@ def invertIntervalList(
         invList = [
             (inputList[i][1], inputList[i + 1][0]) for i in range(0, len(inputList) - 1)
         ]
+
+        # If two intervals in the input share a boundary, we'll get invalid intervals in the output
+        # eg invertIntervalList([(0, 1), (1, 2)]) -> [(1, 1)]
+        invList = [interval for interval in invList if interval[0] != interval[1]]
 
     return invList
 

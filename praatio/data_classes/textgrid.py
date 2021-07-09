@@ -521,7 +521,7 @@ class Textgrid:
                 errorReporter(
                     errors.TextgridException,
                     f"Textgrid has a min timestamp of ({self.minTimestamp}) "
-                    "but tier has ({tier.minTimestamp})",
+                    f"but tier has ({tier.minTimestamp})",
                 )
 
             if self.maxTimestamp != tier.maxTimestamp:
@@ -529,7 +529,7 @@ class Textgrid:
                 errorReporter(
                     errors.TextgridException,
                     f"Textgrid has a max timestamp of ({self.maxTimestamp}) "
-                    "but tier has ({tier.maxTimestamp})",
+                    f"but tier has ({tier.maxTimestamp})",
                 )
 
             isValid = isValid and tier.validate(reportingMode)

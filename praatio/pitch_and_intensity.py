@@ -628,7 +628,7 @@ def detectPitchErrors(
         floorCutoff = currentPitch * maxJumpThreshold
         if (lastPitch <= floorCutoff) or (lastPitch >= ceilingCutoff):
             currentTime = pitchList[i][0]
-            errorList.append(Point(currentTime, currentPitch / lastPitch))
+            errorList.append(Point(currentTime, str(currentPitch / lastPitch)))
 
     if tgToMark is not None:
         tierName = _PITCH_ERROR_TIER_NAME

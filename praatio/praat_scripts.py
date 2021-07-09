@@ -236,7 +236,9 @@ def resynthesizePitch(
 
     if pointList is not None:
         dur = audio.WavQueryObj(inputWavFN).getDuration()
-        pointObj = data_points.PointObject2D(pointList, constants.PITCH, 0, dur)
+        pointObj = data_points.PointObject2D(
+            pointList, constants.DataPointTypes.PITCH, 0, dur
+        )
         pointObj.save(pitchFN)
 
     utils.runPraatScript(
