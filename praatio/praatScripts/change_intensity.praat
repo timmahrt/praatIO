@@ -1,4 +1,4 @@
-form Soundfile to klaatgrid
+form Change intensity
     sentence Input_audio_file_name
     sentence Output_audio_file_name
     real Intensity_val

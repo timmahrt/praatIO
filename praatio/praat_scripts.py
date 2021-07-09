@@ -43,7 +43,7 @@ def changeGender(
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "change_gender.praat")
 
-    #  Praat crashes on exit after resynthesis with a klaatgrid
+    #  Praat crashes on exit after resynthesis with a klattgrid
     utils.runPraatScript(
         praatEXE,
         scriptFN,
@@ -76,7 +76,7 @@ def changeIntensity(
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "change_intensity.praat")
 
-    #  Praat crashes on exit after resynthesis with a klaatgrid
+    #  Praat crashes on exit after resynthesis with a klattgrid
     utils.runPraatScript(praatEXE, scriptFN, [wavFN, outputWavFN, newIntensity])
 
 

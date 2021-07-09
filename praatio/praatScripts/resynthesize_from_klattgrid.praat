@@ -1,4 +1,4 @@
-form Soundfile to klaatgrid
+form Klattgrid to soundfile
     sentence Input_audio_file_name
     sentence Input_klatt_file_name
     sentence Output_audio_file_name

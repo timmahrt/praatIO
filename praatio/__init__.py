@@ -9,7 +9,7 @@ Praat's homepage: [http://www.fon.hum.uva.nl/praat/](http://www.fon.hum.uva.nl/p
 praatio's utility comes from the classes Textgrid, IntervalTier,
 and PointTier in **textgrid.py** These classes represent the speech transcript
 data stored inside of .TextGrid files.  textgrid.py contains functions for
-reading/writing these objects from/to files. **data_points.py** and **klaatgrid.py**
+reading/writing these objects from/to files. **data_points.py** and **klattgrid.py**
 contain similar code for other data files that praat works with.
 
 **pitch_and_intensity.py** uses praat to extract pitch and intensity values

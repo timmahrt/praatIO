@@ -1,7 +1,7 @@
 """
 Functions for reading/writing/manipulating klattgrid files
 
-A klaatgrid can be used for speech synthesis/resynthesis.
+A klattgrid can be used for speech synthesis/resynthesis.
 For more information on the praat klattgrid:
 http://www.fon.hum.uva.nl/praat/manual/KlattGrid.html
 
@@ -26,7 +26,7 @@ import io
 from os.path import join
 from typing import List, Tuple, Optional
 
-from praatio.data_classes.klaatgrid import (
+from praatio.data_classes.klattgrid import (
     Klattgrid,
     KlattPointTier,
     KlattContainerTier,
@@ -117,7 +117,7 @@ def resynthesize(
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "resynthesize_from_klattgrid.praat")
 
-    #  Praat crashes on exit after resynthesis with a klaatgrid
+    #  Praat crashes on exit after resynthesis with a klattgrid
     utils.runPraatScript(praatEXE, scriptFN, [wavFN, klattFN, outputWavFN, method])
 
 

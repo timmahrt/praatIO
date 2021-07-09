@@ -1,4 +1,4 @@
-form Soundfile to klaatgrid
+form Soundfile to klattgrid
     sentence Input_audio_file_name
     sentence Output_audio_file_name
     real Time_step_s 0.005
