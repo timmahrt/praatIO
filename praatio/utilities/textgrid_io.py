@@ -164,7 +164,7 @@ def getTextgridAsStr(
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
     minTimestamp: Optional[float] = None,
     maxTimestamp: Optional[float] = None,
-    outputFormat: Literal[
+    format: Literal[
         "short_textgrid", "long_textgrid", "json"
     ] = TextgridFormats.SHORT_TEXTGRID,
     ignoreBlankSpaces: bool = False,
@@ -187,7 +187,7 @@ def getTextgridAsStr(
             if None, use whatever is defined in the Textgrid object.
             If maxTimestamp is smaller than timestamps in your textgrid,
             an exception will be thrown.
-        outputFormat (str): one of ['short_textgrid', 'long_textgrid', 'json']
+        format (str): one of ['short_textgrid', 'long_textgrid', 'json']
         ignoreBlankSpaces (bool): if False, blank sections in interval
             tiers will be filled in with an empty interval
             (with a label of "")
@@ -196,23 +196,23 @@ def getTextgridAsStr(
         a string representation of the textgrid
     """
 
-    validOutputFormats = [
+    validFormats = [
         TextgridFormats.LONG_TEXTGRID,
         TextgridFormats.SHORT_TEXTGRID,
         TextgridFormats.JSON,
     ]
-    if outputFormat not in validOutputFormats:
-        raise errors.WrongOption("outputFormat", outputFormat, validOutputFormats)
+    if format not in validFormats:
+        raise errors.WrongOption("format", format, validFormats)
 
     tg = _prepTgForSaving(
         tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
     )
 
-    if outputFormat == TextgridFormats.LONG_TEXTGRID:
+    if format == TextgridFormats.LONG_TEXTGRID:
         outputTxt = _tgToLongTextForm(tg)
-    elif outputFormat == TextgridFormats.SHORT_TEXTGRID:
+    elif format == TextgridFormats.SHORT_TEXTGRID:
         outputTxt = _tgToShortTextForm(tg)
-    elif outputFormat == TextgridFormats.JSON:
+    elif format == TextgridFormats.JSON:
         outputTxt = _tgToJson(tg)
 
     return outputTxt

@@ -814,7 +814,7 @@ class TextgridTests(PraatioTestCase):
         sut = textgrid.Textgrid()
 
         self.assertRaises(
-            errors.WrongOption, sut.save, "file.Textgrid", outputFormat="cat"
+            errors.WrongOption, sut.save, "file.Textgrid", format="cat"
         )
 
     def test_save_throws_error_if_reporting_mode_is_invalid(self):

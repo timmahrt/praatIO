@@ -82,7 +82,7 @@ class IOTests(PraatioTestCase):
         outputFN = join(self.outputRoot, fn)
 
         tg = textgrid.openTextgrid(inputFN)
-        tg.save(outputFN, outputFormat=constants.TextgridFormats.LONG_TEXTGRID)
+        tg.save(outputFN, format=constants.TextgridFormats.LONG_TEXTGRID)
 
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
@@ -112,7 +112,7 @@ class IOTests(PraatioTestCase):
         outputFN = join(self.outputRoot, "saved_short_file.textgrid")
 
         tg = textgrid.openTextgrid(shortFN)
-        tg.save(outputFN, outputFormat=constants.TextgridFormats.SHORT_TEXTGRID)
+        tg.save(outputFN, format=constants.TextgridFormats.SHORT_TEXTGRID)
 
         self.assertTrue(areTheSameFiles(shortFN, outputFN, readFile))
 
@@ -123,7 +123,7 @@ class IOTests(PraatioTestCase):
         outputFN = join(self.outputRoot, "saved_long_file.textgrid")
 
         tg = textgrid.openTextgrid(longFN)
-        tg.save(outputFN, outputFormat=constants.TextgridFormats.LONG_TEXTGRID)
+        tg.save(outputFN, format=constants.TextgridFormats.LONG_TEXTGRID)
 
         self.assertTrue(areTheSameFiles(longFN, outputFN, readFile))
 
@@ -137,7 +137,7 @@ class IOTests(PraatioTestCase):
         )
 
         tgFromTgFile = textgrid.openTextgrid(shortFN)
-        tgFromTgFile.save(outputFN, outputFormat=constants.TextgridFormats.JSON)
+        tgFromTgFile.save(outputFN, format=constants.TextgridFormats.JSON)
 
         tgFromJsonFile = textgrid.openTextgrid(outputFN)
         tgFromJsonFile.save(outputLastFN)

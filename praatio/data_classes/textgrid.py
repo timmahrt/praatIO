@@ -410,9 +410,7 @@ class Textgrid:
         minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
-        outputFormat: Literal[
-            "short_textgrid", "long_textgrid", "json"
-        ] = "short_textgrid",
+        format: Literal["short_textgrid", "long_textgrid", "json"] = "short_textgrid",
         ignoreBlankSpaces: bool = False,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
@@ -434,7 +432,7 @@ class Textgrid:
                 if None, use whatever is defined in the Textgrid object.
                 If maxTimestamp is smaller than timestamps in your textgrid,
                 an exception will be thrown.
-            outputFormat (str): one of ['short_textgrid', 'long_textgrid', 'json']
+            format (str): one of ['short_textgrid', 'long_textgrid', 'json']
             ignoreBlankSpaces (bool): if False, blank sections in interval
                 tiers will be filled in with an empty interval
                 (with a label of ""). Praat needs blanks to render textgrids properly.
@@ -446,7 +444,7 @@ class Textgrid:
             a string representation of the textgrid
         """
 
-        utils.validateOption("outputFormat", outputFormat, TextgridFormats)
+        utils.validateOption("format", format, TextgridFormats)
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
         )
@@ -459,7 +457,7 @@ class Textgrid:
             minimumIntervalLength,
             minTimestamp,
             maxTimestamp,
-            outputFormat,
+            format,
             ignoreBlankSpaces,
         )
 
