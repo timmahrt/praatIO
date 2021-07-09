@@ -73,13 +73,11 @@ class IntervalTierTests(PraatioTestCase):
         )
 
     def test_interval_tier_creation_with_no_times(self):
-        self.assertRaises(
-            errors.TimelessTextgridTierException,
-            textgrid.IntervalTier,
-            "phones",
-            [],
-            None,
-            None,
+        with self.assertRaises(errors.TimelessTextgridTierException) as cm:
+            textgrid.IntervalTier("phones", [], None, None)
+
+        self.assertEqual(
+            "All textgrid tiers much have a min and max duration", str(cm.exception)
         )
 
     @testing_utils.supressStdout
@@ -167,7 +165,10 @@ class IntervalTierTests(PraatioTestCase):
             sut.crop(1, 2, "cat", True)
 
         self.assertEqual(
-            "For argument 'mode' was given the value 'cat'. However, expected one of [strict, lax, truncated]",
+            (
+                "For argument 'mode' was given the value 'cat'. "
+                "However, expected one of [strict, lax, truncated]"
+            ),
             str(cm.exception),
         )
 
@@ -226,6 +227,27 @@ class IntervalTierTests(PraatioTestCase):
         )
         self.assertEqual(expectedIntervalTier, sut)
 
+    def test_crop_truncates_an_interval_if_the_crop_region_is_inside_the_interval(self):
+        originalIntervalTier = makeIntervalTier(
+            intervals=[
+                Interval(0.3, 0.7, "cats"),
+                Interval(1, 2.5, "hello"),
+                Interval(3.0, 3.5, "world"),
+                Interval(3.5, 4.0, "travel"),
+            ]
+        )
+
+        sut = originalIntervalTier.crop(
+            1.5, 2.0, constants.CropCollision.TRUNCATED, False
+        )
+
+        expectedIntervalTier = makeIntervalTier(
+            intervals=[Interval(1.5, 2.0, "hello")],
+            minT=1.5,
+            maxT=2.0,
+        )
+        self.assertEqual(expectedIntervalTier, sut)
+
     def test_crop_keeps_overlapping_intervals_if_mode_is_lax_and_rebase_true(
         self,
     ):
@@ -263,6 +285,25 @@ class IntervalTierTests(PraatioTestCase):
             intervals=[Interval(1.0, 2.5, "hello"), Interval(3.0, 3.5, "world")],
             minT=1.0,
             maxT=3.5,
+        )
+        self.assertEqual(expectedIntervalTier, sut)
+
+    def test_crop_keeps_an_interval_that_is_wholly_in_crop_region_if_mode_is_lax(self):
+        originalIntervalTier = makeIntervalTier(
+            intervals=[
+                Interval(0.3, 0.7, "cats"),
+                Interval(1, 2.5, "hello"),
+                Interval(3.0, 3.5, "world"),
+                Interval(3.5, 4.0, "travel"),
+            ]
+        )
+
+        sut = originalIntervalTier.crop(1.5, 2.0, constants.CropCollision.LAX, False)
+
+        expectedIntervalTier = makeIntervalTier(
+            intervals=[Interval(1, 2.5, "hello")],
+            minT=1,
+            maxT=2.5,
         )
         self.assertEqual(expectedIntervalTier, sut)
 
@@ -452,7 +493,7 @@ class IntervalTierTests(PraatioTestCase):
         expectedIntervalTier = makeIntervalTier(intervals=[Interval(1, 2, "world")])
         self.assertEqual(expectedIntervalTier, sut)
 
-    def test_edit_timestamps_are_trimmed_if_they_partially_go_below_zero_even_reporting_mode_as_silence(
+    def test_edit_timestamps_are_trimmed_if_they_partially_go_below_zero_and_mode_is_silence(
         self,
     ):
         initialIntervalTier = makeIntervalTier(
@@ -731,15 +772,22 @@ class IntervalTierTests(PraatioTestCase):
     def test_insert_throws_error_with_overlapping_intervals_when_mode_is_error(
         self,
     ):
-        sut = makeIntervalTier(intervals=[Interval(1, 2, "hello")])
+        sut = makeIntervalTier("words", intervals=[Interval(1, 2, "hello")])
 
-        self.assertRaises(
-            errors.TextgridCollisionException, sut.insertEntry, [1.5, 3, "world"]
+        with self.assertRaises(errors.TextgridCollisionException) as cm:
+            sut.insertEntry([1.5, 3, "world"])
+
+        expectedErrMsg = (
+            "Attempted to insert interval (1.5, 3, 'world') into tier words "
+            "of textgrid but overlapping entries [(1.0, 2.0, 'hello')] already exist"
         )
+        self.assertEqual(expectedErrMsg, str(cm.exception))
 
     def test_insert_space_raises_error_if_collision_mode_is_invalid(self):
         sut = makeIntervalTier()
-        self.assertRaises(errors.WrongOption, sut.insertSpace, 2.5, 1, "bird")
+
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.insertSpace(2.5, 1, "bird")
 
     def test_insert_space_inserts_a_space_into_the_textgrid(self):
         intervalTier = textgrid.IntervalTier(

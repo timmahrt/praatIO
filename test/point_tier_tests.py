@@ -62,13 +62,11 @@ class PointTierTests(PraatioTestCase):
         )
 
     def test_point_tier_creation_with_no_times(self):
-        self.assertRaises(
-            errors.TimelessTextgridTierException,
-            textgrid.PointTier,
-            "pitch_values",
-            [],
-            None,
-            None,
+        with self.assertRaises(errors.TimelessTextgridTierException) as cm:
+            textgrid.PointTier("pitch_values", [], None, None)
+
+        self.assertEqual(
+            "All textgrid tiers much have a min and max duration", str(cm.exception)
         )
 
     def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):

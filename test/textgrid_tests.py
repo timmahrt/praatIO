@@ -1,12 +1,11 @@
 import unittest
 
 from praatio import textgrid
-from praatio.utilities.constants import Interval, Point, POINT_TIER, INTERVAL_TIER
+from praatio.utilities.constants import Interval, Point
 from praatio.utilities import constants
 from praatio.utilities import errors
 
 from test.praatio_test_case import PraatioTestCase
-from test import testing_utils
 
 
 def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
@@ -22,6 +21,184 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
 
 
 class TextgridTests(PraatioTestCase):
+    def test_add_tier_raises_error_with_invalid_option(self):
+        sut = textgrid.Textgrid()
+        tier = makeIntervalTier()
+
+        self.assertRaises(errors.WrongOption, sut.addTier, tier, reportingMode="bird")
+
+    def test_add_tier_raises_error_if_max_timestamp_is_altered(self):
+        sut = textgrid.Textgrid(maxTimestamp=5)
+        tier = makeIntervalTier(maxT=10)
+
+        self.assertRaises(
+            errors.TextgridException, sut.addTier, tier, reportingMode="error"
+        )
+
+    def test_add_tier_raises_error_if_min_timestamp_is_altered(self):
+        sut = textgrid.Textgrid(minTimestamp=3)
+        tier = makeIntervalTier(minT=1)
+
+        self.assertRaises(
+            errors.TextgridException, sut.addTier, tier, reportingMode="error"
+        )
+
+    def test_add_tier_raises_error_if_autoset_max_timestamp_is_altered(self):
+        sut = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words", maxT=5)
+        tier2 = makeIntervalTier("phrases", maxT=10)
+
+        sut.addTier(tier1, reportingMode="error")
+        self.assertRaises(
+            errors.TextgridException, sut.addTier, tier2, reportingMode="error"
+        )
+
+    def test_add_tier_raises_error_if_autoset_min_timestamp_is_altered(self):
+        sut = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words", minT=1)
+        tier2 = makeIntervalTier("phrases", minT=0.5)
+
+        sut.addTier(tier1, reportingMode="error")
+        self.assertRaises(
+            errors.TextgridException, sut.addTier, tier2, reportingMode="error"
+        )
+
+    def test_add_tier_raises_error_if_tier_name_already_exists_in_textgrid(self):
+        sut = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words")
+        tier2 = makeIntervalTier("words")
+
+        sut.addTier(tier1, reportingMode="error")
+        self.assertRaises(errors.TextgridException, sut.addTier, tier2)
+
+    def test_add_tier_can_add_a_tier_to_a_tg(self):
+        sut = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words")
+        tier2 = makeIntervalTier("phrases")
+        tier3 = makePointTier("max pitch")
+
+        sut.addTier(tier1, reportingMode="error")
+        sut.addTier(tier2, reportingMode="error")
+        sut.addTier(tier3, reportingMode="error")
+
+        self.assertEquals(["words", "phrases", "max pitch"], sut.tierNameList)
+        self.assertEqual(tier1, sut.tierDict["words"])
+        self.assertEqual(tier2, sut.tierDict["phrases"])
+        self.assertEqual(tier3, sut.tierDict["max pitch"])
+
+    def test_add_tier_can_add_a_tier_to_a_tg_at_specific_indices(self):
+        sut = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words")
+        tier2 = makeIntervalTier("phrases")
+        tier3 = makePointTier("max pitch")
+
+        sut.addTier(tier1, reportingMode="error")
+        sut.addTier(tier2, reportingMode="error")
+        sut.addTier(tier3, tierIndex=1, reportingMode="error")
+
+        # tier3 was inserted last but with index 1, so it will appear second
+        self.assertEquals(["words", "max pitch", "phrases"], sut.tierNameList)
+        self.assertEqual(tier1, sut.tierDict["words"])
+        self.assertEqual(tier3, sut.tierDict["max pitch"])
+        self.assertEqual(tier2, sut.tierDict["phrases"])
+
+    def test_append_textgrid_with_matching_names_only(self):
+        tg1 = textgrid.Textgrid()
+        tg2 = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words", [[1.1, 2.3, "hello"], [3.4, 4.1, "world"]])
+        tier2 = makeIntervalTier("words", [[2.4, 3.0, "goodnight"], [3.4, 4.1, "moon"]])
+        tier3 = makePointTier("max pitch", [[1.8, "135"], [3.7, "152"]])
+        tier4 = makePointTier("max pitch", [[2.7, "98"], [3.8, "143"]])
+        tier5 = makeIntervalTier("phrases", [[0.9, 1.3, "the"], [2.0, 2.4, "house"]])
+        tier6 = makeIntervalTier("cats", [[1.9, 2.3, "birds"], [3.2, 4.1, "fly"]])
+        tier7 = makePointTier("min pitch", [[1.4, "61"], [4.1, "73"]])
+        tier8 = makePointTier("dogs", [[2.7, "collie"], [3.8, "golden retriever"]])
+
+        for tier in [tier1, tier3, tier5, tier7]:
+            tg1.addTier(tier)
+        for tier in [tier2, tier4, tier6, tier8]:
+            tg2.addTier(tier)
+
+        sut = tg1.appendTextgrid(tg2, onlyMatchingNames=True)
+
+        expectedTier1 = makeIntervalTier(
+            "words",
+            [
+                [1.1, 2.3, "hello"],
+                [3.4, 4.1, "world"],
+                [7.4, 8.0, "goodnight"],
+                [8.4, 9.1, "moon"],
+            ],
+            0,
+            10,
+        )
+        expectedTier2 = makePointTier(
+            "max pitch", [[1.8, "135"], [3.7, "152"], [7.7, "98"], [8.8, "143"]], 0, 10
+        )
+
+        self.assertEquals(0, sut.minTimestamp)
+        self.assertEquals(10, sut.maxTimestamp)
+        self.assertEquals(["words", "max pitch"], sut.tierNameList)
+        self.assertEquals(expectedTier1, sut.tierDict["words"])
+        self.assertEquals(expectedTier2, sut.tierDict["max pitch"])
+
+    def test_append_textgrid_without_matching_names_only(self):
+        tg1 = textgrid.Textgrid()
+        tg2 = textgrid.Textgrid()
+        tier1 = makeIntervalTier("words", [[1.1, 2.3, "hello"], [3.4, 4.1, "world"]])
+        tier2 = makeIntervalTier("words", [[2.4, 3.0, "goodnight"], [3.4, 4.1, "moon"]])
+        tier3 = makePointTier("max pitch", [[1.8, "135"], [3.7, "152"]])
+        tier4 = makePointTier("max pitch", [[2.7, "98"], [3.8, "143"]])
+        tier5 = makeIntervalTier("phrases", [[0.9, 1.3, "the"], [2.0, 2.4, "house"]])
+        tier6 = makeIntervalTier("cats", [[1.9, 2.3, "birds"], [3.2, 4.1, "fly"]])
+        tier7 = makePointTier("min pitch", [[1.4, "61"], [4.1, "73"]])
+        tier8 = makePointTier("dogs", [[2.7, "collie"], [3.8, "golden retriever"]])
+
+        for tier in [tier1, tier3, tier5, tier7]:
+            tg1.addTier(tier)
+        for tier in [tier2, tier4, tier6, tier8]:
+            tg2.addTier(tier)
+
+        sut = tg1.appendTextgrid(tg2, onlyMatchingNames=False)
+
+        expectedTier1 = makeIntervalTier(
+            "words",
+            [
+                [1.1, 2.3, "hello"],
+                [3.4, 4.1, "world"],
+                [7.4, 8.0, "goodnight"],
+                [8.4, 9.1, "moon"],
+            ],
+            0,
+            10,
+        )
+        expectedTier2 = makePointTier(
+            "max pitch", [[1.8, "135"], [3.7, "152"], [7.7, "98"], [8.8, "143"]], 0, 10
+        )
+        expectedTier3 = makeIntervalTier(
+            "phrases", [[0.9, 1.3, "the"], [2.0, 2.4, "house"]]
+        )
+        expectedTier4 = makePointTier("min pitch", [[1.4, "61"], [4.1, "73"]])
+        expectedTier5 = makeIntervalTier(
+            "cats", [[6.9, 7.3, "birds"], [8.2, 9.1, "fly"]], 0, 10
+        )
+        expectedTier6 = makePointTier(
+            "dogs", [[7.7, "collie"], [8.8, "golden retriever"]], 0, 10
+        )
+
+        self.assertEquals(0, sut.minTimestamp)
+        self.assertEquals(10, sut.maxTimestamp)
+        self.assertEquals(
+            ["words", "max pitch", "phrases", "min pitch", "cats", "dogs"],
+            sut.tierNameList,
+        )
+        self.assertEquals(expectedTier1, sut.tierDict["words"])
+        self.assertEquals(expectedTier2, sut.tierDict["max pitch"])
+        self.assertEquals(expectedTier3, sut.tierDict["phrases"])
+        self.assertEquals(expectedTier4, sut.tierDict["min pitch"])
+        self.assertEquals(expectedTier5, sut.tierDict["cats"])
+        self.assertEquals(expectedTier6, sut.tierDict["dogs"])
+
     def test_crop_raises_error_if_mode_invalid(self):
         sut = textgrid.Textgrid()
 
@@ -29,7 +206,10 @@ class TextgridTests(PraatioTestCase):
             sut.crop(1, 2, "cat", True)
 
         self.assertEqual(
-            "For argument 'mode' was given the value 'cat'. However, expected one of [strict, lax, truncated]",
+            (
+                "For argument 'mode' was given the value 'cat'. "
+                "However, expected one of [strict, lax, truncated]"
+            ),
             str(cm.exception),
         )
 

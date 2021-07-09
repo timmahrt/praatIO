@@ -41,8 +41,8 @@ class TextgridCollisionException(Exception):
     ):
         super(TextgridCollisionException, self).__init__()
         self.tierName = tierName
-        self.insertInterval = insertInterval
-        self.collisionList = collisionList
+        self.insertInterval = tuple(insertInterval)
+        self.collisionList = [tuple(interval) for interval in collisionList]
 
     def __str__(self):
         return (
@@ -54,34 +54,6 @@ class TextgridCollisionException(Exception):
 class TimelessTextgridTierException(Exception):
     def __str__(self):
         return "All textgrid tiers much have a min and max duration"
-
-
-class BadIntervalError(Exception):
-    def __init__(self, start: float, end: float, label: str):
-        super(BadIntervalError, self).__init__()
-        self.start = start
-        self.end = end
-        self.label = label
-
-    def __str__(self):
-        return (
-            "Problem with interval--could not create textgrid "
-            f"({self.start},{self.end},{self.label})"
-        )
-
-
-class BadFormatException(Exception):
-    def __init__(self, selectedFormat: str, validFormatOptions: List[str]):
-        super(BadFormatException, self).__init__()
-        self.selectedFormat = selectedFormat
-        self.validFormatOptions = validFormatOptions
-
-    def __str__(self):
-        validFormatOptionsStr = ", ".join(self.validFormatOptions)
-        return (
-            f"Problem with format.  Received {self.selectedFormat} "
-            f"but format must be one of {validFormatOptionsStr}"
-        )
 
 
 class IncompatibleTierError(Exception):
@@ -144,3 +116,14 @@ class FindZeroCrossingError(Exception):
     def __str__(self):
         retString = "No zero crossing found between %f and %f"
         return retString % (self.startTime, self.endTime)
+
+
+class NormalizationException(Exception):
+    def __str__(self):
+        return (
+            "Local normalization will nullify the effect of global normalization. "
+            "Local normalization should be used to examine local phenomena "
+            "(e.g. max pitch in a segment of running speech)."
+            "Global normalization should be used to examine global phenomena "
+            "(e.g. the pitch range of a speaker)."
+        )

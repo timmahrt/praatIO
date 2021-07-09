@@ -107,9 +107,7 @@ class Textgrid:
         if self.maxTimestamp is None or maxV > self.maxTimestamp:
             self.maxTimestamp = maxV
 
-    def appendTextgrid(
-        self, tg: "Textgrid", onlyMatchingNames: bool = True
-    ) -> "Textgrid":
+    def appendTextgrid(self, tg: "Textgrid", onlyMatchingNames: bool) -> "Textgrid":
         """
         Append one textgrid to the end of this one
 
@@ -127,7 +125,7 @@ class Textgrid:
 
         # Get all tier names.  Ordered first by this textgrid and
         # then by the other textgrid.
-        combinedTierNameList = self.tierNameList
+        combinedTierNameList = self.tierNameList[:]
         for tierName in tg.tierNameList:
             if tierName not in combinedTierNameList:
                 combinedTierNameList.append(tierName)
@@ -143,14 +141,14 @@ class Textgrid:
                         finalTierNameList.append(tierName)
 
         # Add tiers from this textgrid
-        for tierName in self.tierNameList:
-            if tierName in finalTierNameList:
+        for tierName in finalTierNameList:
+            if tierName in self.tierNameList:
                 tier = self.tierDict[tierName]
                 retTG.addTier(tier)
 
         # Add tiers from the given textgrid
-        for tierName in tg.tierNameList:
-            if tierName in finalTierNameList:
+        for tierName in finalTierNameList:
+            if tierName in tg.tierNameList:
                 appendTier = tg.tierDict[tierName]
                 appendTier = appendTier.new(minTimestamp=minTime, maxTimestamp=maxTime)
 
@@ -219,7 +217,9 @@ class Textgrid:
             tier = self.tierDict[tierName]
             newTier = tier.crop(cropStart, cropEnd, mode, rebaseToZero)
 
-            reportingMode = constants.ErrorReportingMode.WARNING
+            reportingMode: Literal[
+                "silence", "warning", "error"
+            ] = constants.ErrorReportingMode.WARNING
             if mode == constants.CropCollision.LAX:
                 # We expect that there will be changes to the size
                 # of the textgrid when the mode is LAX

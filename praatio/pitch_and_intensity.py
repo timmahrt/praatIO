@@ -33,26 +33,6 @@ UNSPECIFIED = "unspecified"
 _PITCH_ERROR_TIER_NAME = "pitch errors"
 
 
-class NormalizationException(Exception):
-    def __str__(self):
-        return (
-            "Local normalization will nullify the effect of global normalization. "
-            "Local normalization should be used to examine local phenomena "
-            "(e.g. max pitch in a segment of running speech)."
-            "Global normalization should be used to examine global phenomena "
-            "(e.g. the pitch range of a speaker)."
-        )
-
-
-class OverwriteException(Exception):
-    def __str__(self):
-        return (
-            "Performing this operation will result in the pitch files "
-            "being overwritten.  Please change the output directory "
-            "to an alternative location or add a suffix to the output. "
-        )
-
-
 def _extractPIPiecewise(
     inputFN: str,
     outputFN: str,
@@ -507,7 +487,7 @@ def generatePIMeasures(
 
     # Warn user that normalizing a second time nullifies the first normalization
     if globalZNormalization is True and localZNormalizationWindowSize > 0:
-        raise NormalizationException()
+        raise errors.NormalizationException()
 
     castDataList = cast(List[Tuple[float, ...]], dataList)
     if globalZNormalization is True:

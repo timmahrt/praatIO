@@ -3,11 +3,8 @@ Various generic utility functions
 """
 
 import os
-from os.path import join
 import subprocess
-import functools
 import itertools
-import io
 import wave
 from pkg_resources import resource_filename
 from typing_extensions import Literal
@@ -67,21 +64,6 @@ def checkIsOvershoot(time: float, referenceTime: float, errorReporter) -> bool:
         return True
     else:
         return False
-
-
-def overshootCheck(
-    start: float, end: float, minTimestamp: float, maxTimestamp: float
-) -> None:
-    if start < minTimestamp:
-        raise errors.TextgridException(
-            f"Time ({start}) exceed Textgrid's minimum "
-            "({minTimestamp}). If this is desired, set overshoot=True)"
-        )
-    if end > maxTimestamp:
-        raise errors.TextgridException(
-            f"Time ({end}) exceed Textgrid's maximum "
-            "({maxTimestamp}). If this is desired, set overshoot=True)"
-        )
 
 
 def validateOption(variableName, value, optionClass):
@@ -329,7 +311,7 @@ def sign(x: float) -> int:
 
 
 def invertIntervalList(
-    inputList: List[Tuple[float, float]], maxValue: float = None
+    inputList: List[Tuple[float, float]], minValue: float = None, maxValue: float = None
 ) -> List[Tuple[float, float]]:
     """
     Inverts the segments of a list of intervals
@@ -338,20 +320,23 @@ def invertIntervalList(
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
     [(0.5, 1.2), (3.4, 5.0)] -> [(0.0, 0.5), (1.2, 3.4)]
     """
+    if any([start >= end for start, end in inputList]):
+        raise errors.PraatioException("Interval start occured before interval end")
+
     inputList = sorted(inputList)
 
     # Special case -- empty lists
     invList: List[Tuple[float, float]]
-    if len(inputList) == 0 and maxValue is not None:
+    if len(inputList) == 0 and minValue is not None and maxValue is not None:
         invList = [
-            (0, maxValue),
+            (minValue, maxValue),
         ]
     else:
         # Insert in a garbage head and tail value for the purpose
         # of inverting, in the range does not start and end at the
         # smallest and largest values
-        if inputList[0][0] != 0:
-            inputList.insert(0, (-1, 0))
+        if minValue is not None and inputList[0][0] > minValue:
+            inputList.insert(0, (-1, minValue))
         if maxValue is not None and inputList[-1][1] < maxValue:
             inputList.append((maxValue, maxValue + 1))
 
@@ -364,9 +349,9 @@ def invertIntervalList(
 
 def makeDir(path: str) -> None:
     """
-    Creates a new directory
+    Create a new directory
 
-    Unlike os.mkdir, it does not throw an exception if the directory already exists.
+    Unlike os.mkdir, it does not throw an exception if the directory already exists
     """
     if not os.path.exists(path):
         os.mkdir(path)
@@ -406,103 +391,6 @@ def runPraatScript(
 
     if myProcess.wait():
         raise errors.PraatExecutionFailed(cmdList)
-
-
-def _getMatchFunc(pattern: str):
-    """
-    An unsophisticated pattern matching function
-    """
-
-    # '#' Marks word boundaries, so if there is more than one we need to do
-    #    something special to make sure we're not mis-representings them
-    if pattern.count("#") >= 2:
-        raise errors.ParsingError("Found more than one '#' which was not expected.")
-
-    def startsWith(subStr, fullStr):
-        return fullStr[: len(subStr)] == subStr
-
-    def endsWith(subStr, fullStr):
-        return fullStr[-1 * len(subStr) :] == subStr
-
-    def inStr(subStr, fullStr):
-        return subStr in fullStr
-
-    # Selection of the correct function
-    if pattern[0] == "#":
-        pattern = pattern[1:]
-        cmpFunc = startsWith
-
-    elif pattern[-1] == "#":
-        pattern = pattern[:-1]
-        cmpFunc = endsWith
-
-    else:
-        cmpFunc = inStr
-
-    return functools.partial(cmpFunc, pattern)
-
-
-def findFiles(
-    path: str,
-    filterPaths: bool = False,
-    filterExt: str = None,
-    filterPattern: str = None,
-    skipIfNameInList: List[str] = None,
-    stripExt: bool = False,
-) -> List[str]:
-
-    fnList = os.listdir(path)
-
-    if filterPaths is True:
-        fnList = [
-            folderName
-            for folderName in fnList
-            if os.path.isdir(os.path.join(path, folderName))
-        ]
-
-    if filterExt is not None:
-        splitFNList = [[fn, *list(os.path.splitext(fn))] for fn in fnList]
-        fnList = [fn for fn, name, ext in splitFNList if ext == filterExt]
-
-    if filterPattern is not None:
-        splitFNList = [[fn, *list(os.path.splitext(fn))] for fn in fnList]
-        matchFunc = _getMatchFunc(filterPattern)
-        fnList = [fn for fn, name, ext in splitFNList if matchFunc(name)]
-
-    if skipIfNameInList is not None:
-        targetNameList = [os.path.splitext(fn)[0] for fn in skipIfNameInList]
-        fnList = [fn for fn in fnList if os.path.splitext(fn)[0] not in targetNameList]
-
-    if stripExt is True:
-        fnList = [os.path.splitext(fn)[0] for fn in fnList]
-
-    fnList.sort()
-    return fnList
-
-
-def openCSV(path: str, fn: str, encoding: str = "utf-8") -> List[List[str]]:
-    """
-    Load a feature
-
-    In many cases we only want a single value from the feature (mainly because
-    the feature only contains one value).  In these situations, the user
-    can indicate that rather than receiving a list of lists, they can receive
-    a lists of values, where each value represents the item in the row
-    indicated by valueIndex.
-    """
-
-    # Load CSV file
-    with io.open(join(path, fn), "r", encoding=encoding) as fd:
-        featureList = fd.read().splitlines()
-    return [rowStr.split(",") for rowStr in featureList]
-
-
-def getRowFromCSV(
-    path: str, fn: str, valueIndex: int, encoding: str = "utf-8"
-) -> List[str]:
-    featureListOfLists = openCSV(path, fn, encoding)
-
-    return [row[valueIndex] for row in featureListOfLists]
 
 
 def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
