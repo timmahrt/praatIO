@@ -26,5 +26,7 @@ for interval in tier.entryList:
     for val in pp.getPointsInInterval(interval.start, interval.end):
         newPoints.append((val,))
 
-outputPP = data_points.PointObject1D(newPoints, constants.POINT, pp.minTime, pp.maxTime)
+outputPP = data_points.PointObject1D(
+    newPoints, constants.DataPointTypes.POINT, pp.minTime, pp.maxTime
+)
 outputPP.save(join(outputPath, "bobby_vowels.PointProcess"))

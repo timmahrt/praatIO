@@ -9,6 +9,7 @@ talking most of the time.
 Probably only useful in limited circumstances.
 """
 
+import os
 from os.path import join
 import math
 
@@ -67,19 +68,31 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
 
 def autoSegmentSpeech(praatEXE, inputWavPath, rawTGPath, finalTGPath):
-
+    utils.makeDir(rawTGPath)
     utils.makeDir(finalTGPath)
 
-    praat_scripts.annotateSilences(praatEXE, inputWavPath, rawTGPath)
+    for fn in os.listdir(inputWavPath):
+        if ".wav" not in fn:
+            continue
+        name = os.path.splitext(fn)[0]
+        tgFn = name + ".TextGrid"
+        praat_scripts.annotateSilences(
+            praatEXE, join(inputWavPath, fn), join(rawTGPath, tgFn)
+        )
 
-    for tgFN in utils.findFiles(rawTGPath, filterExt=".TextGrid"):
+    for fn in os.listdir(rawTGPath):
+        if ".TextGrid" not in fn:
+            continue
         markTranscriptForAnnotations(
-            join(rawTGPath, tgFN), "silences", join(finalTGPath, tgFN)
+            join(rawTGPath, fn), "silences", join(finalTGPath, fn)
         )
 
 
+# 2021/07/09 I tried to run this with relative paths
+# but it didn't work.  Using absolute paths did though.
 _praatEXE = r"C:\praat.exe"
-_root = join(".", "files")
+_praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"
+_root = "/Users/tmahrt/Dropbox/workspace/praatIO/examples/files"
 _inputWavPath = _root
 _rawTGPath = join(_root, "silence_marked_textgrids")
 _finalTGPath = join(_root, "ready-to-transcribe_textgrids")

@@ -40,7 +40,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
 
     keepList = tg.tierDict["phone"].entryList
     keepList = [entry for entry in keepList if not isVowel(entry[2])]
-    deleteList = utils.invertIntervalList(keepList, tg.maxTimestamp)
+    deleteList = utils.invertIntervalList(keepList, 0, tg.maxTimestamp)
 
     wavObj = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
     wavObj.save(outputWavFN)
