@@ -101,6 +101,8 @@ class IOTests(unittest.TestCase):
         tg = textgrid.openTextgrid(inputFN, False)
         tg.save(outputFN, constants.TextgridFormats.LONG_TEXTGRID, True)
 
+        self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
+
         fn = "bobby_words_with_newlines_longfile_elan.TextGrid"
         elanInputFN = join(self.dataRoot, fn)
         elanOutputFN = join(self.outputRoot, fn)
