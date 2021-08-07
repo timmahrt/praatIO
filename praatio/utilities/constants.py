@@ -69,3 +69,10 @@ class EraseCollision:
     ERROR: Final = "error"
 
     validOptions = [TRUNCATE, CATEGORICAL, ERROR]
+
+
+class DuplicateNames:
+    ERROR: Final = "error"
+    RENAME: Final = "rename"
+
+    validOptions = [ERROR, RENAME]

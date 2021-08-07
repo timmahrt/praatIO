@@ -97,6 +97,51 @@ class IOTests(PraatioTestCase):
 
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
+    def test_open_textgrid_raises_error_if_mode_invalid(self):
+        fn = "all_tiers_have_the_same_name.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+
+        with self.assertRaises(errors.WrongOption) as cm:
+            textgrid.openTextgrid(inputFN, duplicateNamesMode="cats")
+
+        self.assertEqual(
+            (
+                "For argument 'duplicateNamesMode' was given the value 'cats'. "
+                "However, expected one of [error, rename]"
+            ),
+            str(cm.exception),
+        )
+
+    def test_openTextgrid_throws_error_when_textgrid_has_duplicate_tier_names(self):
+        fn = "all_tiers_have_the_same_name.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+
+        with self.assertRaises(errors.DuplicateTierName) as cm:
+            textgrid.openTextgrid(
+                inputFN, duplicateNamesMode=constants.DuplicateNames.ERROR
+            )
+
+        self.assertEqual(
+            (
+                "Your textgrid contains tiers with the same name 'Mary'. "
+                "This is not allowed. It is recommended that you rename them. "
+                "If you set openTextgrid(..., duplicateNamesMode='rename'), praatio "
+                "will automatically append numbers to the end of tiers to ensure they "
+                "are unique."
+            ),
+            str(cm.exception),
+        )
+
+    def test_openTextgrid_can_rename_tiers_when_textgrid_has_duplicate_tier_names(self):
+        fn = "all_tiers_have_the_same_name.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+
+        sut = textgrid.openTextgrid(
+            inputFN, duplicateNamesMode=constants.DuplicateNames.RENAME
+        )
+
+        self.assertEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNameList)
+
     def test_tg_io_long_vs_short(self):
         """Tests reading of long vs short textgrids"""
 

@@ -32,12 +32,14 @@ from praatio.data_classes.textgrid import Textgrid
 from praatio.utilities import textgrid_io
 from praatio.utilities import utils
 from praatio.utilities import constants
+from praatio.utilities import errors
 
 
 def openTextgrid(
     fnFullPath: str,
     includeEmptyIntervals: bool = False,
     reportingMode: Literal["silence", "warning", "error"] = "warning",
+    duplicateNamesMode: Literal["error", "rename"] = "error",
 ) -> Textgrid:
     """
     Opens a textgrid file (.TextGrid and .json are both fine)
@@ -53,6 +55,9 @@ def openTextgrid(
     https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
     """
     utils.validateOption("reportingMode", reportingMode, constants.ErrorReportingMode)
+    utils.validateOption(
+        "duplicateNamesMode", duplicateNamesMode, constants.DuplicateNames
+    )
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
@@ -61,6 +66,29 @@ def openTextgrid(
             data = fd.read()
 
     tgAsDict = textgrid_io.parseTextgridStr(data, includeEmptyIntervals)
+
+    tierNames = []
+    for tier in tgAsDict["tiers"]:
+        name = tier["name"]
+        if name in tierNames:
+            if duplicateNamesMode == constants.DuplicateNames.ERROR:
+                raise errors.DuplicateTierName(
+                    f"Your textgrid contains tiers with the same name '{name}'. "
+                    "This is not allowed. It is recommended that you rename them. "
+                    "If you set openTextgrid(..., duplicateNamesMode='rename'), praatio "
+                    "will automatically append numbers to the end of tiers to ensure they "
+                    "are unique."
+                )
+            elif duplicateNamesMode == constants.DuplicateNames.RENAME:
+                newName = name
+                i = 2
+                while newName in tierNames:
+                    newName = f"{name}_{i}"
+                    i += 1
+                name = newName
+                tier["name"] = name
+        tierNames.append(name)
+
     return _dictionaryToTg(tgAsDict, reportingMode)
 
 

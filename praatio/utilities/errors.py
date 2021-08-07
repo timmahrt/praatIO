@@ -32,7 +32,11 @@ class TextgridException(Exception):
     pass
 
 
-class TextgridCollisionException(Exception):
+class DuplicateTierName(TextgridException):
+    pass
+
+
+class TextgridCollisionException(TextgridException):
     def __init__(
         self,
         tierName: str,
