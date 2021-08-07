@@ -91,6 +91,9 @@ You can view them online using the external website Jupyter:
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 4.4 (Jul 5, 2021)
+- Textgrid reading now more robust (fix for files created in Elan)
+
 Ver 4.3 (Apr 5, 2021)
 - Textgrid reading/writing is now more robust (newlines and quotes are ok)
 - Textgrids can now be saved without creating blank intervals

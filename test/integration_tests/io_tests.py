@@ -98,8 +98,17 @@ class IOTests(unittest.TestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = textgrid.openTextgrid(inputFN)
-        tg.save(outputFN, format=constants.TextgridFormats.LONG_TEXTGRID)
+        tg = textgrid.openTextgrid(inputFN, False)
+        tg.save(outputFN, constants.TextgridFormats.LONG_TEXTGRID, True)
+
+        fn = "bobby_words_with_newlines_longfile_elan.TextGrid"
+        elanInputFN = join(self.dataRoot, fn)
+        elanOutputFN = join(self.outputRoot, fn)
+
+        tg = textgrid.openTextgrid(elanInputFN, False)
+        tg.save(elanOutputFN, constants.TextgridFormats.LONG_TEXTGRID, True)
+
+        self.assertTrue(areTheSameFiles(inputFN, elanOutputFN, readFile))
 
     def test_tg_io(self):
         """Tests for reading/writing textgrid io"""

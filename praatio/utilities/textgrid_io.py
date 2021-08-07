@@ -1,3 +1,4 @@
+import re
 import json
 from typing import Optional, Tuple, List, Any, Dict
 
@@ -346,7 +347,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
     data = data.replace("\r\n", "\n")
 
     # Toss textgrid header
-    header, data = data.split("item [", 1)
+    header, data = re.split(r"item ?\[", data, maxsplit=1, flags=re.MULTILINE)
 
     headerList = header.split("\n")
     tgMin = float(headerList[3].split("=")[1].strip())
@@ -354,54 +355,66 @@ def _parseNormalTextgrid(data: str) -> Dict:
 
     # Process each tier individually (will be output to separate folders)
     tiers = []
-    tierList = data.split("item [")[1:]
+    tierList = re.split(r"item ?\[", data, flags=re.MULTILINE)[1:]
     for tierTxt in tierList:
         if 'class = "IntervalTier"' in tierTxt:
             tierType = INTERVAL_TIER
-            searchWord = "intervals ["
+            searchWord = r"intervals ?\["
         else:
             tierType = POINT_TIER
-            searchWord = "points ["
+            searchWord = r"points ?\["
 
         # Get tier meta-information
         try:
-            header, tierData = tierTxt.split(searchWord, 1)
+            d = re.split(searchWord, tierTxt, flags=re.MULTILINE)
+            header, tierData = d[0], d[1:]
         except ValueError:
             # A tier with no entries
-            if "size = 0" in tierTxt:
+            if re.search(r"size ?= ?0", tierTxt):
                 header = tierTxt
-                tierData = ""
+                tierData = []
             else:
                 raise
-        tierName = header.split("name = ")[1].split("\n", 1)[0]
-        tierName, tierNameI = _fetchTextRow(header, 0, "name = ")
-        tierStartStr = header.split("xmin = ")[1].split("\n", 1)[0]
-        tierStartTime = utils.strToIntOrFloat(tierStartStr)
-        tierEndStr = header.split("xmax = ")[1].split("\n", 1)[0]
-        tierEndTime = utils.strToIntOrFloat(tierEndStr)
+        tierName = re.search(
+            r"name ?= ?\"(.*)\"\s*$", header, flags=re.MULTILINE
+        ).groups()[0]
+        tierName = re.sub(r'""', '"', tierName)
+
+        tierStartTimeStr = re.search(
+            r"xmin ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE
+        ).groups()[0]
+        tierStartTime = utils.strToIntOrFloat(tierStartTimeStr)
+
+        tierEndTimeStr = re.search(
+            r"xmax ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE
+        ).groups()[0]
+        tierEndTime = utils.strToIntOrFloat(tierEndTimeStr)
 
         # Get the tier entry list
-        labelI = 0
         entryList: List[Any] = []
         if tierType == INTERVAL_TIER:
-            while True:
-                try:
-                    timeStart, timeStartI = _fetchRow(tierData, labelI, "xmin = ")
-                    timeEnd, timeEndI = _fetchRow(tierData, timeStartI, "xmax = ")
-                    label, labelI = _fetchTextRow(tierData, timeEndI, "text = ")
-                except (ValueError, IndexError):
-                    break
+            for element in tierData:
+                timeStart = re.search(
+                    r"xmin ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
+                ).groups()[0]
+                timeEnd = re.search(
+                    r"xmax ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
+                ).groups()[0]
+                label = re.search(
+                    r"text ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE | re.DOTALL
+                ).groups()[0]
 
                 label = label.strip()
+                label = re.sub(r'""', '"', label)
                 entryList.append(Interval(timeStart, timeEnd, label))
         else:
-            while True:
-                try:
-                    time, timeI = _fetchRow(tierData, labelI, "number = ")
-                    label, labelI = _fetchTextRow(tierData, timeI, "mark = ")
-                except (ValueError, IndexError):
-                    break
-
+            for element in tierData:
+                time = re.search(
+                    r"number ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
+                ).groups()[0]
+                label = re.search(
+                    r"mark ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE | re.DOTALL
+                ).groups()[0]
                 label = label.strip()
                 entryList.append(Point(time, label))
 

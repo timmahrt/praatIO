@@ -1,0 +1,82 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 1.194625 
+tiers? <exists> 
+size = 3 
+item []: 
+    item[1]:
+        class = "IntervalTier" 
+        name = """word""" 
+        xmin = 0 
+        xmax = 1.194625 
+        intervals: size = 6 
+        intervals [1]
+            xmin = 0 
+            xmax = 0.06469123242311078 
+            text = "" 
+        intervals [2]
+            xmin = 0.06469123242311078 
+            xmax = 0.41156462585 
+            text = """""""BOBBY""""""
+Noun" 
+        intervals [3]
+            xmin = 0.41156462585 
+            xmax = 0.6576881808447274 
+            text = "RIPPED
+Verb" 
+        intervals [4]
+            xmin = 0.6576881808447274 
+            xmax = 0.740816326531 
+            text = "THE
+Determiner" 
+        intervals [5]
+            xmin = 0.740816326531 
+            xmax = 1.1171482864527198 
+            text = "LEDGER
+Noun" 
+        intervals [6]
+            xmin = 1.1171482864527198 
+            xmax = 1.194625 
+            text = "" 
+    item[2]:
+        class = "IntervalTier" 
+        name = "phrase" 
+        xmin = 0 
+        xmax = 1.194625 
+        intervals: size = 3 
+        intervals [1]
+            xmin = 0 
+            xmax = 0.06469123242311078 
+            text = "" 
+        intervals [2]
+            xmin = 0.06469123242311078 
+            xmax = 1.1171482864527198 
+            text = "BOBBY RIPPED THE LEDGER" 
+        intervals [3]
+            xmin = 1.1171482864527198 
+            xmax = 1.194625 
+            text = "" 
+    item[3]:
+        class = "TextTier" 
+        name = "" 
+        xmin = 0 
+        xmax = 1.194625 
+        points: size = 4 
+        points [1]
+            number = 0.23290458517889742 
+            mark = "133
+p1" 
+        points [2]
+            number = 0.5304541883551366 
+            mark = "0
+p2" 
+        points [3]
+            number = 0.6966964767693916 
+            mark = "93
+p3" 
+        points [4]
+            number = 0.9231714783772174 
+            mark = "85
+p4" 

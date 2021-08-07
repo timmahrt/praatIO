@@ -13,6 +13,7 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 tgPhones = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"), False)
+elanTgPhones = textgrid.openTextgrid(join(path, "bobby_phones_elan.TextGrid"), False)
 tgWords = textgrid.openTextgrid(join(path, "bobby_words.TextGrid"), False)
 
 tgPhones.addTier(tgWords.tierDict["word"])
