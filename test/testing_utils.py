@@ -2,7 +2,7 @@ import os
 import contextlib
 
 
-def areTheSameFiles(fn1, fn2, fileHandler):
+def areTheSameFiles(fn1, fn2, fileHandler, *args):
     """
     Tests that files contain the same data
 
@@ -13,8 +13,8 @@ def areTheSameFiles(fn1, fn2, fileHandler):
     If fileHandler is readFile or io.open, etc then the raw
     text will be compared.
     """
-    data1 = fileHandler(fn1)
-    data2 = fileHandler(fn2)
+    data1 = fileHandler(fn1, *args)
+    data2 = fileHandler(fn2, *args)
 
     return data1 == data2
 

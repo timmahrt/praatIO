@@ -20,4 +20,4 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 tg = praatio_scripts.alignBoundariesAcrossTiers(inputFN, maxDifference)
-tg.save(outputFN)
+tg.save(outputFN, "short_textgrid", True)

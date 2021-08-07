@@ -814,14 +814,23 @@ class TextgridTests(PraatioTestCase):
         sut = textgrid.Textgrid()
 
         self.assertRaises(
-            errors.WrongOption, sut.save, "file.Textgrid", format="cat"
+            errors.WrongOption,
+            sut.save,
+            "file.Textgrid",
+            format="cat",
+            includeBlankSpaces=True,
         )
 
     def test_save_throws_error_if_reporting_mode_is_invalid(self):
         sut = textgrid.Textgrid()
 
         self.assertRaises(
-            errors.WrongOption, sut.save, "file.Textgrid", reportingMode="cat"
+            errors.WrongOption,
+            sut.save,
+            "file.Textgrid",
+            format="short_textgrid",
+            includeBlankSpaces=True,
+            reportingMode="cat",
         )
 
     def test_rename_tier_renames_a_tier(self):

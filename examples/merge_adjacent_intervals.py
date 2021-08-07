@@ -20,7 +20,7 @@ def merge_adjacent(path, fn, outputPath):
 
     outputTG = textgrid.Textgrid()
 
-    tg = textgrid.openTextgrid(join(path, fn))
+    tg = textgrid.openTextgrid(join(path, fn), False)
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
 
@@ -44,7 +44,7 @@ def merge_adjacent(path, fn, outputPath):
         )
         outputTG.addTier(replacementTier)
 
-    outputTG.save(join(outputPath, fn))
+    outputTG.save(join(outputPath, fn), "short_textgrid", True)
 
 
 def merge_adjacent_batch(inputPath, outputPath):

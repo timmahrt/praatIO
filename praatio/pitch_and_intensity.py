@@ -499,7 +499,7 @@ def generatePIMeasures(
     # Raw values should have 0 filtered; normalized values are centered around 0, so don't filter
     filterZeroFlag = not globalZNormalization
 
-    tg = textgrid.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN, False)
     if not isinstance(tg.tierDict[tierName], textgrid.IntervalTier):
         raise errors.IncompatibleTierError(tg.tierDict[tierName])
 

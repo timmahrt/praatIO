@@ -34,10 +34,10 @@ def readFile(fn):
 
 def run_save(
     tg,
-    minimumIntervalLength=None,
+    includeBlankSpaces=True,
     minTimestamp=None,
     maxTimestamp=None,
-    ignoreBlankSpaces=False,
+    minimumIntervalLength=None,
 ):
     """
     Mock write function and return the first tier's entry list
@@ -49,10 +49,11 @@ def run_save(
     tgAsDict = tg_data_class._tgToDictionary(tg)
     textgrid_io.getTextgridAsStr(
         tgAsDict,
-        minimumIntervalLength=minimumIntervalLength,
+        format=constants.TextgridFormats.SHORT_TEXTGRID,
+        includeBlankSpaces=includeBlankSpaces,
         minTimestamp=minTimestamp,
         maxTimestamp=maxTimestamp,
-        ignoreBlankSpaces=ignoreBlankSpaces,
+        minimumIntervalLength=minimumIntervalLength,
     )
 
     entryList = tgAsDict["tiers"][0]["entries"]
@@ -70,8 +71,8 @@ class IOTests(PraatioTestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = textgrid.openTextgrid(inputFN)
-        tg.save(outputFN)
+        tg = textgrid.openTextgrid(inputFN, False)
+        tg.save(outputFN, constants.TextgridFormats.SHORT_TEXTGRID, True)
 
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
@@ -81,8 +82,8 @@ class IOTests(PraatioTestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = textgrid.openTextgrid(inputFN)
-        tg.save(outputFN, format=constants.TextgridFormats.LONG_TEXTGRID)
+        tg = textgrid.openTextgrid(inputFN, False)
+        tg.save(outputFN, constants.TextgridFormats.LONG_TEXTGRID, True)
 
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
@@ -92,8 +93,8 @@ class IOTests(PraatioTestCase):
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
 
-        tg = textgrid.openTextgrid(inputFN)
-        tg.save(outputFN)
+        tg = textgrid.openTextgrid(inputFN, False)
+        tg.save(outputFN, constants.TextgridFormats.SHORT_TEXTGRID, True)
 
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
@@ -102,7 +103,7 @@ class IOTests(PraatioTestCase):
         inputFN = join(self.dataRoot, fn)
 
         with self.assertRaises(errors.WrongOption) as cm:
-            textgrid.openTextgrid(inputFN, duplicateNamesMode="cats")
+            textgrid.openTextgrid(inputFN, False, duplicateNamesMode="cats")
 
         self.assertEqual(
             (
@@ -118,7 +119,9 @@ class IOTests(PraatioTestCase):
 
         with self.assertRaises(errors.DuplicateTierName) as cm:
             textgrid.openTextgrid(
-                inputFN, duplicateNamesMode=constants.DuplicateNames.ERROR
+                inputFN,
+                False,
+                duplicateNamesMode=constants.DuplicateNames.ERROR,
             )
 
         self.assertEqual(
@@ -137,7 +140,7 @@ class IOTests(PraatioTestCase):
         inputFN = join(self.dataRoot, fn)
 
         sut = textgrid.openTextgrid(
-            inputFN, duplicateNamesMode=constants.DuplicateNames.RENAME
+            inputFN, False, duplicateNamesMode=constants.DuplicateNames.RENAME
         )
 
         self.assertEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNameList)
@@ -148,7 +151,7 @@ class IOTests(PraatioTestCase):
         shortFN = join(self.dataRoot, "textgrid_to_merge.TextGrid")
         longFN = join(self.dataRoot, "textgrid_to_merge_longfile.TextGrid")
 
-        self.assertTrue(areTheSameFiles(shortFN, longFN, textgrid.openTextgrid))
+        self.assertTrue(areTheSameFiles(shortFN, longFN, textgrid.openTextgrid, True))
 
     def test_saving_short_textgrid(self):
         """Tests that short textgrid files are saved non-destructively"""
@@ -156,8 +159,8 @@ class IOTests(PraatioTestCase):
         shortFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_short_file.textgrid")
 
-        tg = textgrid.openTextgrid(shortFN)
-        tg.save(outputFN, format=constants.TextgridFormats.SHORT_TEXTGRID)
+        tg = textgrid.openTextgrid(shortFN, False)
+        tg.save(outputFN, constants.TextgridFormats.SHORT_TEXTGRID, True)
 
         self.assertTrue(areTheSameFiles(shortFN, outputFN, readFile))
 
@@ -167,8 +170,12 @@ class IOTests(PraatioTestCase):
         longFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_long_file.textgrid")
 
-        tg = textgrid.openTextgrid(longFN)
-        tg.save(outputFN, format=constants.TextgridFormats.LONG_TEXTGRID)
+        tg = textgrid.openTextgrid(longFN, False)
+        tg.save(
+            outputFN,
+            format=constants.TextgridFormats.LONG_TEXTGRID,
+            includeBlankSpaces=True,
+        )
 
         self.assertTrue(areTheSameFiles(longFN, outputFN, readFile))
 
@@ -181,11 +188,17 @@ class IOTests(PraatioTestCase):
             self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid"
         )
 
-        tgFromTgFile = textgrid.openTextgrid(shortFN)
-        tgFromTgFile.save(outputFN, format=constants.TextgridFormats.JSON)
+        tgFromTgFile = textgrid.openTextgrid(shortFN, False)
+        tgFromTgFile.save(
+            outputFN, format=constants.TextgridFormats.JSON, includeBlankSpaces=True
+        )
 
-        tgFromJsonFile = textgrid.openTextgrid(outputFN)
-        tgFromJsonFile.save(outputLastFN)
+        tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
+        tgFromJsonFile.save(
+            outputLastFN,
+            format=constants.TextgridFormats.SHORT_TEXTGRID,
+            includeBlankSpaces=True,
+        )
 
         self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
 
@@ -307,7 +320,7 @@ class IOTests(PraatioTestCase):
 
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg, ignoreBlankSpaces=True)
+        actualEntryList = run_save(tg, includeBlankSpaces=False)
 
         self.assertEqual(expectedEntryList, actualEntryList)
 

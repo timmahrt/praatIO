@@ -30,13 +30,13 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
 
-        tg = textgrid.openTextgrid(inputTGFN)
+        tg = textgrid.openTextgrid(inputTGFN, False)
         wavObj = audio.WavQueryObj(inputWavFN)
 
         praatio_scripts.tgBoundariesToZeroCrossings(tg, wavObj, zeroCrossingTGFN)
 
     else:
-        tg = textgrid.openTextgrid(inputTGFN)
+        tg = textgrid.openTextgrid(inputTGFN, False)
 
     keepList = tg.tierDict["phone"].entryList
     keepList = [entry for entry in keepList if not isVowel(entry[2])]
@@ -49,7 +49,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     for start, end in sorted(deleteList, reverse=True):
         shrunkTG = shrunkTG.eraseRegion(start, end, doShrink=doShrink)
 
-    shrunkTG.save(outputTGFN)
+    shrunkTG.save(outputTGFN, "short_textgrid", True)
 
 
 # Shrink files

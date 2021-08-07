@@ -29,7 +29,7 @@ for wavFN, tgFN in (
     # some sort of code ('section-to-anonymize') rather than what I have
     # done here.
     deleteList = []
-    tg = textgrid.openTextgrid(join(path, tgFN))
+    tg = textgrid.openTextgrid(join(path, tgFN), False)
     deleteList.append(tg.tierDict["word"].entryList[0])
 
     # Get only time information from entries (i.e. remove label information)

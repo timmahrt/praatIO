@@ -161,24 +161,21 @@ def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
 
 def getTextgridAsStr(
     tg: Dict,
-    minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
+    format: Literal["short_textgrid", "long_textgrid", "json"],
+    includeBlankSpaces: bool,
     minTimestamp: Optional[float] = None,
     maxTimestamp: Optional[float] = None,
-    format: Literal[
-        "short_textgrid", "long_textgrid", "json"
-    ] = TextgridFormats.SHORT_TEXTGRID,
-    ignoreBlankSpaces: bool = False,
+    minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
 ) -> str:
     """
     Converts a textgrid to a string, suitable for saving
 
     Args:
         tg (Textgrid): the textgrid to convert to a string
-        minimumIntervalLength (float): any labeled intervals smaller
-            than this will be removed, useful for removing ultrashort
-            or fragmented intervals; if None, don't remove any.
-            Removed intervals are merged (without their label) into
-            adjacent entries.
+        format (str): one of ['short_textgrid', 'long_textgrid', 'json']
+        includeBlankSpaces (bool): if True, blank sections in interval
+            tiers will be filled in with an empty interval
+            (with a label of "")
         minTimestamp (float): the minTimestamp of the saved Textgrid;
             if None, use whatever is defined in the Textgrid object.
             If minTimestamp is larger than timestamps in your textgrid,
@@ -187,10 +184,11 @@ def getTextgridAsStr(
             if None, use whatever is defined in the Textgrid object.
             If maxTimestamp is smaller than timestamps in your textgrid,
             an exception will be thrown.
-        format (str): one of ['short_textgrid', 'long_textgrid', 'json']
-        ignoreBlankSpaces (bool): if False, blank sections in interval
-            tiers will be filled in with an empty interval
-            (with a label of "")
+        minimumIntervalLength (float): any labeled intervals smaller
+            than this will be removed, useful for removing ultrashort
+            or fragmented intervals; if None, don't remove any.
+            Removed intervals are merged (without their label) into
+            adjacent entries.
 
     Returns:
         a string representation of the textgrid
@@ -205,7 +203,7 @@ def getTextgridAsStr(
         raise errors.WrongOption("format", format, validFormats)
 
     tg = _prepTgForSaving(
-        tg, minimumIntervalLength, minTimestamp, maxTimestamp, ignoreBlankSpaces
+        tg, includeBlankSpaces, minTimestamp, maxTimestamp, minimumIntervalLength
     )
 
     if format == TextgridFormats.LONG_TEXTGRID:
@@ -225,10 +223,10 @@ def _sortEntries(tg: Dict) -> None:
 
 def _prepTgForSaving(
     tg: Dict,
-    minimumIntervalLength: float,
+    includeBlankSpaces: Optional[bool],
     minTimestamp: Optional[float],
     maxTimestamp: Optional[float],
-    ignoreBlankSpaces: Optional[bool],
+    minimumIntervalLength: float,
 ) -> Dict:
     _sortEntries(tg)
 
@@ -243,7 +241,7 @@ def _prepTgForSaving(
         tg["xmax"] = maxTimestamp
 
     # Fill in the blank spaces for interval tiers
-    if not ignoreBlankSpaces:
+    if includeBlankSpaces:
         newTierList = []
         for tier in tg["tiers"]:
             if tier["class"] == POINT_TIER:

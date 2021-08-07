@@ -14,11 +14,11 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 # Let's use praatio to construct some hypothetical textgrids
-tg = textgrid.openTextgrid(join(path, "bobby_words.TextGrid"))
+tg = textgrid.openTextgrid(join(path, "bobby_words.TextGrid"), False)
 wordTier = tg.tierDict["word"]
 entryList = wordTier.entryList
 
-bobbyPhoneTG = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"))
+bobbyPhoneTG = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"), False)
 
 
 bobbyTG = textgrid.Textgrid()
@@ -42,11 +42,13 @@ bobbyTG.addTier(
 bobbyTG.addTier(textgrid.IntervalTier("subjects", entryList[3:5]))
 
 # Let's save it, in case you want to see it
-bobbyTG.save(join(outputPath, "mergeExample_bobby_words_split.TextGrid"))
+bobbyTG.save(
+    join(outputPath, "mergeExample_bobby_words_split.TextGrid"), "short_textgrid", True
+)
 
 
 # And we'll do the same for mary's textgrid
-tg = textgrid.openTextgrid(join(path, "mary.TextGrid"))
+tg = textgrid.openTextgrid(join(path, "mary.TextGrid"), includeEmptyIntervals=False)
 wordTier = tg.tierDict["word"]
 entryList = wordTier.entryList
 
@@ -70,11 +72,17 @@ maryTG.addTier(
 )
 maryTG.addTier(textgrid.IntervalTier("subjects", entryList[2:4]))
 
-maryTG.save(join(outputPath, "mergeExample_mary_words_split.TextGrid"))
+maryTG.save(
+    join(outputPath, "mergeExample_mary_words_split.TextGrid"), "short_textgrid", True
+)
 
 # Let's combine Mary and Bob's textgrids
 combinedTG = bobbyTG.appendTextgrid(maryTG, True)
-combinedTG.save(join(outputPath, "mergeExample_mary_and_bob_words_split.TextGrid"))
+combinedTG.save(
+    join(outputPath, "mergeExample_mary_and_bob_words_split.TextGrid"),
+    "short_textgrid",
+    True,
+)
 
 # And now let's merge their tiers together
 # We'll go with the default merge function which accepts all labels,
@@ -84,4 +92,8 @@ mergedTG = combinedTG.mergeTiers(
     tierList=["nouns", "verbs", "subjects"], preserveOtherTiers=True
 )
 
-mergedTG.save(join(outputPath, "mergeExample_mary_and_bob_words_joined.TextGrid"))
+mergedTG.save(
+    join(outputPath, "mergeExample_mary_and_bob_words_joined.TextGrid"),
+    "short_textgrid",
+    True,
+)

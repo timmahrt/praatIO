@@ -15,7 +15,7 @@ outputPath = join(path, "point_process_output")
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-tg = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"))
+tg = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"), False)
 pp = data_points.open1DPointObject(join(path, "bobby.PointProcess"))
 
 newPoints = []

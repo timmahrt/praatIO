@@ -365,7 +365,7 @@ def splitAudioOnTier(
 
     mode: Final = getValue(noPartialIntervals)
 
-    tg = textgrid.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN, False)
     entryList = tg.tierDict[tierName].entryList
 
     if silenceLabel is not None:
@@ -437,7 +437,9 @@ def splitAudioOnTier(
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
 
-            subTG.save(join(outputPath, outputName + ".TextGrid"))
+            subTG.save(
+                join(outputPath, outputName + ".TextGrid"), "short_textgrid", True
+            )
 
     return outputFNList
 
@@ -458,7 +460,7 @@ def alignBoundariesAcrossTiers(
     value found within /maxDifference/ or, if no majority exists, than
     the value used in the search query.
     """
-    tg = textgrid.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN, False)
 
     for tierName in tg.tierNameList:
         altNameList = [tmpName for tmpName in tg.tierNameList if tmpName != tierName]

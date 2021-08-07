@@ -23,7 +23,7 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 # Find the region to replace and the region that we'll replace it with
-tg = textgrid.openTextgrid(tgFN)
+tg = textgrid.openTextgrid(tgFN, False)
 tier = tg.tierDict[tierName]
 mEntry = tier.entryList[tier.find("m")[0]]
 bEntry = tier.entryList[tier.find("b")[0]]
@@ -46,4 +46,4 @@ audioObj, tg = praatio_scripts.audioSplice(
 )
 
 audioObj.save(outputAudioFN)
-tg.save(outputTGFN)
+tg.save(outputTGFN, "short_textgrid", True)

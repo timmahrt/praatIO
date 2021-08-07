@@ -26,13 +26,13 @@ class IOTests(unittest.TestCase):
     def test_openTextgrid(self):
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = textgrid.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN, False)
         tier = tg.tierDict["word"]
         numEntries = len(tier.entryList)
 
         self.assertEqual(4, numEntries)
 
-    def test_openTextgrid_with_readRaw(self):
+    def test_openTextgrid_with_include_empty_intervals_as_true(self):
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
         tg = textgrid.openTextgrid(tgFN, True)
@@ -45,7 +45,7 @@ class IOTests(unittest.TestCase):
         """Testing adjustments to textgrid times"""
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = textgrid.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN, False)
         shiftedTG = tg.editTimestamps(0.1, constants.ErrorReportingMode.ERROR)
         unshiftedTG = shiftedTG.editTimestamps(-0.1, constants.ErrorReportingMode.ERROR)
 
@@ -55,7 +55,7 @@ class IOTests(unittest.TestCase):
         """Testing insertion and deletion of space in a textgrid"""
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = textgrid.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN, False)
         stretchedTG = tg.insertSpace(1, 1, "stretch")
         unstretchedTG = stretchedTG.eraseRegion(1, 2, doShrink=True)
 
@@ -66,7 +66,7 @@ class IOTests(unittest.TestCase):
 
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
-        tg = textgrid.openTextgrid(tgFN)
+        tg = textgrid.openTextgrid(tgFN, False)
 
         tg.renameTier("phone", "candy")
 

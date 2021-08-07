@@ -37,7 +37,7 @@ from praatio.utilities import errors
 
 def openTextgrid(
     fnFullPath: str,
-    includeEmptyIntervals: bool = False,
+    includeEmptyIntervals: bool,
     reportingMode: Literal["silence", "warning", "error"] = "warning",
     duplicateNamesMode: Literal["error", "rename"] = "error",
 ) -> Textgrid:

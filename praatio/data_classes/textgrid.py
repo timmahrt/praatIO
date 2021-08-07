@@ -407,11 +407,11 @@ class Textgrid:
     def save(
         self,
         fn: str,
-        minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
+        format: Literal["short_textgrid", "long_textgrid", "json"],
+        includeBlankSpaces: bool,
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
-        format: Literal["short_textgrid", "long_textgrid", "json"] = "short_textgrid",
-        ignoreBlankSpaces: bool = False,
+        minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
         """
@@ -419,11 +419,11 @@ class Textgrid:
 
         Args:
             fn (str): the fullpath filename of the output
-            minimumIntervalLength (float): any labeled intervals smaller
-                than this will be removed, useful for removing ultrashort
-                or fragmented intervals; if None, don't remove any.
-                Removed intervals are merged (without their label) into
-                adjacent entries.
+            format (str): one of ['short_textgrid', 'long_textgrid', 'json']
+            includeBlankSpaces (bool): if True, blank sections in interval
+                tiers will be filled in with an empty interval
+                (with a label of ""). If you are unsure, True is recommended
+                as Praat needs blanks to render textgrids properly.
             minTimestamp (float): the minTimestamp of the saved Textgrid;
                 if None, use whatever is defined in the Textgrid object.
                 If minTimestamp is larger than timestamps in your textgrid,
@@ -432,10 +432,11 @@ class Textgrid:
                 if None, use whatever is defined in the Textgrid object.
                 If maxTimestamp is smaller than timestamps in your textgrid,
                 an exception will be thrown.
-            format (str): one of ['short_textgrid', 'long_textgrid', 'json']
-            ignoreBlankSpaces (bool): if False, blank sections in interval
-                tiers will be filled in with an empty interval
-                (with a label of ""). Praat needs blanks to render textgrids properly.
+            minimumIntervalLength (float): any labeled intervals smaller
+                than this will be removed, useful for removing ultrashort
+                or fragmented intervals; if None, don't remove any.
+                Removed intervals are merged (without their label) into
+                adjacent entries.
             reportingMode (str): one of "silence", "warning", or "error". This flag
                 determines the behavior if there is a size difference between the
                 maxTimestamp in the tier and the current textgrid.
@@ -454,11 +455,11 @@ class Textgrid:
         tgAsDict = _tgToDictionary(self)
         textgridStr = textgrid_io.getTextgridAsStr(
             tgAsDict,
-            minimumIntervalLength,
+            format,
+            includeBlankSpaces,
             minTimestamp,
             maxTimestamp,
-            format,
-            ignoreBlankSpaces,
+            minimumIntervalLength,
         )
 
         with io.open(fn, "w", encoding="utf-8") as fd:

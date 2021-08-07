@@ -29,7 +29,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     Assumes the speaker is speaking for most of the recording.
     """
-    tg = textgrid.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN, False)
 
     duration = tg.maxTimestamp
     numEntries = int(math.ceil(duration * proportion))
@@ -64,7 +64,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
     tier = textgrid.IntervalTier("toTranscribe", newEntryList, 0, duration)
     outputTG.addTier(tier)
 
-    outputTG.save(outputTGFN)
+    outputTG.save(outputTGFN, "short_textgrid", True)
 
 
 def autoSegmentSpeech(praatEXE, inputWavPath, rawTGPath, finalTGPath):

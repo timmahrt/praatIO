@@ -22,8 +22,7 @@ from praatio import textgrid
 
 
 def doSetOperations(fromFN, toFN):
-
-    tg = textgrid.openTextgrid(fromFN)
+    tg = textgrid.openTextgrid(fromFN, False)
 
     syllableTier = tg.tierDict["tonicSyllable"]
     phoneTier = tg.tierDict["tonicVowel"]
@@ -56,7 +55,7 @@ def doSetOperations(fromFN, toFN):
     tg.addTier(phoneTier3)
     tg.addTier(syllableTier3)
 
-    tg.save(toFN)
+    tg.save(toFN, "short_textgrid", True)
 
 
 path = join(".", "files")
