@@ -1,3 +1,13 @@
+"""
+An PointObject is used for storing non-annotation data in praat
+
+There are two variants: PointObject1D and PointObject2D
+
+PointObject1D only stores temporal data (it can track pulses/occurances in time).
+PointObject2D stores temporal data and some other data (eg pitch).  It's not
+so different from a PointTier, except that PointTiers specifically hold annotation
+data.
+"""
 import io
 
 from typing_extensions import Literal

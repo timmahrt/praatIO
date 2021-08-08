@@ -1,3 +1,8 @@
+"""
+KlattGrid and related classes.
+
+KlattGrids can be used for synthesizing and manipulating speech
+"""
 import io
 
 from typing import List, Optional, Dict, Callable, Union

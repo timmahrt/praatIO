@@ -1,3 +1,8 @@
+"""
+Functions for reading/writing/manipulating Textgrid classes
+
+This is the 'heart' of praatio.
+"""
 import io
 import copy
 from typing import (

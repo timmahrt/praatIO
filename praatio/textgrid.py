@@ -1,7 +1,7 @@
 """
 Functions for reading/writing/manipulating textgrid files.
 
-This file contains the main data structures for representing Textgrid data:
+This file links the main data structures for representing Textgrid data:
 Textgrid, IntervalTier, and PointTier
 
 A Textgrid is a container for multiple annotation tiers.  Tiers can contain
@@ -10,6 +10,14 @@ Tiers in a Textgrid are ordered and must contain a unique name.
 
 openTextgrid() can be used to open a textgrid file.
 Textgrid.save() can be used to save a Textgrid object to a file.
+
+Historically, these three classes lived in this file. To
+make maintance easier, they were split off.  You can still access
+them from this file as before, but please check out the respective
+files for more documentation on each class:
+IntervalTier in data_classes/interval_tier.py
+PointTier in data_classes/point_tier.py
+Textgrid in data_classes/textgrid.py
 
 see the **examples/** directory for examples using textgrid.py
 """

@@ -1,3 +1,6 @@
+"""
+An IntervalTier is a tier containing an array of intervals -- data that spans a period of time
+"""
 from typing import Callable, List, Optional, Tuple
 
 from typing_extensions import Literal

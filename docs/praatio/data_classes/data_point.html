@@ -78,10 +78,29 @@
                     <h1 class="modulename">
 <a href="./../../praatio.html">praatio</a><wbr>.<a href="./../data_classes.html">data_classes</a><wbr>.data_point    </h1>
 
-                
+                        <div class="docstring"><p>An PointObject is used for storing non-annotation data in praat</p>
+
+<p>There are two variants: PointObject1D and PointObject2D</p>
+
+<p>PointObject1D only stores temporal data (it can track pulses/occurances in time).
+PointObject2D stores temporal data and some other data (eg pitch).  It's not
+so different from a PointTier, except that PointTiers specifically hold annotation
+data.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">io</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An PointObject is used for storing non-annotation data in praat</span>
+
+<span class="sd">There are two variants: PointObject1D and PointObject2D</span>
+
+<span class="sd">PointObject1D only stores temporal data (it can track pulses/occurances in time).</span>
+<span class="sd">PointObject2D stores temporal data and some other data (eg pitch).  It&#39;s not</span>
+<span class="sd">so different from a PointTier, except that PointTiers specifically hold annotation</span>
+<span class="sd">data.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">io</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">cast</span>

@@ -50,7 +50,7 @@
 
                         <div class="docstring"><p>Functions for reading/writing/manipulating textgrid files.</p>
 
-<p>This file contains the main data structures for representing Textgrid data:
+<p>This file links the main data structures for representing Textgrid data:
 Textgrid, IntervalTier, and PointTier</p>
 
 <p>A Textgrid is a container for multiple annotation tiers.  Tiers can contain
@@ -60,6 +60,14 @@ Tiers in a Textgrid are ordered and must contain a unique name.</p>
 <p>openTextgrid() can be used to open a textgrid file.
 Textgrid.save() can be used to save a Textgrid object to a file.</p>
 
+<p>Historically, these three classes lived in this file. To
+make maintance easier, they were split off.  You can still access
+them from this file as before, but please check out the respective
+files for more documentation on each class:
+IntervalTier in data_classes/interval_tier.py
+PointTier in data_classes/point_tier.py
+Textgrid in data_classes/textgrid.py</p>
+
 <p>see the <strong>examples/</strong> directory for examples using textgrid.py</p>
 </div>
 
@@ -68,7 +76,7 @@ Textgrid.save() can be used to save a Textgrid object to a file.</p>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions for reading/writing/manipulating textgrid files.</span>
 
-<span class="sd">This file contains the main data structures for representing Textgrid data:</span>
+<span class="sd">This file links the main data structures for representing Textgrid data:</span>
 <span class="sd">Textgrid, IntervalTier, and PointTier</span>
 
 <span class="sd">A Textgrid is a container for multiple annotation tiers.  Tiers can contain</span>
@@ -77,6 +85,14 @@ Textgrid.save() can be used to save a Textgrid object to a file.</p>
 
 <span class="sd">openTextgrid() can be used to open a textgrid file.</span>
 <span class="sd">Textgrid.save() can be used to save a Textgrid object to a file.</span>
+
+<span class="sd">Historically, these three classes lived in this file. To</span>
+<span class="sd">make maintance easier, they were split off.  You can still access</span>
+<span class="sd">them from this file as before, but please check out the respective</span>
+<span class="sd">files for more documentation on each class:</span>
+<span class="sd">IntervalTier in data_classes/interval_tier.py</span>
+<span class="sd">PointTier in data_classes/point_tier.py</span>
+<span class="sd">Textgrid in data_classes/textgrid.py</span>
 
 <span class="sd">see the **examples/** directory for examples using textgrid.py</span>
 <span class="sd">&quot;&quot;&quot;</span>

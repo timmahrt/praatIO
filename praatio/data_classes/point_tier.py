@@ -1,3 +1,6 @@
+"""
+A PointTier is a tier containing an array of points -- data that exists at a specific point in time
+"""
 from typing import (
     List,
     Tuple,

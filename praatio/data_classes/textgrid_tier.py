@@ -1,3 +1,6 @@
+"""
+The abstract class used by all textgrid tiers
+"""
 import re
 import copy
 from typing import (
