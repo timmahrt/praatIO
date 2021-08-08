@@ -113,7 +113,7 @@ textgrid.openTextgrid(
 tg.save(
   fn=name,
   format= "short_textgrid",
-  includeBlankSpaces= "false"
+  includeBlankSpaces= False
 )
 ```
 
