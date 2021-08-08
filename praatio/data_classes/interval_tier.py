@@ -251,7 +251,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
             pass
         else:
             if collisionMode == constants.EraseCollision.ERROR:
-                raise errors.Collision(
+                raise errors.CollisionError(
                     f"Erase region ({start}, {end})overlapped with an interval. "
                     "If this was expected, consider setting the collisionMode"
                 )
@@ -384,7 +384,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 exist in the insertion area.  One of ['replace', 'merge' None]
                 - 'replace' will remove existing items
                 - 'merge' will fuse the inserting item with existing items
-                - None or any other value will throw a TextgridCollisionException
+                - None or any other value will throw a CollisionError
 
         if *warnFlag* is True and *collisionMode* is not None,
         the user is notified of each collision
@@ -433,7 +433,12 @@ class IntervalTier(textgrid_tier.TextgridTier):
             self.entryList.append(newInterval)
 
         else:
-            raise errors.TextgridCollisionException(self.name, interval, matchList)
+            raise errors.CollisionError(
+                "Attempted to insert interval "
+                f"({interval.start}, {interval.end}, '{interval.label}') into tier {self.name} "
+                f"of textgrid but overlapping entries {[tuple(interval) for interval in matchList]} "
+                "already exist"
+            )
 
         self.sort()
 
@@ -445,7 +450,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         if len(matchList) != 0:
             collisionReporter(
-                errors.Collision,
+                errors.CollisionError,
                 f"Collision warning for ({interval}) with items "
                 f"({matchList}) of tier '{self.name}'",
             )

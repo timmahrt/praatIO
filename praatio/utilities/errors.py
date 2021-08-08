@@ -57,26 +57,7 @@ class OutOfBounds(TextgridException):
     pass
 
 
-class TextgridCollisionException(TextgridException):
-    def __init__(
-        self,
-        tierName: str,
-        insertInterval: Union[constants.Point, constants.Interval],
-        collisionList: List[constants.Interval],
-    ):
-        super(TextgridCollisionException, self).__init__()
-        self.tierName = tierName
-        self.insertInterval = tuple(insertInterval)
-        self.collisionList = [tuple(interval) for interval in collisionList]
-
-    def __str__(self):
-        return (
-            f"Attempted to insert interval {self.insertInterval} into tier {self.tierName} "
-            f"of textgrid but overlapping entries {self.collisionList} already exist"
-        )
-
-
-class Collision(TextgridException):
+class CollisionError(TextgridException):
     pass
 
 

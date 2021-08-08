@@ -73,7 +73,7 @@ class PointTierTests(PraatioTestCase):
     def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):
         sut = makePointTier()
 
-        with self.assertRaises(errors.PraatioException) as cm:
+        with self.assertRaises(errors.ArgumentError) as cm:
             sut.crop(2.1, 1.1, "lax", True)
 
         self.assertEqual(
@@ -263,7 +263,7 @@ class PointTierTests(PraatioTestCase):
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.CollisionError) as _:
             sut.insertEntry(
                 Point(3.7, "hello"),
                 constants.ErrorReportingMode.ERROR,
@@ -342,12 +342,12 @@ class PointTierTests(PraatioTestCase):
             maxT=5,
         )
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 -1.4,
                 constants.ErrorReportingMode.ERROR,
             )
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 1.4,
                 constants.ErrorReportingMode.ERROR,
@@ -404,7 +404,7 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.entryList.append(Point(3.9, "21"))
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_points_are_less_than_minimum_time(self):
@@ -416,7 +416,7 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.minTimestamp = 2.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_points_are_more_than_maximum_time(self):
@@ -428,7 +428,7 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.maxTimestamp = 3.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
 

@@ -44,7 +44,7 @@ class UtilsTests(unittest.TestCase):
         self.assertEquals(1, utils.sign(100.5))
 
     def test_invert_interval_list_throws_exception_if_intervals_are_malformed(self):
-        with self.assertRaises(errors.PraatioException) as _:
+        with self.assertRaises(errors.ArgumentError) as _:
             utils.invertIntervalList([[19, 30], [70, 44]])
 
     def test_invert_interval_list(self):

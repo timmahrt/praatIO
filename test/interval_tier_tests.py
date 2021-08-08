@@ -17,7 +17,7 @@ def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
 
 class IntervalTierTests(PraatioTestCase):
     def test_creating_an_interval_tier_with_invalid_intervals_raises_an_error(self):
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             textgrid.IntervalTier(
                 "words",
                 [Interval(2.0, 1.0, "hello world")],
@@ -81,7 +81,7 @@ class IntervalTierTests(PraatioTestCase):
 
     @testing_utils.supressStdout
     def test_interval_tier_creation_with_invalid_entries(self):
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             textgrid.IntervalTier(
                 "phones",
                 [Interval(1.0, 0.0, "")],
@@ -176,7 +176,7 @@ class IntervalTierTests(PraatioTestCase):
     def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):
         sut = makeIntervalTier()
 
-        with self.assertRaises(errors.PraatioException) as cm:
+        with self.assertRaises(errors.ArgumentError) as cm:
             sut.crop(2.1, 1.1, "lax", True)
 
         self.assertEqual(
@@ -422,7 +422,7 @@ class IntervalTierTests(PraatioTestCase):
             intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")], maxT=5.0
         )
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 2.0,
                 constants.ErrorReportingMode.ERROR,
@@ -435,7 +435,7 @@ class IntervalTierTests(PraatioTestCase):
             intervals=[Interval(2, 2.5, "hello"), Interval(3, 4, "world")], minT=1.0
         )
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 -2.0,
                 constants.ErrorReportingMode.ERROR,
@@ -544,7 +544,7 @@ class IntervalTierTests(PraatioTestCase):
         sut = makeIntervalTier(
             intervals=[Interval(1, 2, "hello"), Interval(3, 4, "world")], maxT=5.0
         )
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.CollisionError) as _:
             sut.eraseRegion(
                 1.5,
                 3.5,
@@ -772,7 +772,7 @@ class IntervalTierTests(PraatioTestCase):
     ):
         sut = makeIntervalTier("words", intervals=[Interval(1, 2, "hello")])
 
-        with self.assertRaises(errors.TextgridCollisionException) as cm:
+        with self.assertRaises(errors.CollisionError) as cm:
             sut.insertEntry([1.5, 3, "world"])
 
         expectedErrMsg = (
@@ -903,7 +903,7 @@ class IntervalTierTests(PraatioTestCase):
             ]
         )
 
-        with self.assertRaises(errors.PraatioException) as _:
+        with self.assertRaises(errors.ArgumentError) as _:
             sut.insertSpace(
                 2.6,
                 1,
@@ -1102,7 +1102,7 @@ class IntervalTierTests(PraatioTestCase):
         sut.entryList = [Interval(2.5, 1, "It's")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_raises_error_if_an_intervals_are_not_ordered_in_time(self):
@@ -1112,7 +1112,7 @@ class IntervalTierTests(PraatioTestCase):
         sut.entryList = [Interval(3.5, 4.0, "world"), Interval(1, 2.5, "hello")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_raises_error_if_intervals_exist_before_min_time(self):
@@ -1126,7 +1126,7 @@ class IntervalTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.entryList = [Interval(0.5, 4.0, "world")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_raises_error_if_intervals_exist_after_max_time(self):
@@ -1140,7 +1140,7 @@ class IntervalTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.entryList = [Interval(0.5, 6.0, "world")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def assertIntervalListsAreEqual(self, expectedIntervals, actualIntervals):

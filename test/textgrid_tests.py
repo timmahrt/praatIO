@@ -32,14 +32,14 @@ class TextgridTests(PraatioTestCase):
         sut = textgrid.Textgrid(maxTimestamp=5)
         tier = makeIntervalTier(maxT=10)
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateAutoModified) as _:
             sut.addTier(tier, reportingMode="error")
 
     def test_add_tier_raises_error_if_min_timestamp_is_altered(self):
         sut = textgrid.Textgrid(minTimestamp=3)
         tier = makeIntervalTier(minT=1)
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateAutoModified) as _:
             sut.addTier(tier, reportingMode="error")
 
     def test_add_tier_raises_error_if_autoset_max_timestamp_is_altered(self):
@@ -48,7 +48,7 @@ class TextgridTests(PraatioTestCase):
         tier2 = makeIntervalTier("phrases", maxT=10)
 
         sut.addTier(tier1, reportingMode="error")
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateAutoModified) as _:
             sut.addTier(tier2, reportingMode="error")
 
     def test_add_tier_raises_error_if_autoset_min_timestamp_is_altered(self):
@@ -57,7 +57,7 @@ class TextgridTests(PraatioTestCase):
         tier2 = makeIntervalTier("phrases", minT=0.5)
 
         sut.addTier(tier1, reportingMode="error")
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateAutoModified) as _:
             sut.addTier(tier2, reportingMode="error")
 
     def test_add_tier_raises_error_if_tier_name_already_exists_in_textgrid(self):
@@ -66,7 +66,7 @@ class TextgridTests(PraatioTestCase):
         tier2 = makeIntervalTier("words")
 
         sut.addTier(tier1, reportingMode="error")
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TierNameExistsError) as _:
             sut.addTier(tier2)
 
     def test_add_tier_can_add_a_tier_to_a_tg(self):
@@ -214,7 +214,7 @@ class TextgridTests(PraatioTestCase):
     def test_crop_raises_error_if_crop_start_time_occurs_after_crop_end_time(self):
         sut = textgrid.Textgrid()
 
-        with self.assertRaises(errors.PraatioException) as cm:
+        with self.assertRaises(errors.ArgumentError) as cm:
             sut.crop(2.1, 1.1, "lax", True)
 
         self.assertEqual(
@@ -434,7 +434,7 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        with self.assertRaises(errors.PraatioException) as _:
+        with self.assertRaises(errors.ArgumentError) as _:
             sut.eraseRegion(2, 1, False)
 
     def test_edit_timestamps_throws_error_if_reporting_mode_is_invalid(self):
@@ -495,7 +495,7 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 3.0,
                 constants.ErrorReportingMode.ERROR,
@@ -553,7 +553,7 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 -0.5,
                 constants.ErrorReportingMode.ERROR,
@@ -569,7 +569,7 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.OutOfBounds) as _:
             sut.editTimestamps(
                 -1.5,
                 constants.ErrorReportingMode.ERROR,
@@ -885,7 +885,7 @@ class TextgridTests(PraatioTestCase):
         sut.addTier(tier1)
         sut.addTier(tier2)
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateAutoModified) as _:
             sut.replaceTier("words", newTier1, "error")
 
     def test_replace_tier_throws_error_if_reporting_mode_is_invalid(self):
@@ -919,7 +919,7 @@ class TextgridTests(PraatioTestCase):
         sut.tierNameList.append("phones")
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TierNameExistsError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_tiers_and_textgrid_dont_agree_on_min_timestamp(
@@ -935,7 +935,7 @@ class TextgridTests(PraatioTestCase):
         sut.minTimestamp = 2.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_tiers_and_textgrid_dont_agree_on_max_timestamp(
@@ -951,7 +951,7 @@ class TextgridTests(PraatioTestCase):
         sut.maxTimestamp = 12.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_included_tier_is_invalid(
@@ -969,7 +969,7 @@ class TextgridTests(PraatioTestCase):
         self.assertFalse(tier.validate(constants.ErrorReportingMode.SILENCE))
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        with self.assertRaises(errors.TextgridException) as _:
+        with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
 
 

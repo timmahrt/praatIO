@@ -307,13 +307,17 @@ class PointTier(textgrid_tier.TextgridTier):
             self.entryList.append(mergedPoint)
 
         else:
-            raise errors.TextgridCollisionException(self.name, point, matchList)
+            raise errors.CollisionError(
+                f"Attempted to insert interval {point} into tier {self.name} "
+                f"of textgrid but overlapping entries {[tuple(interval) for interval in matchList]} "
+                "already exist"
+            )
 
         self.sort()
 
         if len(matchList) != 0:
             collisionReporter(
-                errors.Collision,
+                errors.CollisionError,
                 f"Collision warning for ({point}) with items ({matchList}) of tier '{self.name}'",
             )
 
