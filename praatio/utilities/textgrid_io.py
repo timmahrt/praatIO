@@ -1,6 +1,6 @@
 import re
 import json
-from typing import Optional, Tuple, List, Any, Dict
+from typing import Optional, Tuple, List, Any, Dict, Match
 
 from typing_extensions import Literal
 
@@ -17,7 +17,7 @@ from praatio.utilities.constants import (
 )
 
 
-def reSearch(pattern, string, flags=None) -> re.Match[str]:
+def reSearch(pattern, string, flags=None) -> Match[str]:
     """Search for the string to match. Throws an error if no match is found."""
     if flags:
         matches = re.search(pattern, string, flags)
