@@ -44,9 +44,8 @@ class UtilsTests(unittest.TestCase):
         self.assertEquals(1, utils.sign(100.5))
 
     def test_invert_interval_list_throws_exception_if_intervals_are_malformed(self):
-        self.assertRaises(
-            errors.PraatioException, utils.invertIntervalList, [[19, 30], [70, 44]]
-        )
+        with self.assertRaises(errors.PraatioException) as _:
+            utils.invertIntervalList([[19, 30], [70, 44]])
 
     def test_invert_interval_list(self):
         sut = [(5, 10), (15, 21.5), (32.1, 40)]
@@ -72,7 +71,8 @@ class UtilsTests(unittest.TestCase):
     def test_safe_zip(self):
         listToZip = [[1, 2, 3], [4, 5, 6, 7]]
 
-        self.assertRaises(errors.SafeZipException, utils.safeZip, listToZip, True)
+        with self.assertRaises(errors.SafeZipException) as _:
+            utils.safeZip(listToZip, True)
 
         expectedZippedResult = [(1, 4), (2, 5), (3, 6), (None, 7)]
         self.assertEqual(expectedZippedResult, list(utils.safeZip(listToZip, False)))

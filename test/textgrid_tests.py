@@ -25,23 +25,22 @@ class TextgridTests(PraatioTestCase):
         sut = textgrid.Textgrid()
         tier = makeIntervalTier()
 
-        self.assertRaises(errors.WrongOption, sut.addTier, tier, reportingMode="bird")
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.addTier(tier, reportingMode="bird")
 
     def test_add_tier_raises_error_if_max_timestamp_is_altered(self):
         sut = textgrid.Textgrid(maxTimestamp=5)
         tier = makeIntervalTier(maxT=10)
 
-        self.assertRaises(
-            errors.TextgridException, sut.addTier, tier, reportingMode="error"
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.addTier(tier, reportingMode="error")
 
     def test_add_tier_raises_error_if_min_timestamp_is_altered(self):
         sut = textgrid.Textgrid(minTimestamp=3)
         tier = makeIntervalTier(minT=1)
 
-        self.assertRaises(
-            errors.TextgridException, sut.addTier, tier, reportingMode="error"
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.addTier(tier, reportingMode="error")
 
     def test_add_tier_raises_error_if_autoset_max_timestamp_is_altered(self):
         sut = textgrid.Textgrid()
@@ -49,9 +48,8 @@ class TextgridTests(PraatioTestCase):
         tier2 = makeIntervalTier("phrases", maxT=10)
 
         sut.addTier(tier1, reportingMode="error")
-        self.assertRaises(
-            errors.TextgridException, sut.addTier, tier2, reportingMode="error"
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.addTier(tier2, reportingMode="error")
 
     def test_add_tier_raises_error_if_autoset_min_timestamp_is_altered(self):
         sut = textgrid.Textgrid()
@@ -59,9 +57,8 @@ class TextgridTests(PraatioTestCase):
         tier2 = makeIntervalTier("phrases", minT=0.5)
 
         sut.addTier(tier1, reportingMode="error")
-        self.assertRaises(
-            errors.TextgridException, sut.addTier, tier2, reportingMode="error"
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.addTier(tier2, reportingMode="error")
 
     def test_add_tier_raises_error_if_tier_name_already_exists_in_textgrid(self):
         sut = textgrid.Textgrid()
@@ -69,7 +66,8 @@ class TextgridTests(PraatioTestCase):
         tier2 = makeIntervalTier("words")
 
         sut.addTier(tier1, reportingMode="error")
-        self.assertRaises(errors.TextgridException, sut.addTier, tier2)
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.addTier(tier2)
 
     def test_add_tier_can_add_a_tier_to_a_tg(self):
         sut = textgrid.Textgrid()
@@ -436,12 +434,14 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        self.assertRaises(errors.PraatioException, sut.eraseRegion, 2, 1, False)
+        with self.assertRaises(errors.PraatioException) as _:
+            sut.eraseRegion(2, 1, False)
 
     def test_edit_timestamps_throws_error_if_reporting_mode_is_invalid(self):
         sut = textgrid.Textgrid(0, 7)
 
-        self.assertRaises(errors.WrongOption, sut.editTimestamps, 3.0, "cats")
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.editTimestamps(3.0, "cats")
 
     def test_edit_timestamps_can_move_times_forward(self):
         originalTextgrid = textgrid.Textgrid(0, 7)
@@ -495,12 +495,11 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        self.assertRaises(
-            errors.TextgridException,
-            sut.editTimestamps,
-            3.0,
-            constants.ErrorReportingMode.ERROR,
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.editTimestamps(
+                3.0,
+                constants.ErrorReportingMode.ERROR,
+            )
 
     def test_edit_timestamps_can_move_times_backwards(self):
         originalTextgrid = textgrid.Textgrid(0, 7)
@@ -554,12 +553,11 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        self.assertRaises(
-            errors.TextgridException,
-            sut.editTimestamps,
-            -0.5,
-            constants.ErrorReportingMode.ERROR,
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.editTimestamps(
+                -0.5,
+                constants.ErrorReportingMode.ERROR,
+            )
 
     def test_edit_timestamps_throws_error_if_times_become_negative_and_reporting_mode_is_error(
         self,
@@ -571,12 +569,11 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        self.assertRaises(
-            errors.TextgridException,
-            sut.editTimestamps,
-            -1.5,
-            constants.ErrorReportingMode.ERROR,
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.editTimestamps(
+                -1.5,
+                constants.ErrorReportingMode.ERROR,
+            )
 
     def test_edit_timestamps_truncates_entries_with_negative_times_when_reporting_mode_is_silence(
         self,
@@ -706,13 +703,12 @@ class TextgridTests(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        self.assertRaises(
-            errors.PraatioException,
-            sut.insertSpace,
-            1.5,
-            2,
-            constants.WhitespaceCollision.ERROR,
-        )
+        with self.assertRaises(errors.ArgumentError) as _:
+            sut.insertSpace(
+                1.5,
+                2,
+                constants.WhitespaceCollision.ERROR,
+            )
 
     def test_merge_tiers_wont_include_merged_tiers_if_preserve_other_tiers_false(self):
         originalTextgrid = textgrid.Textgrid(0, 7)
@@ -813,25 +809,23 @@ class TextgridTests(PraatioTestCase):
     def test_save_throws_error_if_output_format_is_invalid(self):
         sut = textgrid.Textgrid()
 
-        self.assertRaises(
-            errors.WrongOption,
-            sut.save,
-            "file.Textgrid",
-            format="cat",
-            includeBlankSpaces=True,
-        )
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.save(
+                "file.Textgrid",
+                format="cat",
+                includeBlankSpaces=True,
+            )
 
     def test_save_throws_error_if_reporting_mode_is_invalid(self):
         sut = textgrid.Textgrid()
 
-        self.assertRaises(
-            errors.WrongOption,
-            sut.save,
-            "file.Textgrid",
-            format="short_textgrid",
-            includeBlankSpaces=True,
-            reportingMode="cat",
-        )
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.save(
+                "file.Textgrid",
+                format="short_textgrid",
+                includeBlankSpaces=True,
+                reportingMode="cat",
+            )
 
     def test_rename_tier_renames_a_tier(self):
         sut = textgrid.Textgrid(0, 10)
@@ -891,9 +885,8 @@ class TextgridTests(PraatioTestCase):
         sut.addTier(tier1)
         sut.addTier(tier2)
 
-        self.assertRaises(
-            errors.TextgridException, sut.replaceTier, "words", newTier1, "error"
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.replaceTier("words", newTier1, "error")
 
     def test_replace_tier_throws_error_if_reporting_mode_is_invalid(self):
         sut = textgrid.Textgrid(0, 5)
@@ -904,13 +897,13 @@ class TextgridTests(PraatioTestCase):
         sut.addTier(tier1)
         sut.addTier(tier2)
 
-        self.assertRaises(
-            errors.WrongOption, sut.replaceTier, "words", newTier1, "cats"
-        )
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.replaceTier("words", newTier1, "cats")
 
     def test_validate_throws_error_if_reporting_mode_is_invalid(self):
         sut = textgrid.Textgrid()
-        self.assertRaises(errors.WrongOption, sut.validate, "bird")
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.validate("bird")
 
     def test_validate_throws_error_if_two_tiers_have_the_same_name(self):
         # Users shouldn't be manually manipulating the tierNameList
@@ -926,9 +919,8 @@ class TextgridTests(PraatioTestCase):
         sut.tierNameList.append("phones")
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_tiers_and_textgrid_dont_agree_on_min_timestamp(
         self,
@@ -943,9 +935,8 @@ class TextgridTests(PraatioTestCase):
         sut.minTimestamp = 2.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_tiers_and_textgrid_dont_agree_on_max_timestamp(
         self,
@@ -960,9 +951,8 @@ class TextgridTests(PraatioTestCase):
         sut.maxTimestamp = 12.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_included_tier_is_invalid(
         self,
@@ -979,9 +969,8 @@ class TextgridTests(PraatioTestCase):
         self.assertFalse(tier.validate(constants.ErrorReportingMode.SILENCE))
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
 
 if __name__ == "__main__":

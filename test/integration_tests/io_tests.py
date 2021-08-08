@@ -330,7 +330,8 @@ class IOTests(unittest.TestCase):
         tg = textgrid.Textgrid()
         tg.addTier(tier)
 
-        self.assertRaises(errors.ParsingError, run_save, tg, minTimestamp=1.0)
+        with self.assertRaises(errors.ParsingError) as _:
+            run_save(tg, minTimestamp=1.0)
 
     def test_save_with_force_too_small_maximum_time(self):
         # If you choose to force save to use a minTimestamp, all
@@ -341,7 +342,8 @@ class IOTests(unittest.TestCase):
         tg = textgrid.Textgrid()
         tg.addTier(tier)
 
-        self.assertRaises(errors.ParsingError, run_save, tg, maxTimestamp=1.0)
+        with self.assertRaises(errors.ParsingError) as _:
+            run_save(tg, maxTimestamp=1.0)
 
     def test_save_with_minimum_interval_length(self):
         # The first entry will be stretched to fill the unlabeled region in

@@ -23,7 +23,8 @@ class PointTierTests(PraatioTestCase):
             minT=0,
             maxT=5.0,
         )
-        self.assertRaises(errors.ArgumentError, pointTier.appendTier, intervalTier)
+        with self.assertRaises(errors.ArgumentError) as _:
+            pointTier.appendTier(intervalTier)
 
     def test_append_tier_with_point_tiers(self):
         pointTier = textgrid.PointTier(
@@ -262,13 +263,12 @@ class PointTierTests(PraatioTestCase):
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
-        self.assertRaises(
-            errors.TextgridCollisionException,
-            sut.insertEntry,
-            Point(3.7, "hello"),
-            constants.ErrorReportingMode.ERROR,
-            constants.ErrorReportingMode.SILENCE,
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.insertEntry(
+                Point(3.7, "hello"),
+                constants.ErrorReportingMode.ERROR,
+                constants.ErrorReportingMode.SILENCE,
+            )
 
     def test_insert_point_when_collision_occurs_and_merge(self):
         sut = makePointTier(
@@ -305,12 +305,11 @@ class PointTierTests(PraatioTestCase):
             points=[Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
         )
 
-        self.assertRaises(
-            errors.WrongOption,
-            sut.editTimestamps,
-            2.0,
-            "cats",
-        )
+        with self.assertRaises(errors.WrongOption) as _:
+            sut.editTimestamps(
+                2.0,
+                "cats",
+            )
 
     def test_edit_timestamps_can_make_points_appear_later(self):
         originalPointTier = makePointTier(
@@ -343,18 +342,16 @@ class PointTierTests(PraatioTestCase):
             maxT=5,
         )
 
-        self.assertRaises(
-            errors.TextgridException,
-            sut.editTimestamps,
-            -1.4,
-            constants.ErrorReportingMode.ERROR,
-        )
-        self.assertRaises(
-            errors.TextgridException,
-            sut.editTimestamps,
-            1.4,
-            constants.ErrorReportingMode.ERROR,
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.editTimestamps(
+                -1.4,
+                constants.ErrorReportingMode.ERROR,
+            )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.editTimestamps(
+                1.4,
+                constants.ErrorReportingMode.ERROR,
+            )
 
     def test_edit_timestamp_can_exceed_maxtimestamp_when_reporting_mode_is_silence(
         self,
@@ -407,9 +404,8 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.entryList.append(Point(3.9, "21"))
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_points_are_less_than_minimum_time(self):
         sut = makePointTier(
@@ -420,9 +416,8 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.minTimestamp = 2.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_points_are_more_than_maximum_time(self):
         sut = makePointTier(
@@ -433,9 +428,8 @@ class PointTierTests(PraatioTestCase):
         self.assertTrue(sut.validate())
         sut.maxTimestamp = 3.0
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-        self.assertRaises(
-            errors.TextgridException, sut.validate, constants.ErrorReportingMode.ERROR
-        )
+        with self.assertRaises(errors.TextgridException) as _:
+            sut.validate(constants.ErrorReportingMode.ERROR)
 
 
 if __name__ == "__main__":
