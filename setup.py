@@ -32,5 +32,4 @@ setup(
     ),
     long_description=io.open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    # install_requires=[], # No requirements! # requires 'from setuptools import setup'
 )
