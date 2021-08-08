@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from praatio.utilities import constants
 

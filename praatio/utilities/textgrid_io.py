@@ -17,6 +17,19 @@ from praatio.utilities.constants import (
 )
 
 
+def reSearch(pattern, string, flags=None) -> re.Match[str]:
+    """Search for the string to match. Throws an error if no match is found."""
+    if flags:
+        matches = re.search(pattern, string, flags)
+    else:
+        matches = re.search(pattern, string)
+
+    if not matches:
+        raise errors.ParsingError("Expected field in Textgrid missing.")
+
+    return matches
+
+
 def _removeBlanks(tier: Dict) -> None:
     def hasContent(entry):
         return entry[-1] != ""
@@ -375,17 +388,17 @@ def _parseNormalTextgrid(data: str) -> Dict:
                 tierData = []
             else:
                 raise
-        tierName = re.search(
+        tierName = reSearch(
             r"name ?= ?\"(.*)\"\s*$", header, flags=re.MULTILINE
         ).groups()[0]
         tierName = re.sub(r'""', '"', tierName)
 
-        tierStartTimeStr = re.search(
+        tierStartTimeStr = reSearch(
             r"xmin ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE
         ).groups()[0]
         tierStartTime = utils.strToIntOrFloat(tierStartTimeStr)
 
-        tierEndTimeStr = re.search(
+        tierEndTimeStr = reSearch(
             r"xmax ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE
         ).groups()[0]
         tierEndTime = utils.strToIntOrFloat(tierEndTimeStr)
@@ -394,14 +407,16 @@ def _parseNormalTextgrid(data: str) -> Dict:
         entryList: List[Any] = []
         if tierType == INTERVAL_TIER:
             for element in tierData:
-                timeStart = re.search(
+                timeStart = reSearch(
                     r"xmin ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
                 ).groups()[0]
-                timeEnd = re.search(
+                timeEnd = reSearch(
                     r"xmax ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
                 ).groups()[0]
-                label = re.search(
-                    r"text ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE | re.DOTALL
+                label = reSearch(
+                    r"text ?= ?\"(.*)\"\s*$",
+                    element,
+                    flags=re.MULTILINE | re.DOTALL,
                 ).groups()[0]
 
                 label = label.strip()
@@ -409,11 +424,13 @@ def _parseNormalTextgrid(data: str) -> Dict:
                 entryList.append(Interval(timeStart, timeEnd, label))
         else:
             for element in tierData:
-                time = re.search(
+                time = reSearch(
                     r"number ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
                 ).groups()[0]
-                label = re.search(
-                    r"mark ?= ?\"(.*)\"\s*$", element, flags=re.MULTILINE | re.DOTALL
+                label = reSearch(
+                    r"mark ?= ?\"(.*)\"\s*$",
+                    element,
+                    flags=re.MULTILINE | re.DOTALL,
                 ).groups()[0]
                 label = label.strip()
                 entryList.append(Point(time, label))

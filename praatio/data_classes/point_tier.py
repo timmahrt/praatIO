@@ -309,7 +309,8 @@ class PointTier(textgrid_tier.TextgridTier):
         else:
             raise errors.CollisionError(
                 f"Attempted to insert interval {point} into tier {self.name} "
-                f"of textgrid but overlapping entries {[tuple(interval) for interval in matchList]} "
+                "of textgrid but overlapping entries "
+                f"{[tuple(interval) for interval in matchList]} "
                 "already exist"
             )
 

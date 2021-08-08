@@ -436,7 +436,8 @@ class IntervalTier(textgrid_tier.TextgridTier):
             raise errors.CollisionError(
                 "Attempted to insert interval "
                 f"({interval.start}, {interval.end}, '{interval.label}') into tier {self.name} "
-                f"of textgrid but overlapping entries {[tuple(interval) for interval in matchList]} "
+                "of textgrid but overlapping entries "
+                f"{[tuple(interval) for interval in matchList]} "
                 "already exist"
             )
 
