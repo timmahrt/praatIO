@@ -81,8 +81,8 @@ If python is not in your path, you'll need to enter the full path e.g.
 ## Version 4 to 5 migration
 
 Many things changed between versions 4 and 5.  If you see an error like
-`ModuleNotFoundError: No module named 'promo'` it means that you have installed version 5
-but your code was written for praatio 4.x or earlier.
+`WARNING: You've tried to import 'tgio' which was renamed 'textgrid' in praatio 5.x.`
+it means that you have installed version 5 but your code was written for praatio 4.x or earlier.
 
 The immediate solution is to uninstall praatio 5 and install praatio 4. From the command line:
 ```
