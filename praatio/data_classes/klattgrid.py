@@ -36,7 +36,7 @@ class _KlattBaseTier(object):
             self.tierNameList.insert(tierIndex, tier.name)
 
         if tier.name in list(self.tierDict.keys()):
-            raise errors.TextgridException(
+            raise errors.TierNameExistsError(
                 f"Cannot add tier with name {tier.name} as it already exists in the Klattgrid"
             )
         self.tierDict[tier.name] = tier

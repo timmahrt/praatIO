@@ -69,7 +69,7 @@ class TextgridTier(ABC):
         This tier's maxtimestamp will be lengthened by the amount in the passed in tier.
         """
         if self.tierType != tier.tierType:
-            raise errors.TextgridException(
+            raise errors.ArgumentError(
                 f"Cannot append a tier of type {type(self)} to a tier of type {type(tier)}."
             )
 

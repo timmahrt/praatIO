@@ -51,7 +51,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         # Prevent poorly-formed textgrids from being created
         for entry in entryList:
             if entry[0] >= entry[1]:
-                raise errors.TextgridException(
+                raise errors.TextgridStateError(
                     f"The start time of an interval ({entry[0]}) "
                     f"cannot occur after its end time ({entry[1]})"
                 )
@@ -108,7 +108,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         utils.validateOption("mode", mode, CropCollision)
 
         if cropStart >= cropEnd:
-            raise errors.PraatioException(
+            raise errors.ArgumentError(
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
@@ -235,7 +235,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     removed that overlaps with the target entry
                 - 'categorical' all entries that overlap, even partially, with
                     the target entry will be completely removed
-                - None or any other value throws AssertionError
+                - None or any other value throws IntervalCollision
             doShrink (bool): if True, moves leftward by (/end/ - /start/)
                 amount, each item that occurs after /end/
 
@@ -251,7 +251,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
             pass
         else:
             if collisionMode == constants.EraseCollision.ERROR:
-                raise errors.TextgridException()
+                raise errors.Collision(
+                    f"Erase region ({start}, {end})overlapped with an interval. "
+                    "If this was expected, consider setting the collisionMode"
+                )
 
             # Remove all the matches from the entryList
             # Go in reverse order because we're destructively altering
@@ -442,7 +445,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         if len(matchList) != 0:
             collisionReporter(
-                errors.TextgridException,
+                errors.Collision,
                 f"Collision warning for ({interval}) with items "
                 f"({matchList}) of tier '{self.name}'",
             )
@@ -511,7 +514,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 elif collisionMode == constants.WhitespaceCollision.NO_CHANGE:
                     newEntryList.append(interval)
                 else:
-                    raise errors.PraatioException(
+                    raise errors.ArgumentError(
                         f"Collision occured during insertSpace() for interval '{interval}' "
                         f"and given white space insertion interval ({start}, {start + duration})"
                     )
@@ -633,14 +636,14 @@ class IntervalTier(textgrid_tier.TextgridTier):
             if interval.start >= interval.end:
                 isValid = False
                 errorReporter(
-                    errors.TextgridException,
+                    errors.TextgridStateError,
                     f"Invalid interval. End time occurs before or on the start time({interval}).",
                 )
 
             if previousInterval and previousInterval.end > interval.start:
                 isValid = False
                 errorReporter(
-                    errors.TextgridException,
+                    errors.TextgridStateError,
                     f"Intervals are not sorted in time: "
                     f"[({previousInterval}), ({interval})]",
                 )

@@ -3,15 +3,36 @@ from typing import List, Union
 from praatio.utilities import constants
 
 
-class SafeZipException(Exception):
+class PraatioException(Exception):
     pass
 
 
-class ParsingError(Exception):
+class SafeZipException(PraatioException):
     pass
 
 
-class WrongOption(Exception):
+class FileNotFound(PraatioException):
+    def __init__(self, fullPath: str):
+        super(FileNotFound, self).__init__()
+        self.fullPath = fullPath
+
+    def __str__(self):
+        return "File not found:\n%s" % self.fullPath
+
+
+class ParsingError(PraatioException):
+    pass
+
+
+class ArgumentError(PraatioException):
+    pass
+
+
+class UnexpectedError(PraatioException):
+    pass
+
+
+class WrongOption(PraatioException):
     def __init__(self, argumentName: str, givenValue: str, availableOptions: List[str]):
         self.argumentName = argumentName
         self.givenValue = givenValue
@@ -24,15 +45,15 @@ class WrongOption(Exception):
         )
 
 
-class PraatioException(Exception):
-    pass
-
-
-class TextgridException(Exception):
+class TextgridException(PraatioException):
     pass
 
 
 class DuplicateTierName(TextgridException):
+    pass
+
+
+class OutOfBounds(TextgridException):
     pass
 
 
@@ -55,12 +76,31 @@ class TextgridCollisionException(TextgridException):
         )
 
 
-class TimelessTextgridTierException(Exception):
+class Collision(TextgridException):
+    pass
+
+
+class TimelessTextgridTierException(TextgridException):
     def __str__(self):
         return "All textgrid tiers much have a min and max duration"
 
 
-class IncompatibleTierError(Exception):
+# When the state of a textgrid has to change in a way the user did
+# not expect (e.g. a new interval was added that is longer
+# than the maxTimestamp, causing maxTimestamp to be lengthened)
+class TextgridStateAutoModified(TextgridException):
+    pass
+
+
+class TextgridStateError(TextgridException):
+    pass
+
+
+class TierNameExistsError(TextgridException):
+    pass
+
+
+class IncompatibleTierError(TextgridException):
     def __init__(self, tier):
         super(IncompatibleTierError, self).__init__()
         self.tier = tier
@@ -76,16 +116,7 @@ class IncompatibleTierError(Exception):
         )
 
 
-class FileNotFound(Exception):
-    def __init__(self, fullPath: str):
-        super(FileNotFound, self).__init__()
-        self.fullPath = fullPath
-
-    def __str__(self):
-        return "File not found:\n%s" % self.fullPath
-
-
-class PraatExecutionFailed(Exception):
+class PraatExecutionFailed(PraatioException):
     def __init__(self, cmdList: List[str]):
         super(PraatExecutionFailed, self).__init__()
         self.cmdList = cmdList
@@ -106,11 +137,11 @@ class PraatExecutionFailed(Exception):
         return errorStr + cmdTxt
 
 
-class EndOfAudioData(Exception):
+class EndOfAudioData(PraatioException):
     pass
 
 
-class FindZeroCrossingError(Exception):
+class FindZeroCrossingError(PraatioException):
     def __init__(self, startTime: float, endTime: float):
         super(FindZeroCrossingError, self).__init__()
 
@@ -122,7 +153,7 @@ class FindZeroCrossingError(Exception):
         return retString % (self.startTime, self.endTime)
 
 
-class NormalizationException(Exception):
+class NormalizationException(PraatioException):
     def __str__(self):
         return (
             "Local normalization will nullify the effect of global normalization. "

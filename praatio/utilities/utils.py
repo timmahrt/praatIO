@@ -47,7 +47,7 @@ def getErrorReporter(reportingMode: Literal["silence", "warning", "error"]):
 def checkIsUndershoot(time: float, referenceTime: float, errorReporter) -> bool:
     if time < referenceTime:
         errorReporter(
-            errors.TextgridException,
+            errors.OutOfBounds,
             f"'{time}' occurs before minimum allowed time '{referenceTime}'",
         )
         return True
@@ -58,7 +58,7 @@ def checkIsUndershoot(time: float, referenceTime: float, errorReporter) -> bool:
 def checkIsOvershoot(time: float, referenceTime: float, errorReporter) -> bool:
     if time > referenceTime:
         errorReporter(
-            errors.TextgridException,
+            errors.OutOfBounds,
             f"'{time}' occurs after maximum allowed time '{referenceTime}'",
         )
         return True
@@ -321,7 +321,7 @@ def invertIntervalList(
     [(0.5, 1.2), (3.4, 5.0)] -> [(0.0, 0.5), (1.2, 3.4)]
     """
     if any([interval[0] >= interval[1] for interval in inputList]):
-        raise errors.PraatioException("Interval start occured before interval end")
+        raise errors.ArgumentError("Interval start occured before interval end")
 
     inputList = sorted(inputList)
 

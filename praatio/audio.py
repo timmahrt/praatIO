@@ -327,7 +327,7 @@ class WavQueryObj(AbstractWav):
         if (keepList is not None and deleteList is not None) or (
             keepList is None and deleteList is None
         ):
-            raise errors.PraatioException(
+            raise errors.ArgumentError(
                 "You must specify 'keepList' or 'deleteList' but not both."
             )
 
@@ -483,7 +483,7 @@ def openAudioFile(
     duration = nframes / float(framerate)
 
     if keepList is not None and deleteList is not None:
-        raise errors.PraatioException(
+        raise errors.ArgumentError(
             "You cannot specify both 'keepList' or 'deleteList'."
         )
 

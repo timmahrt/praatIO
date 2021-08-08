@@ -80,7 +80,7 @@ class Textgrid:
         errorReporter = utils.getErrorReporter(reportingMode)
 
         if tier.name in list(self.tierDict.keys()):
-            raise errors.TextgridException("Tier name already in tier")
+            raise errors.TierNameExistsError("Tier name already in tier")
 
         if tierIndex is None:
             self.tierNameList.append(tier.name)
@@ -92,7 +92,7 @@ class Textgrid:
         minV = tier.minTimestamp
         if self.minTimestamp is not None and minV < self.minTimestamp:
             errorReporter(
-                errors.TextgridException,
+                errors.TextgridStateAutoModified,
                 f"Minimum timestamp in Textgrid changed from ({self.minTimestamp}) to ({minV})",
             )
         if self.minTimestamp is None or minV < self.minTimestamp:
@@ -101,7 +101,7 @@ class Textgrid:
         maxV = tier.maxTimestamp
         if self.maxTimestamp is not None and maxV > self.maxTimestamp:
             errorReporter(
-                errors.TextgridException,
+                errors.TextgridStateAutoModified,
                 f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
             )
         if self.maxTimestamp is None or maxV > self.maxTimestamp:
@@ -201,7 +201,7 @@ class Textgrid:
         utils.validateOption("mode", mode, CropCollision)
 
         if cropStart >= cropEnd:
-            raise errors.PraatioException(
+            raise errors.ArgumentError(
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
@@ -247,7 +247,7 @@ class Textgrid:
             Textgrid: the modified version of the current textgrid
         """
         if start >= end:
-            raise errors.PraatioException(
+            raise errors.ArgumentError(
                 f"EraseRegion error: start time ({start}) must occur before end time ({end})"
             )
 
@@ -511,7 +511,8 @@ class Textgrid:
         if len(self.tierNameList) != len(set(self.tierNameList)):
             isValid = False
             errorReporter(
-                errors.TextgridException, f"Tier names not unique: {self.tierNameList}"
+                errors.TierNameExistsError,
+                f"Tier names not unique: {self.tierNameList}",
             )
 
         for tierName in self.tierNameList:
@@ -520,7 +521,7 @@ class Textgrid:
             if self.minTimestamp != tier.minTimestamp:
                 isValid = False
                 errorReporter(
-                    errors.TextgridException,
+                    errors.TextgridStateError,
                     f"Textgrid has a min timestamp of ({self.minTimestamp}) "
                     f"but tier has ({tier.minTimestamp})",
                 )
@@ -528,7 +529,7 @@ class Textgrid:
             if self.maxTimestamp != tier.maxTimestamp:
                 isValid = False
                 errorReporter(
-                    errors.TextgridException,
+                    errors.TextgridStateError,
                     f"Textgrid has a max timestamp of ({self.maxTimestamp}) "
                     f"but tier has ({tier.maxTimestamp})",
                 )

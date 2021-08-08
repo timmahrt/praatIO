@@ -43,7 +43,7 @@ def filterTimeSeriesData(
     featValues = filterFunc(featValues, windowSize, useEdgePadding)
 
     if len(featureTimeList) != len(featValues):
-        errors.PraatioException(
+        errors.ArgumentError(
             "The length of the time values {len(featureTimeList)} does not "
             "match the length of the data values {len(featValues)}"
         )
@@ -84,7 +84,7 @@ def znormalizeSpeakerData(
         ]
 
     if len(featureTimeList) != len(featValues):
-        errors.PraatioException(
+        errors.ArgumentError(
             "The length of the time values {len(featureTimeList)} does not "
             "match the length of the data values {len(featValues)}"
         )

@@ -527,8 +527,10 @@ def _findMisalignments(
                 if subEnd >= filterStartT and subEnd <= filterStopT:
                     rightMatchVal = subEnd
 
-                if leftMatchVal is not None and rightMatchVal is not None:
-                    raise errors.PraatioException(
+                if (
+                    leftMatchVal is not None and rightMatchVal is not None
+                ):  # This shouldn't happen
+                    raise errors.UnexpectedError(
                         "There should be at most one matching boundary."
                     )
 
@@ -567,8 +569,8 @@ def _findMisalignments(
     if len(valUniqueList) > 1:
         countList = [valList.count(val) for val in valUniqueList]
         bestVal = valUniqueList[countList.index(max(countList))]
-        if bestVal is None:
-            raise errors.PraatioException("Could not find the optimal value")
+        if bestVal is None:  # When can this happen?
+            raise errors.UnexpectedError("Could not find the optimal value")
         for tierName, _, oldEntry, orderID in matchList:
 
             newEntry = list(copy.deepcopy(oldEntry))

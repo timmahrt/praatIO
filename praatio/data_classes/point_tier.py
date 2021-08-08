@@ -77,7 +77,7 @@ class PointTier(textgrid_tier.TextgridTier):
             PointTier: the modified version of the current tier
         """
         if cropStart >= cropEnd:
-            raise errors.PraatioException(
+            raise errors.ArgumentError(
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
@@ -313,7 +313,7 @@ class PointTier(textgrid_tier.TextgridTier):
 
         if len(matchList) != 0:
             collisionReporter(
-                errors.TextgridException,
+                errors.Collision,
                 f"Collision warning for ({point}) with items ({matchList}) of tier '{self.name}'",
             )
 
@@ -377,7 +377,7 @@ class PointTier(textgrid_tier.TextgridTier):
             if previousPoint and previousPoint.time > point.time:
                 isValid = False
                 errorReporter(
-                    errors.TextgridException,
+                    errors.TextgridStateError,
                     f"Points are not sorted in time: "
                     f"[({previousPoint}), ({point})]",
                 )

@@ -23,7 +23,7 @@ class PointTierTests(PraatioTestCase):
             minT=0,
             maxT=5.0,
         )
-        self.assertRaises(errors.TextgridException, pointTier.appendTier, intervalTier)
+        self.assertRaises(errors.ArgumentError, pointTier.appendTier, intervalTier)
 
     def test_append_tier_with_point_tiers(self):
         pointTier = textgrid.PointTier(
