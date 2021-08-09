@@ -15,53 +15,41 @@ see **examples/get_pitch_and_formants.py**
 
 import os
 from os.path import join
-import math
 import io
+import math
+from typing import List, Tuple, Optional, cast
 
-from praatio import dataio
-from praatio import tgio
-from praatio.utilities import utils
-from praatio.utilities import myMath
+from praatio import data_points
 from praatio import praatio_scripts
+from praatio import textgrid
+from praatio.utilities import errors
+from praatio.utilities import my_math
+from praatio.utilities import utils
+from praatio.utilities.constants import Point
 
 
-class NormalizationException(Exception):
-    def __str__(self):
-        return (
-            "Local normalization will nullify the effect of global normalization. "
-            "Local normalization should be used to examine local phenomena "
-            "(e.g. max pitch in a segment of running speech)."
-            "Global normalization should be used to examine global phenomena "
-            "(e.g. the pitch range of a speaker)."
-        )
-
-
-class OverwriteException(Exception):
-    def __str__(self):
-        return (
-            "Performing this operation will result in the pitch files "
-            "being overwritten.  Please change the output directory "
-            "to an alternative location or add a suffix to the output. "
-        )
+HERTZ = "Hertz"
+UNSPECIFIED = "unspecified"
+_PITCH_ERROR_TIER_NAME = "pitch errors"
 
 
 def _extractPIPiecewise(
-    inputFN,
-    outputFN,
-    praatEXE,
-    minPitch,
-    maxPitch,
-    tgFN,
-    tierName,
-    tmpOutputPath,
-    sampleStep=0.01,
-    silenceThreshold=0.03,
-    pitchUnit="Hertz",
-    forceRegenerate=True,
-    undefinedValue=None,
-    medianFilterWindowSize=0,
-    pitchQuadInterp=False,
-):
+    inputFN: str,
+    outputFN: str,
+    praatEXE: str,
+    minPitch: float,
+    maxPitch: float,
+    tgFN: str,
+    tierName: str,
+    tmpOutputPath: str,
+    sampleStep: float = 0.01,
+    silenceThreshold: float = 0.03,
+    pitchUnit: str = HERTZ,
+    forceRegenerate: bool = True,
+    undefinedValue: float = None,
+    medianFilterWindowSize: int = 0,
+    pitchQuadInterp: bool = False,
+) -> List[Tuple[float, ...]]:
     """
     Extracts pitch and int from each labeled interval in a textgrid
 
@@ -77,7 +65,9 @@ def _extractPIPiecewise(
 
     windowSize = medianFilterWindowSize
 
-    assert os.path.exists(inputFN)
+    if not os.path.exists(inputFN):
+        raise errors.ArgumentError(f"Required folder does not exist: f{inputFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
 
@@ -85,7 +75,7 @@ def _extractPIPiecewise(
         splitAudioList = praatio_scripts.splitAudioOnTier(
             inputFN, tgFN, tierName, tmpOutputPath, False
         )
-        allPIList = []
+        allPIList: List[Tuple[str, str, str]] = []
         for start, _, fn in splitAudioList:
             tmpTrackName = os.path.splitext(fn)[0] + ".txt"
             piList = _extractPIFile(
@@ -101,35 +91,33 @@ def _extractPIPiecewise(
                 medianFilterWindowSize=windowSize,
                 pitchQuadInterp=pitchQuadInterp,
             )
-            piList = [
+            convertedPiList = [
                 ("%0.3f" % (float(time) + start), str(pV), str(iV))
                 for time, pV, iV in piList
             ]
-            allPIList.extend(piList)
+            allPIList.extend(convertedPiList)
 
-        allPIList = [",".join(row) for row in allPIList]
+        outputData = [",".join(row) for row in allPIList]
         with open(outputFN, "w") as fd:
-            fd.write("\n".join(allPIList) + "\n")
+            fd.write("\n".join(outputData) + "\n")
 
-    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
-
-    return piList
+    return loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
 
 
 def _extractPIFile(
-    inputFN,
-    outputFN,
-    praatEXE,
-    minPitch,
-    maxPitch,
-    sampleStep=0.01,
-    silenceThreshold=0.03,
-    pitchUnit="Hertz",
-    forceRegenerate=True,
-    undefinedValue=None,
-    medianFilterWindowSize=0,
-    pitchQuadInterp=False,
-):
+    inputFN: str,
+    outputFN: str,
+    praatEXE: str,
+    minPitch: float,
+    maxPitch: float,
+    sampleStep: float = 0.01,
+    silenceThreshold: float = 0.03,
+    pitchUnit: str = HERTZ,
+    forceRegenerate: bool = True,
+    undefinedValue: float = None,
+    medianFilterWindowSize: int = 0,
+    pitchQuadInterp: bool = False,
+) -> List[Tuple[float, ...]]:
     """
     Extracts pitch and intensity values from an audio file
 
@@ -139,7 +127,9 @@ def _extractPIFile(
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
 
-    assert os.path.exists(inputFN)
+    if not os.path.exists(inputFN):
+        raise errors.ArgumentError(f"Required folder does not exist: f{inputFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
 
@@ -171,20 +161,18 @@ def _extractPIFile(
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
-
-    return piList
+    return loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
 
 
 def extractIntensity(
-    inputFN,
-    outputFN,
-    praatEXE,
-    minPitch,
-    sampleStep=0.01,
-    forceRegenerate=True,
-    undefinedValue=None,
-):
+    inputFN: str,
+    outputFN: str,
+    praatEXE: str,
+    minPitch: float,
+    sampleStep: float = 0.01,
+    forceRegenerate: bool = True,
+    undefinedValue: float = None,
+) -> List[Tuple[float, ...]]:
     """
     Extract the intensity for an audio file
 
@@ -194,7 +182,9 @@ def extractIntensity(
     outputPath = os.path.split(outputFN)[0]
     utils.makeDir(outputPath)
 
-    assert os.path.exists(inputFN)
+    if not os.path.exists(inputFN):
+        raise errors.ArgumentError(f"Required folder does not exist: f{inputFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
 
@@ -209,23 +199,21 @@ def extractIntensity(
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    iList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
-
-    return iList
+    return loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
 
 
 def extractPitchTier(
-    wavFN,
-    outputFN,
-    praatEXE,
-    minPitch,
-    maxPitch,
-    sampleStep=0.01,
-    silenceThreshold=0.03,
-    forceRegenerate=True,
-    medianFilterWindowSize=0,
-    pitchQuadInterp=False,
-):
+    wavFN: str,
+    outputFN: str,
+    praatEXE: str,
+    minPitch: float,
+    maxPitch: float,
+    sampleStep: float = 0.01,
+    silenceThreshold: float = 0.03,
+    forceRegenerate: bool = True,
+    medianFilterWindowSize: int = 0,
+    pitchQuadInterp: bool = False,
+) -> data_points.PointObject2D:
     """
     Extract pitch at regular intervals from the input wav file
 
@@ -251,7 +239,9 @@ def extractPitchTier(
     else:
         doInterpolation = 0
 
-    assert os.path.exists(wavFN)
+    if not os.path.exists(wavFN):
+        raise errors.ArgumentError(f"Required file does not exist: f{wavFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         if os.path.exists(outputFN):
@@ -272,24 +262,22 @@ def extractPitchTier(
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    pitchTier = dataio.open2DPointObject(outputFN)
-
-    return pitchTier
+    return data_points.open2DPointObject(outputFN)
 
 
 def extractPitch(
-    wavFN,
-    outputFN,
-    praatEXE,
-    minPitch,
-    maxPitch,
-    sampleStep=0.01,
-    silenceThreshold=0.03,
-    forceRegenerate=True,
-    undefinedValue=None,
-    medianFilterWindowSize=0,
-    pitchQuadInterp=False,
-):
+    wavFN: str,
+    outputFN: str,
+    praatEXE: str,
+    minPitch: float,
+    maxPitch: float,
+    sampleStep: float = 0.01,
+    silenceThreshold: float = 0.03,
+    forceRegenerate: bool = True,
+    undefinedValue: float = None,
+    medianFilterWindowSize: int = 0,
+    pitchQuadInterp: bool = False,
+) -> List[Tuple[float, ...]]:
     """
     Extract pitch at regular intervals from the input wav file
 
@@ -317,7 +305,9 @@ def extractPitch(
     else:
         doInterpolation = 0
 
-    assert os.path.exists(wavFN)
+    if not os.path.exists(wavFN):
+        raise errors.ArgumentError(f"Required file does not exist: f{wavFN}")
+
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
         if os.path.exists(outputFN):
@@ -340,28 +330,26 @@ def extractPitch(
         scriptFN = join(utils.scriptsPath, scriptName)
         utils.runPraatScript(praatEXE, scriptFN, argList)
 
-    piList = loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
-
-    return piList
+    return loadTimeSeriesData(outputFN, undefinedValue=undefinedValue)
 
 
 def extractPI(
-    inputFN,
-    outputFN,
-    praatEXE,
-    minPitch,
-    maxPitch,
-    sampleStep=0.01,
-    silenceThreshold=0.03,
-    pitchUnit="Hertz",
-    forceRegenerate=True,
-    tgFN=None,
-    tierName=None,
-    tmpOutputPath=None,
-    undefinedValue=None,
-    medianFilterWindowSize=0,
-    pitchQuadInterp=False,
-):
+    inputFN: str,
+    outputFN: str,
+    praatEXE: str,
+    minPitch: float,
+    maxPitch: float,
+    sampleStep: float = 0.01,
+    silenceThreshold: float = 0.03,
+    pitchUnit: str = HERTZ,
+    forceRegenerate: bool = True,
+    tgFN: str = None,
+    tierName: str = None,
+    tmpOutputPath: str = None,
+    undefinedValue: float = None,
+    medianFilterWindowSize: int = 0,
+    pitchQuadInterp: bool = False,
+) -> List[Tuple[float, ...]]:
     """
     Extracts pitch and intensity from a file wholesale or piecewise
 
@@ -421,7 +409,9 @@ def extractPI(
     return piList
 
 
-def loadTimeSeriesData(fn, undefinedValue=None):
+def loadTimeSeriesData(
+    fn: str, undefinedValue: float = None
+) -> List[Tuple[float, ...]]:
     """
     For reading the output of get_pitch_and_intensity or get_intensity
 
@@ -435,12 +425,10 @@ def loadTimeSeriesData(fn, undefinedValue=None):
         with io.open(fn, "r", encoding="utf-8") as fd:
             data = fd.read()
     except IOError:
-        print("No pitch track for: %s" % name)
+        print(f"No pitch track for: {name}")
         raise
 
-    dataList = data.splitlines()
-
-    dataList = [row.split(",") for row in dataList if row != ""]
+    dataList = [row.split(",") for row in data.splitlines() if row != ""]
 
     # The new praat script includes a header
     if dataList[0][0] == "time":
@@ -456,34 +444,32 @@ def loadTimeSeriesData(fn, undefinedValue=None):
         for value in row:
             if "--" in value:
                 if undefinedValue is not None:
-                    value = undefinedValue
+                    appendValue = undefinedValue
                 else:
                     doSkip = True
                     break
             else:
-                value = float(value)
+                appendValue = float(value)
 
-            entry.append(value)
+            entry.append(appendValue)
 
         if doSkip is True:
             continue
 
-        newDataList.append(entry)
+        newDataList.append(tuple(entry))
 
-    dataList = newDataList
-
-    return dataList
+    return newDataList
 
 
 def generatePIMeasures(
-    dataList,
-    tgFN,
-    tierName,
-    doPitch,
-    medianFilterWindowSize=None,
-    globalZNormalization=False,
-    localZNormalizationWindowSize=0,
-):
+    dataList: List[Tuple[float, float, float]],
+    tgFN: str,
+    tierName: str,
+    doPitch: bool,
+    medianFilterWindowSize: int = None,
+    globalZNormalization: bool = False,
+    localZNormalizationWindowSize: int = 0,
+) -> List[Tuple[float, ...]]:
     """
     Generates processed values for the labeled intervals in a textgrid
 
@@ -501,21 +487,26 @@ def generatePIMeasures(
 
     # Warn user that normalizing a second time nullifies the first normalization
     if globalZNormalization is True and localZNormalizationWindowSize > 0:
-        raise NormalizationException()
+        raise errors.NormalizationException()
 
+    castDataList = cast(List[Tuple[float, ...]], dataList)
     if globalZNormalization is True:
         if doPitch:
-            dataList = myMath.znormalizeSpeakerData(dataList, 1, True)
+            castDataList = my_math.znormalizeSpeakerData(castDataList, 1, True)
         else:
-            dataList = myMath.znormalizeSpeakerData(dataList, 2, True)
+            castDataList = my_math.znormalizeSpeakerData(castDataList, 2, True)
 
     # Raw values should have 0 filtered; normalized values are centered around 0, so don't filter
     filterZeroFlag = not globalZNormalization
 
-    tg = tgio.openTextgrid(tgFN)
-    piData = tg.tierDict[tierName].getValuesInIntervals(dataList)
+    tg = textgrid.openTextgrid(tgFN, False)
+    if not isinstance(tg.tierDict[tierName], textgrid.IntervalTier):
+        raise errors.IncompatibleTierError(tg.tierDict[tierName])
 
-    outputList = []
+    tier = cast(textgrid.IntervalTier, tg.tierDict[tierName])
+    piData = tier.getValuesInIntervals(castDataList)
+
+    outputList: List[List[float]] = []
     for interval, entryList in piData:
         label = interval[0]
         if doPitch:
@@ -532,9 +523,9 @@ def generatePIMeasures(
                     intensityVal for intensityVal in tmpValList if intensityVal != 0.0
                 ]
 
-            rmsIntensity = 0
+            rmsIntensity = 0.0
             if len(tmpValList) != 0:
-                rmsIntensity = myMath.rms(tmpValList)
+                rmsIntensity = my_math.rms(tmpValList)
             outputList.append(
                 [
                     rmsIntensity,
@@ -546,20 +537,28 @@ def generatePIMeasures(
         for colI in range(len(outputList[0])):
             featValList = [row[colI] for row in outputList]
 
-            featValList = myMath.znormWindowFilter(
+            featValList = my_math.znormWindowFilter(
                 featValList, localZNormalizationWindowSize, True, True
             )
-            assert len(featValList) == len(outputList)
+            if len(featValList) != len(outputList):  # This should hopefully not happen
+                raise errors.UnexpectedError(
+                    "Lists must be of the same length but are not: "
+                    f"({len(featValList)}), ({len(outputList)})"
+                )
 
             for i, val in enumerate(featValList):
                 outputList[i][colI] = val
 
-    return outputList
+    return [tuple(row) for row in outputList]
 
 
 def getPitchMeasures(
-    f0Values, name=None, label=None, medianFilterWindowSize=None, filterZeroFlag=False
-):
+    f0Values: List[float],
+    name: str = None,
+    label: str = None,
+    medianFilterWindowSize: int = None,
+    filterZeroFlag: bool = False,
+) -> Tuple[float, float, float, float, float, float]:
     """
     Get various measures (min, max, etc) for the passed in list of pitch values
 
@@ -570,12 +569,12 @@ def getPitchMeasures(
     """
 
     if name is None:
-        name = "unspecified"
+        name = UNSPECIFIED
     if label is None:
-        label = "unspecified"
+        label = UNSPECIFIED
 
     if medianFilterWindowSize is not None:
-        f0Values = myMath.medianFilter(
+        f0Values = my_math.medianFilter(
             f0Values, medianFilterWindowSize, useEdgePadding=True
         )
 
@@ -583,15 +582,15 @@ def getPitchMeasures(
         f0Values = [f0Val for f0Val in f0Values if int(f0Val) != 0]
 
     if len(f0Values) == 0:
-        myStr = u"No pitch data for file: %s, label: %s" % (name, label)
+        myStr = f"No pitch data for file: {name}, label: {label}"
         print(myStr.encode("ascii", "replace"))
-        counts = 0
-        meanF0 = 0
-        maxF0 = 0
-        minF0 = 0
-        rangeF0 = 0
-        variance = 0
-        std = 0
+        counts = 0.0
+        meanF0 = 0.0
+        maxF0 = 0.0
+        minF0 = 0.0
+        rangeF0 = 0.0
+        variance = 0.0
+        std = 0.0
     else:
         counts = float(len(f0Values))
         meanF0 = sum(f0Values) / counts
@@ -605,13 +604,26 @@ def getPitchMeasures(
     return (meanF0, maxF0, minF0, rangeF0, variance, std)
 
 
-def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
+def detectPitchErrors(
+    pitchList: List[Tuple[float, float]],
+    maxJumpThreshold: float = 0.70,
+    tgToMark: Optional[textgrid.Textgrid] = None,
+) -> Tuple[List[Point], Optional[textgrid.Textgrid]]:
     """
     Detect pitch halving and doubling errors.
 
     If a textgrid is passed in, it adds the markings to the textgrid
     """
-    assert maxJumpThreshold >= 0.0 and maxJumpThreshold <= 1.0
+    if maxJumpThreshold < 0 or maxJumpThreshold > 1:
+        raise errors.ArgumentError(
+            f"'maxJumpThreshold' must be between 0 and 1.  Was given ({maxJumpThreshold})"
+        )
+
+    tierName = _PITCH_ERROR_TIER_NAME
+    if tgToMark is not None and tierName in tgToMark.tierNameList:
+        raise errors.ArgumentError(
+            f"Tier name '{tierName}' is already in provided textgrid"
+        )
 
     errorList = []
     for i in range(1, len(pitchList)):
@@ -622,12 +634,10 @@ def detectPitchErrors(pitchList, maxJumpThreshold=0.70, tgToMark=None):
         floorCutoff = currentPitch * maxJumpThreshold
         if (lastPitch <= floorCutoff) or (lastPitch >= ceilingCutoff):
             currentTime = pitchList[i][0]
-            errorList.append([currentTime, currentPitch / lastPitch])
+            errorList.append(Point(currentTime, str(currentPitch / lastPitch)))
 
     if tgToMark is not None:
-        tierName = "pitch errors"
-        assert tierName not in tgToMark.tierNameList
-        pointTier = tgio.PointTier(
+        pointTier = textgrid.PointTier(
             tierName, errorList, tgToMark.minTimestamp, tgToMark.maxTimestamp
         )
         tgToMark.addTier(pointTier)

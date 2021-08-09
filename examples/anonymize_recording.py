@@ -8,8 +8,8 @@ of the recording.
 import os
 from os.path import join
 
-from praatio import tgio
-from praatio import audioio
+from praatio import textgrid
+from praatio import audio
 
 path = join(".", "files")
 outputPath = join(path, "anonymized_data")
@@ -29,12 +29,12 @@ for wavFN, tgFN in (
     # some sort of code ('section-to-anonymize') rather than what I have
     # done here.
     deleteList = []
-    tg = tgio.openTextgrid(join(path, tgFN))
+    tg = textgrid.openTextgrid(join(path, tgFN), False)
     deleteList.append(tg.tierDict["word"].entryList[0])
 
     # Get only time information from entries (i.e. remove label information)
-    deleteList = [(start, stop) for start, stop, _ in deleteList]
+    deleteList = [(start, end) for start, end, _ in deleteList]
 
     # Replace segments with a sine wave
-    wavQObj = audioio.WavQueryObj(join(path, wavFN))
+    wavQObj = audio.WavQueryObj(join(path, wavFN))
     wavQObj.deleteWavSections(outputWavFN, deleteList=deleteList, operation="sine wave")

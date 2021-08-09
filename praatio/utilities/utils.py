@@ -3,12 +3,17 @@ Various generic utility functions
 """
 
 import os
-from os.path import join
 import subprocess
-import functools
 import itertools
-import io
+import wave
 from pkg_resources import resource_filename
+from typing_extensions import Literal
+from typing import Any, Iterator, List, Tuple, NoReturn, Type
+
+from praatio.utilities import errors
+from praatio.utilities import constants
+
+Interval = constants.Interval
 
 # Get the folder one level above the current folder
 scriptsPath = resource_filename(
@@ -17,7 +22,200 @@ scriptsPath = resource_filename(
 )
 
 
-def getValueAtTime(timestamp, sortedDataTupleList, fuzzyMatching=False, startI=0):
+def reportNoop(_exception: Type[BaseException], _text: str) -> None:
+    pass
+
+
+def reportException(exception: Type[BaseException], text: str) -> NoReturn:
+    raise exception(text)
+
+
+def reportWarning(_exception: Type[BaseException], text: str) -> None:
+    print(text)
+
+
+def getErrorReporter(reportingMode: Literal["silence", "warning", "error"]):
+    modeToFunc = {
+        constants.ErrorReportingMode.SILENCE: reportNoop,
+        constants.ErrorReportingMode.WARNING: reportWarning,
+        constants.ErrorReportingMode.ERROR: reportException,
+    }
+
+    return modeToFunc[reportingMode]
+
+
+def checkIsUndershoot(time: float, referenceTime: float, errorReporter) -> bool:
+    if time < referenceTime:
+        errorReporter(
+            errors.OutOfBounds,
+            f"'{time}' occurs before minimum allowed time '{referenceTime}'",
+        )
+        return True
+    else:
+        return False
+
+
+def checkIsOvershoot(time: float, referenceTime: float, errorReporter) -> bool:
+    if time > referenceTime:
+        errorReporter(
+            errors.OutOfBounds,
+            f"'{time}' occurs after maximum allowed time '{referenceTime}'",
+        )
+        return True
+    else:
+        return False
+
+
+def validateOption(variableName, value, optionClass):
+    if value not in optionClass.validOptions:
+        raise errors.WrongOption(variableName, value, optionClass.validOptions)
+
+
+def intervalOverlapCheck(
+    interval: Interval,
+    cmprInterval: Interval,
+    percentThreshold: float = 0,
+    timeThreshold: float = 0,
+    boundaryInclusive: bool = False,
+) -> bool:
+    """
+    Checks whether two intervals overlap
+
+    Args:
+        interval (Interval):
+        cmprInterval (Interval):
+        percentThreshold (float): if percentThreshold is greater than 0, then
+            if the intervals overlap, they must overlap by at least this threshold
+            (0.2 would mean 20% overlap considering both intervals)
+            (eg [0, 6] and [3,8] have an overlap of 50%. If percentThreshold is set
+             to higher than 50%, the intervals will be considered to not overlap.)
+        timeThreshold (float): if greater than 0, then if the intervals overlap,
+            they must overlap by at least this threshold
+        boundaryInclusive (float): if true, then two intervals are considered to
+            overlap if they share a boundary
+
+    Returns:
+        bool:
+    """
+
+    startTime, endTime = interval[:2]
+    cmprStartTime, cmprEndTime = cmprInterval[:2]
+
+    overlapTime = max(0, min(endTime, cmprEndTime) - max(startTime, cmprStartTime))
+    overlapFlag = overlapTime > 0
+
+    # Do they share a boundary?  Only need to check if one boundary ends
+    # when another begins (because otherwise, they overlap in other ways)
+    boundaryOverlapFlag = False
+    if boundaryInclusive:
+        boundaryOverlapFlag = startTime == cmprEndTime or endTime == cmprStartTime
+
+    # Is the overlap over a certain percent?
+    percentOverlapFlag = False
+    if percentThreshold > 0 and overlapFlag:
+        totalTime = max(endTime, cmprEndTime) - min(startTime, cmprStartTime)
+        percentOverlap = overlapTime / float(totalTime)
+
+        percentOverlapFlag = percentOverlap >= percentThreshold
+        overlapFlag = percentOverlapFlag
+
+    # Is the overlap more than a certain threshold?
+    timeOverlapFlag = False
+    if timeThreshold > 0 and overlapFlag:
+        timeOverlapFlag = overlapTime >= timeThreshold
+        overlapFlag = timeOverlapFlag
+
+    overlapFlag = (
+        overlapFlag or boundaryOverlapFlag or percentOverlapFlag or timeOverlapFlag
+    )
+
+    return overlapFlag
+
+
+def getIntervalsInInterval(
+    start: float,
+    end: float,
+    intervals: List[Interval],
+    mode: Literal["strict", "lax", "truncated"],
+) -> List[Interval]:
+    """
+    Gets all intervals that exist between /start/ and /end/
+
+    Args:
+        cropStart (float):
+        cropEnd (float):
+        mode (CropMode): one of ['strict', 'lax', or 'truncated']
+            - 'strict', only intervals wholly contained by the crop
+                interval will be kept
+            - 'lax', partially contained intervals will be kept
+            - 'truncated', partially contained intervals will be
+                truncated to fit within the crop region.
+        rebaseToZero (bool): if True, the cropped textgrid values
+            will be subtracted by the cropStart
+
+    Returns:
+        bool:
+    """
+    validateOption("mode", mode, constants.CropCollision)
+
+    containedIntervals = []
+    for interval in intervals:
+        matchedEntry = None
+
+        # Don't need to investigate if the current interval is
+        # before start or after end
+        if interval.end <= start or interval.start >= end:
+            continue
+
+        # Determine if the current interval is wholly contained
+        # within the superEntry
+        if interval.start >= start and interval.end <= end:
+            matchedEntry = interval
+
+        # If the current interval is only partially contained within the
+        # target interval AND inclusion is 'lax', include it anyways
+        elif mode == constants.CropCollision.LAX and (
+            interval.start >= start or interval.end <= end
+        ):
+            matchedEntry = interval
+
+        # The current interval stradles the end of the target interval
+        elif interval.start >= start and interval.end > end:
+            if mode == constants.CropCollision.TRUNCATED:
+                matchedEntry = Interval(interval.start, end, interval.label)
+
+        # The current interval stradles the start of the target interval
+        elif interval.start < start and interval.end <= end:
+            if mode == constants.CropCollision.TRUNCATED:
+                matchedEntry = Interval(start, interval.end, interval.label)
+
+        # The current interval contains the target interval completely
+        elif interval.start <= start and interval.end >= end:
+            if mode == constants.CropCollision.LAX:
+                matchedEntry = interval
+            elif mode == constants.CropCollision.TRUNCATED:
+                matchedEntry = Interval(start, end, interval.label)
+
+        if matchedEntry is not None:
+            containedIntervals.append(matchedEntry)
+
+    return containedIntervals
+
+
+def escapeQuotes(text: str) -> str:
+    return text.replace('"', '""')
+
+
+def strToIntOrFloat(inputStr: str) -> float:
+    return float(inputStr) if "." in inputStr else int(inputStr)
+
+
+def getValueAtTime(
+    timestamp: float,
+    sortedDataTupleList: List[Tuple[Any, ...]],
+    fuzzyMatching: bool = False,
+    startI: int = 0,
+) -> Tuple[Tuple[Any, ...], int]:
     """
     Get the value in the data list (sorted by time) that occurs at this point
 
@@ -37,57 +235,55 @@ def getValueAtTime(timestamp, sortedDataTupleList, fuzzyMatching=False, startI=0
     """
 
     i = startI
+    bestRow: Tuple[Any, ...] = ()
 
     # Only find exact timestamp matches
     if fuzzyMatching is False:
         while True:
             try:
-                dataTuple = sortedDataTupleList[i]
+                currRow = sortedDataTupleList[i]
             except IndexError:
-                currTime = timestamp
-                currVal = "--"
                 break
 
-            currTime = dataTuple[0]
-            currVal = dataTuple[1]
-            if timestamp == currTime:
+            currTime = currRow[0]
+            if currTime >= timestamp:
+                if timestamp == currTime:
+                    bestRow = currRow
                 break
             i += 1
-        retTime = currTime
-        retVal = currVal
 
     # Find the closest timestamp
     else:
         bestTime = sortedDataTupleList[i][0]
-        bestVal = sortedDataTupleList[i][1]
-        i += 1
+        bestRow = sortedDataTupleList[i]
         while True:
             try:
                 dataTuple = sortedDataTupleList[i]
             except IndexError:
+                i -= 1
                 break  # Last known value is the closest one
 
             currTime = dataTuple[0]
-            currVal = dataTuple[1]
+            currRow = dataTuple
 
             currDiff = abs(currTime - timestamp)
             bestDiff = abs(bestTime - timestamp)
             if currDiff < bestDiff:  # We're closer to the target val
                 bestTime = currTime
-                bestVal = currVal
+                bestRow = currRow
                 if currDiff == 0:
                     break  # Can't do better than a perfect match
             elif currDiff > bestDiff:
+                i -= 1
                 break  # We've past the best value.
             i += 1
 
-        retTime = bestTime
-        retVal = bestVal
+    retRow = bestRow
 
-    return retTime, retVal, i
+    return retRow, i
 
 
-def getValuesInInterval(dataTupleList, start, stop):
+def getValuesInInterval(dataTupleList: List, start: float, end: float) -> List:
     """
     Gets the values that exist within an interval
 
@@ -98,13 +294,13 @@ def getValuesInInterval(dataTupleList, start, stop):
     intervalDataList = []
     for dataTuple in dataTupleList:
         time = dataTuple[0]
-        if start <= time and stop >= time:
+        if start <= time and end >= time:
             intervalDataList.append(dataTuple)
 
     return intervalDataList
 
 
-def sign(x):
+def sign(x: float) -> int:
     """Returns 1 if x is positive, 0 if x is 0, and -1 otherwise"""
     retVal = 0
     if x > 0:
@@ -114,47 +310,58 @@ def sign(x):
     return retVal
 
 
-def invertIntervalList(inputList, maxValue=None):
+def invertIntervalList(
+    inputList: List[Tuple[float, float]], minValue: float = None, maxValue: float = None
+) -> List[Tuple[float, float]]:
     """
     Inverts the segments of a list of intervals
 
     e.g.
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
+    [(0.5, 1.2), (3.4, 5.0)] -> [(0.0, 0.5), (1.2, 3.4)]
     """
+    if any([interval[0] >= interval[1] for interval in inputList]):
+        raise errors.ArgumentError("Interval start occured before interval end")
+
     inputList = sorted(inputList)
 
     # Special case -- empty lists
-    if len(inputList) == 0 and maxValue is not None:
+    invList: List[Tuple[float, float]]
+    if len(inputList) == 0 and minValue is not None and maxValue is not None:
         invList = [
-            (0, maxValue),
+            (minValue, maxValue),
         ]
     else:
         # Insert in a garbage head and tail value for the purpose
         # of inverting, in the range does not start and end at the
         # smallest and largest values
-        if inputList[0][0] != 0:
-            inputList.insert(0, ["", 0])
+        if minValue is not None and inputList[0][0] > minValue:
+            inputList.insert(0, (-1, minValue))
         if maxValue is not None and inputList[-1][1] < maxValue:
-            inputList.append((maxValue, ""))
+            inputList.append((maxValue, maxValue + 1))
 
         invList = [
-            [inputList[i][1], inputList[i + 1][0]] for i in range(0, len(inputList) - 1)
+            (inputList[i][1], inputList[i + 1][0]) for i in range(0, len(inputList) - 1)
         ]
+
+        # If two intervals in the input share a boundary, we'll get invalid intervals in the output
+        # eg invertIntervalList([(0, 1), (1, 2)]) -> [(1, 1)]
+        invList = [interval for interval in invList if interval[0] != interval[1]]
 
     return invList
 
 
-def makeDir(path):
+def makeDir(path: str) -> None:
     """
-    Creates a new directory
+    Create a new directory
 
-    Unlike os.mkdir, it does not throw an exception if the directory already exists.
+    Unlike os.mkdir, it does not throw an exception if the directory already exists
     """
     if not os.path.exists(path):
         os.mkdir(path)
 
 
-def findAll(txt, subStr):
+def findAll(txt: str, subStr: str) -> List[int]:
     """
     Find the starting indicies of all instances of subStr in txt
     """
@@ -171,43 +378,15 @@ def findAll(txt, subStr):
     return indexList
 
 
-class FileNotFound(Exception):
-    def __init__(self, fullPath):
-        super(FileNotFound, self).__init__()
-        self.fullPath = fullPath
-
-    def __str__(self):
-        return "File not found:\n%s" % self.fullPath
-
-
-class PraatExecutionFailed(Exception):
-    def __init__(self, cmdList):
-        super(PraatExecutionFailed, self).__init__()
-        self.cmdList = cmdList
-
-    def __str__(self):
-        errorStr = (
-            "\nPraat Execution Failed.  Please check the following:\n"
-            "- Praat exists in the location specified\n"
-            "- Praat script can execute ok outside of praat\n"
-            "- script arguments are correct\n\n"
-            "If you can't locate the problem, I recommend using "
-            "absolute paths rather than relative "
-            "paths and using paths without spaces in any folder "
-            "or file names\n\n"
-            "Here is the command that python attempted to run:\n"
-        )
-        cmdTxt = " ".join(self.cmdList)
-        return errorStr + cmdTxt
-
-
-def runPraatScript(praatEXE, scriptFN, argList, cwd=None):
+def runPraatScript(
+    praatEXE: str, scriptFN: str, argList: List[Any], cwd: str = None
+) -> None:
 
     # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
-        raise FileNotFound(praatEXE)
+        raise errors.FileNotFound(praatEXE)
     if not os.path.exists(scriptFN):
-        raise FileNotFound(scriptFN)
+        raise errors.FileNotFound(scriptFN)
 
     argList = ["%s" % arg for arg in argList]
     cmdList = [praatEXE, "--run", scriptFN] + argList
@@ -215,115 +394,10 @@ def runPraatScript(praatEXE, scriptFN, argList, cwd=None):
     myProcess = subprocess.Popen(cmdList, cwd=cwd)
 
     if myProcess.wait():
-        raise PraatExecutionFailed(cmdList)
+        raise errors.PraatExecutionFailed(cmdList)
 
 
-def _getMatchFunc(pattern):
-    """
-    An unsophisticated pattern matching function
-    """
-
-    # '#' Marks word boundaries, so if there is more than one we need to do
-    #    something special to make sure we're not mis-representings them
-    assert pattern.count("#") < 2
-
-    def startsWith(subStr, fullStr):
-        return fullStr[: len(subStr)] == subStr
-
-    def endsWith(subStr, fullStr):
-        return fullStr[-1 * len(subStr) :] == subStr
-
-    def inStr(subStr, fullStr):
-        return subStr in fullStr
-
-    # Selection of the correct function
-    if pattern[0] == "#":
-        pattern = pattern[1:]
-        cmpFunc = startsWith
-
-    elif pattern[-1] == "#":
-        pattern = pattern[:-1]
-        cmpFunc = endsWith
-
-    else:
-        cmpFunc = inStr
-
-    return functools.partial(cmpFunc, pattern)
-
-
-def findFiles(
-    path,
-    filterPaths=False,
-    filterExt=None,
-    filterPattern=None,
-    skipIfNameInList=None,
-    stripExt=False,
-):
-
-    fnList = os.listdir(path)
-
-    if filterPaths is True:
-        fnList = [
-            folderName
-            for folderName in fnList
-            if os.path.isdir(os.path.join(path, folderName))
-        ]
-
-    if filterExt is not None:
-        splitFNList = [
-            [
-                fn,
-            ]
-            + list(os.path.splitext(fn))
-            for fn in fnList
-        ]
-        fnList = [fn for fn, name, ext in splitFNList if ext == filterExt]
-
-    if filterPattern is not None:
-        splitFNList = [
-            [
-                fn,
-            ]
-            + list(os.path.splitext(fn))
-            for fn in fnList
-        ]
-        matchFunc = _getMatchFunc(filterPattern)
-        fnList = [fn for fn, name, ext in splitFNList if matchFunc(name)]
-
-    if skipIfNameInList is not None:
-        targetNameList = [os.path.splitext(fn)[0] for fn in skipIfNameInList]
-        fnList = [fn for fn in fnList if os.path.splitext(fn)[0] not in targetNameList]
-
-    if stripExt is True:
-        fnList = [os.path.splitext(fn)[0] for fn in fnList]
-
-    fnList.sort()
-    return fnList
-
-
-def openCSV(path, fn, valueIndex=None, encoding="utf-8"):
-    """
-    Load a feature
-
-    In many cases we only want a single value from the feature (mainly because
-    the feature only contains one value).  In these situations, the user
-    can indicate that rather than receiving a list of lists, they can receive
-    a lists of values, where each value represents the item in the row
-    indicated by valueIndex.
-    """
-
-    # Load CSV file
-    with io.open(join(path, fn), "r", encoding=encoding) as fd:
-        featureList = fd.read().splitlines()
-    featureList = [row.split(",") for row in featureList]
-
-    if valueIndex is not None:
-        featureList = [row[valueIndex] for row in featureList]
-
-    return featureList
-
-
-def safeZip(listOfLists, enforceLength):
+def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
     """
     A safe version of python's zip()
 
@@ -335,11 +409,18 @@ def safeZip(listOfLists, enforceLength):
     """
     if enforceLength is True:
         length = len(listOfLists[0])
-        assert all([length == len(subList) for subList in listOfLists])
+        if not all([length == len(subList) for subList in listOfLists]):
+            raise errors.SafeZipException("Lists to zip have different sizes.")
 
-    try:
-        zipFunc = itertools.izip_longest  # Python 2.x
-    except AttributeError:
-        zipFunc = itertools.zip_longest  # Python 3.x
+    return itertools.zip_longest(*listOfLists)
 
-    return zipFunc(*listOfLists)
+
+def getWavDuration(wavFN: str) -> float:
+    "For internal use.  See praatio.audio.WavQueryObj() for general use."
+    audiofile = wave.open(wavFN, "r")
+    params = audiofile.getparams()
+    framerate = params[2]
+    nframes = params[3]
+    duration = float(nframes) / framerate
+
+    return duration

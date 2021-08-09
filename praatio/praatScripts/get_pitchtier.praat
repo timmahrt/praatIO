@@ -1,7 +1,7 @@
 # Based on http://www.fon.hum.uva.nl/praat/manual/Script_for_listing_time_--F0_--intensity.html
 #
 
-form Soundfile to pitch and intensity
+form Soundfile to pitch tier
     sentence Input_audio_file_name C:\Users\Tim\Dropbox\workspace\praatIO\examples\files\mary.wav
     sentence Output_data_file_name C:\Users\Tim\Dropbox\workspace\praatIO\examples\files\pitch_extraction\pitch\bobby.PitchTier
     real Sample_step 0.01

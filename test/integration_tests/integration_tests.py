@@ -19,9 +19,9 @@ another issue and will require some refactoring.
 import unittest
 import os
 import sys
+from pathlib import Path
 
-cwd = os.path.dirname(os.path.realpath(__file__))
-_root = os.path.split(cwd)[0]
+_root = os.path.join(Path(__file__).parents[2], "examples")
 sys.path.append(_root)
 
 

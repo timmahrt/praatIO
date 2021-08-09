@@ -18,56 +18,16 @@ Praat is an open source software program for doing phonetic analysis and annotat
 of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 
 # Table of contents
-1. [Common Use Cases](#common-use-cases)
-2. [Documentation](#documentation)
-3. [Tutorials](#tutorials)
-4. [Version History](#version-history)
-5. [Requirements](#requirements)
-6. [Usage](#usage)
-7. [Installation](#installation)
-8. [Citing praatIO](#citing-praatio)
-9. [Acknowledgements](#acknowledgements)
-
-## Common Use Cases
-
-What can you do with this library?
-
-- query a textgrid to get information about the tiers or intervals contained within
-    ```python
-    tg = tgio.openTextgrid("path_to_textgrid")
-    entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
-    entryList = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
-    ```
-
-- create or augment textgrids using data from other sources
-
-- found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid
-    ```python
-    tg = tgio.openTextgrid("path_to_textgrid")
-    moddedTG = tg.editTimestamps(5)
-    moddedTG.save('output_path_to_textgrid')
-    ```
-    
-- utilize the klattgrid interface to raise all speech formants by 20% (among other possible manipulations)
-    ```python
-    kg = kgio.openKlaatGrid("path_to_klaatgrid")
-    incrTwenty = lambda x: x * 1.2
-    kg.tierDict["oral_formants"].modifySubtiers("formants",incrTwenty)
-    kg.save(join(outputPath, "bobby_twenty_percent_less.KlattGrid"))
-    ```
-
-- replace labeled segments in a recording with silence or delete them
-    - see /examples/deleteVowels.py
-    
-- use set operations (union, intersection, difference) on textgrid tiers
-    - see /examples/textgrid_set_operations.py
-
-- see /praatio/praatio_scripts.py for various ready-to-use functions such as
-    - `splitAudioOnTier()`: split an audio file into chunks specified by intervals in one tier
-    - `spellCheckEntries()`: spellcheck a textgrid tier
-    - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
-    - `alignBoundariesAcrossTiers()`: for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
-
+1. [Documentation](#documentation)
+2. [Tutorials](#tutorials)
+3. [Version History](#version-history)
+4. [Requirements](#requirements)
+5. [Installation](#installation)
+6. [Version 4 to 5 migration](#version-4-to-5-migration)
+7. [Usage](#usage)
+8. [Common Use Cases](#common-use-cases)
+9. [Citing praatIO](#citing-praatio)
+10. [Acknowledgements](#acknowledgements)
 
 ## Documentation
 
@@ -91,120 +51,18 @@ You can view them online using the external website Jupyter:
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
-Ver 4.4 (Jul 5, 2021)
-- Textgrid reading now more robust (fix for files created in Elan)
+Please view [CHANGELOG.md](https://github.com/timmahrt/praatIO/blob/master/CHANGELOG.md) for version history.
 
-Ver 4.3 (Apr 5, 2021)
-- Textgrid reading/writing is now more robust (newlines and quotes are ok)
-- Textgrids can now be saved without creating blank intervals
-    - For backwards compatibility, by default, segments with no intervals will be given a blank entry with a label of ""
-
-Ver 4.2 (Aug 14, 2020)
-- Textgrids can now be written to/read from a json file
-    - tg.save("blah.json", outputFormat=tgio.JSON)
-    - tg = openTextgrid("blah.json", readAsJson=True)
-
-Ver 4.1 (May 13, 2020)
-- Textgrids can now be read "raw"
-    - For backwards compatibility, by default, unlabeled points and intervals are removed when opening textgrids
-
-Ver 4.0 (February 5, 2020)
-- Removed unlicensed xsampa.py file, along with associated utility sppas_util.py (originally added in Ver 3.4)
-    - If you are not directly importing either of those files, you can upgrade without changing your code
-
-Ver 3.8 (July 24, 2019)
-- Textgrids can be saved in the Textgrid long file format with .save(fn, useShortForm=False).
-    - For backwards compatibility, by default, it saves in the short file format.
-- Textgrid output formatting is now closer to what Praat outputs.
-
-Ver 3.7 (March 17, 2019)
-- Speaker normalization and normalization within local context added to pitch and intensity query functions
-- Generated pdoc documentation added
-
-Ver 3.6 (May 05, 2017)
-- Major clean up of tgio
-    - Ver 3.6 is **not** backwards compatible with previous versions of PraatIO.  Lots of changes to tgio.
-- Tutorials folder added
-
-
-Ver 3.5 (April 04, 2017)
-- Added code for reading, writing, and manipulating audio files (praatio.audioio)
-- *eraseRegion()* and *insertRegion()* added to textgrids and textgrid tiers
-
-
-Ver 3.4 (February 04, 2017)
-- Added place for very specific scripts (praatio.applied_scripts)
-    - added code for using with input and output textgrids to SPPAS, a forced aligner
-- Lots of minor features and bugfixes
-
-
-Ver 3.3 (June 27, 2016)
-- Find zero-crossings in a wave file
-   - for shifting all boundaries in a textgrid see *praatio_scripts.tgBoundariesToZeroCrossings()*
-   - for finding individual zero crossings, see *praatio_scripts.findNearestZeroCrossing()*
-- Pitch features
-   - pitch extraction is now ten times faster
-   - automatic pitch halving/doubling detection
-   - median filtering
-- Textgrid features
-   - set operations over two tiers (union, difference, or intersection)
-   - erase a section of a textgrid (and a section of the corresponding wave file)
-- Extraction of pitch formants using praat
-- Lots of small bugfixes
-
-
-Ver 3.2 (January 29, 2016)
-- Float precision is now preserved in file I/O
-- Integration tests added; using Travis CI and Coveralls for build automation.
-- Lots of small bugfixes
-- Moved point processes into 1D and 2D point objects
-
-Ver 3.1 (December 16, 2015)
-- Support for reading/writing point processes
-
-Ver 3.0 (November 10, 2015)
-- Support for reading and writing klattgrids
-
-Ver 2.1 (July 27, 2015)
-- Addition of praatio_scripts.py where commonly used scripts will be placed
-- Import clash led to praatio.py being renamed to tgio.py
-
-Ver 2.0 (February 5, 2015)
-- Support for reading, writing, and manipulating **point** tiers
-- Ported to python 3
-- Major cleanup/reorganizing of code
-
-Ver 1.0 (August 31, 2014)
-- Reading and writing of textgrids
-- Support for reading, writing, and manipulating **interval** tiers
 
 ## Requirements
 
-``Python 2.6.*`` or above
+Python module `https://pypi.org/project/typing-extensions/`.  It should be installed automatically with praatio but you can install it manually if you have any problems.
 
-``Python 3.3.*`` or above (actually, probably any version of python 3)
+``Python 3.7.*`` or above
 
 [Click here to visit travis-ci and see the specific versions of python that praatIO is currently tested under](<https://travis-ci.org/timmahrt/praatIO>)
 
-
-## Usage
-
-99% of the time you're going to want to run
-
-```python
-from praatio import tgio
-tg = tgio.openTextgrid(r"C:\Users\tim\Documents\transcript.TextGrid")
-```
-
-Or if you want to work with KlaatGrid files
-
-```python
-from praatio import kgio
-kg = kgio.openKlattGrid(r"C:\Users\tim\Documents\transcript.KlattGrid")
-```
-
-See /test for example usages
-
+If you are using ``Python 2.x`` or ``Python < 3.7``, you can use `PraatIO 4.x`.
 
 ## Installation
 
@@ -218,7 +76,107 @@ Otherwise, to manually install, after downloading the source from github, from a
 
 If python is not in your path, you'll need to enter the full path e.g.
 
-    C:\Python36\python.exe setup.py install
+    C:\Python37\python.exe setup.py install
+
+## Version 4 to 5 migration
+
+Many things changed between versions 4 and 5.  If you see an error like
+`WARNING: You've tried to import 'tgio' which was renamed 'textgrid' in praatio 5.x.`
+it means that you have installed version 5 but your code was written for praatio 4.x or earlier.
+
+The immediate solution is to uninstall praatio 5 and install praatio 4. From the command line:
+```
+pip uninstall praatio
+pip install "praatio<5"
+```
+
+If praatio is being installed as a project dependency--ie it is set as a dependency in setup.py like
+```
+    install_requires=["praatio"],
+```
+then changing it to the following should fix the problem
+```
+    install_requires=["praatio ~= 4.1"],
+```
+
+Many files, classes, and functions were renamed in praatio 5 to hopefully be clearer.  There
+were too many changes to list here but the `tgio` module was renamed `textgrid`.
+
+Also, the interface for `openTextgrid()` and `tg.save()` has changed. Here are examples of the required arguments in the new interface
+```
+textgrid.openTextgrid(
+  fn=name,
+  includeEmptyIntervals=False
+)
+```
+```
+tg.save(
+  fn=name,
+  format= "short_textgrid",
+  includeBlankSpaces= False
+)
+```
+
+Please consult the documentation to help in upgrading to version 5.
+
+## Usage
+
+99% of the time you're going to want to run
+
+```python
+from praatio import textgrid
+tg = textgrid.openTextgrid(r"C:\Users\tim\Documents\transcript.TextGrid", False)
+```
+
+Or if you want to work with KlattGrid files
+
+```python
+from praatio import klattgrid
+kg = klattgrid.openKlattGrid(r"C:\Users\tim\Documents\transcript.KlattGrid")
+```
+
+See /test for example usages
+
+
+## Common Use Cases
+
+What can you do with this library?
+
+- query a textgrid to get information about the tiers or intervals contained within
+    ```python
+    tg = textgrid.openTextgrid("path_to_textgrid", False)
+    entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
+    entryList = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
+    ```
+
+- create or augment textgrids using data from other sources
+
+- found that you clipped your audio file five seconds early and have added it back to your wavefile but now your textgrid is misaligned?  Add five seconds to every interval in the textgrid
+    ```python
+    tg = textgrid.openTextgrid("path_to_textgrid", False)
+    moddedTG = tg.editTimestamps(5)
+    moddedTG.save('output_path_to_textgrid', 'long_textgrid', True)
+    ```
+
+- utilize the klattgrid interface to raise all speech formants by 20%
+    ```python
+    kg = klattgrid.openKlattGrid("path_to_klattgrid")
+    incrTwenty = lambda x: x * 1.2
+    kg.tierDict["oral_formants"].modifySubtiers("formants",incrTwenty)
+    kg.save(join(outputPath, "bobby_twenty_percent_less.KlattGrid"))
+    ```
+
+- replace labeled segments in a recording with silence or delete them
+    - see /examples/deleteVowels.py
+
+- use set operations (union, intersection, difference) on textgrid tiers
+    - see /examples/textgrid_set_operations.py
+
+- see /praatio/praatio_scripts.py for various ready-to-use functions such as
+    - `splitAudioOnTier()`: split an audio file into chunks specified by intervals in one tier
+    - `spellCheckEntries()`: spellcheck a textgrid tier
+    - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
+    - `alignBoundariesAcrossTiers()`: for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
 
 
 ## Citing praatIO

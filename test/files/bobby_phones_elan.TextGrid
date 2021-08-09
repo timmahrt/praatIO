@@ -1,0 +1,74 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0.0
+xmax = 1.194625
+tiers? <exists> 
+size = 1 
+item []: 
+    item[1]:
+        class = "IntervalTier" 
+        name = "phone" 
+        xmin = 0.0
+        xmax = 1.18979591837 
+        intervals: size = 15 
+        intervals [1]
+            xmin = 0.0124716553288 
+            xmax = 0.06469123242311078 
+            text = "" 
+        intervals [2]
+            xmin = 0.06469123242311078 
+            xmax = 0.08438971390281873 
+            text = "B" 
+        intervals [3]
+            xmin = 0.08438971390281873 
+            xmax = 0.23285789838876556 
+            text = "AA1" 
+        intervals [4]
+            xmin = 0.23285789838876556 
+            xmax = 0.2788210218414174 
+            text = "B" 
+        intervals [5]
+            xmin = 0.2788210218414174 
+            xmax = 0.41156462585 
+            text = "IY0" 
+        intervals [6]
+            xmin = 0.41156462585 
+            xmax = 0.47094510353588265 
+            text = "R" 
+        intervals [7]
+            xmin = 0.47094510353588265 
+            xmax = 0.521315192744 
+            text = "IH1" 
+        intervals [8]
+            xmin = 0.521315192744 
+            xmax = 0.658052967538796 
+            text = "PT" 
+        intervals [9]
+            xmin = 0.658052967538796 
+            xmax = 0.680952380952 
+            text = "DH" 
+        intervals [10]
+            xmin = 0.680952380952 
+            xmax = 0.740816326531 
+            text = "AH0" 
+        intervals [11]
+            xmin = 0.740816326531 
+            xmax = 0.807647261005538 
+            text = "L" 
+        intervals [12]
+            xmin = 0.807647261005538 
+            xmax = 0.910430839002 
+            text = "EH1" 
+        intervals [13]
+            xmin = 0.910430839002 
+            xmax = 0.980272108844 
+            text = "JH" 
+        intervals [14]
+            xmin = 0.980272108844 
+            xmax = 1.1171482864527198 
+            text = "ER0" 
+        intervals [15]
+            xmin = 1.1171482864527198 
+            xmax = 1.18979591837 
+            text = "" 

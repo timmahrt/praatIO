@@ -5,8 +5,8 @@ Example of using praatio's audio splice functions
 import os
 from os.path import join
 
-from praatio import tgio
-from praatio import audioio
+from praatio import textgrid
+from praatio import audio
 from praatio import praatio_scripts
 
 root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
@@ -23,13 +23,13 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 # Find the region to replace and the region that we'll replace it with
-tg = tgio.openTextgrid(tgFN)
+tg = textgrid.openTextgrid(tgFN, False)
 tier = tg.tierDict[tierName]
 mEntry = tier.entryList[tier.find("m")[0]]
 bEntry = tier.entryList[tier.find("b")[0]]
 
 
-sourceAudioObj = audioio.openAudioFile(audioFN)
+sourceAudioObj = audio.openAudioFile(audioFN)
 mAudioObj = sourceAudioObj.getSubsegment(mEntry[0], mEntry[1])
 bAudioObj = sourceAudioObj.getSubsegment(bEntry[0], bEntry[1])
 
@@ -46,4 +46,4 @@ audioObj, tg = praatio_scripts.audioSplice(
 )
 
 audioObj.save(outputAudioFN)
-tg.save(outputTGFN)
+tg.save(outputTGFN, "short_textgrid", True)

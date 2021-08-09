@@ -1,7 +1,7 @@
 # Based on http://www.fon.hum.uva.nl/praat/manual/Script_for_listing_time_--F0_--intensity.html
 #
 
-form Soundfile to pitch and intensity
+form Soundfile to pitch and intensity segments
     sentence Input_audio_file_name C:\Users\Tim\Dropbox\workspace\praatIO\test\files\bobby.wav
     sentence Output_audio_file_name C:\Users\Tim\Dropbox\workspace\praatIO\test\files\pitch_extraction\pitch\bobby.txt
     sentence Input_textgrid_file_name C:\Users\Tim\Downloads\MCRPfiles.tar\bobby_phones.Textgrid

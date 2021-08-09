@@ -6,9 +6,9 @@ import os
 from os.path import join
 import copy
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import praatio_scripts
-from praatio import audioio
+from praatio import audio
 from praatio.utilities import utils
 
 
@@ -30,26 +30,26 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
 
-        tg = tgio.openTextgrid(inputTGFN)
-        wavObj = audioio.WavQueryObj(inputWavFN)
+        tg = textgrid.openTextgrid(inputTGFN, False)
+        wavObj = audio.WavQueryObj(inputWavFN)
 
         praatio_scripts.tgBoundariesToZeroCrossings(tg, wavObj, zeroCrossingTGFN)
 
     else:
-        tg = tgio.openTextgrid(inputTGFN)
+        tg = textgrid.openTextgrid(inputTGFN, False)
 
     keepList = tg.tierDict["phone"].entryList
     keepList = [entry for entry in keepList if not isVowel(entry[2])]
-    deleteList = utils.invertIntervalList(keepList, tg.maxTimestamp)
+    deleteList = utils.invertIntervalList(keepList, 0, tg.maxTimestamp)
 
-    wavObj = audioio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
+    wavObj = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
     wavObj.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)
-    for start, stop in sorted(deleteList, reverse=True):
-        shrunkTG = shrunkTG.eraseRegion(start, stop, doShrink=doShrink)
+    for start, end in sorted(deleteList, reverse=True):
+        shrunkTG = shrunkTG.eraseRegion(start, end, doShrink=doShrink)
 
-    shrunkTG.save(outputTGFN)
+    shrunkTG.save(outputTGFN, "short_textgrid", True)
 
 
 # Shrink files

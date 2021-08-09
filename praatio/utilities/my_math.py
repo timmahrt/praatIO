@@ -3,11 +3,31 @@ Various math utilities
 """
 
 import math
+import statistics
+from typing import Callable, List, Tuple
+
+from praatio.utilities import errors
+
+
+def numToStr(inputNum: float) -> str:
+    if isclose(inputNum, int(inputNum)):
+        retVal = "%d" % inputNum
+    else:
+        retVal = "%s" % repr(inputNum)
+    return retVal
+
+
+def isclose(a: float, b: float, rel_tol: float = 1e-14, abs_tol: float = 0.0) -> bool:
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
 def filterTimeSeriesData(
-    filterFunc, featureTimeList, windowSize, index, useEdgePadding
-):
+    filterFunc: Callable[[List[float], int, bool], List[float]],
+    featureTimeList: List[list],
+    windowSize: int,
+    index: int,
+    useEdgePadding: bool,
+) -> List[list]:
     """
     Filter time-stamped data values within a window
 
@@ -21,20 +41,23 @@ def filterTimeSeriesData(
     featureTimeList = [list(row) for row in featureTimeList]
     featValues = [row[index] for row in featureTimeList]
     featValues = filterFunc(featValues, windowSize, useEdgePadding)
-    assert len(featureTimeList) == len(featValues)
+
+    if len(featureTimeList) != len(featValues):
+        errors.ArgumentError(
+            "The length of the time values {len(featureTimeList)} does not "
+            "match the length of the data values {len(featValues)}"
+        )
     outputList = [
-        piRow[:index]
-        + [
-            f0Val,
-        ]
-        + piRow[index + 1 :]
+        [*piRow[:index], f0Val, *piRow[index + 1 :]]
         for piRow, f0Val in zip(featureTimeList, featValues)
     ]
 
     return outputList
 
 
-def znormalizeSpeakerData(featureTimeList, index, filterZeroValues):
+def znormalizeSpeakerData(
+    featureTimeList: List[Tuple[float, ...]], index: int, filterZeroValues: bool
+) -> List[Tuple[float, ...]]:
     """
     znormalize time series data
 
@@ -47,34 +70,33 @@ def znormalizeSpeakerData(featureTimeList, index, filterZeroValues):
     filterZeroValues: if True, don't consider zero values in the mean and stdDev
       (recommended value for data like pitch or intensity)
     """
-    featureTimeList = [list(row) for row in featureTimeList]
     featValues = [row[index] for row in featureTimeList]
 
     if not filterZeroValues:
         featValues = znormalizeData(featValues)
     else:
         featValuesNoZeroes = [val for val in featValues if val != ""]
-        meanVal = mean(featValuesNoZeroes)
-        stdDevVal = stdDev(featValuesNoZeroes)
+        meanVal = statistics.mean(featValuesNoZeroes)
+        stdDevVal = statistics.stdev(featValuesNoZeroes)
 
         featValues = [
             (val - meanVal) / stdDevVal if val > 0 else 0 for val in featValues
         ]
 
-    assert len(featureTimeList) == len(featValues)
+    if len(featureTimeList) != len(featValues):
+        errors.ArgumentError(
+            "The length of the time values {len(featureTimeList)} does not "
+            "match the length of the data values {len(featValues)}"
+        )
     outputList = [
-        piRow[:index]
-        + [
-            val,
-        ]
-        + piRow[index + 1 :]
+        tuple([*piRow[:index], val, *piRow[index + 1 :]])
         for piRow, val in zip(featureTimeList, featValues)
     ]
 
     return outputList
 
 
-def medianFilter(dist, window, useEdgePadding):
+def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[float]:
     """
     median filter each value in a dataset; filtering occurs within a given window
 
@@ -86,10 +108,12 @@ def medianFilter(dist, window, useEdgePadding):
     medianFilter(x, 5, False)
     >> [1 1 1 2 4 5 4 4 4 5 1 5]
     """
-    return _stepFilter(median, dist, window, useEdgePadding)
+    return _stepFilter(statistics.median, dist, window, useEdgePadding)
 
 
-def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
+def znormWindowFilter(
+    dist: List[float], window: int, useEdgePadding: bool, filterZeroValues: bool
+) -> List[float]:
     """
     z-normalize each value in a dataset; normalization occurs within a given window
 
@@ -102,14 +126,14 @@ def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
 
     def znormalizeCenterVal(valList):
         valToNorm = valList[int(len(valList) / 2.0)]
-        return (valToNorm - mean(valList)) / stdDev(valList)
+        return (valToNorm - statistics.mean(valList)) / statistics.stdev(valList)
 
     if not filterZeroValues:
         filteredOutput = _stepFilter(znormalizeCenterVal, dist, window, useEdgePadding)
     else:
         zeroIndexList = []
         nonzeroValList = []
-        for i, val in enumerate(dst):
+        for i, val in enumerate(dist):
             if val > 0.0:
                 nonzeroValList.append(val)
             else:
@@ -125,7 +149,9 @@ def znormWindowFilter(dst, window, useEdgePadding, filterZeroValues):
     return filteredOutput
 
 
-def _stepFilter(filterFunc, dist, window, useEdgePadding):
+def _stepFilter(
+    filterFunc, dist: List[float], window: int, useEdgePadding: bool
+) -> List[float]:
 
     offset = int(math.floor(window / 2.0))
     length = len(dist)
@@ -136,7 +162,7 @@ def _stepFilter(filterFunc, dist, window, useEdgePadding):
         # If using edge padding or if 0 <= context <= length
         if useEdgePadding or (((0 <= x - offset) and (x + offset < length))):
 
-            preContext = []
+            preContext: List[float] = []
             currentContext = [
                 dist[x],
             ]
@@ -171,33 +197,7 @@ def _stepFilter(filterFunc, dist, window, useEdgePadding):
     return returnList
 
 
-def median(valList):
-
-    valList = valList[:]
-    valList.sort()
-
-    if len(valList) % 2 == 0:  # Even
-        i = int(len(valList) / 2.0)
-        medianVal = (valList[i - 1] + valList[i]) / 2.0
-    else:  # Odd
-        i = int(len(valList) / 2.0)
-        medianVal = valList[i]
-
-    return medianVal
-
-
-def mean(valList):
-    return sum(valList) / float(len(valList))
-
-
-def stdDev(valList):
-    meanVal = mean(valList)
-    squaredSum = sum([(val - meanVal) ** 2 for val in valList])
-
-    return math.sqrt(squaredSum / float(len(valList) - 1))
-
-
-def znormalizeData(valList):
+def znormalizeData(valList: List[float]) -> List[float]:
     """
     Given a list of floats, return the z-normalized values of the floats
 
@@ -207,13 +207,13 @@ def znormalizeData(valList):
     naturally have different pitch ranges.
     """
     valList = valList[:]
-    meanVal = mean(valList)
-    stdDevVal = stdDev(valList)
+    meanVal = statistics.mean(valList)
+    stdDevVal = statistics.stdev(valList)
 
     return [(val - meanVal) / stdDevVal for val in valList]
 
 
-def rms(intensityValues):
+def rms(intensityValues: List[float]) -> float:
     """Return the root mean square for the input set of values"""
     intensityValues = [val ** 2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)

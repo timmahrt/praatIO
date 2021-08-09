@@ -1,0 +1,114 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 10 
+tiers? <exists> 
+size = 3 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "bob" 
+        xmin = 0 
+        xmax = 10 
+        intervals: size = 8 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.7363043110515426 
+            text = "" 
+        intervals [2]:
+            xmin = 0.7363043110515426 
+            xmax = 1.559821858449687 
+            text = "01a" 
+        intervals [3]:
+            xmin = 1.559821858449687 
+            xmax = 2.4630346523702324 
+            text = "01b" 
+        intervals [4]:
+            xmin = 2.4630346523702324 
+            xmax = 5.863365170659344 
+            text = "" 
+        intervals [5]:
+            xmin = 5.863365170659344 
+            xmax = 6.518637197621309 
+            text = "01c" 
+        intervals [6]:
+            xmin = 6.518637197621309 
+            xmax = 9.219420551991568 
+            text = "" 
+        intervals [7]:
+            xmin = 9.219420551991568 
+            xmax = 9.830417441996643 
+            text = "01d" 
+        intervals [8]:
+            xmin = 9.830417441996643 
+            xmax = 10 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "mary" 
+        xmin = 0 
+        xmax = 10 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.941206131504639 
+            text = "" 
+        intervals [2]:
+            xmin = 2.941206131504639 
+            xmax = 3.773578706294161 
+            text = "02a" 
+        intervals [3]:
+            xmin = 3.773578706294161 
+            xmax = 4.136634829340655 
+            text = "02b" 
+        intervals [4]:
+            xmin = 4.136634829340655 
+            xmax = 4.907022212390531 
+            text = "02c" 
+        intervals [5]:
+            xmin = 4.907022212390531 
+            xmax = 7.90002147067626 
+            text = "" 
+        intervals [6]:
+            xmin = 7.90002147067626 
+            xmax = 8.962624757641608 
+            text = "02d" 
+        intervals [7]:
+            xmin = 8.962624757641608 
+            xmax = 10 
+            text = "" 
+    item [3]:
+        class = "IntervalTier" 
+        name = "sarah" 
+        xmin = 0 
+        xmax = 10 
+        intervals: size = 7 
+        intervals [1]:
+            xmin = 0 
+            xmax = 3.773578706294161 
+            text = "" 
+        intervals [2]:
+            xmin = 3.773578706294161 
+            xmax = 4.136634829340655 
+            text = "03a" 
+        intervals [3]:
+            xmin = 4.136634829340655 
+            xmax = 4.907022212390531 
+            text = "" 
+        intervals [4]:
+            xmin = 4.907022212390531 
+            xmax = 5.562294239352496 
+            text = "03b" 
+        intervals [5]:
+            xmin = 5.562294239352496 
+            xmax = 6.801998074145401 
+            text = "" 
+        intervals [6]:
+            xmin = 6.801998074145401 
+            xmax = 7.262459498497051 
+            text = "03c" 
+        intervals [7]:
+            xmin = 7.262459498497051 
+            xmax = 10 
+            text = "" 

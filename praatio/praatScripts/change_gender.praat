@@ -1,4 +1,4 @@
-form Soundfile to klaatgrid
+form Change gender
     sentence Input_audio_file_name
     sentence Output_audio_file_name
     real Pitch_floor 75.0

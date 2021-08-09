@@ -8,24 +8,30 @@ see **examples/auto_segment_speech.py**, **examples/get_pitch_and_formants.py**,
 import os
 from os.path import join
 import io
+import csv
+from typing import List, Optional, Tuple
 
-from praatio import audioio
-from praatio import dataio
+from praatio import audio
+from praatio import data_points
+from praatio.utilities import constants
 from praatio.utilities import utils
+
+SILENCE_LABEL = "silent"
+SOUND_LABEL = "sound"
 
 
 def changeGender(
-    praatEXE,
-    wavFN,
-    outputWavFN,
-    pitchFloor,
-    pitchCeiling,
-    formantShiftRatio,
-    pitchMedian=0.0,
-    pitchRange=1.0,
-    duration=1.0,
-    scriptFN=None,
-):
+    praatEXE: str,
+    wavFN: str,
+    outputWavFN: str,
+    pitchFloor: float,
+    pitchCeiling: float,
+    formantShiftRatio: float,
+    pitchMedian: float = 0.0,
+    pitchRange: float = 1.0,
+    duration: float = 1.0,
+    scriptFN: Optional[str] = None,
+) -> None:
     """
     Changes the speech formants in a file using praat's change gender function
 
@@ -38,7 +44,7 @@ def changeGender(
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "change_gender.praat")
 
-    #  Praat crashes on exit after resynthesis with a klaatgrid
+    #  Praat crashes on exit after resynthesis with a klattgrid
     utils.runPraatScript(
         praatEXE,
         scriptFN,
@@ -55,7 +61,13 @@ def changeGender(
     )
 
 
-def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
+def changeIntensity(
+    praatEXE: str,
+    wavFN: str,
+    outputWavFN: str,
+    newIntensity: float,
+    scriptFN: Optional[str] = None,
+) -> None:
     """
     Changes the intensity of the wavFN (in db)
 
@@ -65,21 +77,21 @@ def changeIntensity(praatEXE, wavFN, outputWavFN, newIntensity, scriptFN=None):
     if scriptFN is None:
         scriptFN = join(utils.scriptsPath, "change_intensity.praat")
 
-    #  Praat crashes on exit after resynthesis with a klaatgrid
+    #  Praat crashes on exit after resynthesis with a klattgrid
     utils.runPraatScript(praatEXE, scriptFN, [wavFN, outputWavFN, newIntensity])
 
 
 def getFormants(
-    praatEXE,
-    inputWavFN,
-    outputTxtFN,
-    maxFormant,
-    stepSize=0.01,
-    window_length=0.025,
-    preemphasis=50,
-    scriptFN=None,
-    undefinedValue=None,
-):
+    praatEXE: str,
+    inputWavFN: str,
+    outputTxtFN: str,
+    maxFormant: float,
+    stepSize: float = 0.01,
+    window_length: float = 0.025,
+    preemphasis: float = 50,
+    scriptFN: Optional[str] = None,
+    undefinedValue: Optional[str] = None,
+) -> List:
     """
     Get F1, F2, and F3 for the audio file
 
@@ -105,7 +117,9 @@ def getFormants(
 
     # Load the output
     path, fn = os.path.split(outputTxtFN)
-    dataList = utils.openCSV(path, fn)
+    with open(os.path.join(path, fn), "r", encoding="utf-8") as fd:
+        csvFile = csv.reader(fd)
+        dataList = [row for row in csvFile]
 
     # The new praat script includes a header
     if dataList[0][0] == "time":
@@ -130,8 +144,13 @@ def getFormants(
 
 
 def getPulses(
-    praatEXE, inputWavFN, outputPointTierFN, minPitch, maxPitch, scriptFN=None
-):
+    praatEXE: str,
+    inputWavFN: str,
+    outputPointTierFN: str,
+    minPitch: float,
+    maxPitch: float,
+    scriptFN: Optional[str] = None,
+) -> data_points.PointObject1D:
     """
     Gets the pitch/glottal pulses for an audio file.
 
@@ -145,21 +164,21 @@ def getPulses(
     utils.runPraatScript(praatEXE, scriptFN, argList)
 
     # Load the output
-    pointObj = dataio.open1DPointObject(outputPointTierFN)
+    pointObj = data_points.open1DPointObject(outputPointTierFN)
 
     return pointObj
 
 
 def getSpectralInfo(
-    praatEXE,
-    inputWavFN,
-    inputTGFN,
-    outputCSVFN,
-    tierName,
-    spectralPower=2,
-    spectralMoment=3,
-    scriptFN=None,
-):
+    praatEXE: str,
+    inputWavFN: str,
+    inputTGFN: str,
+    outputCSVFN: str,
+    tierName: str,
+    spectralPower: int = 2,
+    spectralMoment: int = 3,
+    scriptFN: Optional[str] = None,
+) -> Tuple[List, List]:
     """
     Extracts various spectral measures from an audio file
 
@@ -187,22 +206,22 @@ def getSpectralInfo(
         data = fd.read()
 
     dataList = data.rstrip().split("\n")
-    dataList = [row.split(",") for row in dataList]
-    titleRow, dataList = dataList[0], dataList[1:]
+    dataListOfLists = [row.split(",") for row in dataList]
+    titleRow, mainDataListOfLists = dataListOfLists[0], dataListOfLists[1:]
 
-    return titleRow, dataList
+    return titleRow, mainDataListOfLists
 
 
 def resynthesizePitch(
-    praatEXE,
-    inputWavFN,
-    pitchFN,
-    outputWavFN,
-    minPitch,
-    maxPitch,
-    scriptFN=None,
-    pointList=None,
-):
+    praatEXE: str,
+    inputWavFN: str,
+    pitchFN: str,
+    outputWavFN: str,
+    minPitch: float,
+    maxPitch: float,
+    scriptFN: Optional[str] = None,
+    pointList: Optional[List] = None,
+) -> None:
     """
     Resynthesizes the pitch in a wav file with the given pitch contour file
 
@@ -216,8 +235,10 @@ def resynthesizePitch(
         scriptFN = join(utils.scriptsPath, "resynthesize_pitch.praat")
 
     if pointList is not None:
-        dur = audioio.WavQueryObj(inputWavFN).getDuration()
-        pointObj = dataio.PointObject2D(pointList, dataio.PITCH, 0, dur)
+        dur = audio.WavQueryObj(inputWavFN).getDuration()
+        pointObj = data_points.PointObject2D(
+            pointList, constants.DataPointTypes.PITCH, 0, dur
+        )
         pointObj.save(pitchFN)
 
     utils.runPraatScript(
@@ -226,8 +247,14 @@ def resynthesizePitch(
 
 
 def resynthesizeDuration(
-    praatEXE, inputWavFN, durationTierFN, outputWavFN, minPitch, maxPitch, scriptFN=None
-):
+    praatEXE: str,
+    inputWavFN: str,
+    durationTierFN: str,
+    outputWavFN: str,
+    minPitch: float,
+    maxPitch: float,
+    scriptFN: Optional[str] = None,
+) -> None:
     """
     Resynthesizes the duration in a wav file with the given duration tier
 
@@ -245,18 +272,18 @@ def resynthesizeDuration(
 
 
 def annotateSilences(
-    praatEXE,
-    inputWavPath,
-    outputTGPath,
-    minPitch=100,
-    timeStep=0.0,
-    silenceThreshold=-25.0,
-    minSilDur=0.1,
-    minSoundDur=0.1,
-    silentLabel="silence",
-    soundLabel="sound",
-    scriptFN=None,
-):
+    praatEXE: str,
+    inputWavPath: str,
+    outputTGPath: str,
+    minPitch: float = 100,
+    timeStep: float = 0.0,
+    silenceThreshold: float = -25.0,
+    minSilDur: float = 0.1,
+    minSoundDur: float = 0.1,
+    silentLabel: str = SILENCE_LABEL,
+    soundLabel: str = SOUND_LABEL,
+    scriptFN: Optional[str] = None,
+) -> None:
     """
     Marks the silences and non-silences of an audio file
 

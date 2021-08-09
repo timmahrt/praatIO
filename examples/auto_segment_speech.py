@@ -9,10 +9,11 @@ talking most of the time.
 Probably only useful in limited circumstances.
 """
 
+import os
 from os.path import join
 import math
 
-from praatio import tgio
+from praatio import textgrid
 from praatio import praat_scripts
 from praatio.utilities import utils
 
@@ -28,7 +29,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     Assumes the speaker is speaking for most of the recording.
     """
-    tg = tgio.openTextgrid(tgFN)
+    tg = textgrid.openTextgrid(tgFN, False)
 
     duration = tg.maxTimestamp
     numEntries = int(math.ceil(duration * proportion))
@@ -36,8 +37,8 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     # Get all silent intervals
     entryList = [
-        (stop - start, start, stop, label)
-        for start, stop, label in entryList
+        (end - start, start, end, label)
+        for start, end, label in entryList
         if label == "silent"
     ]
 
@@ -50,44 +51,48 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
     # Get the mid point of the longest n intervals and convert them
     # into intervals to be transcribed
     entryList = entryList[:numEntries]
-    pointList = [start + ((stop - start) / 2.0) for _, start, stop, _ in entryList]
+    pointList = [start + ((end - start) / 2.0) for _, start, end, _ in entryList]
     pointList.sort()
 
-    pointList = (
-        [
-            0.0,
-        ]
-        + pointList
-        + [
-            duration,
-        ]
-    )
+    pointList = [0.0] + pointList + [duration]
 
     newEntryList = []
     for i in range(len(pointList) - 1):
         newEntryList.append((pointList[i], pointList[i + 1], "%d" % i))
 
-    outputTG = tgio.Textgrid()
-    tier = tgio.IntervalTier("toTranscribe", newEntryList, 0, duration)
+    outputTG = textgrid.Textgrid()
+    tier = textgrid.IntervalTier("toTranscribe", newEntryList, 0, duration)
     outputTG.addTier(tier)
 
-    outputTG.save(outputTGFN)
+    outputTG.save(outputTGFN, "short_textgrid", True)
 
 
 def autoSegmentSpeech(praatEXE, inputWavPath, rawTGPath, finalTGPath):
-
+    utils.makeDir(rawTGPath)
     utils.makeDir(finalTGPath)
 
-    praat_scripts.annotateSilences(praatEXE, inputWavPath, rawTGPath)
+    for fn in os.listdir(inputWavPath):
+        if ".wav" not in fn:
+            continue
+        name = os.path.splitext(fn)[0]
+        tgFn = name + ".TextGrid"
+        praat_scripts.annotateSilences(
+            praatEXE, join(inputWavPath, fn), join(rawTGPath, tgFn)
+        )
 
-    for tgFN in utils.findFiles(rawTGPath, filterExt=".TextGrid"):
+    for fn in os.listdir(rawTGPath):
+        if ".TextGrid" not in fn:
+            continue
         markTranscriptForAnnotations(
-            join(rawTGPath, tgFN), "silences", join(finalTGPath, tgFN)
+            join(rawTGPath, fn), "silences", join(finalTGPath, fn)
         )
 
 
+# 2021/07/09 I tried to run this with relative paths
+# but it didn't work.  Using absolute paths did though.
 _praatEXE = r"C:\praat.exe"
-_root = join(".", "files")
+_praatEXE = "/Applications/Praat.app/Contents/MacOS/Praat"
+_root = "/Users/tmahrt/Dropbox/workspace/praatIO/examples/files"
 _inputWavPath = _root
 _rawTGPath = join(_root, "silence_marked_textgrids")
 _finalTGPath = join(_root, "ready-to-transcribe_textgrids")

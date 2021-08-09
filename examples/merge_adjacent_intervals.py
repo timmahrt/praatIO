@@ -5,7 +5,7 @@ Example of using praatio for merging intervals that share a border.
 import os
 from os.path import join
 
-from praatio import tgio
+from praatio import textgrid
 
 
 def merge_adjacent(path, fn, outputPath):
@@ -18,9 +18,9 @@ def merge_adjacent(path, fn, outputPath):
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
 
-    outputTG = tgio.Textgrid()
+    outputTG = textgrid.Textgrid()
 
-    tg = tgio.openTextgrid(join(path, fn))
+    tg = textgrid.openTextgrid(join(path, fn), False)
     for tierName in tg.tierNameList:
         tier = tg.tierDict[tierName]
 
@@ -39,12 +39,12 @@ def merge_adjacent(path, fn, outputPath):
 
         newEntryList.append(currentEntry)
 
-        replacementTier = tgio.IntervalTier(
+        replacementTier = textgrid.IntervalTier(
             tierName, newEntryList, tier.minTimestamp, tier.maxTimestamp
         )
         outputTG.addTier(replacementTier)
 
-    outputTG.save(join(outputPath, fn))
+    outputTG.save(join(outputPath, fn), "short_textgrid", True)
 
 
 def merge_adjacent_batch(inputPath, outputPath):
