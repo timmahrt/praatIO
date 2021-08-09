@@ -1,7 +1,7 @@
 
 # praatIO
 
-[![](https://travis-ci.org/timmahrt/praatIO.svg?branch=master)](https://travis-ci.org/timmahrt/praatIO) [![](https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?)](https://coveralls.io/github/timmahrt/praatIO?branch=master) [![](https://img.shields.io/badge/license-MIT-blue.svg?)](http://opensource.org/licenses/MIT) [![](https://img.shields.io/pypi/v/praatio.svg)](https://pypi.org/project/praatio/)
+[![](https://travis-ci.org/timmahrt/praatIO.svg?branch=main)](https://travis-ci.org/timmahrt/praatIO) [![](https://coveralls.io/repos/github/timmahrt/praatIO/badge.svg?)](https://coveralls.io/github/timmahrt/praatIO?branch=main) [![](https://img.shields.io/badge/license-MIT-blue.svg?)](http://opensource.org/licenses/MIT) [![](https://img.shields.io/pypi/v/praatio.svg)](https://pypi.org/project/praatio/)
 
 *Questions?  Comments?  Feedback? [![](https://badges.gitter.im/praatio/Lobby.svg)](https://gitter.im/praatio/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)*
 
@@ -44,14 +44,14 @@ folder distributed with PraatIO.
 
 You can view them online using the external website Jupyter:
 
-[Tutorial 1: An introduction and tutorial](<https://nbviewer.jupyter.org/github/timmahrt/praatIO/blob/master/tutorials/tutorial1_intro_to_praatio.ipynb>)
+[Tutorial 1: An introduction and tutorial](<https://nbviewer.jupyter.org/github/timmahrt/praatIO/blob/main/tutorials/tutorial1_intro_to_praatio.ipynb>)
     
     
 ## Version History
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
-Please view [CHANGELOG.md](https://github.com/timmahrt/praatIO/blob/master/CHANGELOG.md) for version history.
+Please view [CHANGELOG.md](https://github.com/timmahrt/praatIO/blob/main/CHANGELOG.md) for version history.
 
 
 ## Requirements
