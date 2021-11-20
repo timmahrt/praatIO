@@ -3,12 +3,11 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
-  - "3.10"
 install:
   - python setup.py install
   - pip install coveralls
   - pip install pytest-cov
 script:
-  - pytest --cov=praatio test/
+  - pytest --cov=praatio tests/
 after_success:
   - coveralls
