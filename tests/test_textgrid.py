@@ -79,7 +79,7 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier2, reportingMode="error")
         sut.addTier(tier3, reportingMode="error")
 
-        self.assertEquals(["words", "phrases", "max pitch"], sut.tierNameList)
+        self.assertEqual(["words", "phrases", "max pitch"], sut.tierNameList)
         self.assertEqual(tier1, sut.tierDict["words"])
         self.assertEqual(tier2, sut.tierDict["phrases"])
         self.assertEqual(tier3, sut.tierDict["max pitch"])
@@ -95,7 +95,7 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier3, tierIndex=1, reportingMode="error")
 
         # tier3 was inserted last but with index 1, so it will appear second
-        self.assertEquals(["words", "max pitch", "phrases"], sut.tierNameList)
+        self.assertEqual(["words", "max pitch", "phrases"], sut.tierNameList)
         self.assertEqual(tier1, sut.tierDict["words"])
         self.assertEqual(tier3, sut.tierDict["max pitch"])
         self.assertEqual(tier2, sut.tierDict["phrases"])
@@ -134,11 +134,11 @@ class TestTextgrid(PraatioTestCase):
             "max pitch", [[1.8, "135"], [3.7, "152"], [7.7, "98"], [8.8, "143"]], 0, 10
         )
 
-        self.assertEquals(0, sut.minTimestamp)
-        self.assertEquals(10, sut.maxTimestamp)
-        self.assertEquals(["words", "max pitch"], sut.tierNameList)
-        self.assertEquals(expectedTier1, sut.tierDict["words"])
-        self.assertEquals(expectedTier2, sut.tierDict["max pitch"])
+        self.assertEqual(0, sut.minTimestamp)
+        self.assertEqual(10, sut.maxTimestamp)
+        self.assertEqual(["words", "max pitch"], sut.tierNameList)
+        self.assertEqual(expectedTier1, sut.tierDict["words"])
+        self.assertEqual(expectedTier2, sut.tierDict["max pitch"])
 
     def test_append_textgrid_without_matching_names_only(self):
         tg1 = textgrid.Textgrid()
@@ -184,18 +184,18 @@ class TestTextgrid(PraatioTestCase):
             "dogs", [[7.7, "collie"], [8.8, "golden retriever"]], 0, 10
         )
 
-        self.assertEquals(0, sut.minTimestamp)
-        self.assertEquals(10, sut.maxTimestamp)
-        self.assertEquals(
+        self.assertEqual(0, sut.minTimestamp)
+        self.assertEqual(10, sut.maxTimestamp)
+        self.assertEqual(
             ["words", "max pitch", "phrases", "min pitch", "cats", "dogs"],
             sut.tierNameList,
         )
-        self.assertEquals(expectedTier1, sut.tierDict["words"])
-        self.assertEquals(expectedTier2, sut.tierDict["max pitch"])
-        self.assertEquals(expectedTier3, sut.tierDict["phrases"])
-        self.assertEquals(expectedTier4, sut.tierDict["min pitch"])
-        self.assertEquals(expectedTier5, sut.tierDict["cats"])
-        self.assertEquals(expectedTier6, sut.tierDict["dogs"])
+        self.assertEqual(expectedTier1, sut.tierDict["words"])
+        self.assertEqual(expectedTier2, sut.tierDict["max pitch"])
+        self.assertEqual(expectedTier3, sut.tierDict["phrases"])
+        self.assertEqual(expectedTier4, sut.tierDict["min pitch"])
+        self.assertEqual(expectedTier5, sut.tierDict["cats"])
+        self.assertEqual(expectedTier6, sut.tierDict["dogs"])
 
     def test_crop_raises_error_if_mode_invalid(self):
         sut = textgrid.Textgrid()

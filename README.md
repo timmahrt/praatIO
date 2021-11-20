@@ -23,7 +23,7 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 3. [Version History](#version-history)
 4. [Requirements](#requirements)
 5. [Installation](#installation)
-6. [Version 4 to 5 migration](#version-4-to-5-migration)
+6. [Version 4 to 5 Migration](#version-4-to-5-migration)
 7. [Usage](#usage)
 8. [Common Use Cases](#common-use-cases)
 9. [Tests](#tests)
@@ -79,7 +79,7 @@ If python is not in your path, you'll need to enter the full path e.g.
 
     C:\Python37\python.exe setup.py install
 
-## Version 4 to 5 migration
+## Version 4 to 5 Migration
 
 Many things changed between versions 4 and 5.  If you see an error like
 `WARNING: You've tried to import 'tgio' which was renamed 'textgrid' in praatio 5.x.`

@@ -2,10 +2,10 @@ import unittest
 
 from praatio.utilities import my_math
 
-from test.praatio_test_case import PraatioTestCase
+from tests.praatio_test_case import PraatioTestCase
 
 
-class MyMathTests(PraatioTestCase):
+class TestMyMath(PraatioTestCase):
 
     datasetA = [1, 10, 100, 1000]
     datasetB = [1, -10, 100, -1000]

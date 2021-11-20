@@ -27,7 +27,7 @@ from praatio.utilities import utils
 from praatio.utilities import textgrid_io
 from praatio.utilities import errors
 
-from test.testing_utils import areTheSameFiles
+from tests.testing_utils import areTheSameFiles
 
 
 def readFile(fn):
@@ -66,11 +66,11 @@ def run_save(
     return entryList
 
 
-class IOTests(unittest.TestCase):
+class TestIO(unittest.TestCase):
     """Testing input and output"""
 
     def __init__(self, *args, **kargs):
-        super(IOTests, self).__init__(*args, **kargs)
+        super(TestIO, self).__init__(*args, **kargs)
 
         cwd = os.path.dirname(os.path.realpath(__file__))
         root = os.path.split(cwd)[0]

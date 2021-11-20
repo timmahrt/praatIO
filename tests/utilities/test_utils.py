@@ -4,7 +4,7 @@ from praatio.utilities import utils
 from praatio.utilities import errors
 
 
-class UtilsTests(unittest.TestCase):
+class TestUtils(unittest.TestCase):
     def test_interval_overlap_check_using_time_threshold_flag(self):
         self.assertTrue(utils.intervalOverlapCheck([0, 5], [2, 7]))
         self.assertTrue(utils.intervalOverlapCheck([0, 5], [2, 7], timeThreshold=3))
@@ -38,10 +38,10 @@ class UtilsTests(unittest.TestCase):
         )
 
     def test_sign(self):
-        self.assertEquals(-1, utils.sign(-1))
-        self.assertEquals(0, utils.sign(0))
-        self.assertEquals(1, utils.sign(1))
-        self.assertEquals(1, utils.sign(100.5))
+        self.assertEqual(-1, utils.sign(-1))
+        self.assertEqual(0, utils.sign(0))
+        self.assertEqual(1, utils.sign(1))
+        self.assertEqual(1, utils.sign(100.5))
 
     def test_invert_interval_list_throws_exception_if_intervals_are_malformed(self):
         with self.assertRaises(errors.ArgumentError) as _:

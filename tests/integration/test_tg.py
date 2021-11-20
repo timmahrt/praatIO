@@ -12,11 +12,11 @@ from praatio import textgrid
 from praatio.utilities import constants
 
 
-class IOTests(unittest.TestCase):
+class TestTg(unittest.TestCase):
     """Testing input and output"""
 
     def __init__(self, *args, **kargs):
-        super(IOTests, self).__init__(*args, **kargs)
+        super(TestTg, self).__init__(*args, **kargs)
 
         cwd = os.path.dirname(os.path.realpath(__file__))
         root = os.path.split(cwd)[0]

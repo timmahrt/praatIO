@@ -25,7 +25,7 @@ _root = os.path.join(Path(__file__).parents[2], "examples")
 sys.path.append(_root)
 
 
-class IntegrationTests(unittest.TestCase):
+class TestIntegration(unittest.TestCase):
     """Integration tests"""
 
     def test_add_tiers(self):
