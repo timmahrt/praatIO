@@ -5,8 +5,8 @@ from praatio.utilities.constants import Interval, INTERVAL_TIER
 from praatio.utilities import errors
 from praatio.utilities import constants
 
-from test.praatio_test_case import PraatioTestCase
-from test import testing_utils
+from tests.praatio_test_case import PraatioTestCase
+from tests import testing_utils
 
 
 def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
@@ -15,7 +15,7 @@ def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
     return textgrid.IntervalTier(name, intervals, minT, maxT)
 
 
-class IntervalTierTests(PraatioTestCase):
+class TestIntervalTier(PraatioTestCase):
     def test_creating_an_interval_tier_with_invalid_intervals_raises_an_error(self):
         with self.assertRaises(errors.TextgridStateError) as _:
             textgrid.IntervalTier(

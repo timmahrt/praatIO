@@ -26,8 +26,9 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 6. [Version 4 to 5 migration](#version-4-to-5-migration)
 7. [Usage](#usage)
 8. [Common Use Cases](#common-use-cases)
-9. [Citing praatIO](#citing-praatio)
-10. [Acknowledgements](#acknowledgements)
+9. [Tests] (#tests)
+10. [Citing praatIO](#citing-praatio)
+11. [Acknowledgements](#acknowledgements)
 
 ## Documentation
 
@@ -178,6 +179,12 @@ What can you do with this library?
     - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
     - `alignBoundariesAcrossTiers()`: for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
 
+
+## Tests
+
+I run tests with the following command:
+
+`pytest --cov=praatio tests/`
 
 ## Citing praatIO
 

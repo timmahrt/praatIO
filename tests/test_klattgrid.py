@@ -3,11 +3,11 @@ from os.path import join
 
 from praatio import klattgrid
 
-from test.testing_utils import areTheSameFiles
-from test.praatio_test_case import PraatioTestCase
+from tests.testing_utils import areTheSameFiles
+from tests.praatio_test_case import PraatioTestCase
 
 
-class KlattgridTests(PraatioTestCase):
+class TestKlattgrid(PraatioTestCase):
     def test_reading_and_writing_klattgrids_does_not_mutate_file(self):
         """Tests for reading/writing klattgrids"""
         fn = "bobby.KlattGrid"

@@ -4,10 +4,10 @@ from os.path import join
 from praatio import audio
 from praatio.utilities import utils
 
-from test.praatio_test_case import PraatioTestCase
+from tests.praatio_test_case import PraatioTestCase
 
 
-class AudioTests(PraatioTestCase):
+class TestAudio(PraatioTestCase):
     def test_get_audio_duration(self):
         """Tests that the two audio duration methods output the same value."""
         wavFN = join(self.dataRoot, "bobby.wav")

@@ -23,8 +23,8 @@ from praatio.utilities import constants
 from praatio.utilities import textgrid_io
 from praatio.utilities import errors
 
-from test.testing_utils import areTheSameFiles
-from test.praatio_test_case import PraatioTestCase
+from tests.testing_utils import areTheSameFiles
+from tests.praatio_test_case import PraatioTestCase
 
 
 def readFile(fn):
@@ -62,7 +62,7 @@ def run_save(
     return entryList
 
 
-class IOTests(PraatioTestCase):
+class TestIo(PraatioTestCase):
     """Testing input and output"""
 
     def test_reading_textgrids_with_newlines_in_labels(self):

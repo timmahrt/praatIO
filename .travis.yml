@@ -3,10 +3,11 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
+  - "3.10"
 install:
   - python setup.py install
   - pip install coveralls
 script:
-  - nosetests --exe --with-coverage
+  - pytest --cov=praatio test/
 after_success:
   - coveralls

@@ -5,7 +5,7 @@ from praatio.utilities.constants import Interval, Point
 from praatio.utilities import constants
 from praatio.utilities import errors
 
-from test.praatio_test_case import PraatioTestCase
+from tests.praatio_test_case import PraatioTestCase
 
 
 def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
@@ -20,7 +20,7 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
     return textgrid.PointTier(name, points, minT, maxT)
 
 
-class TextgridTests(PraatioTestCase):
+class TestTextgrid(PraatioTestCase):
     def test_add_tier_raises_error_with_invalid_option(self):
         sut = textgrid.Textgrid()
         tier = makeIntervalTier()

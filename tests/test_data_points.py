@@ -3,11 +3,11 @@ from os.path import join
 
 from praatio import data_points
 
-from test.testing_utils import areTheSameFiles
-from test.praatio_test_case import PraatioTestCase
+from tests.testing_utils import areTheSameFiles
+from tests.praatio_test_case import PraatioTestCase
 
 
-class DataPointsTest(PraatioTestCase):
+class TestDataPoint(PraatioTestCase):
     def test_duration_tier_io(self):
         """Tests for reading/writing duration tiers"""
         fn = "mary.DurationTier"

@@ -5,7 +5,7 @@ from praatio.utilities.constants import Interval, Point, POINT_TIER
 from praatio.utilities import constants
 from praatio.utilities import errors
 
-from test.praatio_test_case import PraatioTestCase
+from tests.praatio_test_case import PraatioTestCase
 
 
 def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
@@ -14,7 +14,7 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
     return textgrid.PointTier(name, points, minT, maxT)
 
 
-class PointTierTests(PraatioTestCase):
+class TestPointTier(PraatioTestCase):
     def test_append_tier_with_mixed_type_throws_exception(self):
         pointTier = makePointTier()
         intervalTier = textgrid.IntervalTier(
