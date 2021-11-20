@@ -26,7 +26,7 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 6. [Version 4 to 5 migration](#version-4-to-5-migration)
 7. [Usage](#usage)
 8. [Common Use Cases](#common-use-cases)
-9. [Tests] (#tests)
+9. [Tests](#tests)
 10. [Citing praatIO](#citing-praatio)
 11. [Acknowledgements](#acknowledgements)
 
