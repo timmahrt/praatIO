@@ -393,8 +393,9 @@ def _parseNormalTextgrid(data: str) -> Dict:
         ).groups()[0]
         tierName = re.sub(r'""', '"', tierName)
 
+        # "-0" has been reported as a potential start time
         tierStartTimeStr = reSearch(
-            r"xmin ?= ?([\d.]+)\s*$", header, flags=re.MULTILINE
+            r"xmin ?= ?-?([\d.]+)\s*$", header, flags=re.MULTILINE
         ).groups()[0]
         tierStartTime = utils.strToIntOrFloat(tierStartTimeStr)
 
@@ -408,7 +409,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
         if tierType == INTERVAL_TIER:
             for element in tierData:
                 timeStart = reSearch(
-                    r"xmin ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
+                    r"xmin ?= ?-?([\d.]+)\s*$", element, flags=re.MULTILINE
                 ).groups()[0]
                 timeEnd = reSearch(
                     r"xmax ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
@@ -425,7 +426,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
         else:
             for element in tierData:
                 time = reSearch(
-                    r"number ?= ?([\d.]+)\s*$", element, flags=re.MULTILINE
+                    r"number ?= ?-?([\d.]+)\s*$", element, flags=re.MULTILINE
                 ).groups()[0]
                 label = reSearch(
                     r"mark ?= ?\"(.*)\"\s*$",

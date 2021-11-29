@@ -87,6 +87,30 @@ class TestIo(PraatioTestCase):
 
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
+    def test_reading_short_textgrids_with_start_times_of_negative_zero(self):
+        """Tests for reading/writing textgrids with negative zero"""
+        fn = "mary.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+        baselineTg = textgrid.openTextgrid(inputFN, False)
+
+        fn = "mary_with_negative_zero.TextGrid"
+        negativeZeroTgFn = join(self.dataRoot, fn)
+        sut = textgrid.openTextgrid(negativeZeroTgFn, False)
+
+        self.assertEqual(baselineTg, sut)
+
+    def test_reading_long_textgrids_with_start_times_of_negative_zero(self):
+        """Tests for reading/writing textgrids with negative zero"""
+        fn = "mary_longfile.TextGrid"
+        inputFN = join(self.dataRoot, fn)
+        baselineTg = textgrid.openTextgrid(inputFN, False)
+
+        fn = "mary_longfile_with_negative_zero.TextGrid"
+        negativeZeroTgFn = join(self.dataRoot, fn)
+        sut = textgrid.openTextgrid(negativeZeroTgFn, False)
+
+        self.assertEqual(baselineTg, sut)
+
     def test_tg_io(self):
         """Tests for reading/writing textgrid io"""
         fn = "textgrid_to_merge.TextGrid"
