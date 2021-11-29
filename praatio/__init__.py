@@ -31,3 +31,13 @@ on the praatio github page:
 
 There is also a tutorial for working with praatio on the github page.
 """
+
+__all__ = [
+    "audio",
+    "data_points",
+    "klattgrid",
+    "pitch_and_intensity",
+    "praat_scripts",
+    "praatio_scripts",
+    "textgrid",
+]
