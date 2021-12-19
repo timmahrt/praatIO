@@ -1,5 +1,8 @@
 import os
 import contextlib
+import unittest
+
+import pytest
 
 
 def areTheSameFiles(fn1, fn2, fileHandler, *args):
@@ -27,3 +30,16 @@ def supressStdout(func):
                 func(*a, **ka)
 
     return wrapper
+
+
+class _DecoratedMethodsClass(type):
+    def __new__(cls, name, bases, local):
+        for attr in local:
+            value = local[attr]
+            if callable(value):
+                local[attr] = pytest.mark.no_cover(value)  # Ignoring coverage
+        return type.__new__(cls, name, bases, local)
+
+
+class CoverageIgnoredTest(unittest.TestCase, metaclass=_DecoratedMethodsClass):
+    pass

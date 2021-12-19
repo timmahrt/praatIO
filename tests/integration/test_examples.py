@@ -21,12 +21,16 @@ import os
 import sys
 from pathlib import Path
 
+from tests.testing_utils import CoverageIgnoredTest
+
 _root = os.path.join(Path(__file__).parents[2], "examples")
 sys.path.append(_root)
 
-
-class TestIntegration(unittest.TestCase):
-    """Integration tests"""
+# Ignoring test coverage because there is no validation in
+# these tests other than "no unhandled exception occured"
+# which is still important for the user-facing example code
+class TestExamples(CoverageIgnoredTest):
+    """Ensure example tests run without unhandled exceptions"""
 
     def test_add_tiers(self):
         """Running 'add_tiers.py'"""
