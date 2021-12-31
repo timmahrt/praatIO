@@ -3,6 +3,9 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 5.1 (Dec 31, 2021)
+- Fuzzy equivalence for timestamps in Intervals and Points
+
 Ver 5.0 (Aug 8, 2021)
 - Type Annotations
 - Dropping support for Python < 3.7 (including 2.x)
