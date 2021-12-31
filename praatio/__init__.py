@@ -40,4 +40,6 @@ __all__ = [
     "praat_scripts",
     "praatio_scripts",
     "textgrid",
+    "data_classes",
+    "utilities",
 ]

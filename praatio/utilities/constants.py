@@ -2,14 +2,30 @@
 Constant values and primitive definitions that can be shared throughout the code
 """
 from collections import namedtuple
+import math
 
 from typing_extensions import Final
 
 INTERVAL_TIER: Final = "IntervalTier"
 POINT_TIER: Final = "TextTier"
 
-Interval: Final = namedtuple("Interval", ["start", "end", "label"])  # interval entry
-Point: Final = namedtuple("Point", ["time", "label"])  # point entry
+# https://stackoverflow.com/questions/34570814/equality-overloading-for-namedtuple
+class Interval(namedtuple("Interval", ["start", "end", "label"])):
+    def __eq__(self, other):
+        return (
+            math.isclose(self.start, other.start)
+            and math.isclose(self.end, other.end)
+            and self.label == other.label
+        )
+
+
+class Point(namedtuple("Point", ["time", "label"])):
+    def __eq__(self, other):
+        return (
+            math.isclose(self.time, other.time, abs_tol=1e-14)
+            and self.label == other.label
+        )
+
 
 MIN_INTERVAL_LENGTH: Final = 0.00000001  # Arbitrary threshold
 

@@ -3,6 +3,7 @@ The abstract class used by all textgrid tiers
 """
 import re
 import copy
+import math
 from typing import (
     List,
     Optional,
@@ -17,7 +18,6 @@ from typing_extensions import Literal
 
 from praatio.utilities import constants
 from praatio.utilities import errors
-from praatio.utilities import my_math
 from praatio.utilities import utils
 
 T = TypeVar("T", bound="TextgridTier")
@@ -51,15 +51,18 @@ class TextgridTier(ABC):
     def __eq__(self, other):
         isEqual = True
         isEqual &= self.name == other.name
-        isEqual &= my_math.isclose(self.minTimestamp, other.minTimestamp)
-        isEqual &= my_math.isclose(self.maxTimestamp, other.maxTimestamp)
+        isEqual &= math.isclose(self.minTimestamp, other.minTimestamp)
+        isEqual &= math.isclose(self.maxTimestamp, other.maxTimestamp)
         isEqual &= len(self.entryList) == len(self.entryList)
 
+        # TODO: Intervals and Points now use isclose, so we can simplify this
+        #       logic (selfEntry == otherEntry); however, this will break
+        #       things for klattgrids
         if isEqual:
             for selfEntry, otherEntry in zip(self.entryList, other.entryList):
                 for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
                     try:
-                        isEqual &= my_math.isclose(selfSubEntry, otherSubEntry)
+                        isEqual &= math.isclose(selfSubEntry, otherSubEntry)
                     except TypeError:
                         isEqual &= selfSubEntry == otherSubEntry
 

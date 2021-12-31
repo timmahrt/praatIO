@@ -5,7 +5,7 @@ Created on Jan 27, 2016
 
 @author: tmahrt
 
-Runs integration tests
+Runs user-facing example code
 
 The examples were all written as scripts.  They weren't meant to be
 imported or run from other code.  So here, the integration test is just

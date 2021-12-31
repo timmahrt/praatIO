@@ -745,13 +745,13 @@
             <span class="name">audioSplice</span><span class="signature">(
     audioObj: <a href="audio.html#WavObj">praatio.audio.WavObj</a>,
     spliceSegment: <a href="audio.html#WavObj">praatio.audio.WavObj</a>,
-    tg: <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
+    tg: <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
     tierName: str,
     newLabel: str,
     insertStart: float,
     insertStop: float = None,
     alignToZeroCrossing: bool = True
-) -&gt; Tuple[<a href="audio.html#WavObj">praatio.audio.WavObj</a>, <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a>]</span>:
+) -&gt; Tuple[<a href="audio.html#WavObj">praatio.audio.WavObj</a>, <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a>]</span>:
     </div>
 
                 <details>
@@ -872,12 +872,12 @@ in better sounding output</li>
         
             <span class="def">def</span>
             <span class="name">spellCheckEntries</span><span class="signature">(
-    tg: <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
+    tg: <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
     targetTierName: str,
     newTierName: str,
     checkFunction: Callable[[str], bool],
     printEntries: bool = False
-) -&gt; <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
+) -&gt; <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
     </div>
 
                 <details>
@@ -971,12 +971,12 @@ spell checker in the pysle.praattools library.</p>
         
             <span class="def">def</span>
             <span class="name">splitTierEntries</span><span class="signature">(
-    tg: <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
+    tg: <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
     sourceTierName: str,
     targetTierName: str,
     startT: float = None,
     endT: float = None
-) -&gt; <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
+) -&gt; <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
     </div>
 
                 <details>
@@ -1071,11 +1071,11 @@ words into phones.</p>
         
             <span class="def">def</span>
             <span class="name">tgBoundariesToZeroCrossings</span><span class="signature">(
-    tg: <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
+    tg: <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a>,
     wavObj: <a href="audio.html#WavObj">praatio.audio.WavObj</a>,
     adjustPointTiers: bool = True,
     adjustIntervalTiers: bool = True
-) -&gt; <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
+) -&gt; <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
     </div>
 
                 <details>
@@ -1315,7 +1315,7 @@ then this value should be "silences"</li>
             <span class="name">alignBoundariesAcrossTiers</span><span class="signature">(
     tgFN: str,
     maxDifference: float = 0.01
-) -&gt; <a href="../praatio.html#data_classes.textgrid.Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
+) -&gt; <a href="data_classes/textgrid.html#Textgrid">praatio.data_classes.textgrid.Textgrid</a></span>:
     </div>
 
                 <details>
