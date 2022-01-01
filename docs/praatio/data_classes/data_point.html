@@ -110,7 +110,7 @@ data.</p>
 <span class="kn">from</span> <span class="nn">praatio.utilities</span> <span class="kn">import</span> <span class="n">errors</span>
 
 
-<span class="k">class</span> <span class="nc">PointObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PointObject</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pointList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
@@ -124,6 +124,9 @@ data.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxTime</span> <span class="o">=</span> <span class="n">maxTime</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">PointObject</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">isEqual</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectClass</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">objectClass</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minTime</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">minTime</span>
@@ -237,7 +240,7 @@ data.</p>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PointObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">PointObject</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pointList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
@@ -251,6 +254,9 @@ data.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxTime</span> <span class="o">=</span> <span class="n">maxTime</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">PointObject</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">isEqual</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectClass</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">objectClass</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minTime</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">minTime</span>

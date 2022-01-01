@@ -49,6 +49,9 @@ class TextgridTier(ABC):
         self.errorReporter = utils.getErrorReporter(errorMode)
 
     def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+
         isEqual = True
         isEqual &= self.name == other.name
         isEqual &= math.isclose(self.minTimestamp, other.minTimestamp)

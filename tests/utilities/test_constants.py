@@ -23,6 +23,10 @@ class TestConstants(PraatioTestCase):
             constants.Interval(0.5555555556, 1.0, "hello"),
             constants.Interval(5 / 9.0, 1.0, "hello"),
         )
+        self.assertNotEqual(
+            constants.Interval(5 / 9.0, 1.0, "hello"), (0.5555555556, 1.0, "hello")
+        )
+        self.assertNotEqual(constants.Interval(5 / 9.0, 1.0, "hello"), "hello")
 
     def test_point_as_named_tuple(self):
         sut = constants.Point(0.5, "hello")
@@ -38,3 +42,6 @@ class TestConstants(PraatioTestCase):
             constants.Point(0.5555555556, "hello"),
             constants.Point(5 / 9.0, "hello"),
         )
+
+        self.assertNotEqual(constants.Point(5 / 9.0, "hello"), (5 / 9.0, "hello"))
+        self.assertNotEqual(constants.Point(5 / 9.0, "hello"), "hello")

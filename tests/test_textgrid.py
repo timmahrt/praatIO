@@ -21,6 +21,10 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
 
 
 class TestTextgrid(PraatioTestCase):
+    def test_inequivalence_with_non_textgrids(self):
+        sut = textgrid.Textgrid()
+        self.assertNotEqual(sut, 55)
+
     def test_add_tier_raises_error_with_invalid_option(self):
         sut = textgrid.Textgrid()
         tier = makeIntervalTier()

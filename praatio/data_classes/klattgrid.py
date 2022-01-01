@@ -12,7 +12,7 @@ from praatio.data_classes import textgrid_tier
 from praatio.utilities import errors
 
 
-class _KlattBaseTier(object):
+class _KlattBaseTier:
     def __init__(self, name: str):
         self.tierNameList: List[str] = []  # Preserves the order of the tiers
         self.tierDict: Dict[str, "_KlattBaseTier"] = {}
@@ -21,6 +21,9 @@ class _KlattBaseTier(object):
         self.maxTimestamp = None
 
     def __eq__(self, other):
+        if not isinstance(other, _KlattBaseTier):
+            return False
+
         isEqual = True
         isEqual &= self.name == other.name
         isEqual &= self.minTimestamp == other.minTimestamp

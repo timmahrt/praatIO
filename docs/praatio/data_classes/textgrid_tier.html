@@ -147,6 +147,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">errorReporter</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getErrorReporter</span><span class="p">(</span><span class="n">errorMode</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">isEqual</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">)</span>
@@ -381,6 +384,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">errorReporter</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">getErrorReporter</span><span class="p">(</span><span class="n">errorMode</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">isEqual</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">)</span>

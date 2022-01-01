@@ -49,6 +49,9 @@ class Textgrid:
         self.maxTimestamp: float = maxTimestamp  # type: ignore[assignment]
 
     def __eq__(self, other):
+        if not isinstance(other, Textgrid):
+            return False
+
         isEqual = True
         isEqual &= my_math.isclose(self.minTimestamp, other.minTimestamp)
         isEqual &= my_math.isclose(self.maxTimestamp, other.maxTimestamp)
