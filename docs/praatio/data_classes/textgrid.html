@@ -152,6 +152,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">maxTimestamp</span>  <span class="c1"># type: ignore[assignment]</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Textgrid</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">isEqual</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="n">my_math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">)</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="n">my_math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">maxTimestamp</span><span class="p">)</span>
@@ -699,6 +702,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">maxTimestamp</span>  <span class="c1"># type: ignore[assignment]</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Textgrid</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">isEqual</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="n">my_math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">minTimestamp</span><span class="p">)</span>
         <span class="n">isEqual</span> <span class="o">&amp;=</span> <span class="n">my_math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">maxTimestamp</span><span class="p">)</span>

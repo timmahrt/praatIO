@@ -17,7 +17,7 @@ from praatio.utilities import constants
 from praatio.utilities import errors
 
 
-class PointObject(object):
+class PointObject:
     def __init__(
         self,
         pointList: List[Tuple[float, ...]],
@@ -31,6 +31,9 @@ class PointObject(object):
         self.maxTime = maxTime
 
     def __eq__(self, other):
+        if not isinstance(other, PointObject):
+            return False
+
         isEqual = True
         isEqual &= self.objectClass == other.objectClass
         isEqual &= self.minTime == other.minTime

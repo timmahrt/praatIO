@@ -16,6 +16,10 @@ def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
 
 
 class TestIntervalTier(PraatioTestCase):
+    def test_inequivalence_with_non_point_tiers(self):
+        sut = makeIntervalTier()
+        self.assertNotEqual(sut, 55)
+
     def test_creating_an_interval_tier_with_invalid_intervals_raises_an_error(self):
         with self.assertRaises(errors.TextgridStateError) as _:
             textgrid.IntervalTier(
