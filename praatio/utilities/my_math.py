@@ -28,8 +28,7 @@ def filterTimeSeriesData(
     index: int,
     useEdgePadding: bool,
 ) -> List[list]:
-    """
-    Filter time-stamped data values within a window
+    """Filter time-stamped data values within a window
 
     filterFunc could be medianFilter() or znormFilter()
 
@@ -58,8 +57,7 @@ def filterTimeSeriesData(
 def znormalizeSpeakerData(
     featureTimeList: List[Tuple[float, ...]], index: int, filterZeroValues: bool
 ) -> List[Tuple[float, ...]]:
-    """
-    znormalize time series data
+    """znormalize time series data
 
     The idea is to normalize each speaker separately to be able
     to compare data across several speakers for speaker-dependent
@@ -68,7 +66,8 @@ def znormalizeSpeakerData(
     To normalize a speakers data within a local window, use filterTimeSeriesData()
 
     filterZeroValues: if True, don't consider zero values in the mean and stdDev
-      (recommended value for data like pitch or intensity)
+      (recommended value for data like pitch or intensity, where zero values
+       are not expected)
     """
     featValues = [row[index] for row in featureTimeList]
 
@@ -97,8 +96,7 @@ def znormalizeSpeakerData(
 
 
 def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[float]:
-    """
-    median filter each value in a dataset; filtering occurs within a given window
+    """median filter each value in a dataset; filtering occurs within a given window
 
     Median filtering is used to "smooth" out extreme values.  It can be useful if
     your data has lots of quick spikes.  The larger the window, the flatter the output
@@ -114,8 +112,7 @@ def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[f
 def znormWindowFilter(
     dist: List[float], window: int, useEdgePadding: bool, filterZeroValues: bool
 ) -> List[float]:
-    """
-    z-normalize each value in a dataset; normalization occurs within a given window
+    """z-normalize each value in a dataset; normalization occurs within a given window
 
     If you suspect that events are sensitive to local changes, (e.g. local changes in pitch
     are more important absolute differences in pitch) then using windowed
@@ -198,8 +195,7 @@ def _stepFilter(
 
 
 def znormalizeData(valList: List[float]) -> List[float]:
-    """
-    Given a list of floats, return the z-normalized values of the floats
+    """Given a list of floats, return the z-normalized values of the floats
 
     The formula is: z(v) = (v - mean) / stdDev
     In effect, this scales all values to the range [-4, 4].

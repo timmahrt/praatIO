@@ -280,8 +280,7 @@ on the praatio github page:
     <span class="k">def</span> <span class="nf">findNearestZeroCrossing</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">targetTime</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing at the given time in an audio file</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing at the given time in an audio file</span>
 
 <span class="sd">        Looks both before and after the timeStamp</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -350,8 +349,7 @@ on the praatio github page:
         <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span><span class="p">,</span>
         <span class="n">reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing, searching in one direction</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing, searching in one direction</span>
 
 <span class="sd">        Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,</span>
 <span class="sd">        the sample list is searched from back to front.</span>
@@ -419,8 +417,7 @@ on the praatio github page:
 
 
 <span class="k">class</span> <span class="nc">WavQueryObj</span><span class="p">(</span><span class="n">AbstractWav</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for getting information about a wave file</span>
+    <span class="sd">&quot;&quot;&quot;A class for getting information about a wave file</span>
 
 <span class="sd">    The wave file is never loaded--we only keep a reference to the</span>
 <span class="sd">    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don&#39;t</span>
@@ -449,9 +446,7 @@ on the praatio github page:
         <span class="k">return</span> <span class="n">duration</span>
 
     <span class="k">def</span> <span class="nf">getFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get frames with respect to time</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get frames with respect to time&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">startTime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">startTime</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">startFrame</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">startTime</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">framerate</span><span class="p">))</span>
@@ -482,8 +477,7 @@ on the praatio github page:
         <span class="n">operation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;shrink&quot;</span><span class="p">,</span> <span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;sine wave&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AudioDeletion</span><span class="o">.</span><span class="n">SHRINK</span><span class="p">,</span>
         <span class="n">sineWaveAmplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove from the audio all of the intervals</span>
+        <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
 <span class="sd">        DeleteList can easily be constructed from a textgrid tier</span>
 <span class="sd">        e.g. deleteList = tg.tierDict[&quot;targetTier&quot;].entryList</span>
@@ -556,9 +550,7 @@ on the praatio github page:
             <span class="bp">self</span><span class="o">.</span><span class="n">outputModifiedWav</span><span class="p">(</span><span class="n">audioFrames</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">outputModifiedWav</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audioFrames</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Output frames using the same parameters as this WavQueryObj</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Output frames using the same parameters as this WavQueryObj&quot;&quot;&quot;</span>
 
         <span class="c1"># Output resulting wav file</span>
         <span class="n">outParams</span> <span class="o">=</span> <span class="p">[</span>
@@ -576,8 +568,7 @@ on the praatio github page:
 
 
 <span class="k">class</span> <span class="nc">WavObj</span><span class="p">(</span><span class="n">AbstractWav</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for manipulating audio files</span>
+    <span class="sd">&quot;&quot;&quot;A class for manipulating audio files</span>
 
 <span class="sd">    The wav file is represented by its wavform as a series of signed</span>
 <span class="sd">    integers.  This can be very slow and take up lots of memory with</span>
@@ -646,11 +637,13 @@ on the praatio github page:
     <span class="n">deleteList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavObj</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove from the audio all of the intervals</span>
+    <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
-<span class="sd">    keepList - specifies the segments to keep; by default, everything is kept</span>
-<span class="sd">    doShrink - if False, segments not kept are replaced by silence</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fn: The audio file name to read</span>
+<span class="sd">        keepList: Specifies the segments to keep; by default, everything is kept</span>
+<span class="sd">        deleteList: Specifies the segments to delete; by default, nothing is deleted</span>
+<span class="sd">        doShrink: If False, segments not kept are replaced by silence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">audiofile</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
@@ -726,8 +719,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Code for reading, writing, and representing less complicated praat data files</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Code for reading, writing, and representing less complicated praat data files</span>
 
 <span class="sd">see **examples/get_vowel_points.py**</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -862,8 +854,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Functions for reading/writing/manipulating klattgrid files</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Functions for reading/writing/manipulating klattgrid files</span>
 
 <span class="sd">A klattgrid can be used for speech synthesis/resynthesis.</span>
 <span class="sd">For more information on the praat klattgrid:</span>
@@ -931,8 +922,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
     <span class="n">subtractMean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts the klattgrid from a wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extracts the klattgrid from a wav file</span>
 
 <span class="sd">    The default values are the same as the ones used in praat</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1193,8 +1183,7 @@ any points</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># coding: utf-8</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Functions for working with pitch data</span>
+<span class="sd">&quot;&quot;&quot;Functions for working with pitch data</span>
 
 <span class="sd">This file depends on the praat script get_pitch_and_intensity.praat</span>
 <span class="sd">(which depends on praat) to extract pitch and intensity values from</span>
@@ -1244,8 +1233,7 @@ any points</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and int from each labeled interval in a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and int from each labeled interval in a textgrid</span>
 
 <span class="sd">    This has the benefit of being faster than using _extractPIFile if only</span>
 <span class="sd">    labeled regions need to have their pitch values sampled, particularly</span>
@@ -1312,8 +1300,7 @@ any points</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and intensity values from an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and intensity values from an audio file</span>
 
 <span class="sd">    Returns the result as a list.  Will load the serialized result</span>
 <span class="sd">    if this has already been called on the appropriate files before</span>
@@ -1367,8 +1354,7 @@ any points</p>
     <span class="n">forceRegenerate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">undefinedValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract the intensity for an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Extract the intensity for an audio file</span>
 
 <span class="sd">    Calculates intensity using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</span>
@@ -1408,21 +1394,24 @@ any points</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">data_points</span><span class="o">.</span><span class="n">PointObject2D</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract pitch at regular intervals from the input wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extract pitch at regular intervals from the input wav file</span>
 
 <span class="sd">    Data is output to a text file and then returned in a list in the form</span>
 <span class="sd">    [(timeV1, pitchV1), (timeV2, pitchV2), ...]</span>
 
-<span class="sd">    sampleStep - the frequency to sample pitch at</span>
-<span class="sd">    silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
-<span class="sd">                       for pitch</span>
-<span class="sd">    forceRegenerate - if running this function for the same file, if False</span>
-<span class="sd">                      just read in the existing pitch file</span>
-<span class="sd">    pitchQuadInterp - if True, quadratically interpolate pitch</span>
-
 <span class="sd">    Calculates pitch using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampleStep: the frequency to sample pitch at</span>
+<span class="sd">        silenceThreshold: segments with lower intensity won&#39;t be analyzed</span>
+<span class="sd">            for pitch</span>
+<span class="sd">        forceRegenerate: if running this function for the same file, if False</span>
+<span class="sd">            just read in the existing pitch file</span>
+<span class="sd">        pitchQuadInterp: if True, quadratically interpolate pitch</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The pitch data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outputPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFN</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -1472,23 +1461,23 @@ any points</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract pitch at regular intervals from the input wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extract pitch at regular intervals from the input wav file</span>
 
 <span class="sd">    Data is output to a text file and then returned in a list in the form</span>
 <span class="sd">    [(timeV1, pitchV1), (timeV2, pitchV2), ...]</span>
 
-<span class="sd">    sampleStep - the frequency to sample pitch at</span>
-<span class="sd">    silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
-<span class="sd">                       for pitch</span>
-<span class="sd">    forceRegenerate - if running this function for the same file, if False</span>
-<span class="sd">                      just read in the existing pitch file</span>
-<span class="sd">    undefinedValue - if None remove from the dataset, otherset set to</span>
-<span class="sd">                     undefinedValue</span>
-<span class="sd">    pitchQuadInterp - if True, quadratically interpolate pitch</span>
-
 <span class="sd">    Calculates pitch using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampleStep - the frequency to sample pitch at</span>
+<span class="sd">        silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
+<span class="sd">            for pitch</span>
+<span class="sd">        forceRegenerate - if running this function for the same file, if False</span>
+<span class="sd">            just read in the existing pitch file</span>
+<span class="sd">        undefinedValue - if None remove from the dataset, otherset set to</span>
+<span class="sd">            undefinedValue</span>
+<span class="sd">        pitchQuadInterp - if True, quadratically interpolate pitch</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outputPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFN</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -1544,8 +1533,7 @@ any points</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and intensity from a file wholesale or piecewise</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and intensity from a file wholesale or piecewise</span>
 
 <span class="sd">    If the parameters for a tg are passed in, this will only extract labeled</span>
 <span class="sd">    segments in a tier of the tg.  Otherwise, pitch will be extracted from</span>
@@ -1606,8 +1594,7 @@ any points</p>
 <span class="k">def</span> <span class="nf">loadTimeSeriesData</span><span class="p">(</span>
     <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">undefinedValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For reading the output of get_pitch_and_intensity or get_intensity</span>
+    <span class="sd">&quot;&quot;&quot;For reading the output of get_pitch_and_intensity or get_intensity</span>
 
 <span class="sd">    Data should be of the form</span>
 <span class="sd">    [(time1, value1a, value1b, ...),</span>
@@ -1664,19 +1651,17 @@ any points</p>
     <span class="n">globalZNormalization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">localZNormalizationWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates processed values for the labeled intervals in a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Generates processed values for the labeled intervals in a textgrid</span>
 
-<span class="sd">    nullLabelList - labels to ignore in the textgrid.  Defaults to [&quot;&quot;,]</span>
-
-<span class="sd">    if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity</span>
-<span class="sd">    medianFilterWindowSize: if none, no filtering is done</span>
-<span class="sd">    globalZNormalization: if True, values are normalized with the mean</span>
-<span class="sd">                          and stdDev of the data in dataList</span>
-<span class="sd">    localZNormalization: if greater than 1, values are normalized with the mean</span>
-<span class="sd">                         and stdDev of the local context (for a window of 5, it</span>
-<span class="sd">                         would consider the current value, 2 values before and 2</span>
-<span class="sd">                         values after)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        doPitch: if True get pitch measures; if False get rms intensity</span>
+<span class="sd">        medianFilterWindowSize: if none, no filtering is done</span>
+<span class="sd">        globalZNormalization: if True, values are normalized with the mean</span>
+<span class="sd">            and stdDev of the data in dataList</span>
+<span class="sd">        localZNormalization: if greater than 1, values are normalized with the mean</span>
+<span class="sd">            and stdDev of the local context (for a window of 5, it</span>
+<span class="sd">            would consider the current value, 2 values before and 2</span>
+<span class="sd">            values after)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Warn user that normalizing a second time nullifies the first normalization</span>
@@ -1753,13 +1738,13 @@ any points</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filterZeroFlag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get various measures (min, max, etc) for the passed in list of pitch values</span>
+    <span class="sd">&quot;&quot;&quot;Get various measures (min, max, etc) for the passed in list of pitch values</span>
 
-<span class="sd">    name is the name of the file.  Label is the label of the current interval.</span>
-<span class="sd">    Both of these labels are only used debugging and can be ignored if desired.</span>
-<span class="sd">    medianFilterWindowSize: None -&gt; no median filtering</span>
-<span class="sd">    filterZeroFlag:True -&gt; zero values are removed</span>
+<span class="sd">    Args:</span>
+<span class="sd">        name: the name of the file.</span>
+<span class="sd">        label: the label of the current interval.</span>
+<span class="sd">        medianFilterWindowSize: if None, there is no median filtering</span>
+<span class="sd">        filterZeroFlag: if True, values of zero are removed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1803,8 +1788,7 @@ any points</p>
     <span class="n">maxJumpThreshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.70</span><span class="p">,</span>
     <span class="n">tgToMark</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Point</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Detect pitch halving and doubling errors.</span>
+    <span class="sd">&quot;&quot;&quot;Detect pitch halving and doubling errors.</span>
 
 <span class="sd">    If a textgrid is passed in, it adds the markings to the textgrid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1896,8 +1880,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Changes the speech formants in a file using praat&#39;s change gender function</span>
+    <span class="sd">&quot;&quot;&quot;Changes the speech formants in a file using praat&#39;s change gender function</span>
 
 <span class="sd">    PitchMedian = 0.0; no change in median pitch</span>
 <span class="sd">    PitchRange = 1.0; no change in pitch range</span>
@@ -1932,8 +1915,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">newIntensity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Changes the intensity of the wavFN (in db)</span>
+    <span class="sd">&quot;&quot;&quot;Changes the intensity of the wavFN (in db)</span>
 
 <span class="sd">    Uses the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__Scale_intensity___.html</span>
@@ -1956,8 +1938,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">undefinedValue</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get F1, F2, and F3 for the audio file</span>
+    <span class="sd">&quot;&quot;&quot;Get F1, F2, and F3 for the audio file</span>
 
 <span class="sd">    maxFormant = 5500 for females, 5000 for males, &lt;8000 for children</span>
 
@@ -2015,8 +1996,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">maxPitch</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">data_points</span><span class="o">.</span><span class="n">PointObject1D</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets the pitch/glottal pulses for an audio file.</span>
+    <span class="sd">&quot;&quot;&quot;Gets the pitch/glottal pulses for an audio file.</span>
 
 <span class="sd">    Uses the following praat command:</span>
 <span class="sd">    http://www.fon.hum.uva.nl/praat/manual/Sound___Pitch__To_PointProcess__peaks____.html</span>
@@ -2043,8 +2023,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">spectralMoment</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts various spectral measures from an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Extracts various spectral measures from an audio file</span>
 
 <span class="sd">    Measures include: center_of_gravity, standard_deviation</span>
 <span class="sd">    skewness, kertosis, central_movement</span>
@@ -2086,8 +2065,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">pointList</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Resynthesizes the pitch in a wav file with the given pitch contour file</span>
+    <span class="sd">&quot;&quot;&quot;Resynthesizes the pitch in a wav file with the given pitch contour file</span>
 
 <span class="sd">    The pitch track to use can optionally be passed in as pointList.  If</span>
 <span class="sd">    so, it will be saved as pitchFN for praat to be able to use.</span>
@@ -2119,8 +2097,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">maxPitch</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Resynthesizes the duration in a wav file with the given duration tier</span>
+    <span class="sd">&quot;&quot;&quot;Resynthesizes the duration in a wav file with the given duration tier</span>
 
 <span class="sd">    Uses the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Manipulation.html</span>
@@ -2148,8 +2125,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">soundLabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SOUND_LABEL</span><span class="p">,</span>
     <span class="n">scriptFN</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Marks the silences and non-silences of an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Marks the silences and non-silences of an audio file</span>
 
 <span class="sd">    Uses the praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_TextGrid__silences____.html</span>
@@ -2222,8 +2198,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
 <span class="k">def</span> <span class="nf">_shiftTimes</span><span class="p">(</span>
     <span class="n">tg</span><span class="p">:</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">,</span> <span class="n">timeV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">newTimeV</span><span class="p">:</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Change all instances of timeV in the textgrid to newTimeV</span>
+    <span class="sd">&quot;&quot;&quot;Change all instances of timeV in the textgrid to newTimeV</span>
 
 <span class="sd">    These are meant to be small changes.  No checks are done to see</span>
 <span class="sd">    if the new interval steps on other intervals</span>
@@ -2269,22 +2244,21 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">insertStop</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">alignToZeroCrossing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">audio</span><span class="o">.</span><span class="n">WavObj</span><span class="p">,</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Splices a segment into an audio file and corresponding textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Splices a segment into an audio file and corresponding textgrid</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        audioObj (WavObj): the audio to splice into</span>
-<span class="sd">        spliceSegment (WavObj): the audio segment that will be placed into a</span>
+<span class="sd">        audioObj: the audio to splice into</span>
+<span class="sd">        spliceSegment: the audio segment that will be placed into a</span>
 <span class="sd">            larger audio file</span>
-<span class="sd">        tg (Textgrid): the textgrid to splice into</span>
-<span class="sd">        tierName (str): the name of the tier that will receive the new label</span>
-<span class="sd">        newLabel (str): the label for the splice interval on the tier with</span>
+<span class="sd">        tg: the textgrid to splice into</span>
+<span class="sd">        tierName: the name of the tier that will receive the new label</span>
+<span class="sd">        newLabel: the label for the splice interval on the tier with</span>
 <span class="sd">            name tierName</span>
-<span class="sd">        insertStart (float): the time to insert the splice</span>
-<span class="sd">        insertStop (float): if not None, will erase the region between</span>
+<span class="sd">        insertStart: the time to insert the splice</span>
+<span class="sd">        insertStop: if not None, will erase the region between</span>
 <span class="sd">            sourceSpStart and sourceSpEnd.  (In practice this means audioSplice</span>
 <span class="sd">            removes one segment and inserts another in its place)</span>
-<span class="sd">        alignToZeroCrossing - if True, moves all involved times to the nearest</span>
+<span class="sd">        alignToZeroCrossing: if True, moves all involved times to the nearest</span>
 <span class="sd">            zero crossing in the audio.  Generally results</span>
 <span class="sd">            in better sounding output</span>
 
@@ -2344,8 +2318,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">checkFunction</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span>
     <span class="n">printEntries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Spell checks words in a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Spell checks words in a textgrid</span>
 
 <span class="sd">    Entries can contain one or more words, separated by whitespace.</span>
 <span class="sd">    If a mispelling is found, it is noted in a special tier and optionally</span>
@@ -2356,8 +2329,9 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
 <span class="sd">    for python like woosh or pyenchant.  I have already written a naive</span>
 <span class="sd">    spell checker in the pysle.praattools library.</span>
 
-<span class="sd">    checkFunction: should return True if a word is spelled correctly and</span>
-<span class="sd">                   False otherwise</span>
+<span class="sd">    Args:</span>
+<span class="sd">        checkFunction: should return True if a word is spelled correctly and</span>
+<span class="sd">            False otherwise</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">punctuationList</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;_&quot;</span><span class="p">,</span>
@@ -2408,8 +2382,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">startT</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">endT</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Split each entry in a tier by space</span>
+    <span class="sd">&quot;&quot;&quot;Split each entry in a tier by space</span>
 
 <span class="sd">    The split entries will be placed on a new tier.  The split entries</span>
 <span class="sd">    are equally allocated a subsegment of the interval occupied by the</span>
@@ -2476,8 +2449,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">adjustPointTiers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">adjustIntervalTiers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Makes all textgrid interval boundaries fall on pressure wave zero crossings</span>
+    <span class="sd">&quot;&quot;&quot;Makes all textgrid interval boundaries fall on pressure wave zero crossings</span>
 
 <span class="sd">    adjustPointTiers: if True, point tiers will be adjusted.</span>
 <span class="sd">    adjustIntervalTiers: if True, interval tiers will be adjusted.</span>
@@ -2521,26 +2493,25 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">noPartialIntervals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">silenceLabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Outputs one subwav for each entry in the tier of a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Outputs one subwav for each entry in the tier of a textgrid</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        wavnFN (str):</span>
-<span class="sd">        tgFN (str):</span>
-<span class="sd">        tierName (str):</span>
-<span class="sd">        outputPath (str):</span>
-<span class="sd">        outputTGFlag (bool): If True, outputs paired, cropped textgrids</span>
+<span class="sd">        wavnFN:</span>
+<span class="sd">        tgFN:</span>
+<span class="sd">        tierName:</span>
+<span class="sd">        outputPath:</span>
+<span class="sd">        outputTGFlag: If True, outputs paired, cropped textgrids</span>
 <span class="sd">            If is type str (a tier name), outputs a paired, cropped</span>
 <span class="sd">            textgrid with only the specified tier</span>
-<span class="sd">        nameStyle (str):</span>
+<span class="sd">        nameStyle:</span>
 <span class="sd">            - &#39;append&#39;: append interval label to output name</span>
 <span class="sd">            - &#39;append_no_i&#39;: append label but not interval to output name</span>
 <span class="sd">            - &#39;label&#39;: output name is the same as label</span>
 <span class="sd">            - None: output name plus the interval number</span>
-<span class="sd">        noPartialIntervals (bool): if True: intervals in non-target tiers that</span>
+<span class="sd">        noPartialIntervals: if True: intervals in non-target tiers that</span>
 <span class="sd">            are not wholly contained by an interval in the target tier will not</span>
 <span class="sd">            be included in the output textgrids</span>
-<span class="sd">        silenceLabel (str): the label for silent regions.  If silences are</span>
+<span class="sd">        silenceLabel: the label for silent regions.  If silences are</span>
 <span class="sd">            unlabeled intervals (i.e. blank) then leave this alone.  If</span>
 <span class="sd">            silences are labeled using praat&#39;s &quot;annotate &gt;&gt; to silences&quot;</span>
 <span class="sd">            then this value should be &quot;silences&quot;</span>
@@ -2639,8 +2610,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
 <span class="k">def</span> <span class="nf">alignBoundariesAcrossTiers</span><span class="p">(</span>
     <span class="n">tgFN</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">maxDifference</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Aligns boundaries or points in a textgrid that suffer from &#39;jitter&#39;</span>
+    <span class="sd">&quot;&quot;&quot;Aligns boundaries or points in a textgrid that suffer from &#39;jitter&#39;</span>
 
 <span class="sd">    Often times, boundaries in different tiers are meant to line up.</span>
 <span class="sd">    For example the boundary of the first phone in a word and the start</span>
@@ -2683,9 +2653,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">entry</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">orderID</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is just used by alignBoundariesAcrossTiers()</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This is just used by alignBoundariesAcrossTiers()&quot;&quot;&quot;</span>
     <span class="c1"># Get the start time</span>
     <span class="n">filterStartT</span> <span class="o">=</span> <span class="n">timeV</span> <span class="o">-</span> <span class="n">maxDifference</span>
     <span class="k">if</span> <span class="n">filterStartT</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -2841,18 +2809,20 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="n">duplicateNamesMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens a textgrid file (.TextGrid and .json are both fine)</span>
+    <span class="sd">&quot;&quot;&quot;Opens a textgrid file (.TextGrid and .json are both fine)</span>
+
+<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fnFullPath (str): the path to the textgrid to open</span>
-<span class="sd">        includeEmptyIntervals (bool): if False, points and intervals with</span>
+<span class="sd">        fnFullPath: the path to the textgrid to open</span>
+<span class="sd">        includeEmptyIntervals: if False, points and intervals with</span>
 <span class="sd">             an empty label &#39;&#39; are not included in the returned Textgrid</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Textgrid</span>
+<span class="sd">        A Textgrid</span>
 
-<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        DuplicateTierName: The textgrid contains multiple tiers with the same name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span><span class="p">)</span>
     <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>

@@ -125,18 +125,20 @@ Textgrid in data_classes/textgrid.py</p>
     <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="n">duplicateNamesMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens a textgrid file (.TextGrid and .json are both fine)</span>
+    <span class="sd">&quot;&quot;&quot;Opens a textgrid file (.TextGrid and .json are both fine)</span>
+
+<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fnFullPath (str): the path to the textgrid to open</span>
-<span class="sd">        includeEmptyIntervals (bool): if False, points and intervals with</span>
+<span class="sd">        fnFullPath: the path to the textgrid to open</span>
+<span class="sd">        includeEmptyIntervals: if False, points and intervals with</span>
 <span class="sd">             an empty label &#39;&#39; are not included in the returned Textgrid</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Textgrid</span>
+<span class="sd">        A Textgrid</span>
 
-<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        DuplicateTierName: The textgrid contains multiple tiers with the same name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span><span class="p">)</span>
     <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
@@ -227,18 +229,20 @@ Textgrid in data_classes/textgrid.py</p>
     <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="n">duplicateNamesMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Textgrid</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens a textgrid file (.TextGrid and .json are both fine)</span>
+    <span class="sd">&quot;&quot;&quot;Opens a textgrid file (.TextGrid and .json are both fine)</span>
+
+<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fnFullPath (str): the path to the textgrid to open</span>
-<span class="sd">        includeEmptyIntervals (bool): if False, points and intervals with</span>
+<span class="sd">        fnFullPath: the path to the textgrid to open</span>
+<span class="sd">        includeEmptyIntervals: if False, points and intervals with</span>
 <span class="sd">             an empty label &#39;&#39; are not included in the returned Textgrid</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Textgrid</span>
+<span class="sd">        A Textgrid</span>
 
-<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        DuplicateTierName: The textgrid contains multiple tiers with the same name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span><span class="p">)</span>
     <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
@@ -282,21 +286,27 @@ Textgrid in data_classes/textgrid.py</p>
 
             <div class="docstring"><p>Opens a textgrid file (.TextGrid and .json are both fine)</p>
 
+<p>https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</p>
+
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>fnFullPath (str):</strong>  the path to the textgrid to open</li>
-<li><strong>includeEmptyIntervals (bool):</strong>  if False, points and intervals with
+<li><strong>fnFullPath:</strong>  the path to the textgrid to open</li>
+<li><strong>includeEmptyIntervals:</strong>  if False, points and intervals with
 an empty label '' are not included in the returned Textgrid</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>Textgrid</p>
+  <p>A Textgrid</p>
 </blockquote>
 
-<p>https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</p>
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li><strong>DuplicateTierName:</strong>  The textgrid contains multiple tiers with the same name</li>
+</ul>
 </div>
 
 

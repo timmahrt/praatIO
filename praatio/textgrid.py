@@ -49,18 +49,20 @@ def openTextgrid(
     reportingMode: Literal["silence", "warning", "error"] = "warning",
     duplicateNamesMode: Literal["error", "rename"] = "error",
 ) -> Textgrid:
-    """
-    Opens a textgrid file (.TextGrid and .json are both fine)
+    """Opens a textgrid file (.TextGrid and .json are both fine)
+
+    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
 
     Args:
-        fnFullPath (str): the path to the textgrid to open
-        includeEmptyIntervals (bool): if False, points and intervals with
+        fnFullPath: the path to the textgrid to open
+        includeEmptyIntervals: if False, points and intervals with
              an empty label '' are not included in the returned Textgrid
 
     Returns:
-        Textgrid
+        A Textgrid
 
-    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
+    Raises:
+        DuplicateTierName: The textgrid contains multiple tiers with the same name
     """
     utils.validateOption("reportingMode", reportingMode, constants.ErrorReportingMode)
     utils.validateOption(

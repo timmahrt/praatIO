@@ -29,8 +29,7 @@ class PointTier(textgrid_tier.TextgridTier):
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
-        """
-        A point tier is for annotating instaneous events
+        """A point tier is for annotating instaneous events
 
         The entryList is of the form:
         [(timeVal1, label1), (timeVal2, label2), ]
@@ -65,19 +64,18 @@ class PointTier(textgrid_tier.TextgridTier):
         mode: Literal["strict", "lax", "truncated"] = "lax",
         rebaseToZero: bool = True,
     ) -> "PointTier":
-        """
-        Creates a new tier containing all entries inside the new interval
+        """Creates a new tier containing all entries inside the new interval
 
         Args:
-            cropStart (float):
-            cropEnd (float):
-            mode (str): Mode is ignored.  This parameter is kept for
+            cropStart:
+            cropEnd:
+            mode: Mode is ignored.  This parameter is kept for
                 compatibility with IntervalTier.crop()
-            rebaseToZero (bool): if True, all entries will have their
+            rebaseToZero: if True, all entries will have their
                 timestamps subtracted by *cropStart*.
 
         Returns:
-            PointTier: the modified version of the current tier
+            the modified version of the current tier
         """
         if cropStart >= cropEnd:
             raise errors.ArgumentError(
@@ -114,17 +112,16 @@ class PointTier(textgrid_tier.TextgridTier):
         offset: float,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "PointTier":
-        """
-        Modifies all timestamps by a constant amount
+        """Modifies all timestamps by a constant amount
 
         Args:
-            offset (float):
-            reportingMode (str): one of "silence", "warning", or "error". This flag
+            offset:
+            reportingMode: one of "silence", "warning", or "error". This flag
                 determines the behavior if an entries moves outside of minTimestamp
                 or maxTimestamp after being edited
 
         Returns:
-            PointTier: the modified version of the current tier
+            the modified version of the current tier
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
@@ -161,16 +158,7 @@ class PointTier(textgrid_tier.TextgridTier):
         dataTupleList: List[Tuple[float, ...]],
         fuzzyMatching: bool = False,
     ) -> List[Tuple[Any, ...]]:
-        """
-        Get the values that occur at points in the point tier
-
-        Args:
-            dataTupleList (list):
-            fuzzyMatching (bool): if True, if there is not a feature value
-                at a point, the nearest feature value will be taken.
-
-        Returns:
-            List
+        """Get the values that occur at points in the point tier
 
         The procedure assumes that all data is ordered in time.
         dataTupleList should be in the form
@@ -182,6 +170,14 @@ class PointTier(textgrid_tier.TextgridTier):
         The procedure makes one pass through dataTupleList and one
         pass through self.entryList.  If the data is not sequentially
         ordered, the incorrect response will be returned.
+
+        Args:
+            dataTupleList:
+            fuzzyMatching: if True, if there is not a feature value
+                at a point, the nearest feature value will be taken.
+
+        Returns:
+            A list of values that exist at the given timepoints
         """
 
         currentIndex = 0
@@ -207,19 +203,18 @@ class PointTier(textgrid_tier.TextgridTier):
         collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "PointTier":
-        """
-        Makes a region in a tier blank (removes all contained entries)
+        """Makes a region in a tier blank (removes all contained entries)
 
         Args:
-            start (float): the start of the deletion interval
-            end (float): the end of the deletion interval
-            collisionMode (str): Ignored for the moment (added for compatibility with
+            start: the start of the deletion interval
+            end: the end of the deletion interval
+            collisionMode: Ignored for the moment (added for compatibility with
                 eraseRegion() for Interval Tiers)
-            doShrink (bool): if True, moves leftward by (/end/ - /start/) all points
+            doShrink: if True, moves leftward by (/end/ - /start/) all points
                 to the right of /end/
 
         Returns:
-            PointTier: the modified version of the current tier
+            The modified version of the current tier
         """
 
         newTier = self.new()
@@ -253,23 +248,19 @@ class PointTier(textgrid_tier.TextgridTier):
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
-        """
-        inserts an interval into the tier
+        """Inserts an interval into the tier
 
         Args:
-            entry (tuple|Point): the entry to insert
-            warnFlag (bool): see below for details
-            collisionMode (str): determines the behavior if intervals exist in
-                the insertion area. One of ('replace', 'merge', or None)
+            entry: the entry to insert
+            collisionMode: determines the behavior if intervals exist in
+                the insertion area.
                 - 'replace', existing items will be removed
                 - 'merge', inserting item will be fused with existing items
                 - 'error', will throw TextgridCollisionException
+            collisionReportingMode:
 
         Returns:
             None
-
-        If warnFlag is True and collisionMode is not None, the user is notified
-        of each collision
         """
 
         utils.validateOption(
@@ -331,13 +322,12 @@ class PointTier(textgrid_tier.TextgridTier):
         duration: float,
         _collisionMode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "PointTier":
-        """
-        Inserts a region into the tier
+        """Inserts a region into the tier
 
         Args:
-            start (float): the start time to insert a space at
-            duration (float): the duration of the space to insert
-            collisionMode (str): Ignored for the moment (added for compatibility
+            start: the start time to insert a space at
+            duration: the duration of the space to insert
+            collisionMode: Ignored for the moment (added for compatibility
                 with insertSpace() for Interval Tiers)
 
         Returns:
@@ -360,19 +350,17 @@ class PointTier(textgrid_tier.TextgridTier):
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"
     ) -> bool:
-        """
-        Validate this tier
+        """Validate this tier
 
         Returns whether the tier is valid or not. If reportingMode is "warning"
         or "error" this will also print on error or stop execution, respectively.
 
         Args:
-            reportingMode (str): one of "silence", "warning", or "error". This flag
-                determines the behavior if there is a size difference between the
-                maxTimestamp in the tier and the current textgrid.
+            reportingMode: Determines the behavior if there is a size difference
+                between the maxTimestamp in the tier and the current textgrid.
 
         Returns:
-            bool
+            True if this tier is valid; False otherwise
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode

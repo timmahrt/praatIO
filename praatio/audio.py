@@ -100,8 +100,7 @@ class AbstractWav(ABC):
     def findNearestZeroCrossing(
         self, targetTime: float, timeStep: float = ZERO_CROSSING_TIMESTEP
     ) -> float:
-        """
-        Finds the nearest zero crossing at the given time in an audio file
+        """Finds the nearest zero crossing at the given time in an audio file
 
         Looks both before and after the timeStamp
         """
@@ -170,8 +169,7 @@ class AbstractWav(ABC):
         timeStep: float = ZERO_CROSSING_TIMESTEP,
         reverse: bool = False,
     ) -> float:
-        """
-        Finds the nearest zero crossing, searching in one direction
+        """Finds the nearest zero crossing, searching in one direction
 
         Can do a 'reverse' search by setting reverse to True.  In that case,
         the sample list is searched from back to front.
@@ -239,8 +237,7 @@ class AbstractWav(ABC):
 
 
 class WavQueryObj(AbstractWav):
-    """
-    A class for getting information about a wave file
+    """A class for getting information about a wave file
 
     The wave file is never loaded--we only keep a reference to the
     fd.  All operations on WavQueryObj are fast.  WavQueryObjs don't
@@ -269,9 +266,7 @@ class WavQueryObj(AbstractWav):
         return duration
 
     def getFrames(self, startTime: float = None, endTime: float = None):
-        """
-        Get frames with respect to time
-        """
+        """Get frames with respect to time"""
         if startTime is None:
             startTime = 0
         startFrame = int(startTime * float(self.framerate))
@@ -302,8 +297,7 @@ class WavQueryObj(AbstractWav):
         operation: Literal["shrink", "silence", "sine wave"] = AudioDeletion.SHRINK,
         sineWaveAmplitude: float = None,
     ):
-        """
-        Remove from the audio all of the intervals
+        """Remove from the audio all of the intervals
 
         DeleteList can easily be constructed from a textgrid tier
         e.g. deleteList = tg.tierDict["targetTier"].entryList
@@ -376,9 +370,7 @@ class WavQueryObj(AbstractWav):
             self.outputModifiedWav(audioFrames, outputFN)
 
     def outputModifiedWav(self, audioFrames: bytes, outputFN: str):
-        """
-        Output frames using the same parameters as this WavQueryObj
-        """
+        """Output frames using the same parameters as this WavQueryObj"""
 
         # Output resulting wav file
         outParams = [
@@ -396,8 +388,7 @@ class WavQueryObj(AbstractWav):
 
 
 class WavObj(AbstractWav):
-    """
-    A class for manipulating audio files
+    """A class for manipulating audio files
 
     The wav file is represented by its wavform as a series of signed
     integers.  This can be very slow and take up lots of memory with
@@ -466,11 +457,13 @@ def openAudioFile(
     deleteList: List[Tuple[float, float, str]] = None,
     doShrink: bool = True,
 ) -> WavObj:
-    """
-    Remove from the audio all of the intervals
+    """Remove from the audio all of the intervals
 
-    keepList - specifies the segments to keep; by default, everything is kept
-    doShrink - if False, segments not kept are replaced by silence
+    Args:
+        fn: The audio file name to read
+        keepList: Specifies the segments to keep; by default, everything is kept
+        deleteList: Specifies the segments to delete; by default, nothing is deleted
+        doShrink: If False, segments not kept are replaced by silence
     """
 
     audiofile = wave.open(fn, "r")

@@ -170,8 +170,7 @@
         <span class="k">return</span> <span class="n">isEqual</span>
 
     <span class="k">def</span> <span class="nf">appendTier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append a tier to the end of this one.</span>
+        <span class="sd">&quot;&quot;&quot;Append a tier to the end of this one.</span>
 
 <span class="sd">        This tier&#39;s maxtimestamp will be lengthened by the amount in the passed in tier.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -202,17 +201,16 @@
         <span class="n">substrMatchFlag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">usingRE</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the index of all intervals that match the given label</span>
+        <span class="sd">&quot;&quot;&quot;Returns the index of all intervals that match the given label</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            matchLabel (str): the label to search for</span>
-<span class="sd">            substrMatchFlag (bool): if True, match any label containing matchLabel.</span>
+<span class="sd">            matchLabel: the label to search for</span>
+<span class="sd">            substrMatchFlag: if True, match any label containing matchLabel.</span>
 <span class="sd">                if False, label must be the same as matchLabel.</span>
-<span class="sd">            usingRE (bool): if True, matchLabel is interpreted as a regular expression</span>
+<span class="sd">            usingRE: if True, matchLabel is interpreted as a regular expression</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List: A list of indicies</span>
+<span class="sd">            A list of indicies</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">usingRE</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -270,8 +268,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">entryList</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The given tier is set unioned to this tier.</span>
+        <span class="sd">&quot;&quot;&quot;The given tier is set unioned to this tier.</span>
 
 <span class="sd">        All entries in the given tier are added to the current tier.</span>
 <span class="sd">        Overlapping entries are merged.</span>
@@ -407,8 +404,7 @@
         <span class="k">return</span> <span class="n">isEqual</span>
 
     <span class="k">def</span> <span class="nf">appendTier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append a tier to the end of this one.</span>
+        <span class="sd">&quot;&quot;&quot;Append a tier to the end of this one.</span>
 
 <span class="sd">        This tier&#39;s maxtimestamp will be lengthened by the amount in the passed in tier.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -439,17 +435,16 @@
         <span class="n">substrMatchFlag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">usingRE</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the index of all intervals that match the given label</span>
+        <span class="sd">&quot;&quot;&quot;Returns the index of all intervals that match the given label</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            matchLabel (str): the label to search for</span>
-<span class="sd">            substrMatchFlag (bool): if True, match any label containing matchLabel.</span>
+<span class="sd">            matchLabel: the label to search for</span>
+<span class="sd">            substrMatchFlag: if True, match any label containing matchLabel.</span>
 <span class="sd">                if False, label must be the same as matchLabel.</span>
-<span class="sd">            usingRE (bool): if True, matchLabel is interpreted as a regular expression</span>
+<span class="sd">            usingRE: if True, matchLabel is interpreted as a regular expression</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List: A list of indicies</span>
+<span class="sd">            A list of indicies</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">usingRE</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -507,8 +502,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">entryList</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The given tier is set unioned to this tier.</span>
+        <span class="sd">&quot;&quot;&quot;The given tier is set unioned to this tier.</span>
 
 <span class="sd">        All entries in the given tier are added to the current tier.</span>
 <span class="sd">        Overlapping entries are merged.</span>
@@ -645,8 +639,7 @@ inheritance.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">appendTier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append a tier to the end of this one.</span>
+        <span class="sd">&quot;&quot;&quot;Append a tier to the end of this one.</span>
 
 <span class="sd">        This tier&#39;s maxtimestamp will be lengthened by the amount in the passed in tier.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -702,17 +695,16 @@ inheritance.</p>
         <span class="n">substrMatchFlag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">usingRE</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the index of all intervals that match the given label</span>
+        <span class="sd">&quot;&quot;&quot;Returns the index of all intervals that match the given label</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            matchLabel (str): the label to search for</span>
-<span class="sd">            substrMatchFlag (bool): if True, match any label containing matchLabel.</span>
+<span class="sd">            matchLabel: the label to search for</span>
+<span class="sd">            substrMatchFlag: if True, match any label containing matchLabel.</span>
 <span class="sd">                if False, label must be the same as matchLabel.</span>
-<span class="sd">            usingRE (bool): if True, matchLabel is interpreted as a regular expression</span>
+<span class="sd">            usingRE: if True, matchLabel is interpreted as a regular expression</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List: A list of indicies</span>
+<span class="sd">            A list of indicies</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">usingRE</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -739,16 +731,16 @@ inheritance.</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>matchLabel (str):</strong>  the label to search for</li>
-<li><strong>substrMatchFlag (bool):</strong>  if True, match any label containing matchLabel.
+<li><strong>matchLabel:</strong>  the label to search for</li>
+<li><strong>substrMatchFlag:</strong>  if True, match any label containing matchLabel.
 if False, label must be the same as matchLabel.</li>
-<li><strong>usingRE (bool):</strong>  if True, matchLabel is interpreted as a regular expression</li>
+<li><strong>usingRE:</strong>  if True, matchLabel is interpreted as a regular expression</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>List: A list of indicies</p>
+  <p>A list of indicies</p>
 </blockquote>
 </div>
 
@@ -848,8 +840,7 @@ if False, label must be the same as matchLabel.</li>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tier</span><span class="p">:</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TextgridTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The given tier is set unioned to this tier.</span>
+        <span class="sd">&quot;&quot;&quot;The given tier is set unioned to this tier.</span>
 
 <span class="sd">        All entries in the given tier are added to the current tier.</span>
 <span class="sd">        Overlapping entries are merged.</span>

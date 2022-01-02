@@ -133,15 +133,24 @@
 
 
 <span class="k">class</span> <span class="nc">Textgrid</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A container that stores and operates over interval and point tiers</span>
+
+<span class="sd">    Textgrids are used by the Praat software to group tiers.  Each tier</span>
+<span class="sd">    contains different annotation information for an audio recording.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        tierNameList(List[str]): the list of tier names in the textgrid</span>
+<span class="sd">        tierDict(Dict[str, TextgridTier]): holds the textgrid&#39;s tiers</span>
+<span class="sd">        minTimestamp(float): the minimum allowable timestamp in the textgrid</span>
+<span class="sd">        maxTimestamp(float): the maximum allowable timestamp in the textgrid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A container that stores and operates over interval and point tiers</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for Textgrids</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            errorMode (str): one of &quot;silence&quot;, &quot;warning&quot; or &quot;error&quot;. Determines</span>
-<span class="sd">            the behavior for some non-fatal errors (generally involving incompatibilities</span>
-<span class="sd">            between tiers, such as tiers having different maximum lengths -- which may</span>
-<span class="sd">            be surprising or expected, depending on the use-case.)</span>
+<span class="sd">            minTimestamp: the minimum allowable timestamp in the textgrid</span>
+<span class="sd">            maxTimestamp: the maximum allowable timestamp in the textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tierNameList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Preserves the order of the tiers</span>
@@ -172,18 +181,25 @@
         <span class="n">tierIndex</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a tier to this textgrid.</span>
+        <span class="sd">&quot;&quot;&quot;Add a tier to this textgrid.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tier (TextgridTier):</span>
-<span class="sd">            tierIndex (int): if specified, insert the tier into the specified position</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
-<span class="sd">                determines the behavior if there is a size difference between the</span>
-<span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
+<span class="sd">            tier: The tier to add to the textgrid</span>
+<span class="sd">            tierIndex: Insert the tier into the specified position;</span>
+<span class="sd">                if None, the tier will appear after all existing tiers</span>
+<span class="sd">            reportingMode: This flag determines the behavior if there is a size</span>
+<span class="sd">                difference between the maxTimestamp in the tier and the current</span>
+<span class="sd">                textgrid.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TierNameExistsError: The textgrid already contains a tier with the same</span>
+<span class="sd">                name as the tier being added</span>
+<span class="sd">            TextgridStateAutoModified: The minimum or maximum timestamp was changed</span>
+<span class="sd">                when not permitted</span>
+<span class="sd">            IndexError: TierIndex is too large for the size of the existing tier list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -219,16 +235,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span> <span class="o">=</span> <span class="n">maxV</span>
 
     <span class="k">def</span> <span class="nf">appendTextgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tg</span><span class="p">:</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">,</span> <span class="n">onlyMatchingNames</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append one textgrid to the end of this one</span>
+        <span class="sd">&quot;&quot;&quot;Append one textgrid to the end of this one</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tg (Textgrid): the tier to add to this one</span>
-<span class="sd">            onlyMatchingNames (bool): if False, tiers that don&#39;t appear in both</span>
+<span class="sd">            tg: the textgrid to add to this one</span>
+<span class="sd">            onlyMatchingNames: if False, tiers that don&#39;t appear in both</span>
 <span class="sd">                textgrids will also appear</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">minTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span>
         <span class="n">maxTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span> <span class="o">+</span> <span class="n">tg</span><span class="o">.</span><span class="n">maxTimestamp</span>
@@ -291,23 +306,23 @@
         <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">],</span>
         <span class="n">rebaseToZero</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a textgrid where all intervals fit within the crop region</span>
+        <span class="sd">&quot;&quot;&quot;Creates a textgrid where all intervals fit within the crop region</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            cropStart (float):</span>
-<span class="sd">            cropEnd (float):</span>
-<span class="sd">            mode (str): one of [&#39;strict&#39;, &#39;lax&#39;, &#39;truncated&#39;]</span>
+<span class="sd">            cropStart: The start time of the crop interval</span>
+<span class="sd">            cropEnd: The stop time of the crop interval</span>
+<span class="sd">            mode: Determines the crop behavior</span>
 <span class="sd">                - &#39;strict&#39;, only intervals wholly contained by the crop</span>
 <span class="sd">                    interval will be kept</span>
 <span class="sd">                - &#39;lax&#39;, partially contained intervals will be kept</span>
 <span class="sd">                - &#39;truncated&#39;, partially contained intervals will be</span>
 <span class="sd">                    truncated to fit within the crop region.</span>
-<span class="sd">            rebaseToZero (bool): if True, the cropped textgrid values will be</span>
-<span class="sd">                subtracted by the cropStart</span>
+<span class="sd">            rebaseToZero: if True, the cropped textgrid timestamps will be</span>
+<span class="sd">                subtracted by the cropStart; if False, timestamps will not</span>
+<span class="sd">                be changed</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">CropCollision</span><span class="p">)</span>
 
@@ -341,21 +356,23 @@
         <span class="k">return</span> <span class="n">newTG</span>
 
     <span class="k">def</span> <span class="nf">eraseRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a region in a tier blank (removes all contained entries)</span>
+        <span class="sd">&quot;&quot;&quot;Makes a region in a tier blank (removes all contained entries)</span>
 
 <span class="sd">        Intervals that span the region to erase will be truncated.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float):</span>
-<span class="sd">            end (float):</span>
-<span class="sd">            doShrink (bool): if True, all entries appearing after the</span>
+<span class="sd">            start:</span>
+<span class="sd">            end:</span>
+<span class="sd">            doShrink: if True, all entries appearing after the</span>
 <span class="sd">                erased interval will be shifted to fill the void (ie</span>
 <span class="sd">                the duration of the textgrid will be reduced by</span>
 <span class="sd">                *start* - *end*)</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ArgumentError</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
@@ -385,12 +402,11 @@
         <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modifies all timestamps by a constant amount</span>
+        <span class="sd">&quot;&quot;&quot;Modifies all timestamps by a constant amount</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            offset (float): the amount to offset in seconds</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            offset: the amount to offset in seconds</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
 
@@ -417,16 +433,15 @@
         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stretch&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;no_change&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts a blank region into a textgrid</span>
+        <span class="sd">&quot;&quot;&quot;Inserts a blank region into a textgrid</span>
 
 <span class="sd">        Every item that occurs after *start* will be pushed back by</span>
 <span class="sd">        *duration* seconds</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float):</span>
-<span class="sd">            duration (float):</span>
-<span class="sd">            collisionMode (str): Determines behavior in the event that an</span>
+<span class="sd">            start:</span>
+<span class="sd">            duration:</span>
+<span class="sd">            collisionMode: Determines behavior in the event that an</span>
 <span class="sd">                interval stradles the starting point.</span>
 <span class="sd">                One of [&#39;stretch&#39;, &#39;split&#39;, &#39;no change&#39;, None]</span>
 <span class="sd">                - &#39;stretch&#39; stretches the interval by /duration/ amount</span>
@@ -456,13 +471,12 @@
     <span class="k">def</span> <span class="nf">mergeTiers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tierList</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">preserveOtherTiers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Combine tiers</span>
+        <span class="sd">&quot;&quot;&quot;Combine tiers</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tierList (list): A list of tier names to combine. If none, combine</span>
+<span class="sd">            tierList: A list of tier names to combine. If none, combine</span>
 <span class="sd">                all tiers.</span>
-<span class="sd">            preserveOtherTiers (bool): If false, uncombined tiers are not</span>
+<span class="sd">            preserveOtherTiers: If false, uncombined tiers are not</span>
 <span class="sd">                included in the output.</span>
 
 <span class="sd">        Returns:</span>
@@ -525,30 +539,29 @@
         <span class="n">minimumIntervalLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_INTERVAL_LENGTH</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the current textgrid to a file</span>
+        <span class="sd">&quot;&quot;&quot;Save the current textgrid to a file</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fn (str): the fullpath filename of the output</span>
-<span class="sd">            format (str): one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
-<span class="sd">            includeBlankSpaces (bool): if True, blank sections in interval</span>
+<span class="sd">            fn: the fullpath filename of the output</span>
+<span class="sd">            format: one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
+<span class="sd">            includeBlankSpaces: if True, blank sections in interval</span>
 <span class="sd">                tiers will be filled in with an empty interval</span>
 <span class="sd">                (with a label of &quot;&quot;). If you are unsure, True is recommended</span>
 <span class="sd">                as Praat needs blanks to render textgrids properly.</span>
-<span class="sd">            minTimestamp (float): the minTimestamp of the saved Textgrid;</span>
+<span class="sd">            minTimestamp: the minTimestamp of the saved Textgrid;</span>
 <span class="sd">                if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">                If minTimestamp is larger than timestamps in your textgrid,</span>
 <span class="sd">                an exception will be thrown.</span>
-<span class="sd">            maxTimestamp (float): the maxTimestamp of the saved Textgrid;</span>
+<span class="sd">            maxTimestamp: the maxTimestamp of the saved Textgrid;</span>
 <span class="sd">                if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">                If maxTimestamp is smaller than timestamps in your textgrid,</span>
 <span class="sd">                an exception will be thrown.</span>
-<span class="sd">            minimumIntervalLength (float): any labeled intervals smaller</span>
+<span class="sd">            minimumIntervalLength: any labeled intervals smaller</span>
 <span class="sd">                than this will be removed, useful for removing ultrashort</span>
 <span class="sd">                or fragmented intervals; if None, don&#39;t remove any.</span>
 <span class="sd">                Removed intervals are merged (without their label) into</span>
 <span class="sd">                adjacent entries.</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
 
@@ -599,19 +612,22 @@
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate this textgrid</span>
+        <span class="sd">&quot;&quot;&quot;Validates this textgrid</span>
 
 <span class="sd">        Returns whether the textgrid is valid or not. If reportingMode is &quot;warning&quot;</span>
 <span class="sd">        or &quot;error&quot; this will also print on error or stop execution, respectively.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in a tier and the current textgrid.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bool</span>
+<span class="sd">            True if this Textgrid is valid; False if not</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TierNameExistsError: Two tiers have the same name</span>
+<span class="sd">            TextgridStateError: A timestamp fall outside of the allowable range</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -683,15 +699,24 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Textgrid</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A container that stores and operates over interval and point tiers</span>
+
+<span class="sd">    Textgrids are used by the Praat software to group tiers.  Each tier</span>
+<span class="sd">    contains different annotation information for an audio recording.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        tierNameList(List[str]): the list of tier names in the textgrid</span>
+<span class="sd">        tierDict(Dict[str, TextgridTier]): holds the textgrid&#39;s tiers</span>
+<span class="sd">        minTimestamp(float): the minimum allowable timestamp in the textgrid</span>
+<span class="sd">        maxTimestamp(float): the maximum allowable timestamp in the textgrid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A container that stores and operates over interval and point tiers</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for Textgrids</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            errorMode (str): one of &quot;silence&quot;, &quot;warning&quot; or &quot;error&quot;. Determines</span>
-<span class="sd">            the behavior for some non-fatal errors (generally involving incompatibilities</span>
-<span class="sd">            between tiers, such as tiers having different maximum lengths -- which may</span>
-<span class="sd">            be surprising or expected, depending on the use-case.)</span>
+<span class="sd">            minTimestamp: the minimum allowable timestamp in the textgrid</span>
+<span class="sd">            maxTimestamp: the maximum allowable timestamp in the textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tierNameList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Preserves the order of the tiers</span>
@@ -722,18 +747,25 @@
         <span class="n">tierIndex</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a tier to this textgrid.</span>
+        <span class="sd">&quot;&quot;&quot;Add a tier to this textgrid.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tier (TextgridTier):</span>
-<span class="sd">            tierIndex (int): if specified, insert the tier into the specified position</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
-<span class="sd">                determines the behavior if there is a size difference between the</span>
-<span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
+<span class="sd">            tier: The tier to add to the textgrid</span>
+<span class="sd">            tierIndex: Insert the tier into the specified position;</span>
+<span class="sd">                if None, the tier will appear after all existing tiers</span>
+<span class="sd">            reportingMode: This flag determines the behavior if there is a size</span>
+<span class="sd">                difference between the maxTimestamp in the tier and the current</span>
+<span class="sd">                textgrid.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TierNameExistsError: The textgrid already contains a tier with the same</span>
+<span class="sd">                name as the tier being added</span>
+<span class="sd">            TextgridStateAutoModified: The minimum or maximum timestamp was changed</span>
+<span class="sd">                when not permitted</span>
+<span class="sd">            IndexError: TierIndex is too large for the size of the existing tier list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -769,16 +801,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span> <span class="o">=</span> <span class="n">maxV</span>
 
     <span class="k">def</span> <span class="nf">appendTextgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tg</span><span class="p">:</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">,</span> <span class="n">onlyMatchingNames</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append one textgrid to the end of this one</span>
+        <span class="sd">&quot;&quot;&quot;Append one textgrid to the end of this one</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tg (Textgrid): the tier to add to this one</span>
-<span class="sd">            onlyMatchingNames (bool): if False, tiers that don&#39;t appear in both</span>
+<span class="sd">            tg: the textgrid to add to this one</span>
+<span class="sd">            onlyMatchingNames: if False, tiers that don&#39;t appear in both</span>
 <span class="sd">                textgrids will also appear</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">minTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span>
         <span class="n">maxTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span> <span class="o">+</span> <span class="n">tg</span><span class="o">.</span><span class="n">maxTimestamp</span>
@@ -841,23 +872,23 @@
         <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">],</span>
         <span class="n">rebaseToZero</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a textgrid where all intervals fit within the crop region</span>
+        <span class="sd">&quot;&quot;&quot;Creates a textgrid where all intervals fit within the crop region</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            cropStart (float):</span>
-<span class="sd">            cropEnd (float):</span>
-<span class="sd">            mode (str): one of [&#39;strict&#39;, &#39;lax&#39;, &#39;truncated&#39;]</span>
+<span class="sd">            cropStart: The start time of the crop interval</span>
+<span class="sd">            cropEnd: The stop time of the crop interval</span>
+<span class="sd">            mode: Determines the crop behavior</span>
 <span class="sd">                - &#39;strict&#39;, only intervals wholly contained by the crop</span>
 <span class="sd">                    interval will be kept</span>
 <span class="sd">                - &#39;lax&#39;, partially contained intervals will be kept</span>
 <span class="sd">                - &#39;truncated&#39;, partially contained intervals will be</span>
 <span class="sd">                    truncated to fit within the crop region.</span>
-<span class="sd">            rebaseToZero (bool): if True, the cropped textgrid values will be</span>
-<span class="sd">                subtracted by the cropStart</span>
+<span class="sd">            rebaseToZero: if True, the cropped textgrid timestamps will be</span>
+<span class="sd">                subtracted by the cropStart; if False, timestamps will not</span>
+<span class="sd">                be changed</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">CropCollision</span><span class="p">)</span>
 
@@ -891,21 +922,23 @@
         <span class="k">return</span> <span class="n">newTG</span>
 
     <span class="k">def</span> <span class="nf">eraseRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a region in a tier blank (removes all contained entries)</span>
+        <span class="sd">&quot;&quot;&quot;Makes a region in a tier blank (removes all contained entries)</span>
 
 <span class="sd">        Intervals that span the region to erase will be truncated.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float):</span>
-<span class="sd">            end (float):</span>
-<span class="sd">            doShrink (bool): if True, all entries appearing after the</span>
+<span class="sd">            start:</span>
+<span class="sd">            end:</span>
+<span class="sd">            doShrink: if True, all entries appearing after the</span>
 <span class="sd">                erased interval will be shifted to fill the void (ie</span>
 <span class="sd">                the duration of the textgrid will be reduced by</span>
 <span class="sd">                *start* - *end*)</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ArgumentError</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
@@ -935,12 +968,11 @@
         <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modifies all timestamps by a constant amount</span>
+        <span class="sd">&quot;&quot;&quot;Modifies all timestamps by a constant amount</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            offset (float): the amount to offset in seconds</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            offset: the amount to offset in seconds</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
 
@@ -967,16 +999,15 @@
         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stretch&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;no_change&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts a blank region into a textgrid</span>
+        <span class="sd">&quot;&quot;&quot;Inserts a blank region into a textgrid</span>
 
 <span class="sd">        Every item that occurs after *start* will be pushed back by</span>
 <span class="sd">        *duration* seconds</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float):</span>
-<span class="sd">            duration (float):</span>
-<span class="sd">            collisionMode (str): Determines behavior in the event that an</span>
+<span class="sd">            start:</span>
+<span class="sd">            duration:</span>
+<span class="sd">            collisionMode: Determines behavior in the event that an</span>
 <span class="sd">                interval stradles the starting point.</span>
 <span class="sd">                One of [&#39;stretch&#39;, &#39;split&#39;, &#39;no change&#39;, None]</span>
 <span class="sd">                - &#39;stretch&#39; stretches the interval by /duration/ amount</span>
@@ -1006,13 +1037,12 @@
     <span class="k">def</span> <span class="nf">mergeTiers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tierList</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">preserveOtherTiers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Combine tiers</span>
+        <span class="sd">&quot;&quot;&quot;Combine tiers</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tierList (list): A list of tier names to combine. If none, combine</span>
+<span class="sd">            tierList: A list of tier names to combine. If none, combine</span>
 <span class="sd">                all tiers.</span>
-<span class="sd">            preserveOtherTiers (bool): If false, uncombined tiers are not</span>
+<span class="sd">            preserveOtherTiers: If false, uncombined tiers are not</span>
 <span class="sd">                included in the output.</span>
 
 <span class="sd">        Returns:</span>
@@ -1075,30 +1105,29 @@
         <span class="n">minimumIntervalLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_INTERVAL_LENGTH</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the current textgrid to a file</span>
+        <span class="sd">&quot;&quot;&quot;Save the current textgrid to a file</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fn (str): the fullpath filename of the output</span>
-<span class="sd">            format (str): one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
-<span class="sd">            includeBlankSpaces (bool): if True, blank sections in interval</span>
+<span class="sd">            fn: the fullpath filename of the output</span>
+<span class="sd">            format: one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
+<span class="sd">            includeBlankSpaces: if True, blank sections in interval</span>
 <span class="sd">                tiers will be filled in with an empty interval</span>
 <span class="sd">                (with a label of &quot;&quot;). If you are unsure, True is recommended</span>
 <span class="sd">                as Praat needs blanks to render textgrids properly.</span>
-<span class="sd">            minTimestamp (float): the minTimestamp of the saved Textgrid;</span>
+<span class="sd">            minTimestamp: the minTimestamp of the saved Textgrid;</span>
 <span class="sd">                if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">                If minTimestamp is larger than timestamps in your textgrid,</span>
 <span class="sd">                an exception will be thrown.</span>
-<span class="sd">            maxTimestamp (float): the maxTimestamp of the saved Textgrid;</span>
+<span class="sd">            maxTimestamp: the maxTimestamp of the saved Textgrid;</span>
 <span class="sd">                if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">                If maxTimestamp is smaller than timestamps in your textgrid,</span>
 <span class="sd">                an exception will be thrown.</span>
-<span class="sd">            minimumIntervalLength (float): any labeled intervals smaller</span>
+<span class="sd">            minimumIntervalLength: any labeled intervals smaller</span>
 <span class="sd">                than this will be removed, useful for removing ultrashort</span>
 <span class="sd">                or fragmented intervals; if None, don&#39;t remove any.</span>
 <span class="sd">                Removed intervals are merged (without their label) into</span>
 <span class="sd">                adjacent entries.</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
 
@@ -1149,19 +1178,22 @@
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate this textgrid</span>
+        <span class="sd">&quot;&quot;&quot;Validates this textgrid</span>
 
 <span class="sd">        Returns whether the textgrid is valid or not. If reportingMode is &quot;warning&quot;</span>
 <span class="sd">        or &quot;error&quot; this will also print on error or stop execution, respectively.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in a tier and the current textgrid.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bool</span>
+<span class="sd">            True if this Textgrid is valid; False if not</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TierNameExistsError: Two tiers have the same name</span>
+<span class="sd">            TextgridStateError: A timestamp fall outside of the allowable range</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -1202,7 +1234,21 @@
 
         </details>
 
-    
+            <div class="docstring"><p>A container that stores and operates over interval and point tiers</p>
+
+<p>Textgrids are used by the Praat software to group tiers.  Each tier
+contains different annotation information for an audio recording.</p>
+
+<h6 id="attributes">Attributes</h6>
+
+<ul>
+<li><strong>tierNameList(List[str]):</strong>  the list of tier names in the textgrid</li>
+<li><strong>tierDict(Dict[str, TextgridTier]):</strong>  holds the textgrid's tiers</li>
+<li><strong>minTimestamp(float):</strong>  the minimum allowable timestamp in the textgrid</li>
+<li><strong>maxTimestamp(float):</strong>  the maximum allowable timestamp in the textgrid</li>
+</ul>
+</div>
+
 
                             <div id="Textgrid.__init__" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Textgrid.__init__">#&nbsp;&nbsp</a>
@@ -1214,14 +1260,11 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxTimestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A container that stores and operates over interval and point tiers</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for Textgrids</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            errorMode (str): one of &quot;silence&quot;, &quot;warning&quot; or &quot;error&quot;. Determines</span>
-<span class="sd">            the behavior for some non-fatal errors (generally involving incompatibilities</span>
-<span class="sd">            between tiers, such as tiers having different maximum lengths -- which may</span>
-<span class="sd">            be surprising or expected, depending on the use-case.)</span>
+<span class="sd">            minTimestamp: the minimum allowable timestamp in the textgrid</span>
+<span class="sd">            maxTimestamp: the maximum allowable timestamp in the textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tierNameList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Preserves the order of the tiers</span>
@@ -1234,15 +1277,13 @@
 
         </details>
 
-            <div class="docstring"><p>A container that stores and operates over interval and point tiers</p>
+            <div class="docstring"><p>Constructor for Textgrids</p>
 
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>errorMode (str):</strong>  one of "silence", "warning" or "error". Determines</li>
-<li>the behavior for some non-fatal errors (generally involving incompatibilities</li>
-<li>between tiers, such as tiers having different maximum lengths -- which may</li>
-<li>be surprising or expected, depending on the use-case.)</li>
+<li><strong>minTimestamp:</strong>  the minimum allowable timestamp in the textgrid</li>
+<li><strong>maxTimestamp:</strong>  the maximum allowable timestamp in the textgrid</li>
 </ul>
 </div>
 
@@ -1269,18 +1310,25 @@
         <span class="n">tierIndex</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a tier to this textgrid.</span>
+        <span class="sd">&quot;&quot;&quot;Add a tier to this textgrid.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tier (TextgridTier):</span>
-<span class="sd">            tierIndex (int): if specified, insert the tier into the specified position</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
-<span class="sd">                determines the behavior if there is a size difference between the</span>
-<span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
+<span class="sd">            tier: The tier to add to the textgrid</span>
+<span class="sd">            tierIndex: Insert the tier into the specified position;</span>
+<span class="sd">                if None, the tier will appear after all existing tiers</span>
+<span class="sd">            reportingMode: This flag determines the behavior if there is a size</span>
+<span class="sd">                difference between the maxTimestamp in the tier and the current</span>
+<span class="sd">                textgrid.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TierNameExistsError: The textgrid already contains a tier with the same</span>
+<span class="sd">                name as the tier being added</span>
+<span class="sd">            TextgridStateAutoModified: The minimum or maximum timestamp was changed</span>
+<span class="sd">                when not permitted</span>
+<span class="sd">            IndexError: TierIndex is too large for the size of the existing tier list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -1323,11 +1371,12 @@
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>tier (TextgridTier):</strong> </li>
-<li><strong>tierIndex (int):</strong>  if specified, insert the tier into the specified position</li>
-<li><strong>reportingMode (str):</strong>  one of "silence", "warning", or "error". This flag
-determines the behavior if there is a size difference between the
-maxTimestamp in the tier and the current textgrid.</li>
+<li><strong>tier:</strong>  The tier to add to the textgrid</li>
+<li><strong>tierIndex:</strong>  Insert the tier into the specified position;
+if None, the tier will appear after all existing tiers</li>
+<li><strong>reportingMode:</strong>  This flag determines the behavior if there is a size
+difference between the maxTimestamp in the tier and the current
+textgrid.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -1335,6 +1384,16 @@ maxTimestamp in the tier and the current textgrid.</li>
 <blockquote>
   <p>None</p>
 </blockquote>
+
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li><strong>TierNameExistsError:</strong>  The textgrid already contains a tier with the same
+name as the tier being added</li>
+<li><strong>TextgridStateAutoModified:</strong>  The minimum or maximum timestamp was changed
+when not permitted</li>
+<li><strong>IndexError:</strong>  TierIndex is too large for the size of the existing tier list</li>
+</ul>
 </div>
 
 
@@ -1354,16 +1413,15 @@ maxTimestamp in the tier and the current textgrid.</li>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">appendTextgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tg</span><span class="p">:</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">,</span> <span class="n">onlyMatchingNames</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Append one textgrid to the end of this one</span>
+        <span class="sd">&quot;&quot;&quot;Append one textgrid to the end of this one</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tg (Textgrid): the tier to add to this one</span>
-<span class="sd">            onlyMatchingNames (bool): if False, tiers that don&#39;t appear in both</span>
+<span class="sd">            tg: the textgrid to add to this one</span>
+<span class="sd">            onlyMatchingNames: if False, tiers that don&#39;t appear in both</span>
 <span class="sd">                textgrids will also appear</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">minTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minTimestamp</span>
         <span class="n">maxTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxTimestamp</span> <span class="o">+</span> <span class="n">tg</span><span class="o">.</span><span class="n">maxTimestamp</span>
@@ -1427,15 +1485,15 @@ maxTimestamp in the tier and the current textgrid.</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>tg (Textgrid):</strong>  the tier to add to this one</li>
-<li><strong>onlyMatchingNames (bool):</strong>  if False, tiers that don't appear in both
+<li><strong>tg:</strong>  the textgrid to add to this one</li>
+<li><strong>onlyMatchingNames:</strong>  if False, tiers that don't appear in both
 textgrids will also appear</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>Textgrid: the modified version of the current textgrid</p>
+  <p>the modified version of the current textgrid</p>
 </blockquote>
 </div>
 
@@ -1464,23 +1522,23 @@ textgrids will also appear</li>
         <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">],</span>
         <span class="n">rebaseToZero</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a textgrid where all intervals fit within the crop region</span>
+        <span class="sd">&quot;&quot;&quot;Creates a textgrid where all intervals fit within the crop region</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            cropStart (float):</span>
-<span class="sd">            cropEnd (float):</span>
-<span class="sd">            mode (str): one of [&#39;strict&#39;, &#39;lax&#39;, &#39;truncated&#39;]</span>
+<span class="sd">            cropStart: The start time of the crop interval</span>
+<span class="sd">            cropEnd: The stop time of the crop interval</span>
+<span class="sd">            mode: Determines the crop behavior</span>
 <span class="sd">                - &#39;strict&#39;, only intervals wholly contained by the crop</span>
 <span class="sd">                    interval will be kept</span>
 <span class="sd">                - &#39;lax&#39;, partially contained intervals will be kept</span>
 <span class="sd">                - &#39;truncated&#39;, partially contained intervals will be</span>
 <span class="sd">                    truncated to fit within the crop region.</span>
-<span class="sd">            rebaseToZero (bool): if True, the cropped textgrid values will be</span>
-<span class="sd">                subtracted by the cropStart</span>
+<span class="sd">            rebaseToZero: if True, the cropped textgrid timestamps will be</span>
+<span class="sd">                subtracted by the cropStart; if False, timestamps will not</span>
+<span class="sd">                be changed</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">CropCollision</span><span class="p">)</span>
 
@@ -1521,9 +1579,9 @@ textgrids will also appear</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>cropStart (float):</strong> </li>
-<li><strong>cropEnd (float):</strong> </li>
-<li><strong>mode (str):</strong>  one of ['strict', 'lax', 'truncated']
+<li><strong>cropStart:</strong>  The start time of the crop interval</li>
+<li><strong>cropEnd:</strong>  The stop time of the crop interval</li>
+<li><strong>mode:</strong>  Determines the crop behavior
 <ul>
 <li>'strict', only intervals wholly contained by the crop
 interval will be kept</li>
@@ -1531,14 +1589,15 @@ interval will be kept</li>
 <li>'truncated', partially contained intervals will be
 truncated to fit within the crop region.</li>
 </ul></li>
-<li><strong>rebaseToZero (bool):</strong>  if True, the cropped textgrid values will be
-subtracted by the cropStart</li>
+<li><strong>rebaseToZero:</strong>  if True, the cropped textgrid timestamps will be
+subtracted by the cropStart; if False, timestamps will not
+be changed</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>Textgrid: the modified version of the current textgrid</p>
+  <p>the modified version of the current textgrid</p>
 </blockquote>
 </div>
 
@@ -1560,21 +1619,23 @@ subtracted by the cropStart</li>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">eraseRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a region in a tier blank (removes all contained entries)</span>
+        <span class="sd">&quot;&quot;&quot;Makes a region in a tier blank (removes all contained entries)</span>
 
 <span class="sd">        Intervals that span the region to erase will be truncated.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float):</span>
-<span class="sd">            end (float):</span>
-<span class="sd">            doShrink (bool): if True, all entries appearing after the</span>
+<span class="sd">            start:</span>
+<span class="sd">            end:</span>
+<span class="sd">            doShrink: if True, all entries appearing after the</span>
 <span class="sd">                erased interval will be shifted to fill the void (ie</span>
 <span class="sd">                the duration of the textgrid will be reduced by</span>
 <span class="sd">                *start* - *end*)</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Textgrid: the modified version of the current textgrid</span>
+<span class="sd">            the modified version of the current textgrid</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ArgumentError</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
@@ -1609,9 +1670,9 @@ subtracted by the cropStart</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>start (float):</strong> </li>
-<li><strong>end (float):</strong> </li>
-<li><strong>doShrink (bool):</strong>  if True, all entries appearing after the
+<li><strong>start:</strong> </li>
+<li><strong>end:</strong> </li>
+<li><strong>doShrink:</strong>  if True, all entries appearing after the
 erased interval will be shifted to fill the void (ie
 the duration of the textgrid will be reduced by
 <em>start</em> - <em>end</em>)</li>
@@ -1620,8 +1681,14 @@ the duration of the textgrid will be reduced by
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>Textgrid: the modified version of the current textgrid</p>
+  <p>the modified version of the current textgrid</p>
 </blockquote>
+
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li>ArgumentError</li>
+</ul>
 </div>
 
 
@@ -1645,12 +1712,11 @@ the duration of the textgrid will be reduced by
         <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modifies all timestamps by a constant amount</span>
+        <span class="sd">&quot;&quot;&quot;Modifies all timestamps by a constant amount</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            offset (float): the amount to offset in seconds</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            offset: the amount to offset in seconds</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
 
@@ -1679,8 +1745,8 @@ the duration of the textgrid will be reduced by
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>offset (float):</strong>  the amount to offset in seconds</li>
-<li><strong>reportingMode (str):</strong>  one of "silence", "warning", or "error". This flag
+<li><strong>offset:</strong>  the amount to offset in seconds</li>
+<li><strong>reportingMode:</strong>  one of "silence", "warning", or "error". This flag
 determines the behavior if there is a size difference between the
 maxTimestamp in the tier and the current textgrid.</li>
 </ul>
@@ -1715,16 +1781,15 @@ maxTimestamp in the tier and the current textgrid.</li>
         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stretch&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;no_change&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts a blank region into a textgrid</span>
+        <span class="sd">&quot;&quot;&quot;Inserts a blank region into a textgrid</span>
 
 <span class="sd">        Every item that occurs after *start* will be pushed back by</span>
 <span class="sd">        *duration* seconds</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float):</span>
-<span class="sd">            duration (float):</span>
-<span class="sd">            collisionMode (str): Determines behavior in the event that an</span>
+<span class="sd">            start:</span>
+<span class="sd">            duration:</span>
+<span class="sd">            collisionMode: Determines behavior in the event that an</span>
 <span class="sd">                interval stradles the starting point.</span>
 <span class="sd">                One of [&#39;stretch&#39;, &#39;split&#39;, &#39;no change&#39;, None]</span>
 <span class="sd">                - &#39;stretch&#39; stretches the interval by /duration/ amount</span>
@@ -1762,9 +1827,9 @@ maxTimestamp in the tier and the current textgrid.</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>start (float):</strong> </li>
-<li><strong>duration (float):</strong> </li>
-<li><strong>collisionMode (str):</strong>  Determines behavior in the event that an
+<li><strong>start:</strong> </li>
+<li><strong>duration:</strong> </li>
+<li><strong>collisionMode:</strong>  Determines behavior in the event that an
 interval stradles the starting point.
 One of ['stretch', 'split', 'no change', None]
 <ul>
@@ -1802,13 +1867,12 @@ right of 'start' will be advanced by 'duration' seconds</li>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">mergeTiers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tierList</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">preserveOtherTiers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Textgrid&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Combine tiers</span>
+        <span class="sd">&quot;&quot;&quot;Combine tiers</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tierList (list): A list of tier names to combine. If none, combine</span>
+<span class="sd">            tierList: A list of tier names to combine. If none, combine</span>
 <span class="sd">                all tiers.</span>
-<span class="sd">            preserveOtherTiers (bool): If false, uncombined tiers are not</span>
+<span class="sd">            preserveOtherTiers: If false, uncombined tiers are not</span>
 <span class="sd">                included in the output.</span>
 
 <span class="sd">        Returns:</span>
@@ -1865,9 +1929,9 @@ right of 'start' will be advanced by 'duration' seconds</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>tierList (list):</strong>  A list of tier names to combine. If none, combine
+<li><strong>tierList:</strong>  A list of tier names to combine. If none, combine
 all tiers.</li>
-<li><strong>preserveOtherTiers (bool):</strong>  If false, uncombined tiers are not
+<li><strong>preserveOtherTiers:</strong>  If false, uncombined tiers are not
 included in the output.</li>
 </ul>
 
@@ -1931,30 +1995,29 @@ included in the output.</li>
         <span class="n">minimumIntervalLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_INTERVAL_LENGTH</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save the current textgrid to a file</span>
+        <span class="sd">&quot;&quot;&quot;Save the current textgrid to a file</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fn (str): the fullpath filename of the output</span>
-<span class="sd">            format (str): one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
-<span class="sd">            includeBlankSpaces (bool): if True, blank sections in interval</span>
+<span class="sd">            fn: the fullpath filename of the output</span>
+<span class="sd">            format: one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
+<span class="sd">            includeBlankSpaces: if True, blank sections in interval</span>
 <span class="sd">                tiers will be filled in with an empty interval</span>
 <span class="sd">                (with a label of &quot;&quot;). If you are unsure, True is recommended</span>
 <span class="sd">                as Praat needs blanks to render textgrids properly.</span>
-<span class="sd">            minTimestamp (float): the minTimestamp of the saved Textgrid;</span>
+<span class="sd">            minTimestamp: the minTimestamp of the saved Textgrid;</span>
 <span class="sd">                if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">                If minTimestamp is larger than timestamps in your textgrid,</span>
 <span class="sd">                an exception will be thrown.</span>
-<span class="sd">            maxTimestamp (float): the maxTimestamp of the saved Textgrid;</span>
+<span class="sd">            maxTimestamp: the maxTimestamp of the saved Textgrid;</span>
 <span class="sd">                if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">                If maxTimestamp is smaller than timestamps in your textgrid,</span>
 <span class="sd">                an exception will be thrown.</span>
-<span class="sd">            minimumIntervalLength (float): any labeled intervals smaller</span>
+<span class="sd">            minimumIntervalLength: any labeled intervals smaller</span>
 <span class="sd">                than this will be removed, useful for removing ultrashort</span>
 <span class="sd">                or fragmented intervals; if None, don&#39;t remove any.</span>
 <span class="sd">                Removed intervals are merged (without their label) into</span>
 <span class="sd">                adjacent entries.</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
 
@@ -1990,26 +2053,26 @@ included in the output.</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>fn (str):</strong>  the fullpath filename of the output</li>
-<li><strong>format (str):</strong>  one of ['short_textgrid', 'long_textgrid', 'json']</li>
-<li><strong>includeBlankSpaces (bool):</strong>  if True, blank sections in interval
+<li><strong>fn:</strong>  the fullpath filename of the output</li>
+<li><strong>format:</strong>  one of ['short_textgrid', 'long_textgrid', 'json']</li>
+<li><strong>includeBlankSpaces:</strong>  if True, blank sections in interval
 tiers will be filled in with an empty interval
 (with a label of ""). If you are unsure, True is recommended
 as Praat needs blanks to render textgrids properly.</li>
-<li><strong>minTimestamp (float):</strong>  the minTimestamp of the saved Textgrid;
+<li><strong>minTimestamp:</strong>  the minTimestamp of the saved Textgrid;
 if None, use whatever is defined in the Textgrid object.
 If minTimestamp is larger than timestamps in your textgrid,
 an exception will be thrown.</li>
-<li><strong>maxTimestamp (float):</strong>  the maxTimestamp of the saved Textgrid;
+<li><strong>maxTimestamp:</strong>  the maxTimestamp of the saved Textgrid;
 if None, use whatever is defined in the Textgrid object.
 If maxTimestamp is smaller than timestamps in your textgrid,
 an exception will be thrown.</li>
-<li><strong>minimumIntervalLength (float):</strong>  any labeled intervals smaller
+<li><strong>minimumIntervalLength:</strong>  any labeled intervals smaller
 than this will be removed, useful for removing ultrashort
 or fragmented intervals; if None, don't remove any.
 Removed intervals are merged (without their label) into
 adjacent entries.</li>
-<li><strong>reportingMode (str):</strong>  one of "silence", "warning", or "error". This flag
+<li><strong>reportingMode:</strong>  one of "silence", "warning", or "error". This flag
 determines the behavior if there is a size difference between the
 maxTimestamp in the tier and the current textgrid.</li>
 </ul>
@@ -2112,19 +2175,22 @@ maxTimestamp in the tier and the current textgrid.</li>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate this textgrid</span>
+        <span class="sd">&quot;&quot;&quot;Validates this textgrid</span>
 
 <span class="sd">        Returns whether the textgrid is valid or not. If reportingMode is &quot;warning&quot;</span>
 <span class="sd">        or &quot;error&quot; this will also print on error or stop execution, respectively.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if there is a size difference between the</span>
 <span class="sd">                maxTimestamp in a tier and the current textgrid.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bool</span>
+<span class="sd">            True if this Textgrid is valid; False if not</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TierNameExistsError: Two tiers have the same name</span>
+<span class="sd">            TextgridStateError: A timestamp fall outside of the allowable range</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -2165,7 +2231,7 @@ maxTimestamp in the tier and the current textgrid.</li>
 
         </details>
 
-            <div class="docstring"><p>Validate this textgrid</p>
+            <div class="docstring"><p>Validates this textgrid</p>
 
 <p>Returns whether the textgrid is valid or not. If reportingMode is "warning"
 or "error" this will also print on error or stop execution, respectively.</p>
@@ -2173,7 +2239,7 @@ or "error" this will also print on error or stop execution, respectively.</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>reportingMode (str):</strong>  one of "silence", "warning", or "error". This flag
+<li><strong>reportingMode:</strong>  one of "silence", "warning", or "error". This flag
 determines the behavior if there is a size difference between the
 maxTimestamp in a tier and the current textgrid.</li>
 </ul>
@@ -2181,8 +2247,15 @@ maxTimestamp in a tier and the current textgrid.</li>
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>bool</p>
+  <p>True if this Textgrid is valid; False if not</p>
 </blockquote>
+
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li><strong>TierNameExistsError:</strong>  Two tiers have the same name</li>
+<li><strong>TextgridStateError:</strong>  A timestamp fall outside of the allowable range</li>
+</ul>
 </div>
 
 

@@ -31,8 +31,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
-        """
-        An interval tier is for annotating events that have duration
+        """An interval tier is for annotating events that have duration
 
         The entryList is of the form:
         [(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]
@@ -89,23 +88,22 @@ class IntervalTier(textgrid_tier.TextgridTier):
         mode: Literal["strict", "lax", "truncated"],
         rebaseToZero: bool,
     ) -> "IntervalTier":
-        """
-        Creates a new tier with all entries that fit inside the new interval
+        """Creates a new tier with all entries that fit inside the new interval
 
         Args:
-            cropStart (float):
-            cropEnd (float):
-            mode (CropMode): one of ['strict', 'lax', or 'truncated']
+            cropStart:
+            cropEnd:
+            mode: determines cropping behavior
                 - 'strict', only intervals wholly contained by the crop
                     interval will be kept
                 - 'lax', partially contained intervals will be kept
                 - 'truncated', partially contained intervals will be
                     truncated to fit within the crop region.
-            rebaseToZero (bool): if True, the cropped textgrid values
+            rebaseToZero: if True, the cropped textgrid values
                 will be subtracted by the cropStart
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            the modified version of the current tier
         """
 
         utils.validateOption("mode", mode, CropCollision)
@@ -144,17 +142,16 @@ class IntervalTier(textgrid_tier.TextgridTier):
         self.entryList.pop(self.entryList.index(entry))
 
     def difference(self, tier: "IntervalTier") -> "IntervalTier":
-        """
-        Takes the set difference of this tier and the given one
+        """Takes the set difference of this tier and the given one
 
         Any overlapping portions of entries with entries in this textgrid
         will be removed from the returned tier.
 
         Args:
-            tier (IntervalTier):
+            tier: the tier to subtract from this one
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            the modified version of the current tier
         """
         retTier = self.new()
 
@@ -173,17 +170,15 @@ class IntervalTier(textgrid_tier.TextgridTier):
         offset: float,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "IntervalTier":
-        """
-        Modifies all timestamps by a constant amount
+        """Modifies all timestamps by a constant amount
 
         Args:
-            offset (start): the amount to shift all intervals
-            reportingMode (str): one of "silence", "warning", or "error". This flag
-                determines the behavior if an entries moves outside of minTimestamp
-                or maxTimestamp after being edited
+            offset: the amount to shift all intervals
+            reportingMode: Determines the behavior if an entries moves outside
+                of minTimestamp or maxTimestamp after being edited
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            the modified version of the current tier
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
@@ -225,25 +220,26 @@ class IntervalTier(textgrid_tier.TextgridTier):
         collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "IntervalTier":
-        """
-        Makes a region in a tier blank (removes all contained entries)
+        """Makes a region in a tier blank (removes all contained entries)
 
         Args:
-            start (float):
-            end (float):
-            collisionMode (EraseRegionCollisionMode): determines the behavior when
-                the region to erase overlaps with existing intervals. One of
-                ['truncate', 'categorical', 'error']
+            start:
+            end:
+            collisionMode: Determines the behavior when the region to erase
+                overlaps with existing intervals.
                 - 'truncate' partially contained entries will have the portion
                     removed that overlaps with the target entry
                 - 'categorical' all entries that overlap, even partially, with
                     the target entry will be completely removed
                 - None or any other value throws IntervalCollision
-            doShrink (bool): if True, moves leftward by (/end/ - /start/)
+            doShrink: If True, moves leftward by (/end/ - /start/)
                 amount, each item that occurs after /end/
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            The modified version of the current tier
+
+        Raises:
+            CollisionError
         """
         utils.validateOption("collisionMode", collisionMode, constants.EraseCollision)
 
@@ -321,8 +317,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         return newTier
 
     def getValuesInIntervals(self, dataTupleList: List) -> List[Tuple[Interval, List]]:
-        """
-        Returns data from dataTupleList contained in labeled intervals
+        """Returns data from dataTupleList contained in labeled intervals
 
         Each labeled interval will get its own list of data values.
 
@@ -341,8 +336,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         return returnList
 
     def getNonEntries(self) -> List[Interval]:
-        """
-        Returns the regions of the textgrid without labels
+        """Returns the regions of the textgrid without labels
 
         This can include unlabeled segments and regions marked as silent.
         """
@@ -377,23 +371,20 @@ class IntervalTier(textgrid_tier.TextgridTier):
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
-        """
-        inserts an interval into the tier
+        """Inserts an interval into the tier
 
         Args:
-            entry (list|Interval): the Interval to insert
-            warnFlag (bool):
+            entry: the Interval to insert
             collisionMode: determines the behavior in the event that intervals
-                exist in the insertion area.  One of ['replace', 'merge' None]
+                exist in the insertion area.
                 - 'replace' will remove existing items
                 - 'merge' will fuse the inserting item with existing items
                 - None or any other value will throw a CollisionError
-
-        if *warnFlag* is True and *collisionMode* is not None,
-        the user is notified of each collision
+            collisionReportingMode: Determines the behavior if the new entry
+                overlaps with an existing one
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            the modified version of the current tier
         """
         utils.validateOption(
             "collisionMode", collisionMode, constants.IntervalCollision
@@ -465,15 +456,13 @@ class IntervalTier(textgrid_tier.TextgridTier):
         duration: float,
         collisionMode: Literal["stretch", "split", "no_change", "error"],
     ) -> "IntervalTier":
-        """
-        Inserts a blank region into the tier
+        """Inserts a blank region into the tier
 
         Args:
-            start (float):
-            duration (float)
-            collisionMode (str): determines the behavior that occurs if
+            start:
+            duration:
+            collisionMode: Determines the behavior that occurs if
                 an interval stradles the starting point
-                one of ['stretch', 'split', 'no change', 'error']
                 - 'stretch' stretches the interval by /duration/ amount
                 - 'split' splits the interval into two--everything to the
                     right of 'start' will be advanced by 'duration' seconds
@@ -481,7 +470,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 - 'error' will stop execution and raise an error
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            the modified version of the current tier
         """
         utils.validateOption(
             "collisionMode", collisionMode, constants.WhitespaceCollision
@@ -535,15 +524,14 @@ class IntervalTier(textgrid_tier.TextgridTier):
         return newTier
 
     def intersection(self, tier: "IntervalTier") -> "IntervalTier":
-        """
-        Takes the set intersection of this tier and the given one
+        """Takes the set intersection of this tier and the given one
 
         Only intervals that exist in both tiers will remain in the
         returned tier.  If intervals partially overlap, only the overlapping
         portion will be returned.
 
         Args:
-            tier (IntervalTier): the tier to intersect with
+            tier: the tier to intersect with
 
         Returns:
             IntervalTier: the modified version of the current tier
@@ -577,20 +565,19 @@ class IntervalTier(textgrid_tier.TextgridTier):
         targetTier: "IntervalTier",
         filterFunc: Optional[Callable[[str], bool]] = None,
     ) -> "IntervalTier":
-        """
-        Morphs the duration of segments in this tier to those in another
+        """Morphs the duration of segments in this tier to those in another
 
         This preserves the labels and the duration of silence in
         this tier while changing the duration of labeled segments.
 
         Args:
-            targetTier (IntervalTier):
-            filterFunc (functor): if specified, filters entries. The
+            targetTier:
+            filterFunc: if specified, filters entries. The
                 functor takes one argument, an Interval. It returns true
                 if the Interval should be modified and false if not.
 
         Returns:
-            IntervalTier: the modified version of the current tier
+            The modified version of the current tier
         """
         cumulativeAdjustAmount = 0
         newEntryList = []
@@ -620,19 +607,13 @@ class IntervalTier(textgrid_tier.TextgridTier):
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"
     ) -> bool:
-        """
-        Validate this tier
-
-        Returns whether the tier is valid or not. If reportingMode is "warning"
-        or "error" this will also print on error or stop execution, respectively.
+        """Validate this tier
 
         Args:
-            reportingMode (str): one of "silence", "warning", or "error". This flag
-                determines the behavior if there is a size difference between the
-                maxTimestamp in the tier and the current textgrid.
+            reportingMode (str): Determines the behavior if validation fails.
 
         Returns:
-            bool
+            True if the tier is valid; False if not
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode

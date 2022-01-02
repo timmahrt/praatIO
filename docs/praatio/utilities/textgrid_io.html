@@ -100,8 +100,7 @@
 <span class="k">def</span> <span class="nf">_removeUltrashortIntervals</span><span class="p">(</span>
     <span class="n">tier</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">minLength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">minTimestamp</span><span class="p">:</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove intervals that are very tiny</span>
+    <span class="sd">&quot;&quot;&quot;Remove intervals that are very tiny</span>
 
 <span class="sd">    Doing many small manipulations on intervals can lead to the creation</span>
 <span class="sd">    of ultrashort intervals (e.g. 1*10^-15 seconds long).  This function</span>
@@ -150,8 +149,7 @@
     <span class="n">minTime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">maxTime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Fills in the space between intervals with empty space</span>
+    <span class="sd">&quot;&quot;&quot;Fills in the space between intervals with empty space</span>
 
 <span class="sd">    This is necessary to do when saving to create a well-formed textgrid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -202,18 +200,17 @@
 
 
 <span class="k">def</span> <span class="nf">parseTextgridStr</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">includeEmptyIntervals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a string representation of a Textgrid into a dictionary</span>
+    <span class="sd">&quot;&quot;&quot;Converts a string representation of a Textgrid into a dictionary</span>
+
+<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fnFullPath (str): the path to the textgrid to open</span>
-<span class="sd">        includeEmptyIntervals (bool): if False, points and intervals with</span>
+<span class="sd">        fnFullPath: the path to the textgrid to open</span>
+<span class="sd">        includeEmptyIntervals: if False, points and intervals with</span>
 <span class="sd">             an empty label &#39;&#39; are not included in the returned dictionary</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dictionary</span>
-
-<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -241,24 +238,23 @@
     <span class="n">maxTimestamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">minimumIntervalLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_INTERVAL_LENGTH</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a textgrid to a string, suitable for saving</span>
+    <span class="sd">&quot;&quot;&quot;Converts a textgrid to a string, suitable for saving</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        tg (Textgrid): the textgrid to convert to a string</span>
-<span class="sd">        format (str): one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
-<span class="sd">        includeBlankSpaces (bool): if True, blank sections in interval</span>
+<span class="sd">        tg: the textgrid to convert to a string</span>
+<span class="sd">        format: one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
+<span class="sd">        includeBlankSpaces: if True, blank sections in interval</span>
 <span class="sd">            tiers will be filled in with an empty interval</span>
 <span class="sd">            (with a label of &quot;&quot;)</span>
-<span class="sd">        minTimestamp (float): the minTimestamp of the saved Textgrid;</span>
+<span class="sd">        minTimestamp: the minTimestamp of the saved Textgrid;</span>
 <span class="sd">            if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">            If minTimestamp is larger than timestamps in your textgrid,</span>
 <span class="sd">            an exception will be thrown.</span>
-<span class="sd">        maxTimestamp (float): the maxTimestamp of the saved Textgrid;</span>
+<span class="sd">        maxTimestamp: the maxTimestamp of the saved Textgrid;</span>
 <span class="sd">            if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">            If maxTimestamp is smaller than timestamps in your textgrid,</span>
 <span class="sd">            an exception will be thrown.</span>
-<span class="sd">        minimumIntervalLength (float): any labeled intervals smaller</span>
+<span class="sd">        minimumIntervalLength: any labeled intervals smaller</span>
 <span class="sd">            than this will be removed, useful for removing ultrashort</span>
 <span class="sd">            or fragmented intervals; if None, don&#39;t remove any.</span>
 <span class="sd">            Removed intervals are merged (without their label) into</span>
@@ -511,9 +507,7 @@
 
 
 <span class="k">def</span> <span class="nf">_parseShortTextgrid</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reads a short textgrid file</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Reads a short textgrid file&quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">intervalIndicies</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">utils</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;&quot;IntervalTier&quot;&#39;</span><span class="p">)]</span>
@@ -689,18 +683,17 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">parseTextgridStr</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">includeEmptyIntervals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a string representation of a Textgrid into a dictionary</span>
+    <span class="sd">&quot;&quot;&quot;Converts a string representation of a Textgrid into a dictionary</span>
+
+<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fnFullPath (str): the path to the textgrid to open</span>
-<span class="sd">        includeEmptyIntervals (bool): if False, points and intervals with</span>
+<span class="sd">        fnFullPath: the path to the textgrid to open</span>
+<span class="sd">        includeEmptyIntervals: if False, points and intervals with</span>
 <span class="sd">             an empty label &#39;&#39; are not included in the returned dictionary</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Dictionary</span>
-
-<span class="sd">    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -724,11 +717,13 @@
 
             <div class="docstring"><p>Converts a string representation of a Textgrid into a dictionary</p>
 
+<p>https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</p>
+
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>fnFullPath (str):</strong>  the path to the textgrid to open</li>
-<li><strong>includeEmptyIntervals (bool):</strong>  if False, points and intervals with
+<li><strong>fnFullPath:</strong>  the path to the textgrid to open</li>
+<li><strong>includeEmptyIntervals:</strong>  if False, points and intervals with
 an empty label '' are not included in the returned dictionary</li>
 </ul>
 
@@ -737,8 +732,6 @@ an empty label '' are not included in the returned dictionary</li>
 <blockquote>
   <p>Dictionary</p>
 </blockquote>
-
-<p>https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html</p>
 </div>
 
 
@@ -768,24 +761,23 @@ an empty label '' are not included in the returned dictionary</li>
     <span class="n">maxTimestamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">minimumIntervalLength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MIN_INTERVAL_LENGTH</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a textgrid to a string, suitable for saving</span>
+    <span class="sd">&quot;&quot;&quot;Converts a textgrid to a string, suitable for saving</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        tg (Textgrid): the textgrid to convert to a string</span>
-<span class="sd">        format (str): one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
-<span class="sd">        includeBlankSpaces (bool): if True, blank sections in interval</span>
+<span class="sd">        tg: the textgrid to convert to a string</span>
+<span class="sd">        format: one of [&#39;short_textgrid&#39;, &#39;long_textgrid&#39;, &#39;json&#39;]</span>
+<span class="sd">        includeBlankSpaces: if True, blank sections in interval</span>
 <span class="sd">            tiers will be filled in with an empty interval</span>
 <span class="sd">            (with a label of &quot;&quot;)</span>
-<span class="sd">        minTimestamp (float): the minTimestamp of the saved Textgrid;</span>
+<span class="sd">        minTimestamp: the minTimestamp of the saved Textgrid;</span>
 <span class="sd">            if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">            If minTimestamp is larger than timestamps in your textgrid,</span>
 <span class="sd">            an exception will be thrown.</span>
-<span class="sd">        maxTimestamp (float): the maxTimestamp of the saved Textgrid;</span>
+<span class="sd">        maxTimestamp: the maxTimestamp of the saved Textgrid;</span>
 <span class="sd">            if None, use whatever is defined in the Textgrid object.</span>
 <span class="sd">            If maxTimestamp is smaller than timestamps in your textgrid,</span>
 <span class="sd">            an exception will be thrown.</span>
-<span class="sd">        minimumIntervalLength (float): any labeled intervals smaller</span>
+<span class="sd">        minimumIntervalLength: any labeled intervals smaller</span>
 <span class="sd">            than this will be removed, useful for removing ultrashort</span>
 <span class="sd">            or fragmented intervals; if None, don&#39;t remove any.</span>
 <span class="sd">            Removed intervals are merged (without their label) into</span>
@@ -824,20 +816,20 @@ an empty label '' are not included in the returned dictionary</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>tg (Textgrid):</strong>  the textgrid to convert to a string</li>
-<li><strong>format (str):</strong>  one of ['short_textgrid', 'long_textgrid', 'json']</li>
-<li><strong>includeBlankSpaces (bool):</strong>  if True, blank sections in interval
+<li><strong>tg:</strong>  the textgrid to convert to a string</li>
+<li><strong>format:</strong>  one of ['short_textgrid', 'long_textgrid', 'json']</li>
+<li><strong>includeBlankSpaces:</strong>  if True, blank sections in interval
 tiers will be filled in with an empty interval
 (with a label of "")</li>
-<li><strong>minTimestamp (float):</strong>  the minTimestamp of the saved Textgrid;
+<li><strong>minTimestamp:</strong>  the minTimestamp of the saved Textgrid;
 if None, use whatever is defined in the Textgrid object.
 If minTimestamp is larger than timestamps in your textgrid,
 an exception will be thrown.</li>
-<li><strong>maxTimestamp (float):</strong>  the maxTimestamp of the saved Textgrid;
+<li><strong>maxTimestamp:</strong>  the maxTimestamp of the saved Textgrid;
 if None, use whatever is defined in the Textgrid object.
 If maxTimestamp is smaller than timestamps in your textgrid,
 an exception will be thrown.</li>
-<li><strong>minimumIntervalLength (float):</strong>  any labeled intervals smaller
+<li><strong>minimumIntervalLength:</strong>  any labeled intervals smaller
 than this will be removed, useful for removing ultrashort
 or fragmented intervals; if None, don't remove any.
 Removed intervals are merged (without their label) into

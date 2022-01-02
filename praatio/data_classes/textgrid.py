@@ -30,15 +30,24 @@ from praatio.utilities import utils
 
 
 class Textgrid:
+    """A container that stores and operates over interval and point tiers
+
+    Textgrids are used by the Praat software to group tiers.  Each tier
+    contains different annotation information for an audio recording.
+
+    Attributes:
+        tierNameList(List[str]): the list of tier names in the textgrid
+        tierDict(Dict[str, TextgridTier]): holds the textgrid's tiers
+        minTimestamp(float): the minimum allowable timestamp in the textgrid
+        maxTimestamp(float): the maximum allowable timestamp in the textgrid
+    """
+
     def __init__(self, minTimestamp: float = None, maxTimestamp: float = None):
-        """
-        A container that stores and operates over interval and point tiers
+        """Constructor for Textgrids
 
         Args:
-            errorMode (str): one of "silence", "warning" or "error". Determines
-            the behavior for some non-fatal errors (generally involving incompatibilities
-            between tiers, such as tiers having different maximum lengths -- which may
-            be surprising or expected, depending on the use-case.)
+            minTimestamp: the minimum allowable timestamp in the textgrid
+            maxTimestamp: the maximum allowable timestamp in the textgrid
         """
 
         self.tierNameList: List[str] = []  # Preserves the order of the tiers
@@ -69,18 +78,25 @@ class Textgrid:
         tierIndex: Optional[int] = None,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
-        """
-        Add a tier to this textgrid.
+        """Add a tier to this textgrid.
 
         Args:
-            tier (TextgridTier):
-            tierIndex (int): if specified, insert the tier into the specified position
-            reportingMode (str): one of "silence", "warning", or "error". This flag
-                determines the behavior if there is a size difference between the
-                maxTimestamp in the tier and the current textgrid.
+            tier: The tier to add to the textgrid
+            tierIndex: Insert the tier into the specified position;
+                if None, the tier will appear after all existing tiers
+            reportingMode: This flag determines the behavior if there is a size
+                difference between the maxTimestamp in the tier and the current
+                textgrid.
 
         Returns:
             None
+
+        Raises:
+            TierNameExistsError: The textgrid already contains a tier with the same
+                name as the tier being added
+            TextgridStateAutoModified: The minimum or maximum timestamp was changed
+                when not permitted
+            IndexError: TierIndex is too large for the size of the existing tier list
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
@@ -116,16 +132,15 @@ class Textgrid:
             self.maxTimestamp = maxV
 
     def appendTextgrid(self, tg: "Textgrid", onlyMatchingNames: bool) -> "Textgrid":
-        """
-        Append one textgrid to the end of this one
+        """Append one textgrid to the end of this one
 
         Args:
-            tg (Textgrid): the tier to add to this one
-            onlyMatchingNames (bool): if False, tiers that don't appear in both
+            tg: the textgrid to add to this one
+            onlyMatchingNames: if False, tiers that don't appear in both
                 textgrids will also appear
 
         Returns:
-            Textgrid: the modified version of the current textgrid
+            the modified version of the current textgrid
         """
         minTime = self.minTimestamp
         maxTime = self.maxTimestamp + tg.maxTimestamp
@@ -188,23 +203,23 @@ class Textgrid:
         mode: Literal["strict", "lax", "truncated"],
         rebaseToZero: bool,
     ) -> "Textgrid":
-        """
-        Creates a textgrid where all intervals fit within the crop region
+        """Creates a textgrid where all intervals fit within the crop region
 
         Args:
-            cropStart (float):
-            cropEnd (float):
-            mode (str): one of ['strict', 'lax', 'truncated']
+            cropStart: The start time of the crop interval
+            cropEnd: The stop time of the crop interval
+            mode: Determines the crop behavior
                 - 'strict', only intervals wholly contained by the crop
                     interval will be kept
                 - 'lax', partially contained intervals will be kept
                 - 'truncated', partially contained intervals will be
                     truncated to fit within the crop region.
-            rebaseToZero (bool): if True, the cropped textgrid values will be
-                subtracted by the cropStart
+            rebaseToZero: if True, the cropped textgrid timestamps will be
+                subtracted by the cropStart; if False, timestamps will not
+                be changed
 
         Returns:
-            Textgrid: the modified version of the current textgrid
+            the modified version of the current textgrid
         """
         utils.validateOption("mode", mode, CropCollision)
 
@@ -238,21 +253,23 @@ class Textgrid:
         return newTG
 
     def eraseRegion(self, start: float, end: float, doShrink: bool) -> "Textgrid":
-        """
-        Makes a region in a tier blank (removes all contained entries)
+        """Makes a region in a tier blank (removes all contained entries)
 
         Intervals that span the region to erase will be truncated.
 
         Args:
-            start (float):
-            end (float):
-            doShrink (bool): if True, all entries appearing after the
+            start:
+            end:
+            doShrink: if True, all entries appearing after the
                 erased interval will be shifted to fill the void (ie
                 the duration of the textgrid will be reduced by
                 *start* - *end*)
 
         Returns:
-            Textgrid: the modified version of the current textgrid
+            the modified version of the current textgrid
+
+        Raises:
+            ArgumentError
         """
         if start >= end:
             raise errors.ArgumentError(
@@ -282,12 +299,11 @@ class Textgrid:
         offset: float,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "Textgrid":
-        """
-        Modifies all timestamps by a constant amount
+        """Modifies all timestamps by a constant amount
 
         Args:
-            offset (float): the amount to offset in seconds
-            reportingMode (str): one of "silence", "warning", or "error". This flag
+            offset: the amount to offset in seconds
+            reportingMode: one of "silence", "warning", or "error". This flag
                 determines the behavior if there is a size difference between the
                 maxTimestamp in the tier and the current textgrid.
 
@@ -314,16 +330,15 @@ class Textgrid:
         duration: float,
         collisionMode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "Textgrid":
-        """
-        Inserts a blank region into a textgrid
+        """Inserts a blank region into a textgrid
 
         Every item that occurs after *start* will be pushed back by
         *duration* seconds
 
         Args:
-            start (float):
-            duration (float):
-            collisionMode (str): Determines behavior in the event that an
+            start:
+            duration:
+            collisionMode: Determines behavior in the event that an
                 interval stradles the starting point.
                 One of ['stretch', 'split', 'no change', None]
                 - 'stretch' stretches the interval by /duration/ amount
@@ -353,13 +368,12 @@ class Textgrid:
     def mergeTiers(
         self, tierList: Optional[List[str]] = None, preserveOtherTiers: bool = True
     ) -> "Textgrid":
-        """
-        Combine tiers
+        """Combine tiers
 
         Args:
-            tierList (list): A list of tier names to combine. If none, combine
+            tierList: A list of tier names to combine. If none, combine
                 all tiers.
-            preserveOtherTiers (bool): If false, uncombined tiers are not
+            preserveOtherTiers: If false, uncombined tiers are not
                 included in the output.
 
         Returns:
@@ -422,30 +436,29 @@ class Textgrid:
         minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
-        """
-        Save the current textgrid to a file
+        """Save the current textgrid to a file
 
         Args:
-            fn (str): the fullpath filename of the output
-            format (str): one of ['short_textgrid', 'long_textgrid', 'json']
-            includeBlankSpaces (bool): if True, blank sections in interval
+            fn: the fullpath filename of the output
+            format: one of ['short_textgrid', 'long_textgrid', 'json']
+            includeBlankSpaces: if True, blank sections in interval
                 tiers will be filled in with an empty interval
                 (with a label of ""). If you are unsure, True is recommended
                 as Praat needs blanks to render textgrids properly.
-            minTimestamp (float): the minTimestamp of the saved Textgrid;
+            minTimestamp: the minTimestamp of the saved Textgrid;
                 if None, use whatever is defined in the Textgrid object.
                 If minTimestamp is larger than timestamps in your textgrid,
                 an exception will be thrown.
-            maxTimestamp (float): the maxTimestamp of the saved Textgrid;
+            maxTimestamp: the maxTimestamp of the saved Textgrid;
                 if None, use whatever is defined in the Textgrid object.
                 If maxTimestamp is smaller than timestamps in your textgrid,
                 an exception will be thrown.
-            minimumIntervalLength (float): any labeled intervals smaller
+            minimumIntervalLength: any labeled intervals smaller
                 than this will be removed, useful for removing ultrashort
                 or fragmented intervals; if None, don't remove any.
                 Removed intervals are merged (without their label) into
                 adjacent entries.
-            reportingMode (str): one of "silence", "warning", or "error". This flag
+            reportingMode: one of "silence", "warning", or "error". This flag
                 determines the behavior if there is a size difference between the
                 maxTimestamp in the tier and the current textgrid.
 
@@ -496,19 +509,22 @@ class Textgrid:
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"
     ) -> bool:
-        """
-        Validate this textgrid
+        """Validates this textgrid
 
         Returns whether the textgrid is valid or not. If reportingMode is "warning"
         or "error" this will also print on error or stop execution, respectively.
 
         Args:
-            reportingMode (str): one of "silence", "warning", or "error". This flag
+            reportingMode: one of "silence", "warning", or "error". This flag
                 determines the behavior if there is a size difference between the
                 maxTimestamp in a tier and the current textgrid.
 
         Returns:
-            bool
+            True if this Textgrid is valid; False if not
+
+        Raises:
+            TierNameExistsError: Two tiers have the same name
+            TextgridStateError: A timestamp fall outside of the allowable range
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode

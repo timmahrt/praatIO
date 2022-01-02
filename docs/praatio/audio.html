@@ -285,8 +285,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
     <span class="k">def</span> <span class="nf">findNearestZeroCrossing</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">targetTime</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing at the given time in an audio file</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing at the given time in an audio file</span>
 
 <span class="sd">        Looks both before and after the timeStamp</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -355,8 +354,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
         <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span><span class="p">,</span>
         <span class="n">reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing, searching in one direction</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing, searching in one direction</span>
 
 <span class="sd">        Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,</span>
 <span class="sd">        the sample list is searched from back to front.</span>
@@ -424,8 +422,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
 
 
 <span class="k">class</span> <span class="nc">WavQueryObj</span><span class="p">(</span><span class="n">AbstractWav</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for getting information about a wave file</span>
+    <span class="sd">&quot;&quot;&quot;A class for getting information about a wave file</span>
 
 <span class="sd">    The wave file is never loaded--we only keep a reference to the</span>
 <span class="sd">    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don&#39;t</span>
@@ -454,9 +451,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
         <span class="k">return</span> <span class="n">duration</span>
 
     <span class="k">def</span> <span class="nf">getFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get frames with respect to time</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get frames with respect to time&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">startTime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">startTime</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">startFrame</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">startTime</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">framerate</span><span class="p">))</span>
@@ -487,8 +482,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
         <span class="n">operation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;shrink&quot;</span><span class="p">,</span> <span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;sine wave&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AudioDeletion</span><span class="o">.</span><span class="n">SHRINK</span><span class="p">,</span>
         <span class="n">sineWaveAmplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove from the audio all of the intervals</span>
+        <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
 <span class="sd">        DeleteList can easily be constructed from a textgrid tier</span>
 <span class="sd">        e.g. deleteList = tg.tierDict[&quot;targetTier&quot;].entryList</span>
@@ -561,9 +555,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
             <span class="bp">self</span><span class="o">.</span><span class="n">outputModifiedWav</span><span class="p">(</span><span class="n">audioFrames</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">outputModifiedWav</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audioFrames</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Output frames using the same parameters as this WavQueryObj</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Output frames using the same parameters as this WavQueryObj&quot;&quot;&quot;</span>
 
         <span class="c1"># Output resulting wav file</span>
         <span class="n">outParams</span> <span class="o">=</span> <span class="p">[</span>
@@ -581,8 +573,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
 
 
 <span class="k">class</span> <span class="nc">WavObj</span><span class="p">(</span><span class="n">AbstractWav</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for manipulating audio files</span>
+    <span class="sd">&quot;&quot;&quot;A class for manipulating audio files</span>
 
 <span class="sd">    The wav file is represented by its wavform as a series of signed</span>
 <span class="sd">    integers.  This can be very slow and take up lots of memory with</span>
@@ -651,11 +642,13 @@ and <strong>examples/extract_subwavs.py</strong></p>
     <span class="n">deleteList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavObj</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove from the audio all of the intervals</span>
+    <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
-<span class="sd">    keepList - specifies the segments to keep; by default, everything is kept</span>
-<span class="sd">    doShrink - if False, segments not kept are replaced by silence</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fn: The audio file name to read</span>
+<span class="sd">        keepList: Specifies the segments to keep; by default, everything is kept</span>
+<span class="sd">        deleteList: Specifies the segments to delete; by default, nothing is deleted</span>
+<span class="sd">        doShrink: If False, segments not kept are replaced by silence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">audiofile</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
@@ -991,8 +984,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
     <span class="k">def</span> <span class="nf">findNearestZeroCrossing</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">targetTime</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing at the given time in an audio file</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing at the given time in an audio file</span>
 
 <span class="sd">        Looks both before and after the timeStamp</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1061,8 +1053,7 @@ and <strong>examples/extract_subwavs.py</strong></p>
         <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span><span class="p">,</span>
         <span class="n">reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing, searching in one direction</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing, searching in one direction</span>
 
 <span class="sd">        Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,</span>
 <span class="sd">        the sample list is searched from back to front.</span>
@@ -1149,8 +1140,7 @@ inheritance.</p>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">findNearestZeroCrossing</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">targetTime</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing at the given time in an audio file</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing at the given time in an audio file</span>
 
 <span class="sd">        Looks both before and after the timeStamp</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1244,8 +1234,7 @@ inheritance.</p>
         <span class="n">timeStep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ZERO_CROSSING_TIMESTEP</span><span class="p">,</span>
         <span class="n">reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the nearest zero crossing, searching in one direction</span>
+        <span class="sd">&quot;&quot;&quot;Finds the nearest zero crossing, searching in one direction</span>
 
 <span class="sd">        Can do a &#39;reverse&#39; search by setting reverse to True.  In that case,</span>
 <span class="sd">        the sample list is searched from back to front.</span>
@@ -1372,8 +1361,7 @@ the sample list is searched from back to front.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">WavQueryObj</span><span class="p">(</span><span class="n">AbstractWav</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for getting information about a wave file</span>
+    <span class="sd">&quot;&quot;&quot;A class for getting information about a wave file</span>
 
 <span class="sd">    The wave file is never loaded--we only keep a reference to the</span>
 <span class="sd">    fd.  All operations on WavQueryObj are fast.  WavQueryObjs don&#39;t</span>
@@ -1402,9 +1390,7 @@ the sample list is searched from back to front.</p>
         <span class="k">return</span> <span class="n">duration</span>
 
     <span class="k">def</span> <span class="nf">getFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get frames with respect to time</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get frames with respect to time&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">startTime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">startTime</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">startFrame</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">startTime</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">framerate</span><span class="p">))</span>
@@ -1435,8 +1421,7 @@ the sample list is searched from back to front.</p>
         <span class="n">operation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;shrink&quot;</span><span class="p">,</span> <span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;sine wave&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AudioDeletion</span><span class="o">.</span><span class="n">SHRINK</span><span class="p">,</span>
         <span class="n">sineWaveAmplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove from the audio all of the intervals</span>
+        <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
 <span class="sd">        DeleteList can easily be constructed from a textgrid tier</span>
 <span class="sd">        e.g. deleteList = tg.tierDict[&quot;targetTier&quot;].entryList</span>
@@ -1509,9 +1494,7 @@ the sample list is searched from back to front.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">outputModifiedWav</span><span class="p">(</span><span class="n">audioFrames</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">outputModifiedWav</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audioFrames</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Output frames using the same parameters as this WavQueryObj</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Output frames using the same parameters as this WavQueryObj&quot;&quot;&quot;</span>
 
         <span class="c1"># Output resulting wav file</span>
         <span class="n">outParams</span> <span class="o">=</span> <span class="p">[</span>
@@ -1622,9 +1605,7 @@ use a WavObj.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">getFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endTime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get frames with respect to time</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get frames with respect to time&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">startTime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">startTime</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">startFrame</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">startTime</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">framerate</span><span class="p">))</span>
@@ -1696,8 +1677,7 @@ use a WavObj.</p>
         <span class="n">operation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;shrink&quot;</span><span class="p">,</span> <span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;sine wave&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AudioDeletion</span><span class="o">.</span><span class="n">SHRINK</span><span class="p">,</span>
         <span class="n">sineWaveAmplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove from the audio all of the intervals</span>
+        <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
 <span class="sd">        DeleteList can easily be constructed from a textgrid tier</span>
 <span class="sd">        e.g. deleteList = tg.tierDict[&quot;targetTier&quot;].entryList</span>
@@ -1797,9 +1777,7 @@ sineWaveAmplitude: if None and operation is "sine wave"
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">outputModifiedWav</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audioFrames</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">outputFN</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Output frames using the same parameters as this WavQueryObj</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Output frames using the same parameters as this WavQueryObj&quot;&quot;&quot;</span>
 
         <span class="c1"># Output resulting wav file</span>
         <span class="n">outParams</span> <span class="o">=</span> <span class="p">[</span>
@@ -1846,8 +1824,7 @@ sineWaveAmplitude: if None and operation is "sine wave"
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">WavObj</span><span class="p">(</span><span class="n">AbstractWav</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for manipulating audio files</span>
+    <span class="sd">&quot;&quot;&quot;A class for manipulating audio files</span>
 
 <span class="sd">    The wav file is represented by its wavform as a series of signed</span>
 <span class="sd">    integers.  This can be very slow and take up lots of memory with</span>
@@ -2166,11 +2143,13 @@ large files.</p>
     <span class="n">deleteList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WavObj</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove from the audio all of the intervals</span>
+    <span class="sd">&quot;&quot;&quot;Remove from the audio all of the intervals</span>
 
-<span class="sd">    keepList - specifies the segments to keep; by default, everything is kept</span>
-<span class="sd">    doShrink - if False, segments not kept are replaced by silence</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fn: The audio file name to read</span>
+<span class="sd">        keepList: Specifies the segments to keep; by default, everything is kept</span>
+<span class="sd">        deleteList: Specifies the segments to delete; by default, nothing is deleted</span>
+<span class="sd">        doShrink: If False, segments not kept are replaced by silence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">audiofile</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
@@ -2234,8 +2213,14 @@ large files.</p>
 
             <div class="docstring"><p>Remove from the audio all of the intervals</p>
 
-<p>keepList - specifies the segments to keep; by default, everything is kept
-doShrink - if False, segments not kept are replaced by silence</p>
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>fn:</strong>  The audio file name to read</li>
+<li><strong>keepList:</strong>  Specifies the segments to keep; by default, everything is kept</li>
+<li><strong>deleteList:</strong>  Specifies the segments to delete; by default, nothing is deleted</li>
+<li><strong>doShrink:</strong>  If False, segments not kept are replaced by silence</li>
+</ul>
 </div>
 
 

@@ -32,8 +32,7 @@ def changeGender(
     duration: float = 1.0,
     scriptFN: Optional[str] = None,
 ) -> None:
-    """
-    Changes the speech formants in a file using praat's change gender function
+    """Changes the speech formants in a file using praat's change gender function
 
     PitchMedian = 0.0; no change in median pitch
     PitchRange = 1.0; no change in pitch range
@@ -68,8 +67,7 @@ def changeIntensity(
     newIntensity: float,
     scriptFN: Optional[str] = None,
 ) -> None:
-    """
-    Changes the intensity of the wavFN (in db)
+    """Changes the intensity of the wavFN (in db)
 
     Uses the following praat command:
     https://www.fon.hum.uva.nl/praat/manual/Sound__Scale_intensity___.html
@@ -92,8 +90,7 @@ def getFormants(
     scriptFN: Optional[str] = None,
     undefinedValue: Optional[str] = None,
 ) -> List:
-    """
-    Get F1, F2, and F3 for the audio file
+    """Get F1, F2, and F3 for the audio file
 
     maxFormant = 5500 for females, 5000 for males, <8000 for children
 
@@ -151,8 +148,7 @@ def getPulses(
     maxPitch: float,
     scriptFN: Optional[str] = None,
 ) -> data_points.PointObject1D:
-    """
-    Gets the pitch/glottal pulses for an audio file.
+    """Gets the pitch/glottal pulses for an audio file.
 
     Uses the following praat command:
     http://www.fon.hum.uva.nl/praat/manual/Sound___Pitch__To_PointProcess__peaks____.html
@@ -179,8 +175,7 @@ def getSpectralInfo(
     spectralMoment: int = 3,
     scriptFN: Optional[str] = None,
 ) -> Tuple[List, List]:
-    """
-    Extracts various spectral measures from an audio file
+    """Extracts various spectral measures from an audio file
 
     Measures include: center_of_gravity, standard_deviation
     skewness, kertosis, central_movement
@@ -222,8 +217,7 @@ def resynthesizePitch(
     scriptFN: Optional[str] = None,
     pointList: Optional[List] = None,
 ) -> None:
-    """
-    Resynthesizes the pitch in a wav file with the given pitch contour file
+    """Resynthesizes the pitch in a wav file with the given pitch contour file
 
     The pitch track to use can optionally be passed in as pointList.  If
     so, it will be saved as pitchFN for praat to be able to use.
@@ -255,8 +249,7 @@ def resynthesizeDuration(
     maxPitch: float,
     scriptFN: Optional[str] = None,
 ) -> None:
-    """
-    Resynthesizes the duration in a wav file with the given duration tier
+    """Resynthesizes the duration in a wav file with the given duration tier
 
     Uses the following praat command:
     https://www.fon.hum.uva.nl/praat/manual/Manipulation.html
@@ -284,8 +277,7 @@ def annotateSilences(
     soundLabel: str = SOUND_LABEL,
     scriptFN: Optional[str] = None,
 ) -> None:
-    """
-    Marks the silences and non-silences of an audio file
+    """Marks the silences and non-silences of an audio file
 
     Uses the praat command:
     https://www.fon.hum.uva.nl/praat/manual/Sound__To_TextGrid__silences____.html

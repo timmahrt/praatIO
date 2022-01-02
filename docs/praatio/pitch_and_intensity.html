@@ -86,8 +86,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="c1"># coding: utf-8</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Functions for working with pitch data</span>
+<span class="sd">&quot;&quot;&quot;Functions for working with pitch data</span>
 
 <span class="sd">This file depends on the praat script get_pitch_and_intensity.praat</span>
 <span class="sd">(which depends on praat) to extract pitch and intensity values from</span>
@@ -137,8 +136,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and int from each labeled interval in a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and int from each labeled interval in a textgrid</span>
 
 <span class="sd">    This has the benefit of being faster than using _extractPIFile if only</span>
 <span class="sd">    labeled regions need to have their pitch values sampled, particularly</span>
@@ -205,8 +203,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and intensity values from an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and intensity values from an audio file</span>
 
 <span class="sd">    Returns the result as a list.  Will load the serialized result</span>
 <span class="sd">    if this has already been called on the appropriate files before</span>
@@ -260,8 +257,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">forceRegenerate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">undefinedValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract the intensity for an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Extract the intensity for an audio file</span>
 
 <span class="sd">    Calculates intensity using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</span>
@@ -301,21 +297,24 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">data_points</span><span class="o">.</span><span class="n">PointObject2D</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract pitch at regular intervals from the input wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extract pitch at regular intervals from the input wav file</span>
 
 <span class="sd">    Data is output to a text file and then returned in a list in the form</span>
 <span class="sd">    [(timeV1, pitchV1), (timeV2, pitchV2), ...]</span>
 
-<span class="sd">    sampleStep - the frequency to sample pitch at</span>
-<span class="sd">    silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
-<span class="sd">                       for pitch</span>
-<span class="sd">    forceRegenerate - if running this function for the same file, if False</span>
-<span class="sd">                      just read in the existing pitch file</span>
-<span class="sd">    pitchQuadInterp - if True, quadratically interpolate pitch</span>
-
 <span class="sd">    Calculates pitch using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampleStep: the frequency to sample pitch at</span>
+<span class="sd">        silenceThreshold: segments with lower intensity won&#39;t be analyzed</span>
+<span class="sd">            for pitch</span>
+<span class="sd">        forceRegenerate: if running this function for the same file, if False</span>
+<span class="sd">            just read in the existing pitch file</span>
+<span class="sd">        pitchQuadInterp: if True, quadratically interpolate pitch</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The pitch data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outputPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFN</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -365,23 +364,23 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract pitch at regular intervals from the input wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extract pitch at regular intervals from the input wav file</span>
 
 <span class="sd">    Data is output to a text file and then returned in a list in the form</span>
 <span class="sd">    [(timeV1, pitchV1), (timeV2, pitchV2), ...]</span>
 
-<span class="sd">    sampleStep - the frequency to sample pitch at</span>
-<span class="sd">    silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
-<span class="sd">                       for pitch</span>
-<span class="sd">    forceRegenerate - if running this function for the same file, if False</span>
-<span class="sd">                      just read in the existing pitch file</span>
-<span class="sd">    undefinedValue - if None remove from the dataset, otherset set to</span>
-<span class="sd">                     undefinedValue</span>
-<span class="sd">    pitchQuadInterp - if True, quadratically interpolate pitch</span>
-
 <span class="sd">    Calculates pitch using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampleStep - the frequency to sample pitch at</span>
+<span class="sd">        silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
+<span class="sd">            for pitch</span>
+<span class="sd">        forceRegenerate - if running this function for the same file, if False</span>
+<span class="sd">            just read in the existing pitch file</span>
+<span class="sd">        undefinedValue - if None remove from the dataset, otherset set to</span>
+<span class="sd">            undefinedValue</span>
+<span class="sd">        pitchQuadInterp - if True, quadratically interpolate pitch</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outputPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFN</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -437,8 +436,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and intensity from a file wholesale or piecewise</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and intensity from a file wholesale or piecewise</span>
 
 <span class="sd">    If the parameters for a tg are passed in, this will only extract labeled</span>
 <span class="sd">    segments in a tier of the tg.  Otherwise, pitch will be extracted from</span>
@@ -499,8 +497,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
 <span class="k">def</span> <span class="nf">loadTimeSeriesData</span><span class="p">(</span>
     <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">undefinedValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For reading the output of get_pitch_and_intensity or get_intensity</span>
+    <span class="sd">&quot;&quot;&quot;For reading the output of get_pitch_and_intensity or get_intensity</span>
 
 <span class="sd">    Data should be of the form</span>
 <span class="sd">    [(time1, value1a, value1b, ...),</span>
@@ -557,19 +554,17 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">globalZNormalization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">localZNormalizationWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates processed values for the labeled intervals in a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Generates processed values for the labeled intervals in a textgrid</span>
 
-<span class="sd">    nullLabelList - labels to ignore in the textgrid.  Defaults to [&quot;&quot;,]</span>
-
-<span class="sd">    if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity</span>
-<span class="sd">    medianFilterWindowSize: if none, no filtering is done</span>
-<span class="sd">    globalZNormalization: if True, values are normalized with the mean</span>
-<span class="sd">                          and stdDev of the data in dataList</span>
-<span class="sd">    localZNormalization: if greater than 1, values are normalized with the mean</span>
-<span class="sd">                         and stdDev of the local context (for a window of 5, it</span>
-<span class="sd">                         would consider the current value, 2 values before and 2</span>
-<span class="sd">                         values after)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        doPitch: if True get pitch measures; if False get rms intensity</span>
+<span class="sd">        medianFilterWindowSize: if none, no filtering is done</span>
+<span class="sd">        globalZNormalization: if True, values are normalized with the mean</span>
+<span class="sd">            and stdDev of the data in dataList</span>
+<span class="sd">        localZNormalization: if greater than 1, values are normalized with the mean</span>
+<span class="sd">            and stdDev of the local context (for a window of 5, it</span>
+<span class="sd">            would consider the current value, 2 values before and 2</span>
+<span class="sd">            values after)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Warn user that normalizing a second time nullifies the first normalization</span>
@@ -646,13 +641,13 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filterZeroFlag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get various measures (min, max, etc) for the passed in list of pitch values</span>
+    <span class="sd">&quot;&quot;&quot;Get various measures (min, max, etc) for the passed in list of pitch values</span>
 
-<span class="sd">    name is the name of the file.  Label is the label of the current interval.</span>
-<span class="sd">    Both of these labels are only used debugging and can be ignored if desired.</span>
-<span class="sd">    medianFilterWindowSize: None -&gt; no median filtering</span>
-<span class="sd">    filterZeroFlag:True -&gt; zero values are removed</span>
+<span class="sd">    Args:</span>
+<span class="sd">        name: the name of the file.</span>
+<span class="sd">        label: the label of the current interval.</span>
+<span class="sd">        medianFilterWindowSize: if None, there is no median filtering</span>
+<span class="sd">        filterZeroFlag: if True, values of zero are removed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -696,8 +691,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">maxJumpThreshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.70</span><span class="p">,</span>
     <span class="n">tgToMark</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Point</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Detect pitch halving and doubling errors.</span>
+    <span class="sd">&quot;&quot;&quot;Detect pitch halving and doubling errors.</span>
 
 <span class="sd">    If a textgrid is passed in, it adds the markings to the textgrid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -762,8 +756,7 @@ stamped output of the praat script (ie <strong>generatePIMeasures()</strong>)</p
     <span class="n">forceRegenerate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">undefinedValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract the intensity for an audio file</span>
+    <span class="sd">&quot;&quot;&quot;Extract the intensity for an audio file</span>
 
 <span class="sd">    Calculates intensity using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</span>
@@ -834,21 +827,24 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">data_points</span><span class="o">.</span><span class="n">PointObject2D</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract pitch at regular intervals from the input wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extract pitch at regular intervals from the input wav file</span>
 
 <span class="sd">    Data is output to a text file and then returned in a list in the form</span>
 <span class="sd">    [(timeV1, pitchV1), (timeV2, pitchV2), ...]</span>
 
-<span class="sd">    sampleStep - the frequency to sample pitch at</span>
-<span class="sd">    silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
-<span class="sd">                       for pitch</span>
-<span class="sd">    forceRegenerate - if running this function for the same file, if False</span>
-<span class="sd">                      just read in the existing pitch file</span>
-<span class="sd">    pitchQuadInterp - if True, quadratically interpolate pitch</span>
-
 <span class="sd">    Calculates pitch using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampleStep: the frequency to sample pitch at</span>
+<span class="sd">        silenceThreshold: segments with lower intensity won&#39;t be analyzed</span>
+<span class="sd">            for pitch</span>
+<span class="sd">        forceRegenerate: if running this function for the same file, if False</span>
+<span class="sd">            just read in the existing pitch file</span>
+<span class="sd">        pitchQuadInterp: if True, quadratically interpolate pitch</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The pitch data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outputPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFN</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -892,15 +888,25 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</p>
 <p>Data is output to a text file and then returned in a list in the form
 [(timeV1, pitchV1), (timeV2, pitchV2), ...]</p>
 
-<p>sampleStep - the frequency to sample pitch at
-silenceThreshold - segments with lower intensity won't be analyzed
-                   for pitch
-forceRegenerate - if running this function for the same file, if False
-                  just read in the existing pitch file
-pitchQuadInterp - if True, quadratically interpolate pitch</p>
-
 <p>Calculates pitch using the following praat command:
 https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</p>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>sampleStep:</strong>  the frequency to sample pitch at</li>
+<li><strong>silenceThreshold:</strong>  segments with lower intensity won't be analyzed
+for pitch</li>
+<li><strong>forceRegenerate:</strong>  if running this function for the same file, if False
+just read in the existing pitch file</li>
+<li><strong>pitchQuadInterp:</strong>  if True, quadratically interpolate pitch</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>The pitch data</p>
+</blockquote>
 </div>
 
 
@@ -940,23 +946,23 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract pitch at regular intervals from the input wav file</span>
+    <span class="sd">&quot;&quot;&quot;Extract pitch at regular intervals from the input wav file</span>
 
 <span class="sd">    Data is output to a text file and then returned in a list in the form</span>
 <span class="sd">    [(timeV1, pitchV1), (timeV2, pitchV2), ...]</span>
 
-<span class="sd">    sampleStep - the frequency to sample pitch at</span>
-<span class="sd">    silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
-<span class="sd">                       for pitch</span>
-<span class="sd">    forceRegenerate - if running this function for the same file, if False</span>
-<span class="sd">                      just read in the existing pitch file</span>
-<span class="sd">    undefinedValue - if None remove from the dataset, otherset set to</span>
-<span class="sd">                     undefinedValue</span>
-<span class="sd">    pitchQuadInterp - if True, quadratically interpolate pitch</span>
-
 <span class="sd">    Calculates pitch using the following praat command:</span>
 <span class="sd">    https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sampleStep - the frequency to sample pitch at</span>
+<span class="sd">        silenceThreshold - segments with lower intensity won&#39;t be analyzed</span>
+<span class="sd">            for pitch</span>
+<span class="sd">        forceRegenerate - if running this function for the same file, if False</span>
+<span class="sd">            just read in the existing pitch file</span>
+<span class="sd">        undefinedValue - if None remove from the dataset, otherset set to</span>
+<span class="sd">            undefinedValue</span>
+<span class="sd">        pitchQuadInterp - if True, quadratically interpolate pitch</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outputPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFN</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -1002,17 +1008,21 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</p>
 <p>Data is output to a text file and then returned in a list in the form
 [(timeV1, pitchV1), (timeV2, pitchV2), ...]</p>
 
-<p>sampleStep - the frequency to sample pitch at
-silenceThreshold - segments with lower intensity won't be analyzed
-                   for pitch
-forceRegenerate - if running this function for the same file, if False
-                  just read in the existing pitch file
-undefinedValue - if None remove from the dataset, otherset set to
-                 undefinedValue
-pitchQuadInterp - if True, quadratically interpolate pitch</p>
-
 <p>Calculates pitch using the following praat command:
 https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</p>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li>sampleStep - the frequency to sample pitch at</li>
+<li>silenceThreshold - segments with lower intensity won't be analyzed
+for pitch</li>
+<li>forceRegenerate - if running this function for the same file, if False
+just read in the existing pitch file</li>
+<li>undefinedValue - if None remove from the dataset, otherset set to
+undefinedValue</li>
+<li>pitchQuadInterp - if True, quadratically interpolate pitch</li>
+</ul>
 </div>
 
 
@@ -1060,8 +1070,7 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html</p>
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">pitchQuadInterp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extracts pitch and intensity from a file wholesale or piecewise</span>
+    <span class="sd">&quot;&quot;&quot;Extracts pitch and intensity from a file wholesale or piecewise</span>
 
 <span class="sd">    If the parameters for a tg are passed in, this will only extract labeled</span>
 <span class="sd">    segments in a tier of the tg.  Otherwise, pitch will be extracted from</span>
@@ -1151,8 +1160,7 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</p>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">loadTimeSeriesData</span><span class="p">(</span>
     <span class="n">fn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">undefinedValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For reading the output of get_pitch_and_intensity or get_intensity</span>
+    <span class="sd">&quot;&quot;&quot;For reading the output of get_pitch_and_intensity or get_intensity</span>
 
 <span class="sd">    Data should be of the form</span>
 <span class="sd">    [(time1, value1a, value1b, ...),</span>
@@ -1238,19 +1246,17 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</p>
     <span class="n">globalZNormalization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">localZNormalizationWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates processed values for the labeled intervals in a textgrid</span>
+    <span class="sd">&quot;&quot;&quot;Generates processed values for the labeled intervals in a textgrid</span>
 
-<span class="sd">    nullLabelList - labels to ignore in the textgrid.  Defaults to [&quot;&quot;,]</span>
-
-<span class="sd">    if &#39;doPitch&#39;=true get pitch measures; if =false get rms intensity</span>
-<span class="sd">    medianFilterWindowSize: if none, no filtering is done</span>
-<span class="sd">    globalZNormalization: if True, values are normalized with the mean</span>
-<span class="sd">                          and stdDev of the data in dataList</span>
-<span class="sd">    localZNormalization: if greater than 1, values are normalized with the mean</span>
-<span class="sd">                         and stdDev of the local context (for a window of 5, it</span>
-<span class="sd">                         would consider the current value, 2 values before and 2</span>
-<span class="sd">                         values after)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        doPitch: if True get pitch measures; if False get rms intensity</span>
+<span class="sd">        medianFilterWindowSize: if none, no filtering is done</span>
+<span class="sd">        globalZNormalization: if True, values are normalized with the mean</span>
+<span class="sd">            and stdDev of the data in dataList</span>
+<span class="sd">        localZNormalization: if greater than 1, values are normalized with the mean</span>
+<span class="sd">            and stdDev of the local context (for a window of 5, it</span>
+<span class="sd">            would consider the current value, 2 values before and 2</span>
+<span class="sd">            values after)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Warn user that normalizing a second time nullifies the first normalization</span>
@@ -1324,16 +1330,18 @@ https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html</p>
 
             <div class="docstring"><p>Generates processed values for the labeled intervals in a textgrid</p>
 
-<p>nullLabelList - labels to ignore in the textgrid.  Defaults to ["",]</p>
+<h6 id="args">Args</h6>
 
-<p>if 'doPitch'=true get pitch measures; if =false get rms intensity
-medianFilterWindowSize: if none, no filtering is done
-globalZNormalization: if True, values are normalized with the mean
-                      and stdDev of the data in dataList
-localZNormalization: if greater than 1, values are normalized with the mean
-                     and stdDev of the local context (for a window of 5, it
-                     would consider the current value, 2 values before and 2
-                     values after)</p>
+<ul>
+<li><strong>doPitch:</strong>  if True get pitch measures; if False get rms intensity</li>
+<li><strong>medianFilterWindowSize:</strong>  if none, no filtering is done</li>
+<li><strong>globalZNormalization:</strong>  if True, values are normalized with the mean
+and stdDev of the data in dataList</li>
+<li><strong>localZNormalization:</strong>  if greater than 1, values are normalized with the mean
+and stdDev of the local context (for a window of 5, it
+would consider the current value, 2 values before and 2
+values after)</li>
+</ul>
 </div>
 
 
@@ -1361,13 +1369,13 @@ localZNormalization: if greater than 1, values are normalized with the mean
     <span class="n">medianFilterWindowSize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filterZeroFlag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get various measures (min, max, etc) for the passed in list of pitch values</span>
+    <span class="sd">&quot;&quot;&quot;Get various measures (min, max, etc) for the passed in list of pitch values</span>
 
-<span class="sd">    name is the name of the file.  Label is the label of the current interval.</span>
-<span class="sd">    Both of these labels are only used debugging and can be ignored if desired.</span>
-<span class="sd">    medianFilterWindowSize: None -&gt; no median filtering</span>
-<span class="sd">    filterZeroFlag:True -&gt; zero values are removed</span>
+<span class="sd">    Args:</span>
+<span class="sd">        name: the name of the file.</span>
+<span class="sd">        label: the label of the current interval.</span>
+<span class="sd">        medianFilterWindowSize: if None, there is no median filtering</span>
+<span class="sd">        filterZeroFlag: if True, values of zero are removed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1410,10 +1418,14 @@ localZNormalization: if greater than 1, values are normalized with the mean
 
             <div class="docstring"><p>Get various measures (min, max, etc) for the passed in list of pitch values</p>
 
-<p>name is the name of the file.  Label is the label of the current interval.
-Both of these labels are only used debugging and can be ignored if desired.
-medianFilterWindowSize: None -> no median filtering
-filterZeroFlag:True -> zero values are removed</p>
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>name:</strong>  the name of the file.</li>
+<li><strong>label:</strong>  the label of the current interval.</li>
+<li><strong>medianFilterWindowSize:</strong>  if None, there is no median filtering</li>
+<li><strong>filterZeroFlag:</strong>  if True, values of zero are removed</li>
+</ul>
 </div>
 
 
@@ -1437,8 +1449,7 @@ filterZeroFlag:True -> zero values are removed</p>
     <span class="n">maxJumpThreshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.70</span><span class="p">,</span>
     <span class="n">tgToMark</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Point</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">textgrid</span><span class="o">.</span><span class="n">Textgrid</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Detect pitch halving and doubling errors.</span>
+    <span class="sd">&quot;&quot;&quot;Detect pitch halving and doubling errors.</span>
 
 <span class="sd">    If a textgrid is passed in, it adds the markings to the textgrid</span>
 <span class="sd">    &quot;&quot;&quot;</span>

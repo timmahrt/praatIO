@@ -16,7 +16,7 @@ def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
 
 
 class TestIntervalTier(PraatioTestCase):
-    def test_inequivalence_with_non_point_tiers(self):
+    def test_inequivalence_with_non_interval_tiers(self):
         sut = makeIntervalTier()
         self.assertNotEqual(sut, 55)
 
@@ -1048,7 +1048,7 @@ class TestIntervalTier(PraatioTestCase):
         # 4.0 = 5 + (1.0 + 0.2 + 0.3) - (1.5 + 0.5 + 0.5)
         self.assertAlmostEqual(4.7, sut.maxTimestamp)
 
-    def test_mintimestamp_behaviour(self):
+    def test_mintimestamp_behavior(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
 
         # By default, the min and max timestamp values come from the entry list

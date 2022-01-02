@@ -105,8 +105,7 @@
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">useEdgePadding</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">list</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Filter time-stamped data values within a window</span>
+    <span class="sd">&quot;&quot;&quot;Filter time-stamped data values within a window</span>
 
 <span class="sd">    filterFunc could be medianFilter() or znormFilter()</span>
 
@@ -135,8 +134,7 @@
 <span class="k">def</span> <span class="nf">znormalizeSpeakerData</span><span class="p">(</span>
     <span class="n">featureTimeList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">filterZeroValues</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    znormalize time series data</span>
+    <span class="sd">&quot;&quot;&quot;znormalize time series data</span>
 
 <span class="sd">    The idea is to normalize each speaker separately to be able</span>
 <span class="sd">    to compare data across several speakers for speaker-dependent</span>
@@ -145,7 +143,8 @@
 <span class="sd">    To normalize a speakers data within a local window, use filterTimeSeriesData()</span>
 
 <span class="sd">    filterZeroValues: if True, don&#39;t consider zero values in the mean and stdDev</span>
-<span class="sd">      (recommended value for data like pitch or intensity)</span>
+<span class="sd">      (recommended value for data like pitch or intensity, where zero values</span>
+<span class="sd">       are not expected)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">featValues</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">featureTimeList</span><span class="p">]</span>
 
@@ -174,8 +173,7 @@
 
 
 <span class="k">def</span> <span class="nf">medianFilter</span><span class="p">(</span><span class="n">dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">useEdgePadding</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    median filter each value in a dataset; filtering occurs within a given window</span>
+    <span class="sd">&quot;&quot;&quot;median filter each value in a dataset; filtering occurs within a given window</span>
 
 <span class="sd">    Median filtering is used to &quot;smooth&quot; out extreme values.  It can be useful if</span>
 <span class="sd">    your data has lots of quick spikes.  The larger the window, the flatter the output</span>
@@ -191,8 +189,7 @@
 <span class="k">def</span> <span class="nf">znormWindowFilter</span><span class="p">(</span>
     <span class="n">dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">useEdgePadding</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">filterZeroValues</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    z-normalize each value in a dataset; normalization occurs within a given window</span>
+    <span class="sd">&quot;&quot;&quot;z-normalize each value in a dataset; normalization occurs within a given window</span>
 
 <span class="sd">    If you suspect that events are sensitive to local changes, (e.g. local changes in pitch</span>
 <span class="sd">    are more important absolute differences in pitch) then using windowed</span>
@@ -275,8 +272,7 @@
 
 
 <span class="k">def</span> <span class="nf">znormalizeData</span><span class="p">(</span><span class="n">valList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given a list of floats, return the z-normalized values of the floats</span>
+    <span class="sd">&quot;&quot;&quot;Given a list of floats, return the z-normalized values of the floats</span>
 
 <span class="sd">    The formula is: z(v) = (v - mean) / stdDev</span>
 <span class="sd">    In effect, this scales all values to the range [-4, 4].</span>
@@ -370,8 +366,7 @@
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">useEdgePadding</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">list</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Filter time-stamped data values within a window</span>
+    <span class="sd">&quot;&quot;&quot;Filter time-stamped data values within a window</span>
 
 <span class="sd">    filterFunc could be medianFilter() or znormFilter()</span>
 
@@ -428,8 +423,7 @@ featureTimeList: [(time_0, .., featureA_0, ..),
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">znormalizeSpeakerData</span><span class="p">(</span>
     <span class="n">featureTimeList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">filterZeroValues</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    znormalize time series data</span>
+    <span class="sd">&quot;&quot;&quot;znormalize time series data</span>
 
 <span class="sd">    The idea is to normalize each speaker separately to be able</span>
 <span class="sd">    to compare data across several speakers for speaker-dependent</span>
@@ -438,7 +432,8 @@ featureTimeList: [(time_0, .., featureA_0, ..),
 <span class="sd">    To normalize a speakers data within a local window, use filterTimeSeriesData()</span>
 
 <span class="sd">    filterZeroValues: if True, don&#39;t consider zero values in the mean and stdDev</span>
-<span class="sd">      (recommended value for data like pitch or intensity)</span>
+<span class="sd">      (recommended value for data like pitch or intensity, where zero values</span>
+<span class="sd">       are not expected)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">featValues</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">featureTimeList</span><span class="p">]</span>
 
@@ -477,7 +472,8 @@ data like pitch range</p>
 <p>To normalize a speakers data within a local window, use filterTimeSeriesData()</p>
 
 <p>filterZeroValues: if True, don't consider zero values in the mean and stdDev
-  (recommended value for data like pitch or intensity)</p>
+  (recommended value for data like pitch or intensity, where zero values
+   are not expected)</p>
 </div>
 
 
@@ -493,8 +489,7 @@ data like pitch range</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">medianFilter</span><span class="p">(</span><span class="n">dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">useEdgePadding</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    median filter each value in a dataset; filtering occurs within a given window</span>
+    <span class="sd">&quot;&quot;&quot;median filter each value in a dataset; filtering occurs within a given window</span>
 
 <span class="sd">    Median filtering is used to &quot;smooth&quot; out extreme values.  It can be useful if</span>
 <span class="sd">    your data has lots of quick spikes.  The larger the window, the flatter the output</span>
@@ -545,8 +540,7 @@ medianFilter(x, 5, False)</p>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">znormWindowFilter</span><span class="p">(</span>
     <span class="n">dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">useEdgePadding</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">filterZeroValues</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    z-normalize each value in a dataset; normalization occurs within a given window</span>
+    <span class="sd">&quot;&quot;&quot;z-normalize each value in a dataset; normalization occurs within a given window</span>
 
 <span class="sd">    If you suspect that events are sensitive to local changes, (e.g. local changes in pitch</span>
 <span class="sd">    are more important absolute differences in pitch) then using windowed</span>
@@ -604,8 +598,7 @@ znormalization is appropriate.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">znormalizeData</span><span class="p">(</span><span class="n">valList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given a list of floats, return the z-normalized values of the floats</span>
+    <span class="sd">&quot;&quot;&quot;Given a list of floats, return the z-normalized values of the floats</span>
 
 <span class="sd">    The formula is: z(v) = (v - mean) / stdDev</span>
 <span class="sd">    In effect, this scales all values to the range [-4, 4].</span>

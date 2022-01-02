@@ -1,6 +1,5 @@
 # coding: utf-8
-"""
-Functions for working with pitch data
+"""Functions for working with pitch data
 
 This file depends on the praat script get_pitch_and_intensity.praat
 (which depends on praat) to extract pitch and intensity values from
@@ -50,8 +49,7 @@ def _extractPIPiecewise(
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
-    """
-    Extracts pitch and int from each labeled interval in a textgrid
+    """Extracts pitch and int from each labeled interval in a textgrid
 
     This has the benefit of being faster than using _extractPIFile if only
     labeled regions need to have their pitch values sampled, particularly
@@ -118,8 +116,7 @@ def _extractPIFile(
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
-    """
-    Extracts pitch and intensity values from an audio file
+    """Extracts pitch and intensity values from an audio file
 
     Returns the result as a list.  Will load the serialized result
     if this has already been called on the appropriate files before
@@ -173,8 +170,7 @@ def extractIntensity(
     forceRegenerate: bool = True,
     undefinedValue: float = None,
 ) -> List[Tuple[float, ...]]:
-    """
-    Extract the intensity for an audio file
+    """Extract the intensity for an audio file
 
     Calculates intensity using the following praat command:
     https://www.fon.hum.uva.nl/praat/manual/Sound__To_Intensity___.html
@@ -214,21 +210,24 @@ def extractPitchTier(
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> data_points.PointObject2D:
-    """
-    Extract pitch at regular intervals from the input wav file
+    """Extract pitch at regular intervals from the input wav file
 
     Data is output to a text file and then returned in a list in the form
     [(timeV1, pitchV1), (timeV2, pitchV2), ...]
 
-    sampleStep - the frequency to sample pitch at
-    silenceThreshold - segments with lower intensity won't be analyzed
-                       for pitch
-    forceRegenerate - if running this function for the same file, if False
-                      just read in the existing pitch file
-    pitchQuadInterp - if True, quadratically interpolate pitch
-
     Calculates pitch using the following praat command:
     https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
+
+    Args:
+        sampleStep: the frequency to sample pitch at
+        silenceThreshold: segments with lower intensity won't be analyzed
+            for pitch
+        forceRegenerate: if running this function for the same file, if False
+            just read in the existing pitch file
+        pitchQuadInterp: if True, quadratically interpolate pitch
+
+    Returns:
+        The pitch data
     """
     outputPath = os.path.split(outputFN)[0]
 
@@ -278,23 +277,23 @@ def extractPitch(
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
-    """
-    Extract pitch at regular intervals from the input wav file
+    """Extract pitch at regular intervals from the input wav file
 
     Data is output to a text file and then returned in a list in the form
     [(timeV1, pitchV1), (timeV2, pitchV2), ...]
 
-    sampleStep - the frequency to sample pitch at
-    silenceThreshold - segments with lower intensity won't be analyzed
-                       for pitch
-    forceRegenerate - if running this function for the same file, if False
-                      just read in the existing pitch file
-    undefinedValue - if None remove from the dataset, otherset set to
-                     undefinedValue
-    pitchQuadInterp - if True, quadratically interpolate pitch
-
     Calculates pitch using the following praat command:
     https://www.fon.hum.uva.nl/praat/manual/Sound__To_Pitch___.html
+
+    Args:
+        sampleStep - the frequency to sample pitch at
+        silenceThreshold - segments with lower intensity won't be analyzed
+            for pitch
+        forceRegenerate - if running this function for the same file, if False
+            just read in the existing pitch file
+        undefinedValue - if None remove from the dataset, otherset set to
+            undefinedValue
+        pitchQuadInterp - if True, quadratically interpolate pitch
     """
     outputPath = os.path.split(outputFN)[0]
 
@@ -350,8 +349,7 @@ def extractPI(
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
-    """
-    Extracts pitch and intensity from a file wholesale or piecewise
+    """Extracts pitch and intensity from a file wholesale or piecewise
 
     If the parameters for a tg are passed in, this will only extract labeled
     segments in a tier of the tg.  Otherwise, pitch will be extracted from
@@ -412,8 +410,7 @@ def extractPI(
 def loadTimeSeriesData(
     fn: str, undefinedValue: float = None
 ) -> List[Tuple[float, ...]]:
-    """
-    For reading the output of get_pitch_and_intensity or get_intensity
+    """For reading the output of get_pitch_and_intensity or get_intensity
 
     Data should be of the form
     [(time1, value1a, value1b, ...),
@@ -470,19 +467,17 @@ def generatePIMeasures(
     globalZNormalization: bool = False,
     localZNormalizationWindowSize: int = 0,
 ) -> List[Tuple[float, ...]]:
-    """
-    Generates processed values for the labeled intervals in a textgrid
+    """Generates processed values for the labeled intervals in a textgrid
 
-    nullLabelList - labels to ignore in the textgrid.  Defaults to ["",]
-
-    if 'doPitch'=true get pitch measures; if =false get rms intensity
-    medianFilterWindowSize: if none, no filtering is done
-    globalZNormalization: if True, values are normalized with the mean
-                          and stdDev of the data in dataList
-    localZNormalization: if greater than 1, values are normalized with the mean
-                         and stdDev of the local context (for a window of 5, it
-                         would consider the current value, 2 values before and 2
-                         values after)
+    Args:
+        doPitch: if True get pitch measures; if False get rms intensity
+        medianFilterWindowSize: if none, no filtering is done
+        globalZNormalization: if True, values are normalized with the mean
+            and stdDev of the data in dataList
+        localZNormalization: if greater than 1, values are normalized with the mean
+            and stdDev of the local context (for a window of 5, it
+            would consider the current value, 2 values before and 2
+            values after)
     """
 
     # Warn user that normalizing a second time nullifies the first normalization
@@ -559,13 +554,13 @@ def getPitchMeasures(
     medianFilterWindowSize: int = None,
     filterZeroFlag: bool = False,
 ) -> Tuple[float, float, float, float, float, float]:
-    """
-    Get various measures (min, max, etc) for the passed in list of pitch values
+    """Get various measures (min, max, etc) for the passed in list of pitch values
 
-    name is the name of the file.  Label is the label of the current interval.
-    Both of these labels are only used debugging and can be ignored if desired.
-    medianFilterWindowSize: None -> no median filtering
-    filterZeroFlag:True -> zero values are removed
+    Args:
+        name: the name of the file.
+        label: the label of the current interval.
+        medianFilterWindowSize: if None, there is no median filtering
+        filterZeroFlag: if True, values of zero are removed
     """
 
     if name is None:
@@ -609,8 +604,7 @@ def detectPitchErrors(
     maxJumpThreshold: float = 0.70,
     tgToMark: Optional[textgrid.Textgrid] = None,
 ) -> Tuple[List[Point], Optional[textgrid.Textgrid]]:
-    """
-    Detect pitch halving and doubling errors.
+    """Detect pitch halving and doubling errors.
 
     If a textgrid is passed in, it adds the markings to the textgrid
     """

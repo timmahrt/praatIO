@@ -191,26 +191,25 @@
     <span class="n">timeThreshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">boundaryInclusive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks whether two intervals overlap</span>
+    <span class="sd">&quot;&quot;&quot;Checks whether two intervals overlap</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        interval (Interval):</span>
-<span class="sd">        cmprInterval (Interval):</span>
-<span class="sd">        percentThreshold (float): if percentThreshold is greater than 0, then</span>
+<span class="sd">        interval:</span>
+<span class="sd">        cmprInterval:</span>
+<span class="sd">        percentThreshold: if percentThreshold is greater than 0, then</span>
 <span class="sd">            if the intervals overlap, they must overlap by at least this threshold</span>
 <span class="sd">            (0.2 would mean 20% overlap considering both intervals)</span>
 <span class="sd">            (eg [0, 6] and [3,8] have an overlap of 50%. If percentThreshold is set</span>
 <span class="sd">             to higher than 50%, the intervals will be considered to not overlap.)</span>
-<span class="sd">        timeThreshold (float): if greater than 0, then if the intervals overlap,</span>
+<span class="sd">        timeThreshold: if greater than 0, then if the intervals overlap,</span>
 <span class="sd">            they must overlap by at least this threshold</span>
-<span class="sd">        boundaryInclusive (float): if true, then two intervals are considered to</span>
+<span class="sd">        boundaryInclusive: if true, then two intervals are considered to</span>
 <span class="sd">            overlap if they share a boundary</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: move to Interval class?</span>
     <span class="n">startTime</span><span class="p">,</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">interval</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">cmprStartTime</span><span class="p">,</span> <span class="n">cmprEndTime</span> <span class="o">=</span> <span class="n">cmprInterval</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
 
@@ -251,24 +250,23 @@
     <span class="n">intervals</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Interval</span><span class="p">],</span>
     <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Interval</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets all intervals that exist between /start/ and /end/</span>
+    <span class="sd">&quot;&quot;&quot;Gets all intervals that exist between /start/ and /end/</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        cropStart (float):</span>
-<span class="sd">        cropEnd (float):</span>
-<span class="sd">        mode (CropMode): one of [&#39;strict&#39;, &#39;lax&#39;, or &#39;truncated&#39;]</span>
-<span class="sd">            - &#39;strict&#39;, only intervals wholly contained by the crop</span>
+<span class="sd">        start: the target interval start time</span>
+<span class="sd">        end: the target interval stop time</span>
+<span class="sd">        intervals: the list of intervals to check</span>
+<span class="sd">        mode: Determines judgement criteria</span>
+<span class="sd">            - &#39;strict&#39;, only intervals wholly contained by the target</span>
 <span class="sd">                interval will be kept</span>
 <span class="sd">            - &#39;lax&#39;, partially contained intervals will be kept</span>
 <span class="sd">            - &#39;truncated&#39;, partially contained intervals will be</span>
 <span class="sd">                truncated to fit within the crop region.</span>
-<span class="sd">        rebaseToZero (bool): if True, the cropped textgrid values</span>
-<span class="sd">            will be subtracted by the cropStart</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        bool:</span>
+<span class="sd">        The list of intervals that overlap with the target interval</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: move to Interval class?</span>
     <span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">CropCollision</span><span class="p">)</span>
 
     <span class="n">containedIntervals</span> <span class="o">=</span> <span class="p">[]</span>
@@ -329,8 +327,7 @@
     <span class="n">fuzzyMatching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">startI</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the value in the data list (sorted by time) that occurs at this point</span>
+    <span class="sd">&quot;&quot;&quot;Get the value in the data list (sorted by time) that occurs at this point</span>
 
 <span class="sd">    If fuzzyMatching is True, if there is not a value</span>
 <span class="sd">    at the requested timestamp, the nearest feature value will be taken.</span>
@@ -346,7 +343,7 @@
 <span class="sd">    For efficiency purposes, it takes a starting index and returns the ending</span>
 <span class="sd">    index.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: move to Point class?</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">startI</span>
     <span class="n">bestRow</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
 
@@ -397,13 +394,12 @@
 
 
 <span class="k">def</span> <span class="nf">getValuesInInterval</span><span class="p">(</span><span class="n">dataTupleList</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets the values that exist within an interval</span>
+    <span class="sd">&quot;&quot;&quot;Gets the values that exist within an interval</span>
 
 <span class="sd">    The function assumes that the data is formated as</span>
 <span class="sd">    [(t1, v1a, v1b, ...), (t2, v2a, v2b, ...)]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: move to Interval class?</span>
     <span class="n">intervalDataList</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">dataTuple</span> <span class="ow">in</span> <span class="n">dataTupleList</span><span class="p">:</span>
         <span class="n">time</span> <span class="o">=</span> <span class="n">dataTuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -426,8 +422,7 @@
 <span class="k">def</span> <span class="nf">invertIntervalList</span><span class="p">(</span>
     <span class="n">inputList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">minValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Inverts the segments of a list of intervals</span>
+    <span class="sd">&quot;&quot;&quot;Inverts the segments of a list of intervals</span>
 
 <span class="sd">    e.g.</span>
 <span class="sd">    [(0,1), (4,5), (7,10)] -&gt; [(1,4), (5,7)]</span>
@@ -465,8 +460,7 @@
 
 
 <span class="k">def</span> <span class="nf">makeDir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a new directory</span>
+    <span class="sd">&quot;&quot;&quot;Create a new directory</span>
 
 <span class="sd">    Unlike os.mkdir, it does not throw an exception if the directory already exists</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -475,9 +469,7 @@
 
 
 <span class="k">def</span> <span class="nf">findAll</span><span class="p">(</span><span class="n">txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subStr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Find the starting indicies of all instances of subStr in txt</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find the starting indicies of all instances of subStr in txt&quot;&quot;&quot;</span>
     <span class="n">indexList</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -511,8 +503,7 @@
 
 
 <span class="k">def</span> <span class="nf">safeZip</span><span class="p">(</span><span class="n">listOfLists</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">list</span><span class="p">],</span> <span class="n">enforceLength</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A safe version of python&#39;s zip()</span>
+    <span class="sd">&quot;&quot;&quot;A safe version of python&#39;s zip()</span>
 
 <span class="sd">    If two sublists are of different sizes, python&#39;s zip will truncate</span>
 <span class="sd">    the output to be the smaller of the two.</span>
@@ -719,26 +710,25 @@
     <span class="n">timeThreshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">boundaryInclusive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks whether two intervals overlap</span>
+    <span class="sd">&quot;&quot;&quot;Checks whether two intervals overlap</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        interval (Interval):</span>
-<span class="sd">        cmprInterval (Interval):</span>
-<span class="sd">        percentThreshold (float): if percentThreshold is greater than 0, then</span>
+<span class="sd">        interval:</span>
+<span class="sd">        cmprInterval:</span>
+<span class="sd">        percentThreshold: if percentThreshold is greater than 0, then</span>
 <span class="sd">            if the intervals overlap, they must overlap by at least this threshold</span>
 <span class="sd">            (0.2 would mean 20% overlap considering both intervals)</span>
 <span class="sd">            (eg [0, 6] and [3,8] have an overlap of 50%. If percentThreshold is set</span>
 <span class="sd">             to higher than 50%, the intervals will be considered to not overlap.)</span>
-<span class="sd">        timeThreshold (float): if greater than 0, then if the intervals overlap,</span>
+<span class="sd">        timeThreshold: if greater than 0, then if the intervals overlap,</span>
 <span class="sd">            they must overlap by at least this threshold</span>
-<span class="sd">        boundaryInclusive (float): if true, then two intervals are considered to</span>
+<span class="sd">        boundaryInclusive: if true, then two intervals are considered to</span>
 <span class="sd">            overlap if they share a boundary</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: move to Interval class?</span>
     <span class="n">startTime</span><span class="p">,</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">interval</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">cmprStartTime</span><span class="p">,</span> <span class="n">cmprEndTime</span> <span class="o">=</span> <span class="n">cmprInterval</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
 
@@ -780,16 +770,16 @@
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>interval (Interval):</strong> </li>
-<li><strong>cmprInterval (Interval):</strong> </li>
-<li><strong>percentThreshold (float):</strong>  if percentThreshold is greater than 0, then
+<li><strong>interval:</strong> </li>
+<li><strong>cmprInterval:</strong> </li>
+<li><strong>percentThreshold:</strong>  if percentThreshold is greater than 0, then
 if the intervals overlap, they must overlap by at least this threshold
 (0.2 would mean 20% overlap considering both intervals)
 (eg [0, 6] and [3,8] have an overlap of 50%. If percentThreshold is set
 to higher than 50%, the intervals will be considered to not overlap.)</li>
-<li><strong>timeThreshold (float):</strong>  if greater than 0, then if the intervals overlap,
+<li><strong>timeThreshold:</strong>  if greater than 0, then if the intervals overlap,
 they must overlap by at least this threshold</li>
-<li><strong>boundaryInclusive (float):</strong>  if true, then two intervals are considered to
+<li><strong>boundaryInclusive:</strong>  if true, then two intervals are considered to
 overlap if they share a boundary</li>
 </ul>
 
@@ -823,24 +813,23 @@ overlap if they share a boundary</li>
     <span class="n">intervals</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Interval</span><span class="p">],</span>
     <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Interval</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets all intervals that exist between /start/ and /end/</span>
+    <span class="sd">&quot;&quot;&quot;Gets all intervals that exist between /start/ and /end/</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        cropStart (float):</span>
-<span class="sd">        cropEnd (float):</span>
-<span class="sd">        mode (CropMode): one of [&#39;strict&#39;, &#39;lax&#39;, or &#39;truncated&#39;]</span>
-<span class="sd">            - &#39;strict&#39;, only intervals wholly contained by the crop</span>
+<span class="sd">        start: the target interval start time</span>
+<span class="sd">        end: the target interval stop time</span>
+<span class="sd">        intervals: the list of intervals to check</span>
+<span class="sd">        mode: Determines judgement criteria</span>
+<span class="sd">            - &#39;strict&#39;, only intervals wholly contained by the target</span>
 <span class="sd">                interval will be kept</span>
 <span class="sd">            - &#39;lax&#39;, partially contained intervals will be kept</span>
 <span class="sd">            - &#39;truncated&#39;, partially contained intervals will be</span>
 <span class="sd">                truncated to fit within the crop region.</span>
-<span class="sd">        rebaseToZero (bool): if True, the cropped textgrid values</span>
-<span class="sd">            will be subtracted by the cropStart</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        bool:</span>
+<span class="sd">        The list of intervals that overlap with the target interval</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: move to Interval class?</span>
     <span class="n">validateOption</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">CropCollision</span><span class="p">)</span>
 
     <span class="n">containedIntervals</span> <span class="o">=</span> <span class="p">[]</span>
@@ -894,24 +883,23 @@ overlap if they share a boundary</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>cropStart (float):</strong> </li>
-<li><strong>cropEnd (float):</strong> </li>
-<li><strong>mode (CropMode):</strong>  one of ['strict', 'lax', or 'truncated']
+<li><strong>start:</strong>  the target interval start time</li>
+<li><strong>end:</strong>  the target interval stop time</li>
+<li><strong>intervals:</strong>  the list of intervals to check</li>
+<li><strong>mode:</strong>  Determines judgement criteria
 <ul>
-<li>'strict', only intervals wholly contained by the crop
+<li>'strict', only intervals wholly contained by the target
 interval will be kept</li>
 <li>'lax', partially contained intervals will be kept</li>
 <li>'truncated', partially contained intervals will be
 truncated to fit within the crop region.</li>
 </ul></li>
-<li><strong>rebaseToZero (bool):</strong>  if True, the cropped textgrid values
-will be subtracted by the cropStart</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>bool:</p>
+  <p>The list of intervals that overlap with the target interval</p>
 </blockquote>
 </div>
 
@@ -976,8 +964,7 @@ will be subtracted by the cropStart</li>
     <span class="n">fuzzyMatching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">startI</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the value in the data list (sorted by time) that occurs at this point</span>
+    <span class="sd">&quot;&quot;&quot;Get the value in the data list (sorted by time) that occurs at this point</span>
 
 <span class="sd">    If fuzzyMatching is True, if there is not a value</span>
 <span class="sd">    at the requested timestamp, the nearest feature value will be taken.</span>
@@ -993,7 +980,7 @@ will be subtracted by the cropStart</li>
 <span class="sd">    For efficiency purposes, it takes a starting index and returns the ending</span>
 <span class="sd">    index.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: move to Point class?</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">startI</span>
     <span class="n">bestRow</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
 
@@ -1075,13 +1062,12 @@ index.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">getValuesInInterval</span><span class="p">(</span><span class="n">dataTupleList</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets the values that exist within an interval</span>
+    <span class="sd">&quot;&quot;&quot;Gets the values that exist within an interval</span>
 
 <span class="sd">    The function assumes that the data is formated as</span>
 <span class="sd">    [(t1, v1a, v1b, ...), (t2, v2a, v2b, ...)]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: move to Interval class?</span>
     <span class="n">intervalDataList</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">dataTuple</span> <span class="ow">in</span> <span class="n">dataTupleList</span><span class="p">:</span>
         <span class="n">time</span> <span class="o">=</span> <span class="n">dataTuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1145,8 +1131,7 @@ index.</p>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">invertIntervalList</span><span class="p">(</span>
     <span class="n">inputList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">minValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Inverts the segments of a list of intervals</span>
+    <span class="sd">&quot;&quot;&quot;Inverts the segments of a list of intervals</span>
 
 <span class="sd">    e.g.</span>
 <span class="sd">    [(0,1), (4,5), (7,10)] -&gt; [(1,4), (5,7)]</span>
@@ -1205,8 +1190,7 @@ index.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">makeDir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a new directory</span>
+    <span class="sd">&quot;&quot;&quot;Create a new directory</span>
 
 <span class="sd">    Unlike os.mkdir, it does not throw an exception if the directory already exists</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1234,9 +1218,7 @@ index.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">findAll</span><span class="p">(</span><span class="n">txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subStr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Find the starting indicies of all instances of subStr in txt</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find the starting indicies of all instances of subStr in txt&quot;&quot;&quot;</span>
     <span class="n">indexList</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -1307,8 +1289,7 @@ index.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">safeZip</span><span class="p">(</span><span class="n">listOfLists</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">list</span><span class="p">],</span> <span class="n">enforceLength</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A safe version of python&#39;s zip()</span>
+    <span class="sd">&quot;&quot;&quot;A safe version of python&#39;s zip()</span>
 
 <span class="sd">    If two sublists are of different sizes, python&#39;s zip will truncate</span>
 <span class="sd">    the output to be the smaller of the two.</span>

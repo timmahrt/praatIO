@@ -40,8 +40,7 @@ def _removeBlanks(tier: Dict) -> None:
 def _removeUltrashortIntervals(
     tier: Dict, minLength: float, minTimestamp: float
 ) -> None:
-    """
-    Remove intervals that are very tiny
+    """Remove intervals that are very tiny
 
     Doing many small manipulations on intervals can lead to the creation
     of ultrashort intervals (e.g. 1*10^-15 seconds long).  This function
@@ -90,8 +89,7 @@ def _fillInBlanks(
     minTime: Optional[float] = None,
     maxTime: Optional[float] = None,
 ) -> None:
-    """
-    Fills in the space between intervals with empty space
+    """Fills in the space between intervals with empty space
 
     This is necessary to do when saving to create a well-formed textgrid
     """
@@ -142,18 +140,17 @@ def _fillInBlanks(
 
 
 def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
-    """
-    Converts a string representation of a Textgrid into a dictionary
+    """Converts a string representation of a Textgrid into a dictionary
+
+    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
 
     Args:
-        fnFullPath (str): the path to the textgrid to open
-        includeEmptyIntervals (bool): if False, points and intervals with
+        fnFullPath: the path to the textgrid to open
+        includeEmptyIntervals: if False, points and intervals with
              an empty label '' are not included in the returned dictionary
 
     Returns:
         Dictionary
-
-    https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
     """
 
     try:
@@ -181,24 +178,23 @@ def getTextgridAsStr(
     maxTimestamp: Optional[float] = None,
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
 ) -> str:
-    """
-    Converts a textgrid to a string, suitable for saving
+    """Converts a textgrid to a string, suitable for saving
 
     Args:
-        tg (Textgrid): the textgrid to convert to a string
-        format (str): one of ['short_textgrid', 'long_textgrid', 'json']
-        includeBlankSpaces (bool): if True, blank sections in interval
+        tg: the textgrid to convert to a string
+        format: one of ['short_textgrid', 'long_textgrid', 'json']
+        includeBlankSpaces: if True, blank sections in interval
             tiers will be filled in with an empty interval
             (with a label of "")
-        minTimestamp (float): the minTimestamp of the saved Textgrid;
+        minTimestamp: the minTimestamp of the saved Textgrid;
             if None, use whatever is defined in the Textgrid object.
             If minTimestamp is larger than timestamps in your textgrid,
             an exception will be thrown.
-        maxTimestamp (float): the maxTimestamp of the saved Textgrid;
+        maxTimestamp: the maxTimestamp of the saved Textgrid;
             if None, use whatever is defined in the Textgrid object.
             If maxTimestamp is smaller than timestamps in your textgrid,
             an exception will be thrown.
-        minimumIntervalLength (float): any labeled intervals smaller
+        minimumIntervalLength: any labeled intervals smaller
             than this will be removed, useful for removing ultrashort
             or fragmented intervals; if None, don't remove any.
             Removed intervals are merged (without their label) into
@@ -451,9 +447,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
 
 
 def _parseShortTextgrid(data: str) -> Dict:
-    """
-    Reads a short textgrid file
-    """
+    """Reads a short textgrid file"""
     data = data.replace("\r\n", "\n")
 
     intervalIndicies = [(i, True) for i in utils.findAll(data, '"IntervalTier"')]

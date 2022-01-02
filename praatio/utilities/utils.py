@@ -78,26 +78,25 @@ def intervalOverlapCheck(
     timeThreshold: float = 0,
     boundaryInclusive: bool = False,
 ) -> bool:
-    """
-    Checks whether two intervals overlap
+    """Checks whether two intervals overlap
 
     Args:
-        interval (Interval):
-        cmprInterval (Interval):
-        percentThreshold (float): if percentThreshold is greater than 0, then
+        interval:
+        cmprInterval:
+        percentThreshold: if percentThreshold is greater than 0, then
             if the intervals overlap, they must overlap by at least this threshold
             (0.2 would mean 20% overlap considering both intervals)
             (eg [0, 6] and [3,8] have an overlap of 50%. If percentThreshold is set
              to higher than 50%, the intervals will be considered to not overlap.)
-        timeThreshold (float): if greater than 0, then if the intervals overlap,
+        timeThreshold: if greater than 0, then if the intervals overlap,
             they must overlap by at least this threshold
-        boundaryInclusive (float): if true, then two intervals are considered to
+        boundaryInclusive: if true, then two intervals are considered to
             overlap if they share a boundary
 
     Returns:
         bool:
     """
-
+    # TODO: move to Interval class?
     startTime, endTime = interval[:2]
     cmprStartTime, cmprEndTime = cmprInterval[:2]
 
@@ -138,24 +137,23 @@ def getIntervalsInInterval(
     intervals: List[Interval],
     mode: Literal["strict", "lax", "truncated"],
 ) -> List[Interval]:
-    """
-    Gets all intervals that exist between /start/ and /end/
+    """Gets all intervals that exist between /start/ and /end/
 
     Args:
-        cropStart (float):
-        cropEnd (float):
-        mode (CropMode): one of ['strict', 'lax', or 'truncated']
-            - 'strict', only intervals wholly contained by the crop
+        start: the target interval start time
+        end: the target interval stop time
+        intervals: the list of intervals to check
+        mode: Determines judgement criteria
+            - 'strict', only intervals wholly contained by the target
                 interval will be kept
             - 'lax', partially contained intervals will be kept
             - 'truncated', partially contained intervals will be
                 truncated to fit within the crop region.
-        rebaseToZero (bool): if True, the cropped textgrid values
-            will be subtracted by the cropStart
 
     Returns:
-        bool:
+        The list of intervals that overlap with the target interval
     """
+    # TODO: move to Interval class?
     validateOption("mode", mode, constants.CropCollision)
 
     containedIntervals = []
@@ -216,8 +214,7 @@ def getValueAtTime(
     fuzzyMatching: bool = False,
     startI: int = 0,
 ) -> Tuple[Tuple[Any, ...], int]:
-    """
-    Get the value in the data list (sorted by time) that occurs at this point
+    """Get the value in the data list (sorted by time) that occurs at this point
 
     If fuzzyMatching is True, if there is not a value
     at the requested timestamp, the nearest feature value will be taken.
@@ -233,7 +230,7 @@ def getValueAtTime(
     For efficiency purposes, it takes a starting index and returns the ending
     index.
     """
-
+    # TODO: move to Point class?
     i = startI
     bestRow: Tuple[Any, ...] = ()
 
@@ -284,13 +281,12 @@ def getValueAtTime(
 
 
 def getValuesInInterval(dataTupleList: List, start: float, end: float) -> List:
-    """
-    Gets the values that exist within an interval
+    """Gets the values that exist within an interval
 
     The function assumes that the data is formated as
     [(t1, v1a, v1b, ...), (t2, v2a, v2b, ...)]
     """
-
+    # TODO: move to Interval class?
     intervalDataList = []
     for dataTuple in dataTupleList:
         time = dataTuple[0]
@@ -313,8 +309,7 @@ def sign(x: float) -> int:
 def invertIntervalList(
     inputList: List[Tuple[float, float]], minValue: float = None, maxValue: float = None
 ) -> List[Tuple[float, float]]:
-    """
-    Inverts the segments of a list of intervals
+    """Inverts the segments of a list of intervals
 
     e.g.
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
@@ -352,8 +347,7 @@ def invertIntervalList(
 
 
 def makeDir(path: str) -> None:
-    """
-    Create a new directory
+    """Create a new directory
 
     Unlike os.mkdir, it does not throw an exception if the directory already exists
     """
@@ -362,9 +356,7 @@ def makeDir(path: str) -> None:
 
 
 def findAll(txt: str, subStr: str) -> List[int]:
-    """
-    Find the starting indicies of all instances of subStr in txt
-    """
+    """Find the starting indicies of all instances of subStr in txt"""
     indexList = []
     index = 0
     while True:
@@ -398,8 +390,7 @@ def runPraatScript(
 
 
 def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
-    """
-    A safe version of python's zip()
+    """A safe version of python's zip()
 
     If two sublists are of different sizes, python's zip will truncate
     the output to be the smaller of the two.

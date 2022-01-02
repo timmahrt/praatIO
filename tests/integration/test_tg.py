@@ -73,7 +73,7 @@ class TestTg(unittest.TestCase):
         self.assertTrue("phone" not in tg.tierNameList)
         self.assertTrue("candy" in tg.tierNameList)
 
-    def test_mintimestamp_behaviour(self):
+    def test_mintimestamp_behavior(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
 
         # By default, the min and max timestamp values come from the entry list

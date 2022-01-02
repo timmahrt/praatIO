@@ -1,5 +1,4 @@
-"""
-KlattGrid and related classes.
+"""KlattGrid and related classes.
 
 KlattGrids can be used for synthesizing and manipulating speech
 """
@@ -59,9 +58,7 @@ class _KlattBaseTier:
 
 
 class KlattContainerTier(_KlattBaseTier):
-    """
-    Contains a set of intermediate tiers
-    """
+    """Contains a set of intermediate tiers"""
 
     def getAsText(self):
         outputTxt = ""

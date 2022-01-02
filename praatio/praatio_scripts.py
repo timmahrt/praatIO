@@ -30,8 +30,7 @@ class NameStyle:
 def _shiftTimes(
     tg: textgrid.Textgrid, timeV: float, newTimeV: float
 ) -> textgrid.Textgrid:
-    """
-    Change all instances of timeV in the textgrid to newTimeV
+    """Change all instances of timeV in the textgrid to newTimeV
 
     These are meant to be small changes.  No checks are done to see
     if the new interval steps on other intervals
@@ -77,22 +76,21 @@ def audioSplice(
     insertStop: float = None,
     alignToZeroCrossing: bool = True,
 ) -> Tuple[audio.WavObj, textgrid.Textgrid]:
-    """
-    Splices a segment into an audio file and corresponding textgrid
+    """Splices a segment into an audio file and corresponding textgrid
 
     Args:
-        audioObj (WavObj): the audio to splice into
-        spliceSegment (WavObj): the audio segment that will be placed into a
+        audioObj: the audio to splice into
+        spliceSegment: the audio segment that will be placed into a
             larger audio file
-        tg (Textgrid): the textgrid to splice into
-        tierName (str): the name of the tier that will receive the new label
-        newLabel (str): the label for the splice interval on the tier with
+        tg: the textgrid to splice into
+        tierName: the name of the tier that will receive the new label
+        newLabel: the label for the splice interval on the tier with
             name tierName
-        insertStart (float): the time to insert the splice
-        insertStop (float): if not None, will erase the region between
+        insertStart: the time to insert the splice
+        insertStop: if not None, will erase the region between
             sourceSpStart and sourceSpEnd.  (In practice this means audioSplice
             removes one segment and inserts another in its place)
-        alignToZeroCrossing - if True, moves all involved times to the nearest
+        alignToZeroCrossing: if True, moves all involved times to the nearest
             zero crossing in the audio.  Generally results
             in better sounding output
 
@@ -152,8 +150,7 @@ def spellCheckEntries(
     checkFunction: Callable[[str], bool],
     printEntries: bool = False,
 ) -> textgrid.Textgrid:
-    """
-    Spell checks words in a textgrid
+    """Spell checks words in a textgrid
 
     Entries can contain one or more words, separated by whitespace.
     If a mispelling is found, it is noted in a special tier and optionally
@@ -164,8 +161,9 @@ def spellCheckEntries(
     for python like woosh or pyenchant.  I have already written a naive
     spell checker in the pysle.praattools library.
 
-    checkFunction: should return True if a word is spelled correctly and
-                   False otherwise
+    Args:
+        checkFunction: should return True if a word is spelled correctly and
+            False otherwise
     """
     punctuationList = [
         "_",
@@ -216,8 +214,7 @@ def splitTierEntries(
     startT: float = None,
     endT: float = None,
 ) -> textgrid.Textgrid:
-    """
-    Split each entry in a tier by space
+    """Split each entry in a tier by space
 
     The split entries will be placed on a new tier.  The split entries
     are equally allocated a subsegment of the interval occupied by the
@@ -284,8 +281,7 @@ def tgBoundariesToZeroCrossings(
     adjustPointTiers: bool = True,
     adjustIntervalTiers: bool = True,
 ) -> textgrid.Textgrid:
-    """
-    Makes all textgrid interval boundaries fall on pressure wave zero crossings
+    """Makes all textgrid interval boundaries fall on pressure wave zero crossings
 
     adjustPointTiers: if True, point tiers will be adjusted.
     adjustIntervalTiers: if True, interval tiers will be adjusted.
@@ -329,26 +325,25 @@ def splitAudioOnTier(
     noPartialIntervals: bool = False,
     silenceLabel: str = None,
 ) -> List[Tuple[float, float, str]]:
-    """
-    Outputs one subwav for each entry in the tier of a textgrid
+    """Outputs one subwav for each entry in the tier of a textgrid
 
     Args:
-        wavnFN (str):
-        tgFN (str):
-        tierName (str):
-        outputPath (str):
-        outputTGFlag (bool): If True, outputs paired, cropped textgrids
+        wavnFN:
+        tgFN:
+        tierName:
+        outputPath:
+        outputTGFlag: If True, outputs paired, cropped textgrids
             If is type str (a tier name), outputs a paired, cropped
             textgrid with only the specified tier
-        nameStyle (str):
+        nameStyle:
             - 'append': append interval label to output name
             - 'append_no_i': append label but not interval to output name
             - 'label': output name is the same as label
             - None: output name plus the interval number
-        noPartialIntervals (bool): if True: intervals in non-target tiers that
+        noPartialIntervals: if True: intervals in non-target tiers that
             are not wholly contained by an interval in the target tier will not
             be included in the output textgrids
-        silenceLabel (str): the label for silent regions.  If silences are
+        silenceLabel: the label for silent regions.  If silences are
             unlabeled intervals (i.e. blank) then leave this alone.  If
             silences are labeled using praat's "annotate >> to silences"
             then this value should be "silences"
@@ -447,8 +442,7 @@ def splitAudioOnTier(
 def alignBoundariesAcrossTiers(
     tgFN: str, maxDifference: float = 0.01
 ) -> textgrid.Textgrid:
-    """
-    Aligns boundaries or points in a textgrid that suffer from 'jitter'
+    """Aligns boundaries or points in a textgrid that suffer from 'jitter'
 
     Often times, boundaries in different tiers are meant to line up.
     For example the boundary of the first phone in a word and the start
@@ -491,9 +485,7 @@ def _findMisalignments(
     entry: list,
     orderID: int,
 ) -> None:
-    """
-    This is just used by alignBoundariesAcrossTiers()
-    """
+    """This is just used by alignBoundariesAcrossTiers()"""
     # Get the start time
     filterStartT = timeV - maxDifference
     if filterStartT < 0:

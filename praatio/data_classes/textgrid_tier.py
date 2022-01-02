@@ -72,8 +72,7 @@ class TextgridTier(ABC):
         return isEqual
 
     def appendTier(self, tier: "TextgridTier") -> "TextgridTier":
-        """
-        Append a tier to the end of this one.
+        """Append a tier to the end of this one.
 
         This tier's maxtimestamp will be lengthened by the amount in the passed in tier.
         """
@@ -104,17 +103,16 @@ class TextgridTier(ABC):
         substrMatchFlag: bool = False,
         usingRE: bool = False,
     ) -> List[int]:
-        """
-        Returns the index of all intervals that match the given label
+        """Returns the index of all intervals that match the given label
 
         Args:
-            matchLabel (str): the label to search for
-            substrMatchFlag (bool): if True, match any label containing matchLabel.
+            matchLabel: the label to search for
+            substrMatchFlag: if True, match any label containing matchLabel.
                 if False, label must be the same as matchLabel.
-            usingRE (bool): if True, matchLabel is interpreted as a regular expression
+            usingRE: if True, matchLabel is interpreted as a regular expression
 
         Returns:
-            List: A list of indicies
+            A list of indicies
         """
         returnList = []
         if usingRE is True:
@@ -172,8 +170,7 @@ class TextgridTier(ABC):
         self.entryList.sort()
 
     def union(self, tier: "TextgridTier") -> "TextgridTier":
-        """
-        The given tier is set unioned to this tier.
+        """The given tier is set unioned to this tier.
 
         All entries in the given tier are added to the current tier.
         Overlapping entries are merged.

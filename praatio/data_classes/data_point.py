@@ -1,5 +1,4 @@
-"""
-An PointObject is used for storing non-annotation data in praat
+"""An PointObject is used for storing non-annotation data in praat
 
 There are two variants: PointObject1D and PointObject2D
 

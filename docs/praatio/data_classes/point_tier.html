@@ -121,8 +121,7 @@
         <span class="n">minT</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">maxT</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A point tier is for annotating instaneous events</span>
+        <span class="sd">&quot;&quot;&quot;A point tier is for annotating instaneous events</span>
 
 <span class="sd">        The entryList is of the form:</span>
 <span class="sd">        [(timeVal1, label1), (timeVal2, label2), ]</span>
@@ -157,19 +156,18 @@
         <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span>
         <span class="n">rebaseToZero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a new tier containing all entries inside the new interval</span>
+        <span class="sd">&quot;&quot;&quot;Creates a new tier containing all entries inside the new interval</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            cropStart (float):</span>
-<span class="sd">            cropEnd (float):</span>
-<span class="sd">            mode (str): Mode is ignored.  This parameter is kept for</span>
+<span class="sd">            cropStart:</span>
+<span class="sd">            cropEnd:</span>
+<span class="sd">            mode: Mode is ignored.  This parameter is kept for</span>
 <span class="sd">                compatibility with IntervalTier.crop()</span>
-<span class="sd">            rebaseToZero (bool): if True, all entries will have their</span>
+<span class="sd">            rebaseToZero: if True, all entries will have their</span>
 <span class="sd">                timestamps subtracted by *cropStart*.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            the modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">cropStart</span> <span class="o">&gt;=</span> <span class="n">cropEnd</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
@@ -206,17 +204,16 @@
         <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modifies all timestamps by a constant amount</span>
+        <span class="sd">&quot;&quot;&quot;Modifies all timestamps by a constant amount</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            offset (float):</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            offset:</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if an entries moves outside of minTimestamp</span>
 <span class="sd">                or maxTimestamp after being edited</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            the modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -253,16 +250,7 @@
         <span class="n">dataTupleList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
         <span class="n">fuzzyMatching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the values that occur at points in the point tier</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            dataTupleList (list):</span>
-<span class="sd">            fuzzyMatching (bool): if True, if there is not a feature value</span>
-<span class="sd">                at a point, the nearest feature value will be taken.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List</span>
+        <span class="sd">&quot;&quot;&quot;Get the values that occur at points in the point tier</span>
 
 <span class="sd">        The procedure assumes that all data is ordered in time.</span>
 <span class="sd">        dataTupleList should be in the form</span>
@@ -274,6 +262,14 @@
 <span class="sd">        The procedure makes one pass through dataTupleList and one</span>
 <span class="sd">        pass through self.entryList.  If the data is not sequentially</span>
 <span class="sd">        ordered, the incorrect response will be returned.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataTupleList:</span>
+<span class="sd">            fuzzyMatching: if True, if there is not a feature value</span>
+<span class="sd">                at a point, the nearest feature value will be taken.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of values that exist at the given timepoints</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
@@ -299,19 +295,18 @@
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;truncate&quot;</span><span class="p">,</span> <span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
         <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a region in a tier blank (removes all contained entries)</span>
+        <span class="sd">&quot;&quot;&quot;Makes a region in a tier blank (removes all contained entries)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float): the start of the deletion interval</span>
-<span class="sd">            end (float): the end of the deletion interval</span>
-<span class="sd">            collisionMode (str): Ignored for the moment (added for compatibility with</span>
+<span class="sd">            start: the start of the deletion interval</span>
+<span class="sd">            end: the end of the deletion interval</span>
+<span class="sd">            collisionMode: Ignored for the moment (added for compatibility with</span>
 <span class="sd">                eraseRegion() for Interval Tiers)</span>
-<span class="sd">            doShrink (bool): if True, moves leftward by (/end/ - /start/) all points</span>
+<span class="sd">            doShrink: if True, moves leftward by (/end/ - /start/) all points</span>
 <span class="sd">                to the right of /end/</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            The modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">newTier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
@@ -345,23 +340,19 @@
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span> <span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
         <span class="n">collisionReportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        inserts an interval into the tier</span>
+        <span class="sd">&quot;&quot;&quot;Inserts an interval into the tier</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            entry (tuple|Point): the entry to insert</span>
-<span class="sd">            warnFlag (bool): see below for details</span>
-<span class="sd">            collisionMode (str): determines the behavior if intervals exist in</span>
-<span class="sd">                the insertion area. One of (&#39;replace&#39;, &#39;merge&#39;, or None)</span>
+<span class="sd">            entry: the entry to insert</span>
+<span class="sd">            collisionMode: determines the behavior if intervals exist in</span>
+<span class="sd">                the insertion area.</span>
 <span class="sd">                - &#39;replace&#39;, existing items will be removed</span>
 <span class="sd">                - &#39;merge&#39;, inserting item will be fused with existing items</span>
 <span class="sd">                - &#39;error&#39;, will throw TextgridCollisionException</span>
+<span class="sd">            collisionReportingMode:</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
-
-<span class="sd">        If warnFlag is True and collisionMode is not None, the user is notified</span>
-<span class="sd">        of each collision</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
@@ -423,13 +414,12 @@
         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">_collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stretch&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;no_change&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts a region into the tier</span>
+        <span class="sd">&quot;&quot;&quot;Inserts a region into the tier</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float): the start time to insert a space at</span>
-<span class="sd">            duration (float): the duration of the space to insert</span>
-<span class="sd">            collisionMode (str): Ignored for the moment (added for compatibility</span>
+<span class="sd">            start: the start time to insert a space at</span>
+<span class="sd">            duration: the duration of the space to insert</span>
+<span class="sd">            collisionMode: Ignored for the moment (added for compatibility</span>
 <span class="sd">                with insertSpace() for Interval Tiers)</span>
 
 <span class="sd">        Returns:</span>
@@ -452,19 +442,17 @@
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate this tier</span>
+        <span class="sd">&quot;&quot;&quot;Validate this tier</span>
 
 <span class="sd">        Returns whether the tier is valid or not. If reportingMode is &quot;warning&quot;</span>
 <span class="sd">        or &quot;error&quot; this will also print on error or stop execution, respectively.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
-<span class="sd">                determines the behavior if there is a size difference between the</span>
-<span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
+<span class="sd">            reportingMode: Determines the behavior if there is a size difference</span>
+<span class="sd">                between the maxTimestamp in the tier and the current textgrid.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bool</span>
+<span class="sd">            True if this tier is valid; False otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -519,8 +507,7 @@
         <span class="n">minT</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">maxT</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A point tier is for annotating instaneous events</span>
+        <span class="sd">&quot;&quot;&quot;A point tier is for annotating instaneous events</span>
 
 <span class="sd">        The entryList is of the form:</span>
 <span class="sd">        [(timeVal1, label1), (timeVal2, label2), ]</span>
@@ -555,19 +542,18 @@
         <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span>
         <span class="n">rebaseToZero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a new tier containing all entries inside the new interval</span>
+        <span class="sd">&quot;&quot;&quot;Creates a new tier containing all entries inside the new interval</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            cropStart (float):</span>
-<span class="sd">            cropEnd (float):</span>
-<span class="sd">            mode (str): Mode is ignored.  This parameter is kept for</span>
+<span class="sd">            cropStart:</span>
+<span class="sd">            cropEnd:</span>
+<span class="sd">            mode: Mode is ignored.  This parameter is kept for</span>
 <span class="sd">                compatibility with IntervalTier.crop()</span>
-<span class="sd">            rebaseToZero (bool): if True, all entries will have their</span>
+<span class="sd">            rebaseToZero: if True, all entries will have their</span>
 <span class="sd">                timestamps subtracted by *cropStart*.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            the modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">cropStart</span> <span class="o">&gt;=</span> <span class="n">cropEnd</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
@@ -604,17 +590,16 @@
         <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modifies all timestamps by a constant amount</span>
+        <span class="sd">&quot;&quot;&quot;Modifies all timestamps by a constant amount</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            offset (float):</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            offset:</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if an entries moves outside of minTimestamp</span>
 <span class="sd">                or maxTimestamp after being edited</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            the modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -651,16 +636,7 @@
         <span class="n">dataTupleList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
         <span class="n">fuzzyMatching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the values that occur at points in the point tier</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            dataTupleList (list):</span>
-<span class="sd">            fuzzyMatching (bool): if True, if there is not a feature value</span>
-<span class="sd">                at a point, the nearest feature value will be taken.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List</span>
+        <span class="sd">&quot;&quot;&quot;Get the values that occur at points in the point tier</span>
 
 <span class="sd">        The procedure assumes that all data is ordered in time.</span>
 <span class="sd">        dataTupleList should be in the form</span>
@@ -672,6 +648,14 @@
 <span class="sd">        The procedure makes one pass through dataTupleList and one</span>
 <span class="sd">        pass through self.entryList.  If the data is not sequentially</span>
 <span class="sd">        ordered, the incorrect response will be returned.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataTupleList:</span>
+<span class="sd">            fuzzyMatching: if True, if there is not a feature value</span>
+<span class="sd">                at a point, the nearest feature value will be taken.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of values that exist at the given timepoints</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
@@ -697,19 +681,18 @@
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;truncate&quot;</span><span class="p">,</span> <span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
         <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a region in a tier blank (removes all contained entries)</span>
+        <span class="sd">&quot;&quot;&quot;Makes a region in a tier blank (removes all contained entries)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float): the start of the deletion interval</span>
-<span class="sd">            end (float): the end of the deletion interval</span>
-<span class="sd">            collisionMode (str): Ignored for the moment (added for compatibility with</span>
+<span class="sd">            start: the start of the deletion interval</span>
+<span class="sd">            end: the end of the deletion interval</span>
+<span class="sd">            collisionMode: Ignored for the moment (added for compatibility with</span>
 <span class="sd">                eraseRegion() for Interval Tiers)</span>
-<span class="sd">            doShrink (bool): if True, moves leftward by (/end/ - /start/) all points</span>
+<span class="sd">            doShrink: if True, moves leftward by (/end/ - /start/) all points</span>
 <span class="sd">                to the right of /end/</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            The modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">newTier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
@@ -743,23 +726,19 @@
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span> <span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
         <span class="n">collisionReportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        inserts an interval into the tier</span>
+        <span class="sd">&quot;&quot;&quot;Inserts an interval into the tier</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            entry (tuple|Point): the entry to insert</span>
-<span class="sd">            warnFlag (bool): see below for details</span>
-<span class="sd">            collisionMode (str): determines the behavior if intervals exist in</span>
-<span class="sd">                the insertion area. One of (&#39;replace&#39;, &#39;merge&#39;, or None)</span>
+<span class="sd">            entry: the entry to insert</span>
+<span class="sd">            collisionMode: determines the behavior if intervals exist in</span>
+<span class="sd">                the insertion area.</span>
 <span class="sd">                - &#39;replace&#39;, existing items will be removed</span>
 <span class="sd">                - &#39;merge&#39;, inserting item will be fused with existing items</span>
 <span class="sd">                - &#39;error&#39;, will throw TextgridCollisionException</span>
+<span class="sd">            collisionReportingMode:</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
-
-<span class="sd">        If warnFlag is True and collisionMode is not None, the user is notified</span>
-<span class="sd">        of each collision</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
@@ -821,13 +800,12 @@
         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">_collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stretch&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;no_change&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts a region into the tier</span>
+        <span class="sd">&quot;&quot;&quot;Inserts a region into the tier</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float): the start time to insert a space at</span>
-<span class="sd">            duration (float): the duration of the space to insert</span>
-<span class="sd">            collisionMode (str): Ignored for the moment (added for compatibility</span>
+<span class="sd">            start: the start time to insert a space at</span>
+<span class="sd">            duration: the duration of the space to insert</span>
+<span class="sd">            collisionMode: Ignored for the moment (added for compatibility</span>
 <span class="sd">                with insertSpace() for Interval Tiers)</span>
 
 <span class="sd">        Returns:</span>
@@ -850,19 +828,17 @@
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate this tier</span>
+        <span class="sd">&quot;&quot;&quot;Validate this tier</span>
 
 <span class="sd">        Returns whether the tier is valid or not. If reportingMode is &quot;warning&quot;</span>
 <span class="sd">        or &quot;error&quot; this will also print on error or stop execution, respectively.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
-<span class="sd">                determines the behavior if there is a size difference between the</span>
-<span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
+<span class="sd">            reportingMode: Determines the behavior if there is a size difference</span>
+<span class="sd">                between the maxTimestamp in the tier and the current textgrid.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bool</span>
+<span class="sd">            True if this tier is valid; False otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -919,8 +895,7 @@ inheritance.</p>
         <span class="n">minT</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">maxT</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A point tier is for annotating instaneous events</span>
+        <span class="sd">&quot;&quot;&quot;A point tier is for annotating instaneous events</span>
 
 <span class="sd">        The entryList is of the form:</span>
 <span class="sd">        [(timeVal1, label1), (timeVal2, label2), ]</span>
@@ -996,19 +971,18 @@ like '132'))</p>
         <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">,</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;lax&quot;</span><span class="p">,</span>
         <span class="n">rebaseToZero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates a new tier containing all entries inside the new interval</span>
+        <span class="sd">&quot;&quot;&quot;Creates a new tier containing all entries inside the new interval</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            cropStart (float):</span>
-<span class="sd">            cropEnd (float):</span>
-<span class="sd">            mode (str): Mode is ignored.  This parameter is kept for</span>
+<span class="sd">            cropStart:</span>
+<span class="sd">            cropEnd:</span>
+<span class="sd">            mode: Mode is ignored.  This parameter is kept for</span>
 <span class="sd">                compatibility with IntervalTier.crop()</span>
-<span class="sd">            rebaseToZero (bool): if True, all entries will have their</span>
+<span class="sd">            rebaseToZero: if True, all entries will have their</span>
 <span class="sd">                timestamps subtracted by *cropStart*.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            the modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">cropStart</span> <span class="o">&gt;=</span> <span class="n">cropEnd</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
@@ -1044,18 +1018,18 @@ like '132'))</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>cropStart (float):</strong> </li>
-<li><strong>cropEnd (float):</strong> </li>
-<li><strong>mode (str):</strong>  Mode is ignored.  This parameter is kept for
+<li><strong>cropStart:</strong> </li>
+<li><strong>cropEnd:</strong> </li>
+<li><strong>mode:</strong>  Mode is ignored.  This parameter is kept for
 compatibility with IntervalTier.crop()</li>
-<li><strong>rebaseToZero (bool):</strong>  if True, all entries will have their
+<li><strong>rebaseToZero:</strong>  if True, all entries will have their
 timestamps subtracted by <em>cropStart</em>.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>PointTier: the modified version of the current tier</p>
+  <p>the modified version of the current tier</p>
 </blockquote>
 </div>
 
@@ -1102,17 +1076,16 @@ timestamps subtracted by <em>cropStart</em>.</li>
         <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modifies all timestamps by a constant amount</span>
+        <span class="sd">&quot;&quot;&quot;Modifies all timestamps by a constant amount</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            offset (float):</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
+<span class="sd">            offset:</span>
+<span class="sd">            reportingMode: one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
 <span class="sd">                determines the behavior if an entries moves outside of minTimestamp</span>
 <span class="sd">                or maxTimestamp after being edited</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            the modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -1152,8 +1125,8 @@ timestamps subtracted by <em>cropStart</em>.</li>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>offset (float):</strong> </li>
-<li><strong>reportingMode (str):</strong>  one of "silence", "warning", or "error". This flag
+<li><strong>offset:</strong> </li>
+<li><strong>reportingMode:</strong>  one of "silence", "warning", or "error". This flag
 determines the behavior if an entries moves outside of minTimestamp
 or maxTimestamp after being edited</li>
 </ul>
@@ -1161,7 +1134,7 @@ or maxTimestamp after being edited</li>
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>PointTier: the modified version of the current tier</p>
+  <p>the modified version of the current tier</p>
 </blockquote>
 </div>
 
@@ -1186,16 +1159,7 @@ or maxTimestamp after being edited</li>
         <span class="n">dataTupleList</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
         <span class="n">fuzzyMatching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the values that occur at points in the point tier</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            dataTupleList (list):</span>
-<span class="sd">            fuzzyMatching (bool): if True, if there is not a feature value</span>
-<span class="sd">                at a point, the nearest feature value will be taken.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List</span>
+        <span class="sd">&quot;&quot;&quot;Get the values that occur at points in the point tier</span>
 
 <span class="sd">        The procedure assumes that all data is ordered in time.</span>
 <span class="sd">        dataTupleList should be in the form</span>
@@ -1207,6 +1171,14 @@ or maxTimestamp after being edited</li>
 <span class="sd">        The procedure makes one pass through dataTupleList and one</span>
 <span class="sd">        pass through self.entryList.  If the data is not sequentially</span>
 <span class="sd">        ordered, the incorrect response will be returned.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataTupleList:</span>
+<span class="sd">            fuzzyMatching: if True, if there is not a feature value</span>
+<span class="sd">                at a point, the nearest feature value will be taken.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of values that exist at the given timepoints</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1230,20 +1202,6 @@ or maxTimestamp after being edited</li>
 
             <div class="docstring"><p>Get the values that occur at points in the point tier</p>
 
-<h6 id="args">Args</h6>
-
-<ul>
-<li><strong>dataTupleList (list):</strong> </li>
-<li><strong>fuzzyMatching (bool):</strong>  if True, if there is not a feature value
-at a point, the nearest feature value will be taken.</li>
-</ul>
-
-<h6 id="returns">Returns</h6>
-
-<blockquote>
-  <p>List</p>
-</blockquote>
-
 <p>The procedure assumes that all data is ordered in time.
 dataTupleList should be in the form
 [(t1, v1a, v1b, ..), (t2, v2a, v2b, ..), ..]</p>
@@ -1254,6 +1212,20 @@ dataTupleList should be in the form
 <p>The procedure makes one pass through dataTupleList and one
 pass through self.entryList.  If the data is not sequentially
 ordered, the incorrect response will be returned.</p>
+
+<h6 id="args">Args</h6>
+
+<ul>
+<li><strong>dataTupleList:</strong> </li>
+<li><strong>fuzzyMatching:</strong>  if True, if there is not a feature value
+at a point, the nearest feature value will be taken.</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>A list of values that exist at the given timepoints</p>
+</blockquote>
 </div>
 
 
@@ -1281,19 +1253,18 @@ ordered, the incorrect response will be returned.</p>
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;truncate&quot;</span><span class="p">,</span> <span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
         <span class="n">doShrink</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes a region in a tier blank (removes all contained entries)</span>
+        <span class="sd">&quot;&quot;&quot;Makes a region in a tier blank (removes all contained entries)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float): the start of the deletion interval</span>
-<span class="sd">            end (float): the end of the deletion interval</span>
-<span class="sd">            collisionMode (str): Ignored for the moment (added for compatibility with</span>
+<span class="sd">            start: the start of the deletion interval</span>
+<span class="sd">            end: the end of the deletion interval</span>
+<span class="sd">            collisionMode: Ignored for the moment (added for compatibility with</span>
 <span class="sd">                eraseRegion() for Interval Tiers)</span>
-<span class="sd">            doShrink (bool): if True, moves leftward by (/end/ - /start/) all points</span>
+<span class="sd">            doShrink: if True, moves leftward by (/end/ - /start/) all points</span>
 <span class="sd">                to the right of /end/</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PointTier: the modified version of the current tier</span>
+<span class="sd">            The modified version of the current tier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">newTier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
@@ -1329,18 +1300,18 @@ ordered, the incorrect response will be returned.</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>start (float):</strong>  the start of the deletion interval</li>
-<li><strong>end (float):</strong>  the end of the deletion interval</li>
-<li><strong>collisionMode (str):</strong>  Ignored for the moment (added for compatibility with
+<li><strong>start:</strong>  the start of the deletion interval</li>
+<li><strong>end:</strong>  the end of the deletion interval</li>
+<li><strong>collisionMode:</strong>  Ignored for the moment (added for compatibility with
 eraseRegion() for Interval Tiers)</li>
-<li><strong>doShrink (bool):</strong>  if True, moves leftward by (/end/ - /start/) all points
+<li><strong>doShrink:</strong>  if True, moves leftward by (/end/ - /start/) all points
 to the right of /end/</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>PointTier: the modified version of the current tier</p>
+  <p>The modified version of the current tier</p>
 </blockquote>
 </div>
 
@@ -1367,23 +1338,19 @@ to the right of /end/</li>
         <span class="n">collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span> <span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
         <span class="n">collisionReportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        inserts an interval into the tier</span>
+        <span class="sd">&quot;&quot;&quot;Inserts an interval into the tier</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            entry (tuple|Point): the entry to insert</span>
-<span class="sd">            warnFlag (bool): see below for details</span>
-<span class="sd">            collisionMode (str): determines the behavior if intervals exist in</span>
-<span class="sd">                the insertion area. One of (&#39;replace&#39;, &#39;merge&#39;, or None)</span>
+<span class="sd">            entry: the entry to insert</span>
+<span class="sd">            collisionMode: determines the behavior if intervals exist in</span>
+<span class="sd">                the insertion area.</span>
 <span class="sd">                - &#39;replace&#39;, existing items will be removed</span>
 <span class="sd">                - &#39;merge&#39;, inserting item will be fused with existing items</span>
 <span class="sd">                - &#39;error&#39;, will throw TextgridCollisionException</span>
+<span class="sd">            collisionReportingMode:</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
-
-<span class="sd">        If warnFlag is True and collisionMode is not None, the user is notified</span>
-<span class="sd">        of each collision</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
@@ -1442,20 +1409,20 @@ to the right of /end/</li>
 
         </details>
 
-            <div class="docstring"><p>inserts an interval into the tier</p>
+            <div class="docstring"><p>Inserts an interval into the tier</p>
 
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>entry (tuple|Point):</strong>  the entry to insert</li>
-<li><strong>warnFlag (bool):</strong>  see below for details</li>
-<li><strong>collisionMode (str):</strong>  determines the behavior if intervals exist in
-the insertion area. One of ('replace', 'merge', or None)
+<li><strong>entry:</strong>  the entry to insert</li>
+<li><strong>collisionMode:</strong>  determines the behavior if intervals exist in
+the insertion area.
 <ul>
 <li>'replace', existing items will be removed</li>
 <li>'merge', inserting item will be fused with existing items</li>
 <li>'error', will throw TextgridCollisionException</li>
 </ul></li>
+<li><strong>collisionReportingMode:</strong> </li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -1463,9 +1430,6 @@ the insertion area. One of ('replace', 'merge', or None)
 <blockquote>
   <p>None</p>
 </blockquote>
-
-<p>If warnFlag is True and collisionMode is not None, the user is notified
-of each collision</p>
 </div>
 
 
@@ -1491,13 +1455,12 @@ of each collision</p>
         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">_collisionMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stretch&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;no_change&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PointTier&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inserts a region into the tier</span>
+        <span class="sd">&quot;&quot;&quot;Inserts a region into the tier</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start (float): the start time to insert a space at</span>
-<span class="sd">            duration (float): the duration of the space to insert</span>
-<span class="sd">            collisionMode (str): Ignored for the moment (added for compatibility</span>
+<span class="sd">            start: the start time to insert a space at</span>
+<span class="sd">            duration: the duration of the space to insert</span>
+<span class="sd">            collisionMode: Ignored for the moment (added for compatibility</span>
 <span class="sd">                with insertSpace() for Interval Tiers)</span>
 
 <span class="sd">        Returns:</span>
@@ -1525,9 +1488,9 @@ of each collision</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>start (float):</strong>  the start time to insert a space at</li>
-<li><strong>duration (float):</strong>  the duration of the space to insert</li>
-<li><strong>collisionMode (str):</strong>  Ignored for the moment (added for compatibility
+<li><strong>start:</strong>  the start time to insert a space at</li>
+<li><strong>duration:</strong>  the duration of the space to insert</li>
+<li><strong>collisionMode:</strong>  Ignored for the moment (added for compatibility
 with insertSpace() for Interval Tiers)</li>
 </ul>
 
@@ -1556,19 +1519,17 @@ with insertSpace() for Interval Tiers)</li>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;silence&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate this tier</span>
+        <span class="sd">&quot;&quot;&quot;Validate this tier</span>
 
 <span class="sd">        Returns whether the tier is valid or not. If reportingMode is &quot;warning&quot;</span>
 <span class="sd">        or &quot;error&quot; this will also print on error or stop execution, respectively.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            reportingMode (str): one of &quot;silence&quot;, &quot;warning&quot;, or &quot;error&quot;. This flag</span>
-<span class="sd">                determines the behavior if there is a size difference between the</span>
-<span class="sd">                maxTimestamp in the tier and the current textgrid.</span>
+<span class="sd">            reportingMode: Determines the behavior if there is a size difference</span>
+<span class="sd">                between the maxTimestamp in the tier and the current textgrid.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bool</span>
+<span class="sd">            True if this tier is valid; False otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">validateOption</span><span class="p">(</span>
             <span class="s2">&quot;reportingMode&quot;</span><span class="p">,</span> <span class="n">reportingMode</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">ErrorReportingMode</span>
@@ -1607,15 +1568,14 @@ or "error" this will also print on error or stop execution, respectively.</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>reportingMode (str):</strong>  one of "silence", "warning", or "error". This flag
-determines the behavior if there is a size difference between the
-maxTimestamp in the tier and the current textgrid.</li>
+<li><strong>reportingMode:</strong>  Determines the behavior if there is a size difference
+between the maxTimestamp in the tier and the current textgrid.</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>bool</p>
+  <p>True if this tier is valid; False otherwise</p>
 </blockquote>
 </div>
 
