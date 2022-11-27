@@ -8,7 +8,7 @@ import itertools
 import wave
 from pkg_resources import resource_filename
 from typing_extensions import Literal
-from typing import Any, Iterator, List, Tuple, NoReturn, Type
+from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional
 
 from praatio.utilities import errors
 from praatio.utilities import constants
@@ -407,7 +407,7 @@ def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
 
 
 def getWavDuration(wavFN: str) -> float:
-    "For internal use.  See praatio.audio.WavQueryObj() for general use."
+    "For internal use.  See praatio.audio.QueryWav() for general use."
     audiofile = wave.open(wavFN, "r")
     params = audiofile.getparams()
     framerate = params[2]
@@ -415,3 +415,74 @@ def getWavDuration(wavFN: str) -> float:
     duration = float(nframes) / framerate
 
     return duration
+
+
+def chooseClosestTime(
+    targetTime: float,
+    leftCandidate: Optional[float],
+    rightCandidate: Optional[float],
+    duration: float,
+) -> float:
+    """Chooses the closest time between two options that straddle the target time
+
+    Args:
+        targetTime: the time to compare against
+        leftCandidate: the candidate to the left of the target time
+        rightCandidate: the candidate to the right of the target time
+        duration: duration of the audio file; used for debugging purposes
+
+    Returns:
+        the closer of the two options to the target time
+    Raises:
+        FindZeroCrossingError: When no left or right candidate is provided
+    """
+    zeroCrossingTime: float
+    # TODO: I think this case isn't possible
+    if leftCandidate is None and rightCandidate is None:
+        raise (errors.FindZeroCrossingError(0, duration))
+
+    elif leftCandidate is None and rightCandidate is not None:
+        zeroCrossingTime = rightCandidate
+    elif rightCandidate is None and leftCandidate is not None:
+        zeroCrossingTime = leftCandidate
+    elif rightCandidate and leftCandidate:
+        leftDiff = targetTime - leftCandidate
+        rightDiff = rightCandidate - targetTime
+
+        if leftDiff <= rightDiff:
+            zeroCrossingTime = leftCandidate
+        else:
+            zeroCrossingTime = rightCandidate
+
+    return zeroCrossingTime
+
+
+def getInterval(
+    startTime: float, duration: float, max: float, reverse: bool
+) -> Tuple[float, float]:
+    """returns an interval before or after some start time
+
+    The returned timestamps will be between 0 and max
+
+    Args:
+        startTime: the time to get the interval from
+        duration: duration of the interval
+        max: the maximum allowed time
+        reverse: is the interval before or after the targetTime?
+
+    Returns:
+        the start and end time of an interval
+    """
+    if reverse is True:
+        endTime = startTime
+        startTime -= duration
+    else:
+        endTime = startTime + duration
+
+    # Don't read over the edges
+    if startTime < 0:
+        startTime = 0
+    elif endTime > max:
+        endTime = max
+
+    return (startTime, endTime)

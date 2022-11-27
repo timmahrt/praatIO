@@ -31,9 +31,9 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
         utils.makeDir(zeroCrossingTGPath)
 
         tg = textgrid.openTextgrid(inputTGFN, False)
-        wavObj = audio.WavQueryObj(inputWavFN)
+        wav = audio.QueryWav(inputWavFN)
 
-        praatio_scripts.tgBoundariesToZeroCrossings(tg, wavObj, zeroCrossingTGFN)
+        praatio_scripts.tgBoundariesToZeroCrossings(tg, wav, zeroCrossingTGFN)
 
     else:
         tg = textgrid.openTextgrid(inputTGFN, False)
@@ -42,8 +42,8 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     keepList = [entry for entry in keepList if not isVowel(entry[2])]
     deleteList = utils.invertIntervalList(keepList, 0, tg.maxTimestamp)
 
-    wavObj = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
-    wavObj.save(outputWavFN)
+    wav = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
+    wav.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)
     for start, end in sorted(deleteList, reverse=True):
