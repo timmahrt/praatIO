@@ -32,11 +32,25 @@ _DELETE: Final = "delete"
 
 ZERO_CROSSING_TIMESTEP: Final = 0.002
 DEFAULT_SINE_FREQUENCY = 200
+NUM_BITS_IN_A_BYTE = 8
 
 
 def calculateMaxAmplitude(sampleWidth: int) -> int:
-    """Gets the maximum possible amplitude for a given sample width"""
-    return 2 ** (sampleWidth * 8 - 1) - 1
+    """Gets the largest possible amplitude representable by a given sample width
+
+    The formula is 2^(n-1) - 1 where n is the number of bits
+    - the first -1 is because the result is signed
+    - the second -1 is because the value is 0 based
+    e.g. if n=3 then 2^(3-1)-1 => 3
+         if n=4 then 2^(4-1)-1 => 7
+
+    Args:
+        sampleWidth: the width in bytes of a sample in the wave file
+
+    Returns:
+        An integer
+    """
+    return 2 ** (sampleWidth * NUM_BITS_IN_A_BYTE - 1) - 1
 
 
 def convertFromBytes(byteStr: bytes, sampleWidth: int) -> Tuple[int, ...]:
