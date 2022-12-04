@@ -4,6 +4,7 @@ python:
   - "3.8"
   - "3.9"
 install:
+  - pip install importlib-metadata
   - python setup.py install
   - pip install coveralls
   - pip install pytest-cov
