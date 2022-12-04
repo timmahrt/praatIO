@@ -181,19 +181,6 @@ class AbstractWav(ABC):
         startTime, endTime = utils.getInterval(start, step, self.duration, reverse)
         samples = self.getSamples(startTime, endTime)
 
-        # if startTime > 0.49 and endTime < 0.51:
-        # print(
-        #     [
-        #         startTime,
-        #         endTime,
-        #         _findNextZeroCrossing(
-        #             startTime, endTime, samples, self.frameRate, reverse
-        #         ),
-        #         samples,
-        #         0 in samples,
-        #     ]
-        # )
-
         return _findNextZeroCrossing(
             startTime, endTime, samples, self.frameRate, reverse
         )
