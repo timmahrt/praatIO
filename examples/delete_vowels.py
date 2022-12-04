@@ -5,6 +5,7 @@ Praatio example for deleting the vowels from the textgrids and audio files
 import os
 from os.path import join
 import copy
+import wave
 
 from praatio import textgrid
 from praatio import praatio_scripts
@@ -38,15 +39,16 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     else:
         tg = textgrid.openTextgrid(inputTGFN, False)
 
-    keepList = tg.tierDict["phone"].entryList
-    keepList = [entry for entry in keepList if not isVowel(entry[2])]
-    deleteList = utils.invertIntervalList(keepList, 0, tg.maxTimestamp)
+    keepIntervals = tg.tierDict["phone"].entryList
+    keepIntervals = [entry for entry in keepIntervals if not isVowel(entry[2])]
+    deleteIntervals = utils.invertIntervalList(keepIntervals, 0, tg.maxTimestamp)
 
-    wav = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
+    wavReader = wave.open(inputWavFN, "r")
+    wav = audio.readFramesAtTimes(wavReader, keepIntervals=keepIntervals)
     wav.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)
-    for start, end in sorted(deleteList, reverse=True):
+    for start, end in sorted(deleteIntervals, reverse=True):
         shrunkTG = shrunkTG.eraseRegion(start, end, doShrink=doShrink)
 
     shrunkTG.save(outputTGFN, "short_textgrid", True)

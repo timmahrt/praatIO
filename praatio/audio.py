@@ -20,13 +20,6 @@ from praatio.utilities import utils
 
 sampleWidthDict: Final = {1: "b", 2: "h", 4: "i", 8: "q"}
 
-
-class AudioDeletion:
-    SHRINK: Final = "shrink"
-    SILENCE: Final = "silence"
-    SINE_WAVE: Final = "sine wave"
-
-
 _KEEP: Final = "keep"
 _DELETE: Final = "delete"
 
@@ -74,18 +67,21 @@ def convertToBytes(numList: Tuple[int, ...], sampleWidth: int) -> bytes:
 
 
 def extractSubwav(fn: str, outputFN: str, startTime: float, endTime: float) -> None:
+    """Get a subsegment of an audio file"""
     wav = QueryWav(fn)
     frames = wav.getFrames(startTime, endTime)
     wav.outputFrames(frames, outputFN)
 
 
 def getDuration(fn: str) -> float:
+    """Get the total duration of an audio file"""
     return QueryWav(fn).duration
 
 
 def readFramesAtTime(
     audiofile: wave.Wave_read, startTime: float, endTime: float
 ) -> bytes:
+    """Read the audio frames for the specified internal of an audio file"""
     params = audiofile.getparams()
     frameRate = params[2]
 
@@ -97,34 +93,37 @@ def readFramesAtTime(
 
 def readFramesAtTimes(
     audiofile: wave.Wave_read,
-    keepList: List[Tuple[float, float]] = None,
-    deleteList: List[Tuple[float, float]] = None,
+    keepIntervals: List[Tuple[float, float]] = None,
+    deleteIntervals: List[Tuple[float, float]] = None,
     replaceFunc: Optional[Callable[[float], bytes]] = None,
-) -> bytes:
+) -> "Wav":
     """Reads an audio file into memory, with some configuration
 
     Args:
         audiofile: the time to get the interval from
-        keepList: duration of the interval
-        deleteList: the maximum allowed time
+        keepIntervals: duration of the interval
+        deleteIntervals: the maximum allowed time
         replaceFunc: is the interval before or after the targetTime?
 
     Returns:
         A bytestring of the loaded audio file
 
     Raises:
-        ArgumentError: The timestamps in keepList or deleteList exceed the audio duration
+        ArgumentError: The timestamps in keepIntervals or deleteIntervals exceed the audio duration
+        ArgumentError: Only one of keepIntervals and deleteIntervals can be specified
     """
     params = audiofile.getparams()
     frameRate = params[2]
     nframes = params[3]
 
     duration = nframes / float(frameRate)
-    markedIntervals = _computeKeepDeleteIntervals(0.0, duration, keepList, deleteList)
+    markedIntervals = _computeKeepDeleteIntervals(
+        0.0, duration, keepIntervals, deleteIntervals
+    )
 
     if markedIntervals[-1][1] > duration:
         raise errors.ArgumentError(
-            "Timestamps in keepList and deleteList cannot exceed wav file duration"
+            "Timestamps in keepIntervals and deleteIntervals cannot exceed wav file duration"
         )
 
     # Grab the sections to be kept
@@ -138,7 +137,17 @@ def readFramesAtTimes(
         elif label == _DELETE and replaceFunc:
             audioFrames += replaceFunc(end - start)
 
-    return audioFrames
+    return Wav(
+        audioFrames,
+        [
+            params[0],
+            params[1],
+            params[2],
+            len(audioFrames),
+            params[4],
+            params[5],
+        ],
+    )
 
 
 class AbstractWav(ABC):
@@ -152,6 +161,13 @@ class AbstractWav(ABC):
         self.comptype = params[4]
         self.compname = params[5]
 
+        if self.nchannels != 1:
+            raise (
+                errors.ArgumentError(
+                    "Only audio with a single channel can be loaded. Your file was #{self.nchannels}."
+                )
+            )
+
     def _iterZeroCrossings(
         self,
         start: float,
@@ -159,18 +175,28 @@ class AbstractWav(ABC):
         step: float = ZERO_CROSSING_TIMESTEP,
         reverse: bool = False,
     ) -> Optional[float]:
-        try:
-            if withinThreshold(start):
-                startTime, endTime = utils.getInterval(
-                    start, self.duration, step, reverse
-                )
-                samples = self.getSamples(startTime, endTime)
+        if not withinThreshold(start):
+            return None
 
-                return _findNextZeroCrossing(startTime, endTime, samples, reverse)
-        except errors.FindZeroCrossingError:
-            pass
+        startTime, endTime = utils.getInterval(start, step, self.duration, reverse)
+        samples = self.getSamples(startTime, endTime)
 
-        return None
+        # if startTime > 0.49 and endTime < 0.51:
+        # print(
+        #     [
+        #         startTime,
+        #         endTime,
+        #         _findNextZeroCrossing(
+        #             startTime, endTime, samples, self.frameRate, reverse
+        #         ),
+        #         samples,
+        #         0 in samples,
+        #     ]
+        # )
+
+        return _findNextZeroCrossing(
+            startTime, endTime, samples, self.frameRate, reverse
+        )
 
     @property
     @abstractmethod
@@ -186,7 +212,6 @@ class AbstractWav(ABC):
         """
 
         leftStartTime = rightStartTime = targetTime
-        fileDuration = self.duration
 
         # Find zero crossings
         smallestLeft = None
@@ -196,21 +221,24 @@ class AbstractWav(ABC):
                 leftStartTime, lambda x: x > 0, timeStep, True
             )
             smallestRight = self._iterZeroCrossings(
-                rightStartTime, lambda x: x < fileDuration, timeStep, False
+                rightStartTime,
+                lambda x: x + timeStep < self.duration,
+                timeStep,
+                False,
             )
 
             if smallestLeft is not None or smallestRight is not None:
                 break
             # TODO: I think this case shouldn't be possible
-            elif leftStartTime < 0 and rightStartTime > fileDuration:
-                raise (errors.FindZeroCrossingError(0, fileDuration))
+            elif leftStartTime < 0 and rightStartTime > self.duration:
+                raise (errors.FindZeroCrossingError(0, self.duration))
             # TODO: I think this case shouldn't be possible
             else:
                 leftStartTime -= timeStep
                 rightStartTime += timeStep
 
         return utils.chooseClosestTime(
-            targetTime, smallestLeft, smallestRight, fileDuration
+            targetTime, smallestLeft, smallestRight, self.duration
         )
 
     @abstractmethod
@@ -284,8 +312,15 @@ class Wav(AbstractWav):
         self.frames = frames
         super(Wav, self).__init__(params)
 
+    def __eq__(self, other):
+        if not isinstance(other, Wav):
+            return False
+
+        return self.frames == other.frames
+
     def _getIndexAtTime(self, startTime: float) -> int:
-        return round(startTime * self.frameRate)
+        """Gets the index in the frame list for the given time"""
+        return round(startTime * self.frameRate * self.sampleWidth)
 
     @classmethod
     def open(cls, fn: str) -> "Wav":
@@ -303,7 +338,7 @@ class Wav(AbstractWav):
 
     @property
     def duration(self) -> float:
-        return len(self.frames) / self.frameRate
+        return len(self.frames) / self.frameRate / self.sampleWidth
 
     def getFrames(self, startTime: float, endTime: float) -> bytes:
         i = self._getIndexAtTime(startTime)
@@ -354,8 +389,6 @@ class AudioGenerator:
         return partial(
             self.generateSineWave,
             frequency=frequency,
-            frameRate=self.frameRate,
-            sampleWidth=self.sampleWidth,
             amplitude=amplitude,
         )
 
@@ -386,7 +419,7 @@ def _findNextZeroCrossing(
     samples: Tuple[int, ...],
     frameRate: float,
     reverse: bool = False,
-) -> float:
+) -> Optional[float]:
     """Finds the nearest zero crossing, searching in one direction
 
     Can do a 'reverse' search by setting reverse to True.  In that case,
@@ -396,6 +429,19 @@ def _findNextZeroCrossing(
         the endTime if reverse=True
     """
 
+    # If there is a zero value, return it
+    zeroI = None
+    if 0 in samples:
+        if reverse:
+            zeroI = len(samples) - samples[::-1].index(0) - 1
+        else:
+            zeroI = samples.index(0)
+
+        adjustTime = zeroI / float(frameRate)
+        return startTime + adjustTime
+
+    # If there is no zero value, see if we ever crossed
+    # zero
     # 1 Get the sign for each sample
     signList = [utils.sign(val) for val in samples]
 
@@ -416,10 +462,9 @@ def _findNextZeroCrossing(
     changeIndexList = [i for i in range(start, end, step) if changeList[i] == 1]
 
     # 4 return the zeroed frame closest to starting point
-    try:
-        zeroedFrame = changeIndexList[0]
-    except IndexError:
-        raise (errors.FindZeroCrossingError(startTime, endTime))
+    if len(changeIndexList) == 0:
+        return None
+    zeroedFrame = changeIndexList[0]
 
     # We found the zero by comparing points to the point adjacent to them.
     # It is possible the adjacent point is closer to zero than this one,
@@ -435,31 +480,35 @@ def _findNextZeroCrossing(
 def _computeKeepDeleteIntervals(
     start: float,
     stop: float,
-    keepList: List[Tuple[float, float]] = None,
-    deleteList: List[Tuple[float, float]] = None,
+    keepIntervals: List[Tuple[float, float]] = None,
+    deleteIntervals: List[Tuple[float, float]] = None,
 ) -> List[Tuple[float, float, str]]:
     """Returns a list of intervals, each one labeled 'keep' or 'delete'"""
-    if keepList and deleteList:
+    if keepIntervals and deleteIntervals:
         raise errors.ArgumentError(
-            "You cannot specify both 'keepList' or 'deleteList'."
+            "You cannot specify both 'keepIntervals' or 'deleteIntervals'."
         )
 
-    elif not keepList and not deleteList:
-        computedKeepList = [(start, stop)]
-        computedDeleteList = []
+    elif not keepIntervals and not deleteIntervals:
+        computedKeepIntervals = [(start, stop)]
+        computedDeleteIntervals = []
 
-    elif deleteList:
-        deleteTimestamps = [(interval[0], interval[1]) for interval in deleteList]
-        computedKeepList = utils.invertIntervalList(deleteTimestamps, start, stop)
-        computedDeleteList = deleteTimestamps
+    elif deleteIntervals:
+        deleteTimestamps = [(interval[0], interval[1]) for interval in deleteIntervals]
+        computedKeepIntervals = utils.invertIntervalList(deleteTimestamps, start, stop)
+        computedDeleteIntervals = deleteTimestamps
 
-    elif keepList:
-        keepTimestamps = [(interval[0], interval[1]) for interval in keepList]
-        computedKeepList = keepTimestamps
-        computedDeleteList = utils.invertIntervalList(keepTimestamps, start, stop)
+    elif keepIntervals:
+        keepTimestamps = [(interval[0], interval[1]) for interval in keepIntervals]
+        computedKeepIntervals = keepTimestamps
+        computedDeleteIntervals = utils.invertIntervalList(keepTimestamps, start, stop)
 
-    annotatedKeepList = [(start, end, _KEEP) for start, end in computedKeepList]
-    annotatedDeleteList = [(start, end, _DELETE) for start, end in computedDeleteList]
-    intervals = sorted(annotatedKeepList + annotatedDeleteList)
+    annotatedKeepIntervals = [
+        (start, end, _KEEP) for start, end in computedKeepIntervals
+    ]
+    annotatedDeleteIntervals = [
+        (start, end, _DELETE) for start, end in computedDeleteIntervals
+    ]
+    intervals = sorted(annotatedKeepIntervals + annotatedDeleteIntervals)
 
     return intervals
