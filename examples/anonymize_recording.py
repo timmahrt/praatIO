@@ -36,5 +36,9 @@ for wavFN, tgFN in (
     deleteList = [(start, end) for start, end, _ in deleteList]
 
     # Replace segments with a sine wave
-    wavQObj = audio.WavQueryObj(join(path, wavFN))
-    wavQObj.deleteWavSections(outputWavFN, deleteList=deleteList, operation="sine wave")
+    wav = audio.Wav.open(join(path, wavFN))
+    for start, end in deleteList:
+        sineFrames = audio.AudioGenerator.fromWav(wav).generateSineWave(
+            end - start, audio.DEFAULT_SINE_FREQUENCY
+        )
+        wav.replaceSegment(start, end, sineFrames)

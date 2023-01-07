@@ -118,10 +118,6 @@ class PraatExecutionFailed(PraatioException):
         return errorStr + cmdTxt
 
 
-class EndOfAudioData(PraatioException):
-    pass
-
-
 class FindZeroCrossingError(PraatioException):
     def __init__(self, startTime: float, endTime: float):
         super(FindZeroCrossingError, self).__init__()

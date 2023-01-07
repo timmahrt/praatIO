@@ -8,7 +8,7 @@ import itertools
 import wave
 from pkg_resources import resource_filename
 from typing_extensions import Literal
-from typing import Any, Iterator, List, Tuple, NoReturn, Type
+from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional
 
 from praatio.utilities import errors
 from praatio.utilities import constants
@@ -20,6 +20,19 @@ scriptsPath = resource_filename(
     "praatio",
     "praatScripts",
 )
+
+
+def find(list, value, reverse) -> Optional[int]:
+    """Returns the first/last index of an item in a list"""
+    if value not in list:
+        return None
+
+    if reverse:
+        index = len(list) - list[::-1].index(value) - 1
+    else:
+        index = list.index(value)
+
+    return index
 
 
 def reportNoop(_exception: Type[BaseException], _text: str) -> None:
@@ -407,7 +420,7 @@ def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
 
 
 def getWavDuration(wavFN: str) -> float:
-    "For internal use.  See praatio.audio.WavQueryObj() for general use."
+    "For internal use.  See praatio.audio.QueryWav() for general use."
     audiofile = wave.open(wavFN, "r")
     params = audiofile.getparams()
     framerate = params[2]
@@ -415,3 +428,69 @@ def getWavDuration(wavFN: str) -> float:
     duration = float(nframes) / framerate
 
     return duration
+
+
+def chooseClosestTime(
+    targetTime: float, candidateA: Optional[float], candidateB: Optional[float]
+) -> float:
+    """Chooses the closest time between two options that straddle the target time
+
+    Args:
+        targetTime: the time to compare against
+        candidateA: the first candidate
+        candidateB: the second candidate
+
+    Returns:
+        the closer of the two options to the target time
+    Raises:
+        ArgumentError: When no left or right candidate is provided
+    """
+    closestTime: float
+    if candidateA is None and candidateB is None:
+        raise (errors.ArgumentError("Must provide at"))
+
+    elif candidateA is None and candidateB is not None:
+        closestTime = candidateB
+    elif candidateB is None and candidateA is not None:
+        closestTime = candidateA
+    elif candidateB is not None and candidateA is not None:
+        aDiff = abs(candidateA - targetTime)
+        bDiff = abs(candidateB - targetTime)
+
+        if aDiff <= bDiff:
+            closestTime = candidateA
+        else:
+            closestTime = candidateB
+
+    return closestTime
+
+
+def getInterval(
+    startTime: float, duration: float, max: float, reverse: bool
+) -> Tuple[float, float]:
+    """returns an interval before or after some start time
+
+    The returned timestamps will be between 0 and max
+
+    Args:
+        startTime: the time to get the interval from
+        duration: duration of the interval
+        max: the maximum allowed time
+        reverse: is the interval before or after the targetTime?
+
+    Returns:
+        the start and end time of an interval
+    """
+    if reverse is True:
+        endTime = startTime
+        startTime -= duration
+    else:
+        endTime = startTime + duration
+
+    # Don't read over the edges
+    if startTime < 0:
+        startTime = 0
+    elif endTime > max:
+        endTime = max
+
+    return (startTime, endTime)

@@ -67,15 +67,15 @@ def _shiftTimes(
 
 
 def audioSplice(
-    audioObj: audio.WavObj,
-    spliceSegment: audio.WavObj,
+    audioObj: audio.Wav,
+    spliceSegment: audio.Wav,
     tg: textgrid.Textgrid,
     tierName: str,
     newLabel: str,
     insertStart: float,
     insertStop: float = None,
     alignToZeroCrossing: bool = True,
-) -> Tuple[audio.WavObj, textgrid.Textgrid]:
+) -> Tuple[audio.Wav, textgrid.Textgrid]:
     """Splices a segment into an audio file and corresponding textgrid
 
     Args:
@@ -95,7 +95,7 @@ def audioSplice(
             in better sounding output
 
     Returns:
-        [WavObj, Textgrid]
+        [Wav, Textgrid]
     """
 
     retTG = tg.new()
@@ -104,10 +104,10 @@ def audioSplice(
     if alignToZeroCrossing is True:
 
         # Cut the splice segment to zero crossings
-        spliceDuration = spliceSegment.getDuration()
+        spliceDuration = spliceSegment.duration
         spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
         spliceZeroEnd = spliceSegment.findNearestZeroCrossing(spliceDuration)
-        spliceSegment = spliceSegment.getSubsegment(spliceZeroStart, spliceZeroEnd)
+        spliceSegment = spliceSegment.getSubwav(spliceZeroStart, spliceZeroEnd)
 
         # Move the textgrid borders to zero crossings
         oldInsertStart = insertStart
@@ -125,10 +125,10 @@ def audioSplice(
         insertTime = insertStop
 
     # Insert into the audio file
-    audioObj.insert(insertTime, spliceSegment.audioSamples)
+    audioObj.insert(insertTime, spliceSegment.frames)
 
     # Insert a blank region into the textgrid on all tiers
-    targetDuration = spliceSegment.getDuration()
+    targetDuration = spliceSegment.duration
     retTG = retTG.insertSpace(insertTime, targetDuration, "stretch")
 
     # Insert the splice entry into the target tier
@@ -277,7 +277,7 @@ def splitTierEntries(
 
 def tgBoundariesToZeroCrossings(
     tg: textgrid.Textgrid,
-    wavObj: audio.WavObj,
+    wav: audio.Wav,
     adjustPointTiers: bool = True,
     adjustIntervalTiers: bool = True,
 ) -> textgrid.Textgrid:
@@ -296,7 +296,7 @@ def tgBoundariesToZeroCrossings(
 
             points = []
             for start, label in tier.entryList:
-                newStart = wavObj.findNearestZeroCrossing(start)
+                newStart = wav.findNearestZeroCrossing(start)
                 points.append(Point(newStart, label))
             newTier = tier.new(entryList=points)
         elif isinstance(tier, textgrid.IntervalTier):
@@ -305,8 +305,8 @@ def tgBoundariesToZeroCrossings(
 
             intervals = []
             for start, end, label in tier.entryList:
-                newStart = wavObj.findNearestZeroCrossing(start)
-                newStop = wavObj.findNearestZeroCrossing(end)
+                newStart = wav.findNearestZeroCrossing(start)
+                newStop = wav.findNearestZeroCrossing(end)
                 intervals.append(Interval(newStart, newStop, label))
             newTier = tier.new(entryList=intervals)
 
@@ -395,7 +395,7 @@ def splitAudioOnTier(
 
     # Output wave files
     outputFNList = []
-    wavQObj = audio.WavQueryObj(wavFN)
+    wavQObj = audio.QueryWav(wavFN)
     for i, entry in enumerate(entryList):
         start, end, label = entry
 
@@ -419,7 +419,7 @@ def splitAudioOnTier(
             )
 
         frames = wavQObj.getFrames(start, end)
-        wavQObj.outputModifiedWav(frames, outputFNFullPath)
+        wavQObj.outputFrames(frames, outputFNFullPath)
 
         outputFNList.append((start, end, outputName + ".wav"))
 
