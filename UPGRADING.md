@@ -17,11 +17,9 @@ audio.py has been refreshed in version 6 with numerous bugfixes and
 api changes.
 
 Renamed methods and classes
-
 - audio.WavQueryObj -> audio.QueryWav
 - audio.WavObj -> audio.Wav
 (the new names of these classes are used below)
-
 - audio.samplesAsNums -> audio.convertFromBytes
 - audio.numsAsSamples -> audio.convertToBytes
 - audio.getMaxAmplitude -> audio.calculateMaxAmplitude
