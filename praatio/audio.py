@@ -386,6 +386,7 @@ class AudioGenerator:
 
     @classmethod
     def fromWav(cls, wav: AbstractWav) -> "AudioGenerator":
+        """Build an AudioGenerator with parameters derived from a Wav or QueryWav"""
         return AudioGenerator(wav.sampleWidth, wav.frameRate)
 
     def buildSineWaveGenerator(self, frequency, amplitude) -> Callable[[float], bytes]:
