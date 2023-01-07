@@ -83,7 +83,7 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier2, reportingMode="error")
         sut.addTier(tier3, reportingMode="error")
 
-        self.assertEqual(["words", "phrases", "max pitch"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "phrases", "max pitch"], sut.tierNameList)
         self.assertEqual(tier1, sut.tierDict["words"])
         self.assertEqual(tier2, sut.tierDict["phrases"])
         self.assertEqual(tier3, sut.tierDict["max pitch"])
@@ -99,7 +99,7 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier3, tierIndex=1, reportingMode="error")
 
         # tier3 was inserted last but with index 1, so it will appear second
-        self.assertEqual(["words", "max pitch", "phrases"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "max pitch", "phrases"], sut.tierNameList)
         self.assertEqual(tier1, sut.tierDict["words"])
         self.assertEqual(tier3, sut.tierDict["max pitch"])
         self.assertEqual(tier2, sut.tierDict["phrases"])
@@ -140,7 +140,7 @@ class TestTextgrid(PraatioTestCase):
 
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(10, sut.maxTimestamp)
-        self.assertEqual(["words", "max pitch"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "max pitch"], sut.tierNameList)
         self.assertEqual(expectedTier1, sut.tierDict["words"])
         self.assertEqual(expectedTier2, sut.tierDict["max pitch"])
 
@@ -190,7 +190,7 @@ class TestTextgrid(PraatioTestCase):
 
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(10, sut.maxTimestamp)
-        self.assertEqual(
+        self.assertSequenceEqual(
             ["words", "max pitch", "phrases", "min pitch", "cats", "dogs"],
             sut.tierNameList,
         )
@@ -844,8 +844,7 @@ class TestTextgrid(PraatioTestCase):
         expectedRenamedTier = makeIntervalTier("cats", [[5, 6.7, "hey there"]])
 
         self.assertEqual(expectedRenamedTier, sut.tierDict["cats"])
-        self.assertEqual(["phrases", "cats", "phones"], sut.tierNameList)
-        self.assertCountEqual(["phrases", "cats", "phones"], sut.tierDict.keys())
+        self.assertSequenceEqual(["phrases", "cats", "phones"], sut.tierNameList)
 
     def test_remove_tier_removes_a_tier(self):
         sut = textgrid.Textgrid(0, 10)
@@ -860,8 +859,7 @@ class TestTextgrid(PraatioTestCase):
         removedTier = sut.removeTier("words")
 
         self.assertEqual(removedTier, tier2)
-        self.assertEqual(["phrases", "phones"], sut.tierNameList)
-        self.assertCountEqual(["phrases", "phones"], sut.tierDict.keys())
+        self.assertSequenceEqual(["phrases", "phones"], sut.tierNameList)
 
     def test_replace_tier_replaces_one_tier_with_another(self):
         sut = textgrid.Textgrid(0, 10)
@@ -872,12 +870,11 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier1)
         sut.addTier(tier2)
 
-        self.assertEqual(["words", "phones"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "phones"], sut.tierNameList)
 
         sut.replaceTier("words", newTier1)
 
-        self.assertEqual(["cats", "phones"], sut.tierNameList)
-        self.assertCountEqual(["cats", "phones"], sut.tierDict.keys())
+        self.assertSequenceEqual(["cats", "phones"], sut.tierNameList)
         self.assertEqual(newTier1, sut.tierDict["cats"])
 
     def test_replace_tier_reports_if_new_tier_is_larger_than_textgrid(self):
@@ -908,23 +905,6 @@ class TestTextgrid(PraatioTestCase):
         sut = textgrid.Textgrid()
         with self.assertRaises(errors.WrongOption) as _:
             sut.validate("bird")
-
-    def test_validate_throws_error_if_two_tiers_have_the_same_name(self):
-        # Users shouldn't be manually manipulating the tierNameList
-        # (currently its the only way to trigger this error)
-        sut = textgrid.Textgrid()
-        tier1 = makeIntervalTier(name="phones")
-        tier2 = makeIntervalTier(name="words")
-
-        sut.addTier(tier1)
-        sut.addTier(tier2)
-        self.assertTrue(sut.validate())
-
-        sut.tierNameList.append("phones")
-        self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
-
-        with self.assertRaises(errors.TierNameExistsError) as _:
-            sut.validate(constants.ErrorReportingMode.ERROR)
 
     def test_validate_throws_error_if_tiers_and_textgrid_dont_agree_on_min_timestamp(
         self,

@@ -11,6 +11,7 @@ from typing import (
     Dict,
 )
 from typing_extensions import Literal
+from collections import OrderedDict
 
 
 from praatio.utilities.constants import (
@@ -50,8 +51,7 @@ class Textgrid:
             maxTimestamp: the maximum allowable timestamp in the textgrid
         """
 
-        self.tierNameList: List[str] = []  # Preserves the order of the tiers
-        self.tierDict: Dict[str, textgrid_tier.TextgridTier] = {}
+        self.tierDict: OrderedDict[str, textgrid_tier.TextgridTier] = OrderedDict()
 
         # Timestamps are determined by the first tier added
         self.minTimestamp: float = minTimestamp  # type: ignore[assignment]
@@ -71,6 +71,10 @@ class Textgrid:
                 isEqual &= self.tierDict[tierName] == other.tierDict[tierName]
 
         return isEqual
+
+    @property
+    def tierNameList(self):
+        return tuple(self.tierDict.keys())
 
     def addTier(
         self,
@@ -103,15 +107,17 @@ class Textgrid:
         )
         errorReporter = utils.getErrorReporter(reportingMode)
 
-        if tier.name in list(self.tierDict.keys()):
+        if tier.name in self.tierNameList:
             raise errors.TierNameExistsError("Tier name already in tier")
 
-        if tierIndex is None:
-            self.tierNameList.append(tier.name)
-        else:
-            self.tierNameList.insert(tierIndex, tier.name)
-
+        tmpTierNameList = list(self.tierNameList)
         self.tierDict[tier.name] = tier
+        if tierIndex is not None:  # Need to recreate the tierDict with the new order
+            tmpTierNameList.insert(tierIndex, tier.name)
+            newTierDict = OrderedDict()
+            for tmpName in tmpTierNameList:
+                newTierDict[tmpName] = self.tierDict[tmpName]
+            self.tierDict = newTierDict
 
         minV = tier.minTimestamp
         if self.minTimestamp is not None and minV < self.minTimestamp:
@@ -148,7 +154,7 @@ class Textgrid:
 
         # Get all tier names.  Ordered first by this textgrid and
         # then by the other textgrid.
-        combinedTierNameList = self.tierNameList[:]
+        combinedTierNameList = list(self.tierNameList)
         for tierName in tg.tierNameList:
             if tierName not in combinedTierNameList:
                 combinedTierNameList.append(tierName)
@@ -493,7 +499,6 @@ class Textgrid:
         self.addTier(oldTier.new(newName, oldTier.entryList), tierIndex)
 
     def removeTier(self, name: str) -> textgrid_tier.TextgridTier:
-        self.tierNameList.pop(self.tierNameList.index(name))
         return self.tierDict.pop(name)
 
     def replaceTier(
