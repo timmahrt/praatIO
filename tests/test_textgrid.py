@@ -104,6 +104,45 @@ class TestTextgrid(PraatioTestCase):
         self.assertEqual(tier3, sut.tierDict["max pitch"])
         self.assertEqual(tier2, sut.tierDict["phrases"])
 
+    def test_manually_replacing_a_tier_doesnt_unintentionally_modifying_order(
+        self,
+    ):
+        # Users are not supposed to directly modify tierDict directly, but
+        # it might be difficult to actually enforce this
+        expectedTierNameList = ["words", "phrases"]
+
+        tier1 = makeIntervalTier("words")
+        tier2 = makeIntervalTier("phrases")
+
+        tier3 = makeIntervalTier("words")
+        tier3.insertEntry((0, 1.0, "hello"))
+
+        self.assertNotEqual(tier1, tier3)
+
+        sut = textgrid.Textgrid()
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        self.assertSequenceEqual(expectedTierNameList, sut.tierNameList)
+
+        sut.tierDict["words"] = tier3
+        self.assertSequenceEqual(expectedTierNameList, sut.tierNameList)
+        self.assertEqual(tier3, sut.tierDict["words"])
+
+    def test_manually_updating_tier_dict_also_updates_tier_name_list(self):
+        # Users are not supposed to directly modify tierDict directly, but
+        # it might be difficult to actually enforce this
+        tier1 = makeIntervalTier("words")
+        tier2 = makeIntervalTier("phrases")
+
+        sut = textgrid.Textgrid()
+        sut.tierDict["words"] = tier1
+        self.assertSequenceEqual(["words"], sut.tierNameList)
+
+        sut.addTier(tier2)
+        sut.tierDict["phrases"] = tier1
+        self.assertSequenceEqual(["words", "phrases"], sut.tierNameList)
+
     def test_append_textgrid_with_matching_names_only(self):
         tg1 = textgrid.Textgrid()
         tg2 = textgrid.Textgrid()

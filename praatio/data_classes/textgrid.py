@@ -5,11 +5,7 @@ This is the 'heart' of praatio.
 """
 import io
 import copy
-from typing import (
-    List,
-    Optional,
-    Dict,
-)
+from typing import List, Optional
 from typing_extensions import Literal
 from collections import OrderedDict
 
