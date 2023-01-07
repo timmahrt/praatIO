@@ -22,6 +22,19 @@ scriptsPath = resource_filename(
 )
 
 
+def find(list, value, reverse) -> Optional[int]:
+    """Returns the first/last index of an item in a list"""
+    if value not in list:
+        return None
+
+    if reverse:
+        index = len(list) - list[::-1].index(value) - 1
+    else:
+        index = list.index(value)
+
+    return index
+
+
 def reportNoop(_exception: Type[BaseException], _text: str) -> None:
     pass
 
@@ -418,43 +431,38 @@ def getWavDuration(wavFN: str) -> float:
 
 
 def chooseClosestTime(
-    targetTime: float,
-    leftCandidate: Optional[float],
-    rightCandidate: Optional[float],
-    duration: float,
+    targetTime: float, candidateA: Optional[float], candidateB: Optional[float]
 ) -> float:
     """Chooses the closest time between two options that straddle the target time
 
     Args:
         targetTime: the time to compare against
-        leftCandidate: the candidate to the left of the target time
-        rightCandidate: the candidate to the right of the target time
-        duration: duration of the audio file; used for debugging purposes
+        candidateA: the first candidate
+        candidateB: the second candidate
 
     Returns:
         the closer of the two options to the target time
     Raises:
-        FindZeroCrossingError: When no left or right candidate is provided
+        ArgumentError: When no left or right candidate is provided
     """
-    zeroCrossingTime: float
-    # TODO: I think this case isn't possible
-    if leftCandidate is None and rightCandidate is None:
-        raise (errors.FindZeroCrossingError(0, duration))
+    closestTime: float
+    if candidateA is None and candidateB is None:
+        raise (errors.ArgumentError("Must provide at"))
 
-    elif leftCandidate is None and rightCandidate is not None:
-        zeroCrossingTime = rightCandidate
-    elif rightCandidate is None and leftCandidate is not None:
-        zeroCrossingTime = leftCandidate
-    elif rightCandidate and leftCandidate:
-        leftDiff = targetTime - leftCandidate
-        rightDiff = rightCandidate - targetTime
+    elif candidateA is None and candidateB is not None:
+        closestTime = candidateB
+    elif candidateB is None and candidateA is not None:
+        closestTime = candidateA
+    elif candidateB is not None and candidateA is not None:
+        aDiff = abs(candidateA - targetTime)
+        bDiff = abs(candidateB - targetTime)
 
-        if leftDiff <= rightDiff:
-            zeroCrossingTime = leftCandidate
+        if aDiff <= bDiff:
+            closestTime = candidateA
         else:
-            zeroCrossingTime = rightCandidate
+            closestTime = candidateB
 
-    return zeroCrossingTime
+    return closestTime
 
 
 def getInterval(
