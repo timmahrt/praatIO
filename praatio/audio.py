@@ -384,6 +384,10 @@ class AudioGenerator:
         self.sampleWidth: int = sampleWidth
         self.frameRate: int = frameRate
 
+    @classmethod
+    def fromWav(cls, wav: AbstractWav) -> "AudioGenerator":
+        return AudioGenerator(wav.sampleWidth, wav.frameRate)
+
     def buildSineWaveGenerator(self, frequency, amplitude) -> Callable[[float], bytes]:
         """Returns a function that takes a duration and returns a generated sine wave"""
         return partial(

@@ -202,7 +202,7 @@ class AudioWrapper:
             wavObj = wave.open(self.bobWavFN, "r")
 
             wav = audio.Wav.open(self.bobWavFN)
-            generator = audio.AudioGenerator(wav.sampleWidth, wav.frameRate)
+            generator = audio.AudioGenerator.fromWav(wav)
 
             sut = audio.readFramesAtTimes(
                 wavObj,
@@ -232,7 +232,7 @@ class AudioWrapper:
             wavObj = wave.open(self.bobWavFN, "r")
 
             wav = audio.Wav.open(self.bobWavFN)
-            generator = audio.AudioGenerator(wav.sampleWidth, wav.frameRate)
+            generator = audio.AudioGenerator.fromWav(wav)
 
             sut = audio.readFramesAtTimes(
                 wavObj,
