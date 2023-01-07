@@ -96,7 +96,7 @@ def readFramesAtTimes(
     keepIntervals: List[Tuple[float, float]] = None,
     deleteIntervals: List[Tuple[float, float]] = None,
     replaceFunc: Optional[Callable[[float], bytes]] = None,
-) -> "Wav":
+) -> bytes:
     """Reads an audio file into memory, with some configuration
 
     Args:
@@ -137,17 +137,7 @@ def readFramesAtTimes(
         elif label == _DELETE and replaceFunc:
             audioFrames += replaceFunc(end - start)
 
-    return Wav(
-        audioFrames,
-        [
-            params[0],
-            params[1],
-            params[2],
-            len(audioFrames),
-            params[4],
-            params[5],
-        ],
-    )
+    return audioFrames
 
 
 class AbstractWav(ABC):

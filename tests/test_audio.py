@@ -132,6 +132,24 @@ class AudioWrapper:
 
             self.assertEqual(expectedFrames, sut)
 
+        def test_read_frames_at_time_throws_exception_if_keep_and_delete_specified(
+            self,
+        ):
+            wav = wave.open(self.bobWavFN, "r")
+            with self.assertRaises(errors.ArgumentError) as _:
+                audio.readFramesAtTimes(
+                    wav, keepIntervals=(1, 1.3), deleteIntervals=[(0, 1)]
+                )
+
+        def test_read_frames_at_time_will_read_the_whole_file_by_default(self):
+            wav = wave.open(self.bobWavFN, "r")
+            sut = audio.readFramesAtTimes(wav)
+
+            wavObj = audio.Wav.open(self.bobWavFN)
+            expectedFrames = wavObj.frames
+
+            self.assertEqual(expectedFrames, sut)
+
         def test_wav_get_samples(self):
             # This test isn't really testing anything since there is
             # only a single way the methods convert from bytes
@@ -186,14 +204,18 @@ class AudioWrapper:
             self.assertEqual(expectedDuration, sut.duration)
 
         def test_open_audio_with_keep_list(self):
+            start1, end1 = (0.06, 0.40)
+            start2, end2 = (0.75, 1.12)
+            expectedDuration = (end1 - start1) + (end2 - start2)
             wav = wave.open(self.bobWavFN, "r")
 
-            sut = audio.readFramesAtTimes(
-                wav, keepIntervals=[(0.06, 0.40, "Bobby"), (0.75, 1.12, "Ledger")]
+            readFrames = audio.readFramesAtTimes(
+                wav, keepIntervals=[(start1, end1, "Bobby"), (start2, end2, "Ledger")]
             )
+            sut = audio.Wav(readFrames, wav.getparams())
 
             sut.save(join(self.outputRoot, "bobby_word_tmp.wav"))
-            self.assertEqual(0.34 + 0.37, sut.duration)
+            self.assertAlmostEqual(expectedDuration, sut.duration)
 
         def test_open_audio_with_keep_intervals_and_deleted_segments_are_replaced_with_silence(
             self,
@@ -204,16 +226,17 @@ class AudioWrapper:
             wav = audio.Wav.open(self.bobWavFN)
             generator = audio.AudioGenerator.fromWav(wav)
 
-            sut = audio.readFramesAtTimes(
+            readFrames = audio.readFramesAtTimes(
                 wavObj,
                 keepIntervals=[(0.06, 0.40, "Bobby"), (0.75, 1.12, "Ledger")],
                 replaceFunc=generator.generateSilence,
             )
+            sut = audio.Wav(readFrames, wav.params)
 
             sut.save(join(self.outputRoot, "bobby_word_keep_intervals_and_silence.wav"))
-            self.assertEqual(expectedDuration, sut.duration)
+            self.assertAlmostEqual(expectedDuration, sut.duration)
 
-        def test_open_audio_with_delete_intervals(self):
+        def test_read_frames_at_times_with_delete_intervals(self):
             start1, end1 = (0.06, 0.40)
             start2, end2 = (0.75, 1.12)
             expectedDuration = (
@@ -221,27 +244,42 @@ class AudioWrapper:
             )
             wav = wave.open(self.bobWavFN, "r")
 
-            sut = audio.readFramesAtTimes(
+            readFrames = audio.readFramesAtTimes(
                 wav, deleteIntervals=[(start1, end1, "Bobby"), (start2, end2, "Ledger")]
             )
+            sut = audio.Wav(readFrames, wav.getparams())
 
             self.assertAlmostEqual(expectedDuration, sut.duration, 4)
 
-        def test_open_audio_with_deleted_segments_replaced_with_silence(self):
+        def test_frames_at_times_with_deleted_segments_replaced_with_silence(self):
+            start1, end1 = (0.06, 0.40)
+            start2, end2 = (0.75, 1.12)
             expectedDuration = audio.getDuration(self.bobWavFN)
             wavObj = wave.open(self.bobWavFN, "r")
 
             wav = audio.Wav.open(self.bobWavFN)
             generator = audio.AudioGenerator.fromWav(wav)
 
-            sut = audio.readFramesAtTimes(
+            readFrames = audio.readFramesAtTimes(
                 wavObj,
-                deleteIntervals=[(0.06, 0.40, "Bobby"), (0.75, 1.12, "Ledger")],
+                deleteIntervals=[(start1, end1, "Bobby"), (start2, end2, "Ledger")],
                 replaceFunc=generator.generateSilence,
             )
+            sut = audio.Wav(readFrames, wavObj.getparams())
 
             sut.save(join(self.outputRoot, "bobby_word_delete_list_and_silence.wav"))
-            self.assertEqual(expectedDuration, sut.duration)
+            self.assertAlmostEqual(expectedDuration, sut.duration)
+
+            # Silent regions should be silent, non-silent regions should be not silent
+            self.assertEqual(
+                generator.generateSilence(end1 - start1), sut.getFrames(start1, end1)
+            )
+            self.assertNotEqual(
+                generator.generateSilence(start2 - end1), sut.getFrames(end1, start2)
+            )
+            self.assertEqual(
+                generator.generateSilence(end2 - start2), sut.getFrames(start2, end2)
+            )
 
 
 class TestAudioWith16Bits48000Hz(AudioWrapper.TestAudio):
