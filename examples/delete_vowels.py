@@ -14,7 +14,9 @@ from praatio.utilities import utils
 
 
 def isVowel(label):
-    return any([vowel in label.lower() for vowel in ["a", "e", "i", "o", "u"]])
+    return any(
+        [vowel in label.lower() for vowel in ["a", "e", "i", "o", "u", "ə", "œ"]]
+    )
 
 
 def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=True):
@@ -26,26 +28,35 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     outputWavFN = join(outputPath, wavFN)
     outputTGFN = join(outputPath, tgFN)
 
+    wav = audio.QueryWav(inputWavFN)
+
     if atZeroCrossing is True:
         zeroCrossingTGPath = join(outputPath, "zero_crossing_tgs")
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
 
         tg = textgrid.openTextgrid(inputTGFN, False)
-        wav = audio.QueryWav(inputWavFN)
 
         praatio_scripts.tgBoundariesToZeroCrossings(tg, wav, zeroCrossingTGFN)
 
     else:
         tg = textgrid.openTextgrid(inputTGFN, False)
 
-    keepIntervals = tg.tierDict["phone"].entryList
-    keepIntervals = [entry for entry in keepIntervals if not isVowel(entry[2])]
-    deleteIntervals = utils.invertIntervalList(keepIntervals, 0, tg.maxTimestamp)
+    intervals = tg.tierDict["phone"].entryList
+    deleteIntervals = [(entry[0], entry[1]) for entry in intervals if isVowel(entry[2])]
+    keepIntervals = utils.invertIntervalList(deleteIntervals, 0, wav.duration)
 
     wavReader = wave.open(inputWavFN, "r")
-    wav = audio.readFramesAtTimes(wavReader, keepIntervals=keepIntervals)
-    wav.save(outputWavFN)
+    replaceFunc = None
+    if doShrink is False:
+        generator = audio.AudioGenerator.fromWav(wav)
+        replaceFunc = generator.generateSilence
+
+    frames = audio.readFramesAtTimes(
+        wavReader, keepIntervals=keepIntervals, replaceFunc=replaceFunc
+    )
+    shrunkWav = audio.Wav(frames, wavReader.getparams())
+    shrunkWav.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)
     for start, end in sorted(deleteIntervals, reverse=True):
