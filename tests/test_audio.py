@@ -138,8 +138,15 @@ class AudioWrapper:
             wav = wave.open(self.bobWavFN, "r")
             with self.assertRaises(errors.ArgumentError) as _:
                 audio.readFramesAtTimes(
-                    wav, keepIntervals=(1, 1.3), deleteIntervals=[(0, 1)]
+                    wav, keepIntervals=[(1, 1.3)], deleteIntervals=[(0, 1)]
                 )
+
+        def test_read_frames_at_time_throws_exception_if_timestamps_exceed_audio_duration(
+            self,
+        ):
+            wav = wave.open(self.bobWavFN, "r")
+            with self.assertRaises(errors.ArgumentError) as _:
+                audio.readFramesAtTimes(wav, keepIntervals=[(100.5, 101)])
 
         def test_read_frames_at_time_will_read_the_whole_file_by_default(self):
             wav = wave.open(self.bobWavFN, "r")

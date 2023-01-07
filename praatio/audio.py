@@ -48,9 +48,6 @@ def calculateMaxAmplitude(sampleWidth: int) -> int:
 
 def convertFromBytes(byteStr: bytes, sampleWidth: int) -> Tuple[int, ...]:
     """Convert frames of a python wave object from bytes to numbers"""
-    if len(byteStr) == 0:
-        raise errors.EndOfAudioData()
-
     byteCode = sampleWidthDict[sampleWidth]
     actualNumFrames = int(len(byteStr) / float(sampleWidth))
     audioFrameList = struct.unpack("<" + byteCode * actualNumFrames, byteStr)
