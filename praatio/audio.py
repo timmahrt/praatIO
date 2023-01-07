@@ -201,7 +201,8 @@ class AbstractWav(ABC):
         samplesPerStep = timeStep * self.frameRate
         if samplesPerStep < 2:
             raise errors.ArgumentError(
-                f"'timeStep' ({timeStep}) must be large enough to contain multiple samples for audio framerate ({self.frameRate})"
+                f"'timeStep' ({timeStep}) must be large enough to contain "
+                f"multiple samples for audio framerate ({self.frameRate})"
             )
 
         # Find zero crossings

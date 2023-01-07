@@ -419,7 +419,7 @@ def splitAudioOnTier(
             )
 
         frames = wavQObj.getFrames(start, end)
-        wavQObj.outputModifiedWav(frames, outputFNFullPath)
+        wavQObj.outputFrames(frames, outputFNFullPath)
 
         outputFNList.append((start, end, outputName + ".wav"))
 

@@ -82,7 +82,15 @@ class TestExamples(CoverageIgnoredTest):
         print(os.getcwd())
         import merge_tiers
 
-    def test_set_operations(self):
+    def test_splice_example(self):
+        """Running 'splice_example.py'"""
+        import splice_example
+
+    def test_split_audio_on_tier(self):
+        """Running 'split_audio_on_tier.py'"""
+        import split_audio_on_tier
+
+    def test_textgrid_set_operations(self):
         """Running 'textgrid_set_operations.py'"""
         import textgrid_set_operations
 
