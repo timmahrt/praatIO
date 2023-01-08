@@ -20,15 +20,16 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 # Table of contents
 1. [Documentation](#documentation)
 2. [Tutorials](#tutorials)
-3. [Version History](#version-history)
+3. [Version history](#version-history)
 4. [Requirements](#requirements)
 5. [Installation](#installation)
 6. [Upgrading major versions](#upgrading)
 7. [Usage](#usage)
-8. [Common Use Cases](#common-use-cases)
-9. [Tests](#tests)
-10. [Citing praatIO](#citing-praatio)
-11. [Acknowledgements](#acknowledgements)
+8. [Common use cases](#common-use-cases)
+9. [Output types](#output-types)
+10. [Tests](#tests)
+11. [Citing praatIO](#citing-praatio)
+12. [Acknowledgements](#acknowledgements)
 
 ## Documentation
 
@@ -142,6 +143,66 @@ What can you do with this library?
     - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
     - `alignBoundariesAcrossTiers()`: for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
 
+
+## Output types
+
+PraatIO supports 4 textgrid output file types: short textgrid, long textgrid, json, and textgrid-like json.
+
+Short textgrids and long textgrids are both formats that are natively supported by praat.
+Short textgrids are meant to be more concise while long textgrids are meant to be more human-readable.
+For more information on these file formats, please see [praat's official documentation](https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html)
+
+JSON and textgrid-like JSON are more developer-friendly formats, but they are not supported by praat.
+The default JSON format is more minimal while the textgrid-like JSON is formatted with information similar to a textgrid file.
+
+The default JSON format does not support one use-case: a textgrid has a specified minimum and maximum timestamp.
+The textgrid's tiers also have a specified minimum and maximum timestamp.
+Under most circumstances, they are the same, but the user can specify them to be different and praat will respect this.
+If you have such textgrids, you should use the textgrid-like JSON.
+
+Here is the schema for the JSON output file:
+```
+{
+    "start": 0.0,
+    "end": 1.8,
+    "tiers": {
+        "phone": {
+            "type": "IntervalTier",
+            "entries": [[0.0, 0.3, ""], [0.3, 0.38, "m"]]
+        },
+        "pitch": {
+            "type": "TextTier",
+            "entries": [[0.32, "120"], [0.37, "85"]]
+        }
+    }
+}
+```
+
+Here is the schema for the Textgrid-like JSON output file.
+Notably, `tiers` is a list of hashes, rather than a hash of hashes.
+Also, each tier specifies it's name, and a min and max time.
+```
+{
+    "xmin": 0.0,
+    "xmax": 1.8,
+    "tiers": [
+        {
+            "class": "IntervalTier",
+            "name": "phone",
+            "xmin": 0.0,
+            "xmax": 1.8,
+            "entries": [[0.0, 0.3, ""], [0.3, 0.38, "m"]]
+        },
+        {
+            "class": "TextTier",
+            "name": "pitch",
+            "xmin": 0.0,
+            "xmax": 1.8,
+            "entries": [[0.32, "120"], [0.37, "85"]]
+        }
+    ]
+}
+```
 
 ## Tests
 

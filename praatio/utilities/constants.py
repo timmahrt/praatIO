@@ -46,8 +46,9 @@ class TextgridFormats:
     LONG_TEXTGRID: Final = "long_textgrid"
     SHORT_TEXTGRID: Final = "short_textgrid"
     JSON: Final = "json"
+    TEXTGRID_JSON: Final = "textgrid_json"
 
-    validOptions = [LONG_TEXTGRID, SHORT_TEXTGRID, JSON]
+    validOptions = [LONG_TEXTGRID, SHORT_TEXTGRID, JSON, TEXTGRID_JSON]
 
 
 class DataPointTypes:

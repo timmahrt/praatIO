@@ -155,6 +155,8 @@ def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
 
     try:
         tgAsDict = json.loads(data)
+        if "start" in tgAsDict.keys():  # Using simplified json format
+            tgAsDict = _upconvertDictionaryFromJson(tgAsDict)
     except ValueError:
         caseA = "ooTextFile short" in data
         caseB = "item [" not in data
@@ -172,7 +174,7 @@ def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
 
 def getTextgridAsStr(
     tg: Dict,
-    format: Literal["short_textgrid", "long_textgrid", "json"],
+    format: Literal["short_textgrid", "long_textgrid", "json", "textgrid_json"],
     includeBlankSpaces: bool,
     minTimestamp: Optional[float] = None,
     maxTimestamp: Optional[float] = None,
@@ -182,7 +184,7 @@ def getTextgridAsStr(
 
     Args:
         tg: the textgrid to convert to a string
-        format: one of ['short_textgrid', 'long_textgrid', 'json']
+        format: one of ['short_textgrid', 'long_textgrid', 'json', 'textgrid_json']
         includeBlankSpaces: if True, blank sections in interval
             tiers will be filled in with an empty interval
             (with a label of "")
@@ -204,13 +206,7 @@ def getTextgridAsStr(
         a string representation of the textgrid
     """
 
-    validFormats = [
-        TextgridFormats.LONG_TEXTGRID,
-        TextgridFormats.SHORT_TEXTGRID,
-        TextgridFormats.JSON,
-    ]
-    if format not in validFormats:
-        raise errors.WrongOption("format", format, validFormats)
+    utils.validateOption("format", format, TextgridFormats)
 
     tg = _prepTgForSaving(
         tg, includeBlankSpaces, minTimestamp, maxTimestamp, minimumIntervalLength
@@ -221,9 +217,53 @@ def getTextgridAsStr(
     elif format == TextgridFormats.SHORT_TEXTGRID:
         outputTxt = _tgToShortTextForm(tg)
     elif format == TextgridFormats.JSON:
+        outputTxt = _tgToJson(_downconvertDictionaryForJson(tg))
+    elif format == TextgridFormats.TEXTGRID_JSON:
         outputTxt = _tgToJson(tg)
 
     return outputTxt
+
+
+def _upconvertDictionaryFromJson(tgAsDict: dict) -> dict:
+    """
+    Convert from the sparse json format to the one shaped more literally like a textgrid
+    """
+    transformedDict = {}
+    transformedDict["xmin"] = tgAsDict["start"]
+    transformedDict["xmax"] = tgAsDict["end"]
+    transformedDict["tiers"] = []
+
+    for tierName in tgAsDict["tiers"].keys():
+        tier = tgAsDict["tiers"][tierName]
+        transformedDict["tiers"].append(
+            {
+                "class": tier["type"],
+                "name": tierName,
+                "xmin": tgAsDict["start"],
+                "xmax": tgAsDict["end"],
+                "entries": tier["entries"],
+            }
+        )
+
+    return transformedDict
+
+
+def _downconvertDictionaryForJson(tgAsDict: Dict) -> dict:
+    """
+    Convert from the textgrid-shaped json format to a more minimal json format
+    """
+    tiers = {}
+    for tier in tgAsDict["tiers"]:
+        tiers[tier["name"]] = {
+            "type": tier["class"],
+            "entries": tier["entries"],
+        }
+
+    return {
+        "start": tgAsDict["xmin"],
+        "end": tgAsDict["xmax"],
+        "tiers": tiers,
+    }
 
 
 def _sortEntries(tg: Dict) -> None:
