@@ -69,7 +69,7 @@ class Textgrid:
         return isEqual
 
     @property
-    def tierNameList(self):
+    def tierNameList(self) -> tuple:
         return tuple(self.tierDict.keys())
 
     def addTier(
