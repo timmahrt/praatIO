@@ -2,7 +2,7 @@ name: Praatio test runner
 
 on: [push]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,7 +22,18 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run --source=praatio -m pytest tests/
-      - name: Coveralls
+      - name: Coveralls Parallel
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel: true
+
+finish:
+  needs: test
+  runs-on: ubuntu-latest
+  steps:
+  - name: Coveralls Finished
+    uses: coverallsapp/github-action@master
+    with:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      parallel-finished: true
