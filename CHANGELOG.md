@@ -3,13 +3,18 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
-Ver 6.0 (Jan 7, 2023)
+Ver 6.0 (Feb 4, 2023)
 - Refactored 'audio.py' for maintainability (see [UPGRADING.md](https://github.com/timmahrt/praatIO/blob/main/UPGRADING.md) for details)
 - Added unit tests for 'audio.py'
 - Fixed several bugs related to audio.py
     - Fixed an issue related to finding zero crossings when a value of zero does not appear in the current sample
     - Fixed a rounding issue in several methods (`openAudioFile`, `insert`, `generateSineWave`, `generateSilence`). The rounding error would lead to minor miscalculations. But if the calculations were run many times, the errors would accumulate and become more noticable.
     - Fixed an issue with `readFramesAtTimes`. When the parameter `keepList` or `deleteList` was set, the wrong segments would be kept or deleted.
+- Adjusted how Textgrids are used
+    - Textgrid.tierDict has been made private
+        - Instead of using with tg.tierDict directly, please use tg.addTier, tg.getTier, tg.removeTier, and tg.renameTier
+        - Instead of tg.tierDict.keys() use Textgrid.tierNameList
+
 
 Ver 5.1 (Dec 31, 2021)
 - Fuzzy equivalence for timestamps in Intervals and Points
