@@ -72,10 +72,6 @@ class Textgrid:
     def tierNameList(self) -> Tuple[str, ...]:
         return tuple(self.tierDict.keys())
 
-    def getTier(self, tierName: str) -> textgrid_tier.TextgridTier:
-        """Get the tier with the specified name"""
-        return self.tierDict[tierName]
-
     def addTier(
         self,
         tier: textgrid_tier.TextgridTier,
@@ -329,6 +325,10 @@ class Textgrid:
             tg.addTier(tier, reportingMode=reportingMode)
 
         return tg
+
+    def getTier(self, tierName: str) -> textgrid_tier.TextgridTier:
+        """Get the tier with the specified name"""
+        return self.tierDict[tierName]
 
     def insertSpace(
         self,
