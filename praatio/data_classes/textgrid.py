@@ -106,12 +106,15 @@ class Textgrid:
         if tier.name in self.tierNameList:
             raise errors.TierNameExistsError("Tier name already in tier")
 
-        tmpTierNameList = list(self.tierNameList)
-        self.tierDict[tier.name] = tier
-        if tierIndex is not None:  # Need to recreate the tierDict with the new order
-            tmpTierNameList.insert(tierIndex, tier.name)
+        if tierIndex is None:
+            self.tierDict[tier.name] = tier
+        else:  # Need to recreate the tierDict with the new order
+            newOrderedTierNameList = list(self.tierNameList)
+            newOrderedTierNameList.insert(tierIndex, tier.name)
+
             newTierDict = OrderedDict()
-            for tmpName in tmpTierNameList:
+            self.tierDict[tier.name] = tier
+            for tmpName in newOrderedTierNameList:
                 newTierDict[tmpName] = self.getTier(tmpName)
             self.tierDict = newTierDict
 
@@ -572,14 +575,14 @@ def _tgToDictionary(tg: Textgrid) -> dict:
     tiers = []
     for tierName in tg.tierNameList:
         tier = tg.getTier(tierName)
-        tierDict = {
+        tierAsDict = {
             "class": tier.tierType,
             "name": tierName,
             "xmin": tier.minTimestamp,
             "xmax": tier.maxTimestamp,
             "entries": tier.entryList,
         }
-        tiers.append(tierDict)
+        tiers.append(tierAsDict)
 
     tgAsDict = {"xmin": tg.minTimestamp, "xmax": tg.maxTimestamp, "tiers": tiers}
 
