@@ -5,7 +5,7 @@ This is the 'heart' of praatio.
 """
 import io
 import copy
-from typing import List, Optional
+from typing import Optional, Tuple, Sequence
 from typing_extensions import Literal
 from collections import OrderedDict
 
@@ -69,7 +69,7 @@ class Textgrid:
         return isEqual
 
     @property
-    def tierNameList(self) -> tuple:
+    def tierNameList(self) -> Tuple[str, ...]:
         return tuple(self.tierDict.keys())
 
     def addTier(
@@ -368,7 +368,7 @@ class Textgrid:
         return newTG
 
     def mergeTiers(
-        self, tierList: Optional[List[str]] = None, preserveOtherTiers: bool = True
+        self, tierNames: Optional[Sequence[str]] = None, preserveOtherTiers: bool = True
     ) -> "Textgrid":
         """Combine tiers
 
@@ -381,13 +381,13 @@ class Textgrid:
         Returns:
             Textgrid: the modified version of the current textgrid
         """
-        if tierList is None:
-            tierList = self.tierNameList
+        if tierNames is None:
+            tierNames = self.tierNameList
 
         # Determine the tiers to merge
         intervalTierNameList = []
         pointTierNameList = []
-        for tierName in tierList:
+        for tierName in tierNames:
             tier = self.tierDict[tierName]
             if isinstance(tier, interval_tier.IntervalTier):
                 intervalTierNameList.append(tierName)
@@ -413,7 +413,7 @@ class Textgrid:
 
         if preserveOtherTiers:
             for tierName in self.tierNameList:
-                if tierName not in tierList:
+                if tierName not in tierNames:
                     tg.addTier(self.tierDict[tierName])
 
         if intervalTier is not None:

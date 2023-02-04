@@ -89,7 +89,7 @@ combinedTG.save(
 # except silence. Any non-silent intervals that overlap will be merged
 # together into a super interval
 mergedTG = combinedTG.mergeTiers(
-    tierList=["nouns", "verbs", "subjects"], preserveOtherTiers=True
+    tierNames=["nouns", "verbs", "subjects"], preserveOtherTiers=True
 )
 
 mergedTG.save(
