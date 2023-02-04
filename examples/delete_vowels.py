@@ -42,7 +42,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     else:
         tg = textgrid.openTextgrid(inputTGFN, False)
 
-    intervals = tg.tierDict["phone"].entryList
+    intervals = tg.getTier("phone").entryList
     deleteIntervals = [(entry[0], entry[1]) for entry in intervals if isVowel(entry[2])]
     keepIntervals = utils.invertIntervalList(deleteIntervals, 0, wav.duration)
 

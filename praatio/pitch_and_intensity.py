@@ -495,10 +495,10 @@ def generatePIMeasures(
     filterZeroFlag = not globalZNormalization
 
     tg = textgrid.openTextgrid(tgFN, False)
-    if not isinstance(tg.tierDict[tierName], textgrid.IntervalTier):
-        raise errors.IncompatibleTierError(tg.tierDict[tierName])
+    if not isinstance(tg.getTier(tierName), textgrid.IntervalTier):
+        raise errors.IncompatibleTierError(tg.getTier(tierName))
 
-    tier = cast(textgrid.IntervalTier, tg.tierDict[tierName])
+    tier = cast(textgrid.IntervalTier, tg.getTier(tierName))
     piData = tier.getValuesInIntervals(castDataList)
 
     outputList: List[List[float]] = []

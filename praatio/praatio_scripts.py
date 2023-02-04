@@ -37,7 +37,7 @@ def _shiftTimes(
     """
     tg = tg.new()
     for tierName in tg.tierNameList:
-        tier = tg.tierDict[tierName]
+        tier = tg.getTier(tierName)
 
         if isinstance(tier, textgrid.IntervalTier):
             entryList = [
@@ -133,7 +133,7 @@ def audioSplice(
 
     # Insert the splice entry into the target tier
     newEntry = (insertTime, insertTime + targetDuration, newLabel)
-    retTG.tierDict[tierName].insertEntry(newEntry)
+    retTG.getTier(tierName).insertEntry(newEntry)
 
     # Finally, delete the old section if requested
     if insertStop is not None:
@@ -177,7 +177,7 @@ def spellCheckEntries(
     ]
 
     tg = tg.new()
-    tier = tg.tierDict[targetTierName]
+    tier = tg.getTier(targetTierName)
 
     mispelledEntryList = []
     for start, end, label in tier.entryList:
@@ -227,7 +227,7 @@ def splitTierEntries(
     minT = tg.minTimestamp
     maxT = tg.maxTimestamp
 
-    sourceTier = tg.tierDict[sourceTierName]
+    sourceTier = tg.getTier(sourceTierName)
     targetTier = None
 
     # Examine a subset of the source tier?
@@ -240,7 +240,7 @@ def splitTierEntries(
         sourceTier = sourceTier.crop(startT, endT, "truncated", False)
 
         if targetTierName in tg.tierNameList:
-            targetTier = tg.tierDict[targetTierName]
+            targetTier = tg.getTier(targetTierName)
             targetTier = targetTier.eraseRegion(startT, endT, "truncate", False)
 
     # Split the entries in the source tier
@@ -287,7 +287,7 @@ def tgBoundariesToZeroCrossings(
     adjustIntervalTiers: if True, interval tiers will be adjusted.
     """
     for tierName in tg.tierNameList[:]:
-        tier = tg.tierDict[tierName]
+        tier = tg.getTier(tierName)
 
         newTier: textgrid_tier.TextgridTier
         if isinstance(tier, textgrid.PointTier):
@@ -361,7 +361,7 @@ def splitAudioOnTier(
     mode: Final = getValue(noPartialIntervals)
 
     tg = textgrid.openTextgrid(tgFN, False)
-    entryList = tg.tierDict[tierName].entryList
+    entryList = tg.getTier(tierName).entryList
 
     if silenceLabel is not None:
         entryList = [entry for entry in entryList if entry.label != silenceLabel]
@@ -459,7 +459,7 @@ def alignBoundariesAcrossTiers(
     for tierName in tg.tierNameList:
         altNameList = [tmpName for tmpName in tg.tierNameList if tmpName != tierName]
 
-        tier = tg.tierDict[tierName]
+        tier = tg.getTier(tierName)
         for entry in tier.entryList:
             # Interval tier left boundary or point tier point
             _findMisalignments(
@@ -500,7 +500,7 @@ def _findMisalignments(
 
     matchList = [(tierName, timeV, entry, orderID)]
     for subTierName in tierNameList:
-        subCroppedTier = croppedTG.tierDict[subTierName]
+        subCroppedTier = croppedTG.getTier(subTierName)
 
         # For each item that exists in the search span, find the boundary
         # that lies in the search span
@@ -567,8 +567,8 @@ def _findMisalignments(
 
             newEntry = list(copy.deepcopy(oldEntry))
             newEntry[orderID] = bestVal
-            castNewEntry = tg.tierDict[tierName].entryType(*newEntry)
+            castNewEntry = tg.getTier(tierName).entryType(*newEntry)
 
-            tg.tierDict[tierName].deleteEntry(oldEntry)
-            tg.tierDict[tierName].entryList.append(castNewEntry)
-            tg.tierDict[tierName].entryList.sort()
+            tg.getTier(tierName).deleteEntry(oldEntry)
+            tg.getTier(tierName).entryList.append(castNewEntry)
+            tg.getTier(tierName).entryList.sort()

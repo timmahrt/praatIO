@@ -24,7 +24,7 @@ if not os.path.exists(outputPath):
 
 # Find the region to replace and the region that we'll replace it with
 tg = textgrid.openTextgrid(tgFN, False)
-tier = tg.tierDict[tierName]
+tier = tg.getTier(tierName)
 mEntry = tier.entryList[tier.find("m")[0]]
 bEntry = tier.entryList[tier.find("b")[0]]
 
@@ -40,7 +40,7 @@ audioObj, tg = praatio_scripts.audioSplice(
 
 # Replace 'b' with 'm'
 # The times are now different, so we have to get them again
-bEntry = tg.tierDict[tierName].entryList[tier.find("b")[0]]
+bEntry = tg.getTier(tierName).entryList[tier.find("b")[0]]
 audioObj, tg = praatio_scripts.audioSplice(
     audioObj, mAudioObj, tg, tierName, "m", bEntry[0], bEntry[1]
 )

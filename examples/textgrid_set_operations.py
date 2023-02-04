@@ -24,9 +24,9 @@ from praatio import textgrid
 def doSetOperations(fromFN, toFN):
     tg = textgrid.openTextgrid(fromFN, False)
 
-    syllableTier = tg.tierDict["tonicSyllable"]
-    phoneTier = tg.tierDict["tonicVowel"]
-    filterTier = tg.tierDict["manually_labeled_pitch_errors"]
+    syllableTier = tg.getTier("tonicSyllable")
+    phoneTier = tg.getTier("tonicVowel")
+    filterTier = tg.getTier("manually_labeled_pitch_errors")
 
     # Intersection
     phoneTier1 = phoneTier.intersection(filterTier)
