@@ -2,7 +2,7 @@ name: Praatio test runner
 
 on: [push]
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,7 +29,7 @@ jobs:
           parallel: true
 
 finish:
-  needs: test
+  needs: build
   runs-on: ubuntu-latest
   steps:
   - name: Coveralls Finished
