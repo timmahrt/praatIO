@@ -523,15 +523,24 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         return newTier
 
-    def intersection(self, tier: "IntervalTier") -> "IntervalTier":
+    def intersection(self, tier: "IntervalTier", demarcator="-") -> "IntervalTier":
         """Takes the set intersection of this tier and the given one
 
-        Only intervals that exist in both tiers will remain in the
-        returned tier.  If intervals partially overlap, only the overlapping
-        portion will be returned.
+        - The output will contain one interval for each overlapping pair
+          e.g. [(1, 2, 'foo')] and [(1, 1.3, 'bang'), (1.7, 2, 'wizz')]
+                -> [(1, 1.3, 'foo-bang'), (1.7, 2, 'foo-wizz')]
+        - Only intervals that exist in both tiers will remain in the returned tier.
+          e.g. [(1, 2, 'foo'), (3, 4, 'bar')] and [(1, 2, 'bang'), (2, 3, 'wizz')]
+                -> [(1, 2, 'foo-bang')]
+        - If intervals partially overlap, only the overlapping portion will be returned.
+          e.g. [(1, 2, 'foo')] and [(0.5, 1.5, 'bang')]
+                -> [(1, 1.5, 'foo-bang')]
+
+        Compare with IntervalTier.mergeLabels
 
         Args:
             tier: the tier to intersect with
+            demarcator: the character to separate the labels of the overlapping intervals
 
         Returns:
             IntervalTier: the modified version of the current tier
@@ -547,12 +556,61 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 (
                     subInterval.start,
                     subInterval.end,
-                    f"{subInterval.label}-{interval.label}",
+                    f"{subInterval.label}{demarcator}{interval.label}",
                 )
                 for subInterval in subTier.entryList
             ]
 
             retEntryList.extend(subEntryList)
+
+        newName = f"{self.name}-{tier.name}"
+
+        retTier = self.new(newName, retEntryList)
+
+        return retTier
+
+    def mergeLabels(
+        self, tier: "IntervalTier", demarcator: str = ","
+    ) -> "IntervalTier":
+        """Merges labels of overlapping tiers into this tier
+
+        - All intervals in this tier will appear in the output; for the given tier, only intervals
+          that overlap with content in this tier will appear in the output
+          e.g. [(1, 2, 'foo'), (3, 4, 'bar')] and [(1, 2, 'bang'), (2, 3, 'wizz')]
+                -> [(1, 2, 'foo(bang)'), (3, 4, 'bar()')]
+        - If multiple entries exist in a subinterval, their labels will be concatenated
+          e.g. [(1, 2, 'hi')] and [(1, 1.5, 'h'), (1.5, 2, 'ai')] -> [(1, 2, 'hi(h,ai)')]
+
+        compare with IntervalTier.intersection
+
+        Args:
+            tier: the tier to intersect with
+            demarcator: the string to separate items that fall in the same subinterval
+
+        Returns:
+            IntervalTier: the modified version of the current tier
+        """
+        retEntryList = []
+        for interval in self.entryList:
+            subTier = tier.crop(
+                interval.start, interval.end, CropCollision.TRUNCATED, False
+            )
+            if len(subTier.entryList) == 0:
+                continue
+
+            subLabel = demarcator.join([entry.label for entry in subTier.entryList])
+            label = f"{interval.label}({subLabel})"
+
+            start = min(interval.start, subTier.entryList[0].start)
+            end = max(interval.end, subTier.entryList[-1].end)
+
+            intersectedInterval = (
+                start,
+                end,
+                label,
+            )
+
+            retEntryList.append(intersectedInterval)
 
         newName = f"{self.name}-{tier.name}"
 
