@@ -125,7 +125,7 @@ class TestTextgrid(PraatioTestCase):
 
         self.assertSequenceEqual(expectedTierNameList, sut.tierNameList)
 
-        sut.tierDict["words"] = tier3
+        sut._tierDict["words"] = tier3
         self.assertSequenceEqual(expectedTierNameList, sut.tierNameList)
         self.assertEqual(tier3, sut.getTier("words"))
 
@@ -136,11 +136,11 @@ class TestTextgrid(PraatioTestCase):
         tier2 = makeIntervalTier("phrases")
 
         sut = textgrid.Textgrid()
-        sut.tierDict["words"] = tier1
+        sut._tierDict["words"] = tier1
         self.assertSequenceEqual(["words"], sut.tierNameList)
 
         sut.addTier(tier2)
-        sut.tierDict["phrases"] = tier1
+        sut._tierDict["phrases"] = tier1
         self.assertSequenceEqual(["words", "phrases"], sut.tierNameList)
 
     def test_append_textgrid_with_matching_names_only(self):

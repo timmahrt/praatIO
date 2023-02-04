@@ -33,8 +33,7 @@ class Textgrid:
     contains different annotation information for an audio recording.
 
     Attributes:
-        tierNameList(List[str]): the list of tier names in the textgrid
-        tierDict(Dict[str, TextgridTier]): holds the textgrid's tiers
+        tierNameList(Tuple[str]): the list of tier names in the textgrid
         minTimestamp(float): the minimum allowable timestamp in the textgrid
         maxTimestamp(float): the maximum allowable timestamp in the textgrid
     """
@@ -47,7 +46,7 @@ class Textgrid:
             maxTimestamp: the maximum allowable timestamp in the textgrid
         """
 
-        self.tierDict: OrderedDict[str, textgrid_tier.TextgridTier] = OrderedDict()
+        self._tierDict: OrderedDict[str, textgrid_tier.TextgridTier] = OrderedDict()
 
         # Timestamps are determined by the first tier added
         self.minTimestamp: float = minTimestamp  # type: ignore[assignment]
@@ -70,7 +69,7 @@ class Textgrid:
 
     @property
     def tierNameList(self) -> Tuple[str, ...]:
-        return tuple(self.tierDict.keys())
+        return tuple(self._tierDict.keys())
 
     def addTier(
         self,
@@ -107,16 +106,16 @@ class Textgrid:
             raise errors.TierNameExistsError("Tier name already in tier")
 
         if tierIndex is None:
-            self.tierDict[tier.name] = tier
+            self._tierDict[tier.name] = tier
         else:  # Need to recreate the tierDict with the new order
             newOrderedTierNameList = list(self.tierNameList)
             newOrderedTierNameList.insert(tierIndex, tier.name)
 
             newTierDict = OrderedDict()
-            self.tierDict[tier.name] = tier
+            self._tierDict[tier.name] = tier
             for tmpName in newOrderedTierNameList:
                 newTierDict[tmpName] = self.getTier(tmpName)
-            self.tierDict = newTierDict
+            self._tierDict = newTierDict
 
         minV = tier.minTimestamp
         if self.minTimestamp is not None and minV < self.minTimestamp:
@@ -331,7 +330,7 @@ class Textgrid:
 
     def getTier(self, tierName: str) -> textgrid_tier.TextgridTier:
         """Get the tier with the specified name"""
-        return self.tierDict[tierName]
+        return self._tierDict[tierName]
 
     def insertSpace(
         self,
@@ -502,7 +501,7 @@ class Textgrid:
         self.addTier(oldTier.new(newName, oldTier.entryList), tierIndex)
 
     def removeTier(self, name: str) -> textgrid_tier.TextgridTier:
-        return self.tierDict.pop(name)
+        return self._tierDict.pop(name)
 
     def replaceTier(
         self,

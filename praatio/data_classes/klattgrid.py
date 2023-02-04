@@ -221,7 +221,7 @@ class Klattgrid(textgrid.Textgrid):
         )
 
         for tierName in self.tierNameList:
-            outputTxt += self.tierDict[tierName].getAsText()
+            outputTxt += self._tierDict[tierName].getAsText()
 
         outputTxt = _cleanNumericValues(outputTxt)
 
