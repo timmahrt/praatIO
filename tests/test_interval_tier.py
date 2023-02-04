@@ -1201,7 +1201,7 @@ class TestIntervalTier(PraatioTestCase):
             minT=0,
             maxT=5,
         )
-        intersectTier = textgrid.IntervalTier(
+        tierToMerge = textgrid.IntervalTier(
             "phones",
             [
                 # upon
@@ -1222,7 +1222,7 @@ class TestIntervalTier(PraatioTestCase):
             maxT=9,
         )
 
-        sut = sourceTier.mergeLabels(intersectTier)
+        sut = sourceTier.mergeLabels(tierToMerge)
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(5, sut.maxTimestamp)
         self.assertEqual(
@@ -1256,7 +1256,7 @@ class TestIntervalTier(PraatioTestCase):
             minT=0,
             maxT=9,
         )
-        intersectTier = textgrid.IntervalTier(
+        tierToMerge = textgrid.IntervalTier(
             "words",
             [
                 Interval(1, 2.5, "upon"),
@@ -1268,7 +1268,7 @@ class TestIntervalTier(PraatioTestCase):
             maxT=5,
         )
 
-        sut = sourceTier.mergeLabels(intersectTier)
+        sut = sourceTier.mergeLabels(tierToMerge)
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(9, sut.maxTimestamp)
         self.assertEqual(
@@ -1302,7 +1302,7 @@ class TestIntervalTier(PraatioTestCase):
             minT=0,
             maxT=8,
         )
-        intersectTier = textgrid.IntervalTier(
+        tierToMerge = textgrid.IntervalTier(
             "target",
             [
                 Interval(0.5, 1.5, "bang"),
@@ -1314,7 +1314,7 @@ class TestIntervalTier(PraatioTestCase):
             maxT=9,
         )
 
-        sut = sourceTier.mergeLabels(intersectTier)
+        sut = sourceTier.mergeLabels(tierToMerge)
         self.assertEqual(
             [
                 Interval(1, 2, "foo(bang)"),
@@ -1332,14 +1332,14 @@ class TestIntervalTier(PraatioTestCase):
             minT=0,
             maxT=8,
         )
-        intersectTier = textgrid.IntervalTier(
+        tierToMerge = textgrid.IntervalTier(
             "target",
             [Interval(0.5, 1.5, "bang"), Interval(1.5, 3.5, "wizz")],
             minT=0,
             maxT=9,
         )
 
-        sut = sourceTier.mergeLabels(intersectTier, demarcator="@")
+        sut = sourceTier.mergeLabels(tierToMerge, demarcator="@")
         self.assertEqual(
             [
                 Interval(1, 2, "foo(bang@wizz)"),
