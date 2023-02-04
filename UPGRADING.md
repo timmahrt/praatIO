@@ -42,6 +42,12 @@ Added methods
 - audio.Wav.replaceSegment
 - audio.Wav.open
 
+### data_classes/textgrid.py
+
+`Textgrid.tierDict` has been made protected
+  - Instead of using with `Textgrid.tierDict` directly, please use `Textgrid.addTier()`, `Textgrid.getTier()`, `Textgrid.removeTier()`, and `Textgrid.renameTier()`
+  - Instead of `Textgrid.tierDict.keys()` use `Textgrid.tierNameList`
+
 ## Version 4 to 5 Migration
 
 Many things changed between versions 4 and 5.  If you see an error like
