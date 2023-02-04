@@ -21,19 +21,9 @@ jobs:
           python setup.py install
       - name: Test with pytest
         run: |
-          coverage run --source=praatio -m pytest tests/
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@master
+          pytest --cov=praatio --cov-report=xml tests/
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel: true
+          files: ./coverage.xml
 
-  finish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        parallel-finished: true
