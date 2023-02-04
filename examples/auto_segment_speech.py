@@ -33,7 +33,7 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     duration = tg.maxTimestamp
     numEntries = int(math.ceil(duration * proportion))
-    entryList = tg.tierDict[tierName].entryList
+    entryList = tg.getTier(tierName).entryList
 
     # Get all silent intervals
     entryList = [

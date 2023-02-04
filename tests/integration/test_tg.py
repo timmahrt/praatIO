@@ -27,7 +27,7 @@ class TestTg(unittest.TestCase):
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
         tg = textgrid.openTextgrid(tgFN, False)
-        tier = tg.tierDict["word"]
+        tier = tg.getTier("word")
         numEntries = len(tier.entryList)
 
         self.assertEqual(4, numEntries)
@@ -36,7 +36,7 @@ class TestTg(unittest.TestCase):
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
         tg = textgrid.openTextgrid(tgFN, True)
-        tier = tg.tierDict["word"]
+        tier = tg.getTier("word")
         numEntries = len(tier.entryList)
 
         self.assertEqual(6, numEntries)

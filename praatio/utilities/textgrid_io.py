@@ -432,14 +432,14 @@ def _parseNormalTextgrid(data: str) -> Dict:
                 label = label.strip()
                 entryList.append(Point(time, label))
 
-        tierDict = {
+        tierAsDict = {
             "class": tierType,
             "name": tierName,
             "xmin": float(tierStartTime),
             "xmax": float(tierEndTime),
             "entries": entryList,
         }
-        tiers.append(tierDict)
+        tiers.append(tierAsDict)
 
     tgDict = {"xmin": tgMin, "xmax": tgMax, "tiers": tiers}
 
@@ -510,14 +510,14 @@ def _parseShortTextgrid(data: str) -> Dict:
                 label = label.strip()
                 entryList.append(Point(time, label))
 
-        tierDict = {
+        tierAsDict = {
             "class": className,
             "name": tierName,
             "xmin": float(tierStartTime),
             "xmax": float(tierEndTime),
             "entries": entryList,
         }
-        tiers.append(tierDict)
+        tiers.append(tierAsDict)
 
     tgDict = {"xmin": tgMin, "xmax": tgMax, "tiers": tiers}
 

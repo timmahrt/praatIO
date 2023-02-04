@@ -16,7 +16,7 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid", "mary.TextGrid"]:
 
     # Get the durations for each tier
     for tierName in tg.tierNameList:
-        tier = tg.tierDict[tierName]
+        tier = tg.getTier(tierName)
         if not isinstance(tier, textgrid.IntervalTier):
             continue
         for start, end, label in tier.entryList:

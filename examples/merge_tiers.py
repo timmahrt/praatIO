@@ -15,14 +15,14 @@ if not os.path.exists(outputPath):
 
 # Let's use praatio to construct some hypothetical textgrids
 tg = textgrid.openTextgrid(join(path, "bobby_words.TextGrid"), False)
-wordTier = tg.tierDict["word"]
+wordTier = tg.getTier("word")
 entryList = wordTier.entryList
 
 bobbyPhoneTG = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"), False)
 
 
 bobbyTG = textgrid.Textgrid()
-bobbyTG.addTier(bobbyPhoneTG.tierDict["phone"])
+bobbyTG.addTier(bobbyPhoneTG.getTier("phone"))
 bobbyTG.addTier(
     textgrid.IntervalTier(
         "nouns",
@@ -49,11 +49,11 @@ bobbyTG.save(
 
 # And we'll do the same for mary's textgrid
 tg = textgrid.openTextgrid(join(path, "mary.TextGrid"), includeEmptyIntervals=False)
-wordTier = tg.tierDict["word"]
+wordTier = tg.getTier("word")
 entryList = wordTier.entryList
 
 maryTG = textgrid.Textgrid()
-maryTG.addTier(tg.tierDict["phone"])
+maryTG.addTier(tg.getTier("phone"))
 maryTG.addTier(
     textgrid.IntervalTier(
         "nouns",
@@ -89,7 +89,7 @@ combinedTG.save(
 # except silence. Any non-silent intervals that overlap will be merged
 # together into a super interval
 mergedTG = combinedTG.mergeTiers(
-    tierList=["nouns", "verbs", "subjects"], preserveOtherTiers=True
+    tierNames=["nouns", "verbs", "subjects"], preserveOtherTiers=True
 )
 
 mergedTG.save(

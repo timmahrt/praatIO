@@ -167,7 +167,7 @@ class TestIo(PraatioTestCase):
             inputFN, False, duplicateNamesMode=constants.DuplicateNames.RENAME
         )
 
-        self.assertEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNameList)
+        self.assertSequenceEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNameList)
 
     def test_tg_io_long_vs_short(self):
         """Tests reading of long vs short textgrids"""

@@ -75,7 +75,7 @@ maryPitchData = pitch_and_intensity.extractPI(
     forceRegenerate=False,
 )
 tg = textgrid.openTextgrid(join(tgPath, "mary.TextGrid"))
-tier = tg.tierDict["phone"]
+tier = tg.getTier("phone")
 filteredData = tier.getValuesInIntervals(maryPitchData)
 
 maryPitchData = pitch_and_intensity.extractPI(

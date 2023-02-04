@@ -60,7 +60,7 @@ def run_save(
     tgAsDict = textgrid_io.parseTextgridStr(textgridStr, includeBlankSpaces)
     savedTg = textgrid._dictionaryToTg(tgAsDict, constants.ErrorReportingMode.ERROR)
 
-    entryList = savedTg.tierDict[savedTg.tierNameList[0]].entryList
+    entryList = savedTg.getTier(savedTg.tierNameList[0]).entryList
     entryList = [[start, end, label] for start, end, label in entryList]
 
     return entryList
