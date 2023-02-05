@@ -83,7 +83,7 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier2, reportingMode="error")
         sut.addTier(tier3, reportingMode="error")
 
-        self.assertSequenceEqual(["words", "phrases", "max pitch"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "phrases", "max pitch"], sut.tierNames)
         self.assertEqual(tier1, sut.getTier("words"))
         self.assertEqual(tier2, sut.getTier("phrases"))
         self.assertEqual(tier3, sut.getTier("max pitch"))
@@ -99,7 +99,7 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier3, tierIndex=1, reportingMode="error")
 
         # tier3 was inserted last but with index 1, so it will appear second
-        self.assertSequenceEqual(["words", "max pitch", "phrases"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "max pitch", "phrases"], sut.tierNames)
         self.assertEqual(tier1, sut.getTier("words"))
         self.assertEqual(tier3, sut.getTier("max pitch"))
         self.assertEqual(tier2, sut.getTier("phrases"))
@@ -123,10 +123,10 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier1)
         sut.addTier(tier2)
 
-        self.assertSequenceEqual(expectedTierNameList, sut.tierNameList)
+        self.assertSequenceEqual(expectedTierNameList, sut.tierNames)
 
         sut._tierDict["words"] = tier3
-        self.assertSequenceEqual(expectedTierNameList, sut.tierNameList)
+        self.assertSequenceEqual(expectedTierNameList, sut.tierNames)
         self.assertEqual(tier3, sut.getTier("words"))
 
     def test_manually_updating_tier_dict_also_updates_tier_name_list(self):
@@ -137,11 +137,11 @@ class TestTextgrid(PraatioTestCase):
 
         sut = textgrid.Textgrid()
         sut._tierDict["words"] = tier1
-        self.assertSequenceEqual(["words"], sut.tierNameList)
+        self.assertSequenceEqual(["words"], sut.tierNames)
 
         sut.addTier(tier2)
         sut._tierDict["phrases"] = tier1
-        self.assertSequenceEqual(["words", "phrases"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "phrases"], sut.tierNames)
 
     def test_append_textgrid_with_matching_names_only(self):
         tg1 = textgrid.Textgrid()
@@ -179,7 +179,7 @@ class TestTextgrid(PraatioTestCase):
 
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(10, sut.maxTimestamp)
-        self.assertSequenceEqual(["words", "max pitch"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "max pitch"], sut.tierNames)
         self.assertEqual(expectedTier1, sut.getTier("words"))
         self.assertEqual(expectedTier2, sut.getTier("max pitch"))
 
@@ -231,7 +231,7 @@ class TestTextgrid(PraatioTestCase):
         self.assertEqual(10, sut.maxTimestamp)
         self.assertSequenceEqual(
             ["words", "max pitch", "phrases", "min pitch", "cats", "dogs"],
-            sut.tierNameList,
+            sut.tierNames,
         )
         self.assertEqual(expectedTier1, sut.getTier("words"))
         self.assertEqual(expectedTier2, sut.getTier("max pitch"))
@@ -883,7 +883,7 @@ class TestTextgrid(PraatioTestCase):
         expectedRenamedTier = makeIntervalTier("cats", [[5, 6.7, "hey there"]])
 
         self.assertEqual(expectedRenamedTier, sut.getTier("cats"))
-        self.assertSequenceEqual(["phrases", "cats", "phones"], sut.tierNameList)
+        self.assertSequenceEqual(["phrases", "cats", "phones"], sut.tierNames)
 
     def test_remove_tier_removes_a_tier(self):
         sut = textgrid.Textgrid(0, 10)
@@ -898,7 +898,7 @@ class TestTextgrid(PraatioTestCase):
         removedTier = sut.removeTier("words")
 
         self.assertEqual(removedTier, tier2)
-        self.assertSequenceEqual(["phrases", "phones"], sut.tierNameList)
+        self.assertSequenceEqual(["phrases", "phones"], sut.tierNames)
 
     def test_replace_tier_replaces_one_tier_with_another(self):
         sut = textgrid.Textgrid(0, 10)
@@ -909,11 +909,11 @@ class TestTextgrid(PraatioTestCase):
         sut.addTier(tier1)
         sut.addTier(tier2)
 
-        self.assertSequenceEqual(["words", "phones"], sut.tierNameList)
+        self.assertSequenceEqual(["words", "phones"], sut.tierNames)
 
         sut.replaceTier("words", newTier1)
 
-        self.assertSequenceEqual(["cats", "phones"], sut.tierNameList)
+        self.assertSequenceEqual(["cats", "phones"], sut.tierNames)
         self.assertEqual(newTier1, sut.getTier("cats"))
 
     def test_replace_tier_reports_if_new_tier_is_larger_than_textgrid(self):

@@ -220,7 +220,7 @@ class Klattgrid(textgrid.Textgrid):
             repr(self.maxTimestamp),
         )
 
-        for tierName in self.tierNameList:
+        for tierName in self.tierNames:
             outputTxt += self._tierDict[tierName].getAsText()
 
         outputTxt = _cleanNumericValues(outputTxt)

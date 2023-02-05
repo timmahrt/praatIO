@@ -31,7 +31,7 @@ kg = klattgrid.openKlattgrid(mainKlattFN)
 
 formantTier = kg.tierDict["oral_formants"]
 subFormantTier = formantTier.tierDict["formants"]
-for subTierName in subFormantTier.tierNameList:
+for subTierName in subFormantTier.tierNames:
     subFormantTier.tierDict[subTierName].modifyValues(incrTwenty)
 
 outputName = name + "_twenty_percent_more"

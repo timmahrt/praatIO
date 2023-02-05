@@ -21,9 +21,7 @@ def merge_adjacent(path, fn, outputPath):
     outputTG = textgrid.Textgrid()
 
     tg = textgrid.openTextgrid(join(path, fn), False)
-    for tierName in tg.tierNameList:
-        tier = tg.getTier(tierName)
-
+    for tier in tg.tiers:
         newEntryList = []
         currentEntry = list(tier.entryList[0])
         for nextEntry in tier.entryList[1:]:
@@ -40,7 +38,7 @@ def merge_adjacent(path, fn, outputPath):
         newEntryList.append(currentEntry)
 
         replacementTier = textgrid.IntervalTier(
-            tierName, newEntryList, tier.minTimestamp, tier.maxTimestamp
+            tier.name, newEntryList, tier.minTimestamp, tier.maxTimestamp
         )
         outputTG.addTier(replacementTier)
 

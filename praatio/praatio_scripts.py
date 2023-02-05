@@ -36,9 +36,7 @@ def _shiftTimes(
     if the new interval steps on other intervals
     """
     tg = tg.new()
-    for tierName in tg.tierNameList:
-        tier = tg.getTier(tierName)
-
+    for tier in tg.tiers:
         if isinstance(tier, textgrid.IntervalTier):
             entryList = [
                 entry
@@ -239,7 +237,7 @@ def splitTierEntries(
 
         sourceTier = sourceTier.crop(startT, endT, "truncated", False)
 
-        if targetTierName in tg.tierNameList:
+        if targetTierName in tg.tierNames:
             targetTier = tg.getTier(targetTierName)
             targetTier = targetTier.eraseRegion(startT, endT, "truncate", False)
 
@@ -268,7 +266,7 @@ def splitTierEntries(
             targetTier.insertEntry(entry, constants.IntervalCollision.ERROR)
 
     # Insert the tier into the textgrid
-    if targetTierName in tg.tierNameList:
+    if targetTierName in tg.tierNames:
         tg.removeTier(targetTierName)
     tg.addTier(targetTier)
 
@@ -286,9 +284,7 @@ def tgBoundariesToZeroCrossings(
     adjustPointTiers: if True, point tiers will be adjusted.
     adjustIntervalTiers: if True, interval tiers will be adjusted.
     """
-    for tierName in tg.tierNameList[:]:
-        tier = tg.getTier(tierName)
-
+    for tier in tg.tiers:
         newTier: textgrid_tier.TextgridTier
         if isinstance(tier, textgrid.PointTier):
             if adjustPointTiers is False:
@@ -310,7 +306,7 @@ def tgBoundariesToZeroCrossings(
                 intervals.append(Interval(newStart, newStop, label))
             newTier = tier.new(entryList=intervals)
 
-        tg.replaceTier(tierName, newTier)
+        tg.replaceTier(tier.name, newTier)
 
     return tg
 
@@ -428,7 +424,7 @@ def splitAudioOnTier(
             subTG = tg.crop(start, end, mode, True)
 
             if isinstance(outputTGFlag, str):
-                for tierName in subTG.tierNameList:
+                for tierName in subTG.tierNames:
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
 
@@ -456,8 +452,8 @@ def alignBoundariesAcrossTiers(
     """
     tg = textgrid.openTextgrid(tgFN, False)
 
-    for tierName in tg.tierNameList:
-        altNameList = [tmpName for tmpName in tg.tierNameList if tmpName != tierName]
+    for tierName in tg.tierNames:
+        altNameList = [tmpName for tmpName in tg.tierNames if tmpName != tierName]
 
         tier = tg.getTier(tierName)
         for entry in tier.entryList:
@@ -480,7 +476,7 @@ def _findMisalignments(
     tg: textgrid.Textgrid,
     timeV: float,
     maxDifference: float,
-    tierNameList: List[str],
+    tierNames: List[str],
     tierName: str,
     entry: list,
     orderID: int,
@@ -499,7 +495,7 @@ def _findMisalignments(
     croppedTG = tg.crop(filterStartT, filterStopT, "lax", False)
 
     matchList = [(tierName, timeV, entry, orderID)]
-    for subTierName in tierNameList:
+    for subTierName in tierNames:
         subCroppedTier = croppedTG.getTier(subTierName)
 
         # For each item that exists in the search span, find the boundary

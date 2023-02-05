@@ -58,7 +58,8 @@ Added methods
 
 `Textgrid.tierDict` has been made protected
   - Instead of using with `Textgrid.tierDict` directly, please use `Textgrid.addTier()`, `Textgrid.getTier()`, `Textgrid.removeTier()`, and `Textgrid.renameTier()`
-  - Instead of `Textgrid.tierDict.keys()` use `Textgrid.tierNameList`
+  - Instead of `Textgrid.tierDict.keys()` use `Textgrid.tierNames`
+  - Instead of `Textgrid.tierDict.values()` use `Textgrid.tiers`
 
 ## Version 4 to 5 Migration
 

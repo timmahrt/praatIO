@@ -70,8 +70,8 @@ class TestTg(unittest.TestCase):
 
         tg.renameTier("phone", "candy")
 
-        self.assertTrue("phone" not in tg.tierNameList)
-        self.assertTrue("candy" in tg.tierNameList)
+        self.assertTrue("phone" not in tg.tierNames)
+        self.assertTrue("candy" in tg.tierNames)
 
     def test_mintimestamp_behavior(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]

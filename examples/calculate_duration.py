@@ -15,14 +15,13 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid", "mary.TextGrid"]:
     name = os.path.splitext(fn)[0]
 
     # Get the durations for each tier
-    for tierName in tg.tierNameList:
-        tier = tg.getTier(tierName)
+    for tier in tg.tiers:
         if not isinstance(tier, textgrid.IntervalTier):
             continue
         for start, end, label in tier.entryList:
             txt = u"%s,%s,%s,%0.2f" % (
                 name,
-                tierName,
+                tier.name,
                 label,
                 float(end) - float(start),
             )

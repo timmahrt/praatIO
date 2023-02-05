@@ -167,7 +167,7 @@ class TestIo(PraatioTestCase):
             inputFN, False, duplicateNamesMode=constants.DuplicateNames.RENAME
         )
 
-        self.assertSequenceEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNameList)
+        self.assertSequenceEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNames)
 
     def test_tg_io_long_vs_short(self):
         """Tests reading of long vs short textgrids"""
@@ -273,12 +273,12 @@ class TestIo(PraatioTestCase):
         tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
 
         # The timestamps in the source tg's tiers /don't/ match the source tg
-        for tier in tgFromTgFile.tierDict.values():
+        for tier in tgFromTgFile.tiers:
             self.assertNotEqual(tgFromTgFile.minTimestamp, tier.minTimestamp)
             self.assertNotEqual(tgFromTgFile.maxTimestamp, tier.maxTimestamp)
 
         # The timestamps in the json tg's tiers /do/ match the tg
-        for tier in tgFromJsonFile.tierDict.values():
+        for tier in tgFromJsonFile.tiers:
             self.assertEqual(tgFromJsonFile.minTimestamp, tier.minTimestamp)
             self.assertEqual(tgFromJsonFile.minTimestamp, tier.minTimestamp)
 
