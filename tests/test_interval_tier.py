@@ -1068,34 +1068,282 @@ class TestIntervalTier(PraatioTestCase):
         self.assertEqual(0.4, tier.minTimestamp)
         self.assertEqual(1.3, tier.maxTimestamp)
 
-    def test_intersection(self):
+    def test_intersection_outputs_one_item_for_each_overlapping_pair(self):
         sourceTier = textgrid.IntervalTier(
-            "pitch_values",
+            "source",
             [
-                Interval(1, 2.5, "hello"),
-                Interval(2.8, 3.0, "the"),
-                Interval(3.5, 4.0, "world"),
+                Interval(1, 2.5, "foo"),  # overlaps with 1
+                Interval(2.8, 3.0, "bar"),  # overlaps with same as previous
+                Interval(3, 5, "wizz"),  # overlaps with 2
             ],
             minT=0,
             maxT=5,
         )
         intersectTier = textgrid.IntervalTier(
-            "pitch_values",
+            "target",
             [
-                Interval(1, 2.5, "It's"),
-                Interval(3.0, 3.5, "my"),
-                Interval(3.7, 4.2, "cat"),
-                Interval(4.3, 4.7, "there"),
+                Interval(1, 3.0, "buzz"),
+                Interval(3, 4, "cat"),
+                Interval(4, 5, "dog"),
             ],
             minT=0,
             maxT=9,
         )
 
         sut = sourceTier.intersection(intersectTier)
+        self.assertEqual(
+            [
+                Interval(1.0, 2.5, "foo-buzz"),
+                Interval(2.8, 3.0, "bar-buzz"),
+                Interval(3, 4, "wizz-cat"),
+                Interval(4, 5, "wizz-dog"),
+            ],
+            sut.entryList,
+        )
+
+    def test_intersection_trims_non_overlapping_portions(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [
+                Interval(1, 2, "foo"),  # Trim the right side
+                Interval(2, 3, "bar"),  # Trim the left side
+                Interval(4, 5, "cat"),  # Don't trim any part
+                Interval(6, 8, "bird"),  # Trim both sides
+            ],
+            minT=0,
+            maxT=8,
+        )
+        intersectTier = textgrid.IntervalTier(
+            "target",
+            [
+                Interval(0.5, 1.5, "bang"),
+                Interval(2.5, 3.5, "wizz"),
+                Interval(3.5, 5.5, "dog"),
+                Interval(6.5, 7.5, "fish"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.intersection(intersectTier)
+        self.assertEqual(
+            [
+                Interval(1, 1.5, "foo-bang"),
+                Interval(2.5, 3, "bar-wizz"),
+                Interval(4, 5, "cat-dog"),
+                Interval(6.5, 7.5, "bird-fish"),
+            ],
+            sut.entryList,
+        )
+
+    def test_intersection_can_specify_the_demarcator(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [Interval(1, 2, "foo")],
+            minT=0,
+            maxT=8,
+        )
+        intersectTier = textgrid.IntervalTier(
+            "target",
+            [Interval(0.5, 1.5, "bar")],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.intersection(intersectTier, demarcator="@")
+        self.assertEqual(
+            [Interval(1, 1.5, "foo@bar")],
+            sut.entryList,
+        )
+
+    def test_intersection_meta_info_follows_the_source_tier(self):
+        tierA = textgrid.IntervalTier(
+            "A",
+            [
+                Interval(1, 2.5, "foo"),  # overlaps with 1
+                Interval(2.8, 3.0, "bar"),  # overlaps with same as previous
+                Interval(3, 5, "wizz"),  # overlaps with 2
+            ],
+            minT=0,
+            maxT=5,
+        )
+        tierB = textgrid.IntervalTier(
+            "B",
+            [
+                Interval(1, 3.0, "buzz"),
+                Interval(3, 4, "cat"),
+                Interval(4, 5, "dog"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        tierAIntersectB = tierA.intersection(tierB)
+        tierBIntersectA = tierB.intersection(tierA)
+
+        self.assertEqual(0, tierAIntersectB.minTimestamp)
+        self.assertEqual(5, tierAIntersectB.maxTimestamp)
+        self.assertEqual("A-B", tierAIntersectB.name)
+
+        self.assertEqual(0, tierBIntersectA.minTimestamp)
+        self.assertEqual(9, tierBIntersectA.maxTimestamp)
+        self.assertEqual("B-A", tierBIntersectA.name)
+
+    def test_merge_labels_when_the_target_intervals_are_smaller(self):
+        sourceTier = textgrid.IntervalTier(
+            "words",
+            [
+                Interval(1, 2.5, "upon"),
+                Interval(2.8, 3.0, "a"),
+                Interval(3.0, 4.2, "a"),
+                Interval(4.2, 4.7, "time"),
+            ],
+            minT=0,
+            maxT=5,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "phones",
+            [
+                # upon
+                Interval(1, 1.2, "AH0"),
+                Interval(1.2, 1.3, "P"),
+                Interval(1.4, 2.0, "AA1"),
+                Interval(2.0, 2.5, "N"),
+                # a
+                Interval(2.8, 3.0, "AH0"),
+                # a
+                Interval(3.0, 4.2, "EY1"),
+                # time
+                Interval(4.2, 4.3, "T"),
+                Interval(4.3, 4.6, "AY1"),
+                Interval(4.6, 4.7, "M"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge)
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(5, sut.maxTimestamp)
         self.assertEqual(
-            [Interval(1.0, 2.5, "hello-It's"), Interval(3.7, 4.0, "world-cat")],
+            [
+                Interval(1.0, 2.5, "upon(AH0,P,AA1,N)"),
+                Interval(2.8, 3.0, "a(AH0)"),
+                Interval(3.0, 4.2, "a(EY1)"),
+                Interval(4.2, 4.7, "time(T,AY1,M)"),
+            ],
+            sut.entryList,
+        )
+
+    def test_merge_labels_when_the_target_intervals_are_larger(self):
+        sourceTier = textgrid.IntervalTier(
+            "phones",
+            [
+                # upon
+                Interval(1, 1.2, "AH0"),
+                Interval(1.2, 1.3, "P"),
+                Interval(1.4, 2.0, "AA1"),
+                Interval(2.0, 2.5, "N"),
+                # a
+                Interval(2.8, 3.0, "AH0"),
+                # a
+                Interval(3.0, 4.2, "EY1"),
+                # time
+                Interval(4.2, 4.3, "T"),
+                Interval(4.3, 4.6, "AY1"),
+                Interval(4.6, 4.7, "M"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "words",
+            [
+                Interval(1, 2.5, "upon"),
+                Interval(2.8, 3.0, "a"),
+                Interval(3.0, 4.2, "a"),
+                Interval(4.2, 4.7, "time"),
+            ],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge)
+        self.assertEqual(0, sut.minTimestamp)
+        self.assertEqual(9, sut.maxTimestamp)
+        self.assertEqual(
+            [
+                # upon
+                Interval(1, 1.2, "AH0(upon)"),
+                Interval(1.2, 1.3, "P(upon)"),
+                Interval(1.4, 2.0, "AA1(upon)"),
+                Interval(2.0, 2.5, "N(upon)"),
+                # a
+                Interval(2.8, 3.0, "AH0(a)"),
+                # a
+                Interval(3.0, 4.2, "EY1(a)"),
+                # time
+                Interval(4.2, 4.3, "T(time)"),
+                Interval(4.3, 4.6, "AY1(time)"),
+                Interval(4.6, 4.7, "M(time)"),
+            ],
+            sut.entryList,
+        )
+
+    def test_merge_labels_doesnt_trim_non_overlapping_portions(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [
+                Interval(1, 2, "foo"),  # Non-overlapping right side
+                Interval(2, 3, "bar"),  # Non-overlapping left side
+                Interval(4, 5, "cat"),  # All overlapping
+                Interval(6, 8, "bird"),  # Non-overlapping on both sides
+            ],
+            minT=0,
+            maxT=8,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "target",
+            [
+                Interval(0.5, 1.5, "bang"),
+                Interval(2.5, 3.5, "wizz"),
+                Interval(3.5, 5.5, "dog"),
+                Interval(6.5, 7.5, "fish"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge)
+        self.assertEqual(
+            [
+                Interval(1, 2, "foo(bang)"),
+                Interval(2, 3, "bar(wizz)"),
+                Interval(4, 5, "cat(dog)"),
+                Interval(6, 8, "bird(fish)"),
+            ],
+            sut.entryList,
+        )
+
+    def test_merge_labels_can_specify_the_demarcator(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [Interval(1, 2, "foo")],
+            minT=0,
+            maxT=8,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "target",
+            [Interval(0.5, 1.5, "bang"), Interval(1.5, 3.5, "wizz")],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge, demarcator="@")
+        self.assertEqual(
+            [
+                Interval(1, 2, "foo(bang@wizz)"),
+            ],
             sut.entryList,
         )
 
