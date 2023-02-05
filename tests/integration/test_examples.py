@@ -26,6 +26,7 @@ from tests.testing_utils import CoverageIgnoredTest
 _root = os.path.join(Path(__file__).parents[2], "examples")
 sys.path.append(_root)
 
+
 # Ignoring test coverage because there is no validation in
 # these tests other than "no unhandled exception occured"
 # which is still important for the user-facing example code
@@ -109,7 +110,6 @@ class TestExamples(CoverageIgnoredTest):
 
         root = os.path.join(".", "files")
         endingList = os.listdir(root)
-        endingDir = os.getcwd()
         rmList = [fn for fn in endingList if fn not in self.startingList]
 
         if self.oldRoot == root:

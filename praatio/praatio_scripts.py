@@ -8,7 +8,6 @@ see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
 import os
 from os.path import join
 import math
-import copy
 from typing import Callable, List, Tuple, Optional
 
 from typing_extensions import Literal, Final
@@ -481,7 +480,7 @@ def alignBoundariesAcrossTiers(
         if tier.name == tierName:
             continue
 
-        newEntries = []
+        newEntries: list = []
         if tier.entryType == constants.Interval:
             for start, stop, label in tier.entries:
                 startCompare = min(times, key=lambda x: abs(x - start))

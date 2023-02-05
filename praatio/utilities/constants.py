@@ -9,6 +9,7 @@ from typing_extensions import Final
 INTERVAL_TIER: Final = "IntervalTier"
 POINT_TIER: Final = "TextTier"
 
+
 # https://stackoverflow.com/questions/34570814/equality-overloading-for-namedtuple
 class Interval(namedtuple("Interval", ["start", "end", "label"])):
     def __eq__(self, other):

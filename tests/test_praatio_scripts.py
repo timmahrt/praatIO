@@ -2,8 +2,7 @@ import unittest
 
 from praatio import textgrid
 from praatio import praatio_scripts
-from praatio.utilities.constants import Interval, Point, POINT_TIER
-from praatio.utilities import constants
+from praatio.utilities.constants import Interval, Point
 from praatio.utilities import errors
 
 from tests.praatio_test_case import PraatioTestCase
@@ -85,3 +84,7 @@ class TestPraatioScripts(PraatioTestCase):
 
         with self.assertRaises(errors.ArgumentError) as _:
             praatio_scripts.alignBoundariesAcrossTiers(tg, "foo", maxDifference=0.01)
+
+
+if __name__ == "__main__":
+    unittest.main()
