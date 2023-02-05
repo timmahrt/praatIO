@@ -61,6 +61,15 @@ Added methods
   - Instead of `Textgrid.tierDict.keys()` use `Textgrid.tierNames`
   - Instead of `Textgrid.tierDict.values()` use `Textgrid.tiers`
 
+### data_classes/textgrid_tier.py
+
+`TextgridTier.entryList` was renamed to `TextgridTier.entries` and made read only. Please use `TextgridTier.insertEntry()` and `TextgridTier.deleteEntry()` if you need to modify it.
+
+### praatio_scripts.py
+
+`alignBoundariesAcrossTiers` has an additional required argument, `tierName` which is the name of the reference tier used
+to determine "correct" alignment.
+
 ## Version 4 to 5 Migration
 
 Many things changed between versions 4 and 5.  If you see an error like

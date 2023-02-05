@@ -11,7 +11,8 @@ Ver 6.0 (Feb 4, 2023)
     - Fixed a rounding issue in several methods (`openAudioFile`, `insert`, `generateSineWave`, `generateSilence`). The rounding error would lead to minor miscalculations. But if the calculations were run many times, the errors would accumulate and become more noticable.
     - Fixed an issue with `readFramesAtTimes`. When the parameter `keepList` or `deleteList` was set, the wrong segments would be kept or deleted.
 - Made `Textgrid.tierDict` protected; use the available helper methods rather than accessing `tierDict` directly.
-
+- Made `Textgrid.entries` read only; use the available helper methods to modify it.
+- Bugfix with `praatio_scripts.alignBoundariesAcrossTiers`
 
 Ver 5.1 (Dec 31, 2021)
 - Fuzzy equivalence for timestamps in Intervals and Points
