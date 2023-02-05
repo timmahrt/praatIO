@@ -11,6 +11,18 @@ If you are having difficulty upgrading, please don't hesistate to open an issue 
 
 ## Version 5 to 6 Migration
 
+### JSON output files
+
+Before there was only one JSON output schema. Now there are two.
+
+'JSON' and 'Textgrid JSON'.
+See [README.md](https://github.com/timmahrt/praatIO/blob/main/CHANGELOG.md) for more information.
+
+`textgrid.openTextgrid()` will correctly open either JSON variant.
+
+`textgrid.Textgrid.save()` takes an argument `format`.
+If you wish to keep the same behavior as in Praatio 5.0, please specify `format=textgrid_json`.
+
 ### audio.py
 
 audio.py has been refreshed in version 6 with numerous bugfixes and

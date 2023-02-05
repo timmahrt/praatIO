@@ -203,18 +203,20 @@ class TestIo(PraatioTestCase):
 
         self.assertTrue(areTheSameFiles(longFN, outputFN, readFile))
 
-    def test_saving_and_loading_json(self):
-        """Tests that json files are saved non-destructively"""
+    def test_saving_and_loading_textgrid_json(self):
+        """Tests that textgrid-like json files are saved non-destructively"""
         fn = "mary.TextGrid"
         shortFN = join(self.dataRoot, fn)
-        outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
+        outputFN = join(self.outputRoot, "saved_textgrid_as_textgrid_json.json")
         outputLastFN = join(
             self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid"
         )
 
         tgFromTgFile = textgrid.openTextgrid(shortFN, False)
         tgFromTgFile.save(
-            outputFN, format=constants.TextgridFormats.JSON, includeBlankSpaces=True
+            outputFN,
+            format=constants.TextgridFormats.TEXTGRID_JSON,
+            includeBlankSpaces=True,
         )
 
         tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
@@ -225,6 +227,60 @@ class TestIo(PraatioTestCase):
         )
 
         self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
+
+    def test_saving_and_loading_json(self):
+        """Tests that json files are saved correctly"""
+        fn = "mary.TextGrid"
+        shortFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
+        outputLastFN = join(
+            self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid"
+        )
+
+        tgFromTgFile = textgrid.openTextgrid(shortFN, False)
+        tgFromTgFile.save(
+            outputFN,
+            format=constants.TextgridFormats.JSON,
+            includeBlankSpaces=True,
+        )
+
+        tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
+        tgFromJsonFile.save(
+            outputLastFN,
+            format=constants.TextgridFormats.SHORT_TEXTGRID,
+            includeBlankSpaces=True,
+        )
+
+        self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
+
+    def test_saving_and_loading_json_leads_to_data_lose_in_one_edgecase(self):
+        # Each tier can have a unique min and max timestamp
+        # These timestamps can be different from the min and max specified for the file
+        # The default json file maintains only a single min and max, so if the user has
+        # different min and max timestamps in the tiers, that information will be lost
+        fn = "mary_with_constrained_tier_times.TextGrid"
+        shortFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "mary_with_constrained_tier_times.json")
+
+        tgFromTgFile = textgrid.openTextgrid(shortFN, False)
+        tgFromTgFile.save(
+            outputFN,
+            format=constants.TextgridFormats.JSON,
+            includeBlankSpaces=True,
+            reportingMode="silence",
+        )
+
+        tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
+
+        # The timestamps in the source tg's tiers /don't/ match the source tg
+        for tier in tgFromTgFile.tierDict.values():
+            self.assertNotEqual(tgFromTgFile.minTimestamp, tier.minTimestamp)
+            self.assertNotEqual(tgFromTgFile.maxTimestamp, tier.maxTimestamp)
+
+        # The timestamps in the json tg's tiers /do/ match the tg
+        for tier in tgFromJsonFile.tierDict.values():
+            self.assertEqual(tgFromJsonFile.minTimestamp, tier.minTimestamp)
+            self.assertEqual(tgFromJsonFile.minTimestamp, tier.minTimestamp)
 
     def test_save(self):
         userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]

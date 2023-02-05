@@ -437,7 +437,7 @@ class Textgrid:
     def save(
         self,
         fn: str,
-        format: Literal["short_textgrid", "long_textgrid", "json"],
+        format: Literal["short_textgrid", "long_textgrid", "json", "textgrid_json"],
         includeBlankSpaces: bool,
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
@@ -448,7 +448,10 @@ class Textgrid:
 
         Args:
             fn: the fullpath filename of the output
-            format: one of ['short_textgrid', 'long_textgrid', 'json']
+            format: one of ['short_textgrid', 'long_textgrid', 'json', 'textgrid_json']
+                'short_textgrid' and 'long_textgrid' are both used by praat
+                'json' and 'textgrid_json' are two json variants. 'json' cannot represent
+                tiers with different min and max timestamps than the textgrid.
             includeBlankSpaces: if True, blank sections in interval
                 tiers will be filled in with an empty interval
                 (with a label of ""). If you are unsure, True is recommended
@@ -482,6 +485,7 @@ class Textgrid:
         self.validate(reportingMode)
 
         tgAsDict = _tgToDictionary(self)
+
         textgridStr = textgrid_io.getTextgridAsStr(
             tgAsDict,
             format,
@@ -583,6 +587,4 @@ def _tgToDictionary(tg: Textgrid) -> dict:
         }
         tiers.append(tierAsDict)
 
-    tgAsDict = {"xmin": tg.minTimestamp, "xmax": tg.maxTimestamp, "tiers": tiers}
-
-    return tgAsDict
+    return {"xmin": tg.minTimestamp, "xmax": tg.maxTimestamp, "tiers": tiers}
