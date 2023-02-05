@@ -237,7 +237,7 @@ def getValueAtTime(
     [(t1, v1a, v1b, ..), (t2, v2a, v2b, ..), ..]
 
     The procedure makes one pass through dataTupleList and one
-    pass through self.entryList.  If the data is not sequentially
+    pass through self.entries.  If the data is not sequentially
     ordered, the incorrect response will be returned.
 
     For efficiency purposes, it takes a starting index and returns the ending

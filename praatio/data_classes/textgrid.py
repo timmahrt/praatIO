@@ -33,7 +33,8 @@ class Textgrid:
     contains different annotation information for an audio recording.
 
     Attributes:
-        tierNameList(Tuple[str]): the list of tier names in the textgrid
+        tierNames(Tuple[str]): the list of tier names in the textgrid
+        tiers(Tuple[TextgridTier]): the list of ordered tiers
         minTimestamp(float): the minimum allowable timestamp in the textgrid
         maxTimestamp(float): the maximum allowable timestamp in the textgrid
     """
@@ -60,16 +61,20 @@ class Textgrid:
         isEqual &= my_math.isclose(self.minTimestamp, other.minTimestamp)
         isEqual &= my_math.isclose(self.maxTimestamp, other.maxTimestamp)
 
-        isEqual &= self.tierNameList == other.tierNameList
+        isEqual &= self.tierNames == other.tierNames
         if isEqual:
-            for tierName in self.tierNameList:
+            for tierName in self.tierNames:
                 isEqual &= self.getTier(tierName) == other.getTier(tierName)
 
         return isEqual
 
     @property
-    def tierNameList(self) -> Tuple[str, ...]:
+    def tierNames(self) -> Tuple[str, ...]:
         return tuple(self._tierDict.keys())
+
+    @property
+    def tiers(self) -> Tuple[textgrid_tier.TextgridTier, ...]:
+        return tuple(self._tierDict.values())
 
     def addTier(
         self,
@@ -102,13 +107,13 @@ class Textgrid:
         )
         errorReporter = utils.getErrorReporter(reportingMode)
 
-        if tier.name in self.tierNameList:
+        if tier.name in self.tierNames:
             raise errors.TierNameExistsError("Tier name already in tier")
 
         if tierIndex is None:
             self._tierDict[tier.name] = tier
         else:  # Need to recreate the tierDict with the new order
-            newOrderedTierNameList = list(self.tierNameList)
+            newOrderedTierNameList = list(self.tierNames)
             newOrderedTierNameList.insert(tierIndex, tier.name)
 
             newTierDict = OrderedDict()
@@ -152,42 +157,42 @@ class Textgrid:
 
         # Get all tier names.  Ordered first by this textgrid and
         # then by the other textgrid.
-        combinedTierNameList = list(self.tierNameList)
-        for tierName in tg.tierNameList:
-            if tierName not in combinedTierNameList:
-                combinedTierNameList.append(tierName)
+        combinedTierNames = list(self.tierNames)
+        for tierName in tg.tierNames:
+            if tierName not in combinedTierNames:
+                combinedTierNames.append(tierName)
 
         # Determine the tier names that will be in the final textgrid
-        finalTierNameList = []
+        finalTierNames = []
         if onlyMatchingNames is False:
-            finalTierNameList = combinedTierNameList
+            finalTierNames = combinedTierNames
         else:
-            for tierName in combinedTierNameList:
-                if tierName in self.tierNameList:
-                    if tierName in tg.tierNameList:
-                        finalTierNameList.append(tierName)
+            for tierName in combinedTierNames:
+                if tierName in self.tierNames:
+                    if tierName in tg.tierNames:
+                        finalTierNames.append(tierName)
 
         # Add tiers from this textgrid
-        for tierName in finalTierNameList:
-            if tierName in self.tierNameList:
+        for tierName in finalTierNames:
+            if tierName in self.tierNames:
                 tier = self.getTier(tierName)
                 retTG.addTier(tier)
 
         # Add tiers from the given textgrid
-        for tierName in finalTierNameList:
-            if tierName in tg.tierNameList:
+        for tierName in finalTierNames:
+            if tierName in tg.tierNames:
                 appendTier = tg.getTier(tierName)
                 appendTier = appendTier.new(minTimestamp=minTime, maxTimestamp=maxTime)
 
                 appendTier = appendTier.editTimestamps(self.maxTimestamp)
 
-                if tierName in retTG.tierNameList:
+                if tierName in retTG.tierNames:
                     tier = retTG.getTier(tierName)
-                    newEntryList = retTG.getTier(tierName).entryList
-                    newEntryList += appendTier.entryList
+                    newEntries = retTG.getTier(tierName).entries
+                    newEntries += appendTier.entries
 
                     tier = tier.new(
-                        entryList=newEntryList,
+                        entries=newEntries,
                         minTimestamp=minTime,
                         maxTimestamp=maxTime,
                     )
@@ -240,7 +245,7 @@ class Textgrid:
             maxT = cropEnd
         newTG = Textgrid(minT, maxT)
 
-        for tierName in self.tierNameList:
+        for tierName in self.tierNames:
             tier = self.getTier(tierName)
             newTier = tier.crop(cropStart, cropEnd, mode, rebaseToZero)
 
@@ -287,8 +292,7 @@ class Textgrid:
             maxTimestamp -= diff
 
         newTG = Textgrid(self.minTimestamp, self.maxTimestamp)
-        for name in self.tierNameList:
-            tier = self.getTier(name)
+        for tier in self.tiers:
             shrunkTier = tier.eraseRegion(
                 start, end, constants.EraseCollision.TRUNCATE, doShrink
             )
@@ -319,9 +323,8 @@ class Textgrid:
         )
 
         tg = Textgrid(self.minTimestamp, self.maxTimestamp)
-        for tierName in self.tierNameList:
-            tier = self.getTier(tierName)
-            if len(tier.entryList) > 0:
+        for tier in self.tiers:
+            if len(tier.entries) > 0:
                 tier = tier.editTimestamps(offset, reportingMode)
 
             tg.addTier(tier, reportingMode=reportingMode)
@@ -366,8 +369,7 @@ class Textgrid:
         newTG.minTimestamp = self.minTimestamp
         newTG.maxTimestamp = self.maxTimestamp + duration
 
-        for tierName in self.tierNameList:
-            tier = self.getTier(tierName)
+        for tier in self.tiers:
             newTier = tier.insertSpace(start, duration, collisionMode)
             newTG.addTier(newTier)
 
@@ -388,39 +390,39 @@ class Textgrid:
             Textgrid: the modified version of the current textgrid
         """
         if tierNames is None:
-            tierNames = self.tierNameList
+            tierNames = self.tierNames
 
         # Determine the tiers to merge
-        intervalTierNameList = []
-        pointTierNameList = []
+        intervalTierNames = []
+        pointTierNames = []
         for tierName in tierNames:
             tier = self.getTier(tierName)
             if isinstance(tier, interval_tier.IntervalTier):
-                intervalTierNameList.append(tierName)
+                intervalTierNames.append(tierName)
             elif isinstance(tier, point_tier.PointTier):
-                pointTierNameList.append(tierName)
+                pointTierNames.append(tierName)
 
         # Merge the interval tiers
         intervalTier = None
-        if len(intervalTierNameList) > 0:
-            intervalTier = self.getTier(intervalTierNameList.pop(0))
-            for tierName in intervalTierNameList:
+        if len(intervalTierNames) > 0:
+            intervalTier = self.getTier(intervalTierNames.pop(0))
+            for tierName in intervalTierNames:
                 intervalTier = intervalTier.union(self.getTier(tierName))
 
         # Merge the point tiers
         pointTier = None
-        if len(pointTierNameList) > 0:
-            pointTier = self.getTier(pointTierNameList.pop(0))
-            for tierName in pointTierNameList:
+        if len(pointTierNames) > 0:
+            pointTier = self.getTier(pointTierNames.pop(0))
+            for tierName in pointTierNames:
                 pointTier = pointTier.union(self.getTier(tierName))
 
         # Create the final textgrid to output
         tg = Textgrid(self.minTimestamp, self.maxTimestamp)
 
         if preserveOtherTiers:
-            for tierName in self.tierNameList:
-                if tierName not in tierNames:
-                    tg.addTier(self.getTier(tierName))
+            for tier in self.tiers:
+                if tier.name not in tierNames:
+                    tg.addTier(tier)
 
         if intervalTier is not None:
             tg.addTier(intervalTier)
@@ -500,9 +502,9 @@ class Textgrid:
 
     def renameTier(self, oldName: str, newName: str) -> None:
         oldTier = self.getTier(oldName)
-        tierIndex = self.tierNameList.index(oldName)
+        tierIndex = self.tierNames.index(oldName)
         self.removeTier(oldName)
-        self.addTier(oldTier.new(newName, oldTier.entryList), tierIndex)
+        self.addTier(oldTier.new(newName, oldTier.entries), tierIndex)
 
     def removeTier(self, name: str) -> textgrid_tier.TextgridTier:
         return self._tierDict.pop(name)
@@ -513,7 +515,7 @@ class Textgrid:
         newTier: textgrid_tier.TextgridTier,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
-        tierIndex = self.tierNameList.index(name)
+        tierIndex = self.tierNames.index(name)
         self.removeTier(name)
         self.addTier(newTier, tierIndex, reportingMode)
 
@@ -543,16 +545,14 @@ class Textgrid:
         errorReporter = utils.getErrorReporter(reportingMode)
 
         isValid = True
-        if len(self.tierNameList) != len(set(self.tierNameList)):
+        if len(self.tierNames) != len(set(self.tierNames)):
             isValid = False
             errorReporter(
                 errors.TierNameExistsError,
-                f"Tier names not unique: {self.tierNameList}",
+                f"Tier names not unique: {self.tierNames}",
             )
 
-        for tierName in self.tierNameList:
-            tier = self.getTier(tierName)
-
+        for tier in self.tiers:
             if self.minTimestamp != tier.minTimestamp:
                 isValid = False
                 errorReporter(
@@ -576,14 +576,13 @@ class Textgrid:
 
 def _tgToDictionary(tg: Textgrid) -> dict:
     tiers = []
-    for tierName in tg.tierNameList:
-        tier = tg.getTier(tierName)
+    for tier in tg.tiers:
         tierAsDict = {
             "class": tier.tierType,
-            "name": tierName,
+            "name": tier.name,
             "xmin": tier.minTimestamp,
             "xmax": tier.maxTimestamp,
-            "entries": tier.entryList,
+            "entries": tier.entries,
         }
         tiers.append(tierAsDict)
 

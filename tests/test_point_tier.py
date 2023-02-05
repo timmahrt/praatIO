@@ -42,7 +42,7 @@ class TestPointTier(PraatioTestCase):
         self.assertEqual(15, sut.maxTimestamp)
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "99"), Point(9.2, "153"), Point(12.1, "89")],
-            sut.entryList,
+            sut._entries,
         )
         self.assertEqual(POINT_TIER, sut.tierType)
 
@@ -214,7 +214,7 @@ class TestPointTier(PraatioTestCase):
 
         self.assertEqual(
             [Point(0.5, "21"), Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32")],
-            sut.entryList,
+            sut._entries,
         )
 
     def test_insert_point_at_middle_of_point_tier(self):
@@ -226,7 +226,7 @@ class TestPointTier(PraatioTestCase):
 
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "99"), Point(3.9, "21"), Point(4.5, "32")],
-            sut.entryList,
+            sut._entries,
         )
 
     def test_insert_entry_works_with_points_tuples_or_lists(self):
@@ -247,7 +247,7 @@ class TestPointTier(PraatioTestCase):
                 Point(4.1, "99"),
                 Point(4.5, "32"),
             ],
-            sut.entryList,
+            sut._entries,
         )
 
     def test_insert_point_at_end_of_point_tier(self):
@@ -259,7 +259,7 @@ class TestPointTier(PraatioTestCase):
 
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "99"), Point(4.5, "32"), Point(4.9, "21")],
-            sut.entryList,
+            sut._entries,
         )
 
     def test_insert_point_when_collision_occurs(self):
@@ -286,7 +286,7 @@ class TestPointTier(PraatioTestCase):
         )
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "99-hello"), Point(4.5, "32")],
-            sut.entryList,
+            sut._entries,
         )
 
     def test_insert_point_when_collision_occurs_and_replace(self):
@@ -301,7 +301,7 @@ class TestPointTier(PraatioTestCase):
         )
         self.assertEqual(
             [Point(1.3, "55"), Point(3.7, "hello"), Point(4.5, "32")],
-            sut.entryList,
+            sut._entries,
         )
 
     def test_edit_timestamps_throws_error_if_reporting_mode_is_invalid(self):
@@ -406,7 +406,7 @@ class TestPointTier(PraatioTestCase):
         )
 
         self.assertTrue(sut.validate())
-        sut.entryList.append(Point(3.9, "21"))
+        sut._entries.append(Point(3.9, "21"))
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
         with self.assertRaises(errors.TextgridStateError) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)

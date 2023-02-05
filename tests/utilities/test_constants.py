@@ -45,3 +45,7 @@ class TestConstants(PraatioTestCase):
 
         self.assertNotEqual(constants.Point(5 / 9.0, "hello"), (5 / 9.0, "hello"))
         self.assertNotEqual(constants.Point(5 / 9.0, "hello"), "hello")
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -502,16 +502,16 @@ def generatePIMeasures(
     piData = tier.getValuesInIntervals(castDataList)
 
     outputList: List[List[float]] = []
-    for interval, entryList in piData:
+    for interval, entries in piData:
         label = interval[0]
         if doPitch:
-            tmpValList = [f0Val for _, f0Val, _ in entryList]
+            tmpValList = [f0Val for _, f0Val, _ in entries]
             f0Measures = getPitchMeasures(
                 tmpValList, tgFN, label, medianFilterWindowSize, filterZeroFlag
             )
             outputList.append(list(f0Measures))
         else:
-            tmpValList = [intensityVal for _, _, intensityVal in entryList]
+            tmpValList = [intensityVal for _, _, intensityVal in entries]
 
             if filterZeroFlag:
                 tmpValList = [
@@ -614,7 +614,7 @@ def detectPitchErrors(
         )
 
     tierName = _PITCH_ERROR_TIER_NAME
-    if tgToMark is not None and tierName in tgToMark.tierNameList:
+    if tgToMark is not None and tierName in tgToMark.tierNames:
         raise errors.ArgumentError(
             f"Tier name '{tierName}' is already in provided textgrid"
         )

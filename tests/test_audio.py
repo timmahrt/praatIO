@@ -1,6 +1,5 @@
 import unittest
 from os.path import join
-import tempfile
 import wave
 
 from praatio import audio
@@ -8,6 +7,7 @@ from praatio.utilities import utils
 from praatio.utilities import errors
 
 from tests.praatio_test_case import PraatioTestCase
+
 
 # Wrap superclasses in a dummy test to prevent them from running
 # https://stackoverflow.com/a/25695512
