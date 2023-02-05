@@ -18,7 +18,7 @@ for fn in ["bobby_phones.TextGrid", "bobby_words.TextGrid", "mary.TextGrid"]:
     for tier in tg.tiers:
         if not isinstance(tier, textgrid.IntervalTier):
             continue
-        for start, end, label in tier.entryList:
+        for start, end, label in tier.entries:
             txt = u"%s,%s,%s,%0.2f" % (
                 name,
                 tier.name,

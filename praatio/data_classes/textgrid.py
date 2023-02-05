@@ -188,11 +188,11 @@ class Textgrid:
 
                 if tierName in retTG.tierNames:
                     tier = retTG.getTier(tierName)
-                    newEntryList = retTG.getTier(tierName).entryList
-                    newEntryList += appendTier.entryList
+                    newEntries = retTG.getTier(tierName).entries
+                    newEntries += appendTier.entries
 
                     tier = tier.new(
-                        entryList=newEntryList,
+                        entries=newEntries,
                         minTimestamp=minTime,
                         maxTimestamp=maxTime,
                     )
@@ -324,7 +324,7 @@ class Textgrid:
 
         tg = Textgrid(self.minTimestamp, self.maxTimestamp)
         for tier in self.tiers:
-            if len(tier.entryList) > 0:
+            if len(tier.entries) > 0:
                 tier = tier.editTimestamps(offset, reportingMode)
 
             tg.addTier(tier, reportingMode=reportingMode)
@@ -504,7 +504,7 @@ class Textgrid:
         oldTier = self.getTier(oldName)
         tierIndex = self.tierNames.index(oldName)
         self.removeTier(oldName)
-        self.addTier(oldTier.new(newName, oldTier.entryList), tierIndex)
+        self.addTier(oldTier.new(newName, oldTier.entries), tierIndex)
 
     def removeTier(self, name: str) -> textgrid_tier.TextgridTier:
         return self._tierDict.pop(name)
@@ -582,7 +582,7 @@ def _tgToDictionary(tg: Textgrid) -> dict:
             "name": tier.name,
             "xmin": tier.minTimestamp,
             "xmax": tier.maxTimestamp,
-            "entries": tier.entryList,
+            "entries": tier.entries,
         }
         tiers.append(tierAsDict)
 

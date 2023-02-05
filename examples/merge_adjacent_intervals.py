@@ -22,9 +22,9 @@ def merge_adjacent(path, fn, outputPath):
 
     tg = textgrid.openTextgrid(join(path, fn), False)
     for tier in tg.tiers:
-        newEntryList = []
-        currentEntry = list(tier.entryList[0])
-        for nextEntry in tier.entryList[1:]:
+        newEntries = []
+        currentEntry = list(tier.entries[0])
+        for nextEntry in tier.entries[1:]:
 
             # Is a boundary shared?
             if currentEntry[1] == nextEntry[0]:
@@ -32,13 +32,13 @@ def merge_adjacent(path, fn, outputPath):
                 currentEntry[2] += " - " + nextEntry[2]
             # If not
             else:
-                newEntryList.append(currentEntry)
+                newEntries.append(currentEntry)
                 currentEntry = list(nextEntry)
 
-        newEntryList.append(currentEntry)
+        newEntries.append(currentEntry)
 
         replacementTier = textgrid.IntervalTier(
-            tier.name, newEntryList, tier.minTimestamp, tier.maxTimestamp
+            tier.name, newEntries, tier.minTimestamp, tier.maxTimestamp
         )
         outputTG.addTier(replacementTier)
 

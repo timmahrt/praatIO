@@ -113,15 +113,15 @@ class KlattPointTier(textgrid_tier.TextgridTier):
     def __init__(
         self,
         name: str,
-        entryList: List,
+        entries: List,
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
 
-        entryList = [(float(time), label) for time, label in entryList]
+        entries = [(float(time), label) for time, label in entries]
 
         # Determine the min and max timestamps
-        timeList = [time for time, label in entryList]
+        timeList = [time for time, label in entries]
         if minT is not None:
             timeList.append(float(minT))
         if maxT is not None:
@@ -133,7 +133,7 @@ class KlattPointTier(textgrid_tier.TextgridTier):
         except ValueError:
             raise errors.TimelessTextgridTierException()
 
-        super(KlattPointTier, self).__init__(name, entryList, setMinT, setMaxT)
+        super(KlattPointTier, self).__init__(name, entries, setMinT, setMaxT)
 
     def crop(self):
         raise NotImplementedError
@@ -157,11 +157,11 @@ class KlattPointTier(textgrid_tier.TextgridTier):
         raise NotImplementedError
 
     def modifyValues(self, modFunc: Callable[[float], bool]) -> None:
-        newEntryList = [
-            (timestamp, modFunc(float(value))) for timestamp, value in self.entryList
+        newEntries = [
+            (timestamp, modFunc(float(value))) for timestamp, value in self.entries
         ]
 
-        self.entryList = newEntryList
+        self.entries = newEntries
 
     def getAsText(self) -> str:
         outputList = []
@@ -171,9 +171,9 @@ class KlattPointTier(textgrid_tier.TextgridTier):
         outputList.append("xmax = %s" % repr(self.maxTimestamp))
 
         if self.name not in ["phonation", "vocalTract", "coupling", "frication"]:
-            outputList.append("points: size= %d" % len(self.entryList))
+            outputList.append("points: size= %d" % len(self.entries))
 
-        for i, entry in enumerate(self.entryList):
+        for i, entry in enumerate(self.entries):
             outputList.append("points [%d]:" % (i + 1))
             outputList.append("    number = %s" % repr(entry[0]))
             outputList.append("    value = %s" % repr(entry[1]))
@@ -192,9 +192,9 @@ class KlattSubPointTier(KlattPointTier):
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputList.append("    xmin = %s" % repr(self.minTimestamp))
         outputList.append("    xmax = %s" % repr(self.maxTimestamp))
-        outputList.append("    points: size = %d" % len(self.entryList))
+        outputList.append("    points: size = %d" % len(self.entries))
 
-        for i, entry in enumerate(self.entryList):
+        for i, entry in enumerate(self.entries):
             outputList.append("    points [%d]:" % (i + 1))
             outputList.append("        number = %s" % repr(entry[0]))
             outputList.append("        value = %s" % repr(entry[1]))

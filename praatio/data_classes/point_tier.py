@@ -25,13 +25,13 @@ class PointTier(textgrid_tier.TextgridTier):
     def __init__(
         self,
         name: str,
-        entryList: List[constants.Point],
+        entries: List[constants.Point],
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
         """A point tier is for annotating instaneous events
 
-        The entryList is of the form:
+        The entries is of the form:
         [(timeVal1, label1), (timeVal2, label2), ]
 
         The data stored in the labels can be anything but will
@@ -40,10 +40,10 @@ class PointTier(textgrid_tier.TextgridTier):
         like '132'))
         """
 
-        entryList = [constants.Point(float(time), label) for time, label in entryList]
+        entries = [constants.Point(float(time), label) for time, label in entries]
 
         # Determine the min and max timestamps
-        timeList = [time for time, label in entryList]
+        timeList = [time for time, label in entries]
         if minT is not None:
             timeList.append(float(minT))
         if maxT is not None:
@@ -55,7 +55,7 @@ class PointTier(textgrid_tier.TextgridTier):
         except ValueError:
             raise errors.TimelessTextgridTierException()
 
-        super(PointTier, self).__init__(name, entryList, resolvedMinT, resolvedMaxT)
+        super(PointTier, self).__init__(name, entries, resolvedMinT, resolvedMaxT)
 
     def crop(
         self,
@@ -82,18 +82,17 @@ class PointTier(textgrid_tier.TextgridTier):
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
-        newEntryList = []
+        newEntries = []
 
-        for entry in self.entryList:
+        for entry in self.entries:
             timestamp = entry.time
 
             if timestamp >= cropStart and timestamp <= cropEnd:
-                newEntryList.append(entry)
+                newEntries.append(entry)
 
         if rebaseToZero is True:
-            newEntryList = [
-                constants.Point(timeV - cropStart, label)
-                for timeV, label in newEntryList
+            newEntries = [
+                constants.Point(timeV - cropStart, label) for timeV, label in newEntries
             ]
             minT = 0.0
             maxT = cropEnd - cropStart
@@ -101,11 +100,11 @@ class PointTier(textgrid_tier.TextgridTier):
             minT = cropStart
             maxT = cropEnd
 
-        return PointTier(self.name, newEntryList, minT, maxT)
+        return PointTier(self.name, newEntries, minT, maxT)
 
     def deleteEntry(self, entry: constants.Point) -> None:
-        """Removes an entry from the entryList"""
-        self.entryList.pop(self.entryList.index(entry))
+        """Removes an entry from the entries"""
+        self._entries.pop(self._entries.index(entry))
 
     def editTimestamps(
         self,
@@ -128,8 +127,8 @@ class PointTier(textgrid_tier.TextgridTier):
         )
         errorReporter = utils.getErrorReporter(reportingMode)
 
-        newEntryList: List[constants.Point] = []
-        for timestamp, label in self.entryList:
+        newEntries: List[constants.Point] = []
+        for timestamp, label in self.entries:
 
             newTimestamp = timestamp + offset
             utils.checkIsUndershoot(newTimestamp, self.minTimestamp, errorReporter)
@@ -138,10 +137,10 @@ class PointTier(textgrid_tier.TextgridTier):
             if newTimestamp < 0:
                 continue
 
-            newEntryList.append(constants.Point(newTimestamp, label))
+            newEntries.append(constants.Point(newTimestamp, label))
 
         # Determine new min and max timestamps
-        timeList = [float(point.time) for point in newEntryList]
+        timeList = [float(point.time) for point in newEntries]
         newMin = min(timeList)
         newMax = max(timeList)
 
@@ -151,7 +150,7 @@ class PointTier(textgrid_tier.TextgridTier):
         if newMax < self.maxTimestamp:
             newMax = self.maxTimestamp
 
-        return PointTier(self.name, newEntryList, newMin, newMax)
+        return PointTier(self.name, newEntries, newMin, newMax)
 
     def getValuesAtPoints(
         self,
@@ -168,7 +167,7 @@ class PointTier(textgrid_tier.TextgridTier):
         [(t1, v1a, v1b, ..), (t2, v2a, v2b), ..]
 
         The procedure makes one pass through dataTupleList and one
-        pass through self.entryList.  If the data is not sequentially
+        pass through self.entries.  If the data is not sequentially
         ordered, the incorrect response will be returned.
 
         Args:
@@ -184,7 +183,7 @@ class PointTier(textgrid_tier.TextgridTier):
         retList = []
 
         sortedDataTupleList = sorted(dataTupleList)
-        for timestamp, label in self.entryList:
+        for timestamp, label in self.entries:
             retTuple = utils.getValueAtTime(
                 timestamp,
                 sortedDataTupleList,
@@ -219,26 +218,26 @@ class PointTier(textgrid_tier.TextgridTier):
 
         newTier = self.new()
         croppedTier = newTier.crop(start, end, constants.CropCollision.TRUNCATED, False)
-        matchList = croppedTier.entryList
+        matchList = croppedTier.entries
 
         if len(matchList) > 0:
-            # Remove all the matches from the entryList
+            # Remove all the matches from the entries
             # Go in reverse order because we're destructively altering
             # the order of the list (messes up index order)
             for point in matchList[::-1]:
                 newTier.deleteEntry(point)
 
         if doShrink is True:
-            newEntryList = []
+            newEntries = []
             diff = end - start
-            for point in newTier.entryList:
+            for point in newTier.entries:
                 if point.time < start:
-                    newEntryList.append(point)
+                    newEntries.append(point)
                 elif point.time > end:
-                    newEntryList.append(constants.Point(point.time - diff, point.label))
+                    newEntries.append(constants.Point(point.time - diff, point.label))
 
             newMax = newTier.maxTimestamp - diff
-            newTier = newTier.new(entryList=newEntryList, maxTimestamp=newMax)
+            newTier = newTier.new(entries=newEntries, maxTimestamp=newMax)
 
         return newTier
 
@@ -280,25 +279,25 @@ class PointTier(textgrid_tier.TextgridTier):
 
         matchList = []
         i = None
-        for i, point in enumerate(self.entryList):
+        for i, point in enumerate(self.entries):
             if point.time == newPoint.time:
                 matchList.append(point)
                 break
 
         if len(matchList) == 0:
-            self.entryList.append(newPoint)
+            self._entries.append(newPoint)
 
         elif collisionMode == constants.IntervalCollision.REPLACE:
-            self.deleteEntry(self.entryList[i])
-            self.entryList.append(newPoint)
+            self.deleteEntry(self.entries[i])
+            self._entries.append(newPoint)
 
         elif collisionMode == constants.IntervalCollision.MERGE:
-            oldPoint = self.entryList[i]
+            oldPoint = self.entries[i]
             mergedPoint = constants.Point(
                 newPoint.time, "-".join([oldPoint.label, newPoint.label])
             )
-            self.deleteEntry(self.entryList[i])
-            self.entryList.append(mergedPoint)
+            self.deleteEntry(self._entries[i])
+            self._entries.append(mergedPoint)
 
         else:
             raise errors.CollisionError(
@@ -334,15 +333,15 @@ class PointTier(textgrid_tier.TextgridTier):
             PointTier: the modified version of the current tier
         """
 
-        newEntryList = []
-        for point in self.entryList:
+        newEntries = []
+        for point in self.entries:
             if point.time <= start:
-                newEntryList.append(point)
+                newEntries.append(point)
             elif point.time > start:
-                newEntryList.append(constants.Point(point.time + duration, point.label))
+                newEntries.append(constants.Point(point.time + duration, point.label))
 
         newTier = self.new(
-            entryList=newEntryList, maxTimestamp=self.maxTimestamp + duration
+            entries=newEntries, maxTimestamp=self.maxTimestamp + duration
         )
 
         return newTier
@@ -369,7 +368,7 @@ class PointTier(textgrid_tier.TextgridTier):
 
         isValid = True
         previousPoint = None
-        for point in self.entryList:
+        for point in self.entries:
             if previousPoint and previousPoint.time > point.time:
                 isValid = False
                 errorReporter(

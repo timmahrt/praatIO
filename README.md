@@ -110,8 +110,8 @@ What can you do with this library?
 - query a textgrid to get information about the tiers or intervals contained within
     ```python
     tg = textgrid.openTextgrid("path_to_textgrid", False)
-    entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
-    entryList = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
+    entries = tg.tierDict["speaker_1_tier"].entries # Get all intervals
+    entries = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
     ```
 
 - create or augment textgrids using data from other sources

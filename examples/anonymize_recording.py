@@ -30,7 +30,7 @@ for wavFN, tgFN in (
     # done here.
     deleteList = []
     tg = textgrid.openTextgrid(join(path, tgFN), False)
-    deleteList.append(tg.getTier("word").entryList[0])
+    deleteList.append(tg.getTier("word").entries[0])
 
     # Get only time information from entries (i.e. remove label information)
     deleteList = [(start, end) for start, end, _ in deleteList]

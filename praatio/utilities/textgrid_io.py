@@ -48,39 +48,39 @@ def _removeUltrashortIntervals(
     """
 
     # First, remove tiny intervals
-    newEntryList: List[Interval] = []
-    j = 0  # index to newEntryList
+    newEntries: List[Interval] = []
+    j = 0  # index to newEntries
     for start, end, label in tier["entries"]:
 
         if end - start < minLength:
             # Correct ultra-short entries
-            if len(newEntryList) > 0:
-                lastStart, _, lastLabel = newEntryList[j - 1]
-                newEntryList[j - 1] = Interval(lastStart, end, lastLabel)
+            if len(newEntries) > 0:
+                lastStart, _, lastLabel = newEntries[j - 1]
+                newEntries[j - 1] = Interval(lastStart, end, lastLabel)
         else:
-            # Special case: the first entry in oldEntryList was ultra-short
-            if len(newEntryList) == 0 and start != minTimestamp:
-                newEntryList.append(Interval(minTimestamp, end, label))
+            # Special case: the first entry in oldEntries was ultra-short
+            if len(newEntries) == 0 and start != minTimestamp:
+                newEntries.append(Interval(minTimestamp, end, label))
             # Normal case
             else:
-                newEntryList.append(Interval(start, end, label))
+                newEntries.append(Interval(start, end, label))
             j += 1
 
     # Next, shift near equivalent tiny boundaries
     # This will link intervals that were connected by an interval
     # that was shorter than minLength
     j = 0
-    while j < len(newEntryList) - 1:
-        diff = abs(newEntryList[j][1] - newEntryList[j + 1][0])
+    while j < len(newEntries) - 1:
+        diff = abs(newEntries[j][1] - newEntries[j + 1][0])
         if diff > 0 and diff < minLength:
-            newEntryList[j] = Interval(
-                newEntryList[j][0],
-                newEntryList[j + 1][0],
-                newEntryList[j][2],
+            newEntries[j] = Interval(
+                newEntries[j][0],
+                newEntries[j + 1][0],
+                newEntries[j][2],
             )
         j += 1
 
-    tier["entries"] = newEntryList
+    tier["entries"] = newEntries
 
 
 def _fillInBlanks(
@@ -104,39 +104,39 @@ def _fillInBlanks(
         tier["entries"].append((minTime, maxTime, blankLabel))
 
     # Create a new entry list
-    entryList = tier["entries"]
-    entry = entryList[0]
+    entries = tier["entries"]
+    entry = entries[0]
     prevEnd = float(entry[1])
-    newEntryList = [entry]
-    for entry in entryList[1:]:
+    newEntries = [entry]
+    for entry in entries[1:]:
         newStart = float(entry[0])
         newEnd = float(entry[1])
 
         if prevEnd < newStart:
-            newEntryList.append((prevEnd, newStart, blankLabel))
-        newEntryList.append(entry)
+            newEntries.append((prevEnd, newStart, blankLabel))
+        newEntries.append(entry)
 
         prevEnd = newEnd
 
     # Special case: If there is a gap at the start of the file
-    if float(newEntryList[0][0]) < float(minTime):
+    if float(newEntries[0][0]) < float(minTime):
         raise errors.ParsingError(
             "The entries are shorter than the min time specified in the textgrid."
         )
-    if float(newEntryList[0][0]) > float(minTime):
-        newEntryList.insert(0, (minTime, newEntryList[0][0], blankLabel))
+    if float(newEntries[0][0]) > float(minTime):
+        newEntries.insert(0, (minTime, newEntries[0][0], blankLabel))
 
     # Special case -- if there is a gap at the end of the file
     if maxTime is not None:
-        if float(newEntryList[-1][1]) > float(maxTime):
+        if float(newEntries[-1][1]) > float(maxTime):
             raise errors.ParsingError(
                 "The entries are longer than the max time specified in the textgrid."
             )
-        if float(newEntryList[-1][1]) < float(maxTime):
-            newEntryList.append((newEntryList[-1][1], maxTime, blankLabel))
+        if float(newEntries[-1][1]) < float(maxTime):
+            newEntries.append((newEntries[-1][1], maxTime, blankLabel))
 
-    newEntryList.sort()
-    tier["entries"] = newEntryList
+    newEntries.sort()
+    tier["entries"] = newEntries
 
 
 def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
@@ -441,7 +441,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
         tierEndTime = utils.strToIntOrFloat(tierEndTimeStr)
 
         # Get the tier entry list
-        entryList: List[Any] = []
+        entries: List[Any] = []
         if tierType == INTERVAL_TIER:
             for element in tierData:
                 timeStart = reSearch(
@@ -458,7 +458,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
 
                 label = label.strip()
                 label = re.sub(r'""', '"', label)
-                entryList.append(Interval(timeStart, timeEnd, label))
+                entries.append(Interval(timeStart, timeEnd, label))
         else:
             for element in tierData:
                 time = reSearch(
@@ -470,14 +470,14 @@ def _parseNormalTextgrid(data: str) -> Dict:
                     flags=re.MULTILINE | re.DOTALL,
                 ).groups()[0]
                 label = label.strip()
-                entryList.append(Point(time, label))
+                entries.append(Point(time, label))
 
         tierAsDict = {
             "class": tierType,
             "name": tierName,
             "xmin": float(tierStartTime),
             "xmax": float(tierEndTime),
-            "entries": entryList,
+            "entries": entries,
         }
         tiers.append(tierAsDict)
 
@@ -526,7 +526,7 @@ def _parseShortTextgrid(data: str) -> Dict:
         tierEndTime = utils.strToIntOrFloat(tierEndTimeStr)
 
         # Tier entry data
-        entryList: List[Any] = []
+        entries: List[Any] = []
         if isInterval:
             className = INTERVAL_TIER
             while True:
@@ -538,7 +538,7 @@ def _parseShortTextgrid(data: str) -> Dict:
                     break
 
                 label = label.strip()
-                entryList.append(Interval(startTime, endTime, label))
+                entries.append(Interval(startTime, endTime, label))
         else:
             className = POINT_TIER
             while True:
@@ -548,14 +548,14 @@ def _parseShortTextgrid(data: str) -> Dict:
                 except (ValueError, IndexError):
                     break
                 label = label.strip()
-                entryList.append(Point(time, label))
+                entries.append(Point(time, label))
 
         tierAsDict = {
             "class": className,
             "name": tierName,
             "xmin": float(tierStartTime),
             "xmax": float(tierEndTime),
-            "entries": entryList,
+            "entries": entries,
         }
         tiers.append(tierAsDict)
 
