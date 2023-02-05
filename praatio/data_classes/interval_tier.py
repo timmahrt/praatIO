@@ -1,7 +1,7 @@
 """
 An IntervalTier is a tier containing an array of intervals -- data that spans a period of time
 """
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Sequence
 
 from typing_extensions import Literal
 
@@ -17,6 +17,40 @@ from praatio.utilities import utils
 from praatio.utilities import constants
 
 from praatio.data_classes import textgrid_tier
+
+
+def _homogenizeEntries(entries):
+    """
+    Enforces consistency in intervals
+
+    - converts all entries to intervals
+    - removes whitespace in labels
+    - sorts values by time
+    """
+    processedEntries = [
+        Interval(float(start), float(end), label.strip())
+        for start, end, label in entries
+    ]
+    processedEntries.sort()
+    return processedEntries
+
+
+def _calculateMinAndMaxTime(entries: Sequence[Interval], minT=None, maxT=None):
+    minTimeList = [interval.start for interval in entries]
+    maxTimeList = [interval.end for interval in entries]
+
+    if minT is not None:
+        minTimeList.append(float(minT))
+    if maxT is not None:
+        maxTimeList.append(float(maxT))
+
+    try:
+        resolvedMinT = min(minTimeList)
+        resolvedMaxT = max(maxTimeList)
+    except ValueError:
+        raise errors.TimelessTextgridTierException()
+
+    return (resolvedMinT, resolvedMaxT)
 
 
 class IntervalTier(textgrid_tier.TextgridTier):
@@ -41,45 +75,29 @@ class IntervalTier(textgrid_tier.TextgridTier):
         text e.g. ('erase this region') or numerical data e.g. (average pitch
         values like '132'))
         """
-        entries = [
-            Interval(float(start), float(end), label) for start, end, label in entries
-        ]
+        entries = _homogenizeEntries(entries)
+        calculatedMinT, calculatedMaxT = _calculateMinAndMaxTime(entries, minT, maxT)
 
-        if minT is not None:
-            minT = float(minT)
-        if maxT is not None:
-            maxT = float(maxT)
+        super(IntervalTier, self).__init__(
+            name, entries, calculatedMinT, calculatedMaxT
+        )
+        self._validate()
 
-        # Prevent poorly-formed textgrids from being created
-        for entry in entries:
-            if entry[0] >= entry[1]:
+    def _validate(self):
+        """An interval tier is invalid if the entries are out of order or overlap with each other"""
+        for entry in self.entries:
+            if entry.start >= entry.end:
                 raise errors.TextgridStateError(
-                    f"The start time of an interval ({entry[0]}) "
-                    f"cannot occur after its end time ({entry[1]})"
+                    f"The start time of an interval ({entry.start}) "
+                    f"cannot occur after its end time ({entry.end})"
                 )
 
-        # Remove whitespace
-        tmpEntryList = []
-        for start, end, label in entries:
-            tmpEntryList.append(Interval(start, end, label.strip()))
-        entries = tmpEntryList
-
-        # Determine the minimum and maximum timestamps
-        minTimeList = [subList[0] for subList in entries]
-        maxTimeList = [subList[1] for subList in entries]
-
-        if minT is not None:
-            minTimeList.append(minT)
-        if maxT is not None:
-            maxTimeList.append(maxT)
-
-        try:
-            resolvedMinT = min(minTimeList)
-            resolvedMaxT = max(maxTimeList)
-        except ValueError:
-            raise errors.TimelessTextgridTierException()
-
-        super(IntervalTier, self).__init__(name, entries, resolvedMinT, resolvedMaxT)
+        for entry, nextEntry in zip(self.entries[0::], self.entries[1::]):
+            if entry.end > nextEntry.start:
+                raise errors.TextgridStateError(
+                    "Two intervals in the same tier overlap in time:\n"
+                    f"({entry.start}, {entry.end}, {entry.label}) and ({entry.start}, {entry.end}, {entry.label})"
+                )
 
     def crop(
         self,
