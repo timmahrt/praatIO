@@ -436,7 +436,7 @@ def splitAudioOnTier(
 
 
 def alignBoundariesAcrossTiers(
-    tgFN: str, maxDifference: float = 0.01
+    tg: textgrid.Textgrid, tierName: str, maxDifference: float = 0.005
 ) -> textgrid.Textgrid:
     """Aligns boundaries or points in a textgrid that suffer from 'jitter'
 
@@ -449,125 +449,79 @@ def alignBoundariesAcrossTiers(
     to be the same value.  The replacement value is either the majority
     value found within /maxDifference/ or, if no majority exists, than
     the value used in the search query.
+
+    Args:
+        tg: the textgrid to operate on
+        tierName: the name of the reference tier to compare other tiers against
+        maxDifference: any boundaries that differ less this amount compared
+                       to boundaries in the reference tier will be adjusted
+
+    Returns:
+        the provided textgrid with aligned boundaries
+
+    Raises:
+        ArgumentError: The provided maxDifference is larger than the smallest difference in
+                       the tier to be used for comparisons, which could lead to strange results.
+                       In such a case, choose a smaller maxDifference.
     """
-    tg = textgrid.openTextgrid(tgFN, False)
+    referenceTier = tg.getTier(tierName)
+    times = _getTimestampsFromTier(referenceTier)
 
-    for tierName in tg.tierNames:
-        altNameList = [tmpName for tmpName in tg.tierNames if tmpName != tierName]
-
-        tier = tg.getTier(tierName)
-        for entry in tier.entries:
-            # Interval tier left boundary or point tier point
-            _findMisalignments(
-                tg, entry.start, maxDifference, altNameList, tierName, entry, 0
+    for time, nextTime in zip(times[1::], times[2::]):
+        if nextTime - time < maxDifference:
+            raise errors.ArgumentError(
+                "The provided maxDifference is larger than the smallest difference in"
+                "the tier used for comparison, which could lead to strange results."
+                "Please choose a smaller maxDifference.\n"
+                f"Max difference: {maxDifference}\n"
+                f"found difference {nextTime - time} for times {time} and {nextTime}"
             )
 
-        # Interval tier right boundary
-        if tier.tierType == textgrid.INTERVAL_TIER:
-            for entry in tier.entries:
-                _findMisalignments(
-                    tg, entry.end, maxDifference, altNameList, tierName, entry, 1
-                )
+    for tier in tg.tiers:
+        if tier.name == tierName:
+            continue
+
+        newEntries = []
+        if tier.entryType == constants.Interval:
+            for start, stop, label in tier.entries:
+                startCompare = min(times, key=lambda x: abs(x - start))
+                stopCompare = min(times, key=lambda x: abs(x - stop))
+
+                if abs(start - startCompare) <= maxDifference:
+                    start = startCompare
+                if abs(stop - stopCompare) <= maxDifference:
+                    stop = stopCompare
+                newEntries.append((start, stop, label))
+        elif tier.entryType == constants.Point:
+            for time, label in tier.entries:
+                timeCompare = min(times, key=lambda x: abs(x - time))
+
+                if abs(time - timeCompare) <= maxDifference:
+                    time = timeCompare
+                newEntries.append((time, label))
+
+        tier = tier.new(entries=newEntries)
+        tg.replaceTier(tier.name, tier)
 
     return tg
 
 
-def _findMisalignments(
-    tg: textgrid.Textgrid,
-    timeV: float,
-    maxDifference: float,
-    tierNames: List[str],
-    tierName: str,
-    entry: list,
-    orderID: int,
-) -> None:
-    """This is just used by alignBoundariesAcrossTiers()"""
-    # Get the start time
-    filterStartT = timeV - maxDifference
-    if filterStartT < 0:
-        filterStartT = 0
+def _getTimestampsFromTier(tier: textgrid_tier.TextgridTier) -> List[float]:
+    """Get all timestamps used in a tier"""
+    timestamps = []
+    if tier.entryType == constants.Interval:
+        timestamps = [
+            time
+            for start, stop, _ in tier.entries
+            for time in [
+                start,
+                stop,
+            ]
+        ]
+    elif tier.entryType == constants.Point:
+        timestamps = [time for time, _ in tier.entries]
 
-    # Get the end time
-    filterStopT = timeV + maxDifference
-    if filterStopT > tg.maxTimestamp:
-        filterStopT = tg.maxTimestamp
+    timestamps = list(set(timestamps))
+    timestamps.sort()
 
-    croppedTG = tg.crop(filterStartT, filterStopT, "lax", False)
-
-    matchList = [(tierName, timeV, entry, orderID)]
-    for subTierName in tierNames:
-        subCroppedTier = croppedTG.getTier(subTierName)
-
-        # For each item that exists in the search span, find the boundary
-        # that lies in the search span
-        for subCroppedEntry in subCroppedTier.entries:
-
-            if subCroppedTier.tierType == textgrid.INTERVAL_TIER:
-                subStart, subEnd, _ = subCroppedEntry
-
-                # Left boundary?
-                leftMatchVal = None
-                if subStart >= filterStartT and subStart <= filterStopT:
-                    leftMatchVal = subStart
-
-                # Right boundary?
-                rightMatchVal = None
-                if subEnd >= filterStartT and subEnd <= filterStopT:
-                    rightMatchVal = subEnd
-
-                if (
-                    leftMatchVal is not None and rightMatchVal is not None
-                ):  # This shouldn't happen
-                    raise errors.UnexpectedError(
-                        "There should be at most one matching boundary."
-                    )
-
-                # Set the matching boundary info
-                if leftMatchVal is not None:
-                    matchVal = leftMatchVal
-                    subOrderID = 0
-                else:
-                    matchVal = rightMatchVal
-                    subOrderID = 1
-
-                # Match value could be none if, for an interval tier,
-                # no boundary sits inside the search span (the search span
-                # is wholly inside the interval)
-                if matchVal is None:
-                    continue
-
-            elif subCroppedTier.tierType == constants.POINT_TIER:
-                subStart, _ = subCroppedEntry
-                if subStart >= filterStartT and subStart <= filterStopT:
-                    matchVal = subStart
-                    subOrderID = 0
-
-            matchList.append((subTierName, matchVal, subCroppedEntry, subOrderID))
-
-    # Find the number of different values that are almost the same
-    valList = [row[1] for row in matchList]
-    valUniqueList = []
-    for val in valList:
-        if val not in valUniqueList:
-            valUniqueList.append(val)
-
-    # If they're all the same, there is nothing to do
-    # If some are different, take the most common value (or else the first
-    # one) and set all similar times to that value
-    if len(valUniqueList) > 1:
-        countList = [valList.count(val) for val in valUniqueList]
-        bestVal = valUniqueList[countList.index(max(countList))]
-        if bestVal is None:  # When can this happen?
-            raise errors.UnexpectedError("Could not find the optimal value")
-        for tierName, _, oldEntry, orderID in matchList:
-
-            newEntry = list(copy.deepcopy(oldEntry))
-            newEntry[orderID] = bestVal
-            tier = tg.getTier(tierName)
-            castNewEntry = tier.entryType(*newEntry)
-
-            tier.deleteEntry(oldEntry)
-            tier._entries.append(
-                castNewEntry
-            )  # TODO: move to insertEntry and a bug is triggered
-            tier.sort()
+    return timestamps
