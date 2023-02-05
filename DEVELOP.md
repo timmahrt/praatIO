@@ -17,3 +17,12 @@ Tests are run with
 
 `pytest --cov=praatio tests/`
 
+## Release
+
+Releases are built and deployed with:
+
+`python setup.py bdist_wheel sdist`
+
+`twine upload dist/*`
+
+Don't forget to tag the release.

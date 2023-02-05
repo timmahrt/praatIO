@@ -204,12 +204,6 @@ Also, each tier specifies it's name, and a min and max time.
 }
 ```
 
-## Tests
-
-I run tests with the following command (this requires pytest and pytest-cov to be installed):
-
-`pytest --cov=praatio tests/`
-
 ## Citing praatIO
 
 PraatIO is general purpose coding and doesn't need to be cited
