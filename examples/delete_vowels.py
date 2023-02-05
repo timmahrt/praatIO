@@ -5,6 +5,7 @@ Praatio example for deleting the vowels from the textgrids and audio files
 import os
 from os.path import join
 import copy
+import wave
 
 from praatio import textgrid
 from praatio import praatio_scripts
@@ -13,7 +14,9 @@ from praatio.utilities import utils
 
 
 def isVowel(label):
-    return any([vowel in label.lower() for vowel in ["a", "e", "i", "o", "u"]])
+    return any(
+        [vowel in label.lower() for vowel in ["a", "e", "i", "o", "u", "ə", "œ"]]
+    )
 
 
 def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=True):
@@ -25,28 +28,38 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
     outputWavFN = join(outputPath, wavFN)
     outputTGFN = join(outputPath, tgFN)
 
+    wav = audio.QueryWav(inputWavFN)
+
     if atZeroCrossing is True:
         zeroCrossingTGPath = join(outputPath, "zero_crossing_tgs")
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
 
         tg = textgrid.openTextgrid(inputTGFN, False)
-        wavObj = audio.WavQueryObj(inputWavFN)
 
-        praatio_scripts.tgBoundariesToZeroCrossings(tg, wavObj, zeroCrossingTGFN)
+        praatio_scripts.tgBoundariesToZeroCrossings(tg, wav, zeroCrossingTGFN)
 
     else:
         tg = textgrid.openTextgrid(inputTGFN, False)
 
-    keepList = tg.tierDict["phone"].entryList
-    keepList = [entry for entry in keepList if not isVowel(entry[2])]
-    deleteList = utils.invertIntervalList(keepList, 0, tg.maxTimestamp)
+    intervals = tg.getTier("phone").entries
+    deleteIntervals = [(entry[0], entry[1]) for entry in intervals if isVowel(entry[2])]
+    keepIntervals = utils.invertIntervalList(deleteIntervals, 0, wav.duration)
 
-    wavObj = audio.openAudioFile(inputWavFN, keepList=keepList, doShrink=doShrink)
-    wavObj.save(outputWavFN)
+    wavReader = wave.open(inputWavFN, "r")
+    replaceFunc = None
+    if doShrink is False:
+        generator = audio.AudioGenerator.fromWav(wav)
+        replaceFunc = generator.generateSilence
+
+    frames = audio.readFramesAtTimes(
+        wavReader, keepIntervals=keepIntervals, replaceFunc=replaceFunc
+    )
+    shrunkWav = audio.Wav(frames, wavReader.getparams())
+    shrunkWav.save(outputWavFN)
 
     shrunkTG = copy.deepcopy(tg)
-    for start, end in sorted(deleteList, reverse=True):
+    for start, end in sorted(deleteIntervals, reverse=True):
         shrunkTG = shrunkTG.eraseRegion(start, end, doShrink=doShrink)
 
     shrunkTG.save(outputTGFN, "short_textgrid", True)

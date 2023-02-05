@@ -8,7 +8,6 @@ see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
 import os
 from os.path import join
 import math
-import copy
 from typing import Callable, List, Tuple, Optional
 
 from typing_extensions import Literal, Final
@@ -36,30 +35,28 @@ def _shiftTimes(
     if the new interval steps on other intervals
     """
     tg = tg.new()
-    for tierName in tg.tierNameList:
-        tier = tg.tierDict[tierName]
-
+    for tier in tg.tiers:
         if isinstance(tier, textgrid.IntervalTier):
-            entryList = [
+            entries = [
                 entry
-                for entry in tier.entryList
+                for entry in tier.entries
                 if entry[0] == timeV or entry[1] == timeV
             ]
-            insertEntryList = []
-            for entry in entryList:
+            insertEntries = []
+            for entry in entries:
                 if entry[0] == timeV:
                     newStart, newStop = newTimeV, entry[1]
                 elif entry[1] == timeV:
                     newStart, newStop = entry[0], newTimeV
                 tier.deleteEntry(entry)
-                insertEntryList.append((newStart, newStop, entry[2]))
+                insertEntries.append((newStart, newStop, entry[2]))
 
-            for entry in insertEntryList:
+            for entry in insertEntries:
                 tier.insertEntry(entry)
 
         elif isinstance(tier, textgrid.PointTier):
-            entryList = [entry for entry in tier.entryList if entry[0] == timeV]
-            for entry in entryList:
+            entries = [entry for entry in tier.entries if entry[0] == timeV]
+            for entry in entries:
                 tier.deleteEntry(entry)
                 tier.insertEntry(Point(newTimeV, entry[1]))
 
@@ -67,15 +64,15 @@ def _shiftTimes(
 
 
 def audioSplice(
-    audioObj: audio.WavObj,
-    spliceSegment: audio.WavObj,
+    audioObj: audio.Wav,
+    spliceSegment: audio.Wav,
     tg: textgrid.Textgrid,
     tierName: str,
     newLabel: str,
     insertStart: float,
     insertStop: float = None,
     alignToZeroCrossing: bool = True,
-) -> Tuple[audio.WavObj, textgrid.Textgrid]:
+) -> Tuple[audio.Wav, textgrid.Textgrid]:
     """Splices a segment into an audio file and corresponding textgrid
 
     Args:
@@ -95,7 +92,7 @@ def audioSplice(
             in better sounding output
 
     Returns:
-        [WavObj, Textgrid]
+        [Wav, Textgrid]
     """
 
     retTG = tg.new()
@@ -104,10 +101,10 @@ def audioSplice(
     if alignToZeroCrossing is True:
 
         # Cut the splice segment to zero crossings
-        spliceDuration = spliceSegment.getDuration()
+        spliceDuration = spliceSegment.duration
         spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
         spliceZeroEnd = spliceSegment.findNearestZeroCrossing(spliceDuration)
-        spliceSegment = spliceSegment.getSubsegment(spliceZeroStart, spliceZeroEnd)
+        spliceSegment = spliceSegment.getSubwav(spliceZeroStart, spliceZeroEnd)
 
         # Move the textgrid borders to zero crossings
         oldInsertStart = insertStart
@@ -125,15 +122,15 @@ def audioSplice(
         insertTime = insertStop
 
     # Insert into the audio file
-    audioObj.insert(insertTime, spliceSegment.audioSamples)
+    audioObj.insert(insertTime, spliceSegment.frames)
 
     # Insert a blank region into the textgrid on all tiers
-    targetDuration = spliceSegment.getDuration()
+    targetDuration = spliceSegment.duration
     retTG = retTG.insertSpace(insertTime, targetDuration, "stretch")
 
     # Insert the splice entry into the target tier
     newEntry = (insertTime, insertTime + targetDuration, newLabel)
-    retTG.tierDict[tierName].insertEntry(newEntry)
+    retTG.getTier(tierName).insertEntry(newEntry)
 
     # Finally, delete the old section if requested
     if insertStop is not None:
@@ -177,10 +174,10 @@ def spellCheckEntries(
     ]
 
     tg = tg.new()
-    tier = tg.tierDict[targetTierName]
+    tier = tg.getTier(targetTierName)
 
-    mispelledEntryList = []
-    for start, end, label in tier.entryList:
+    mispelledEntries = []
+    for start, end, label in tier.entries:
 
         # Remove punctuation
         for char in punctuationList:
@@ -194,13 +191,13 @@ def spellCheckEntries(
 
         if len(mispelledList) > 0:
             mispelledTxt = ", ".join(mispelledList)
-            mispelledEntryList.append(Interval(start, end, mispelledTxt))
+            mispelledEntries.append(Interval(start, end, mispelledTxt))
 
             if printEntries is True:
                 print((start, end, mispelledTxt))
 
     tier = textgrid.IntervalTier(
-        newTierName, mispelledEntryList, tg.minTimestamp, tg.maxTimestamp
+        newTierName, mispelledEntries, tg.minTimestamp, tg.maxTimestamp
     )
     tg.addTier(tier)
 
@@ -227,7 +224,7 @@ def splitTierEntries(
     minT = tg.minTimestamp
     maxT = tg.maxTimestamp
 
-    sourceTier = tg.tierDict[sourceTierName]
+    sourceTier = tg.getTier(sourceTierName)
     targetTier = None
 
     # Examine a subset of the source tier?
@@ -239,36 +236,36 @@ def splitTierEntries(
 
         sourceTier = sourceTier.crop(startT, endT, "truncated", False)
 
-        if targetTierName in tg.tierNameList:
-            targetTier = tg.tierDict[targetTierName]
+        if targetTierName in tg.tierNames:
+            targetTier = tg.getTier(targetTierName)
             targetTier = targetTier.eraseRegion(startT, endT, "truncate", False)
 
     # Split the entries in the source tier
-    newEntryList = []
-    for start, end, label in sourceTier.entryList:
+    newEntries = []
+    for start, end, label in sourceTier.entries:
         labelList = label.split()
         intervalLength = (end - start) / float(len(labelList))
 
-        newSubEntryList = [
+        newSubEntries = [
             Interval(
                 start + intervalLength * i, start + intervalLength * (i + 1), label
             )
             for i, label in enumerate(labelList)
         ]
-        newEntryList.extend(newSubEntryList)
+        newEntries.extend(newSubEntries)
 
     # Create a new tier
     if targetTier is None:
-        targetTier = textgrid.IntervalTier(targetTierName, newEntryList, minT, maxT)
+        targetTier = textgrid.IntervalTier(targetTierName, newEntries, minT, maxT)
 
     # Or insert new entries into existing target tier
     else:
 
-        for entry in newEntryList:
+        for entry in newEntries:
             targetTier.insertEntry(entry, constants.IntervalCollision.ERROR)
 
     # Insert the tier into the textgrid
-    if targetTierName in tg.tierNameList:
+    if targetTierName in tg.tierNames:
         tg.removeTier(targetTierName)
     tg.addTier(targetTier)
 
@@ -277,7 +274,7 @@ def splitTierEntries(
 
 def tgBoundariesToZeroCrossings(
     tg: textgrid.Textgrid,
-    wavObj: audio.WavObj,
+    wav: audio.Wav,
     adjustPointTiers: bool = True,
     adjustIntervalTiers: bool = True,
 ) -> textgrid.Textgrid:
@@ -286,31 +283,29 @@ def tgBoundariesToZeroCrossings(
     adjustPointTiers: if True, point tiers will be adjusted.
     adjustIntervalTiers: if True, interval tiers will be adjusted.
     """
-    for tierName in tg.tierNameList[:]:
-        tier = tg.tierDict[tierName]
-
+    for tier in tg.tiers:
         newTier: textgrid_tier.TextgridTier
         if isinstance(tier, textgrid.PointTier):
             if adjustPointTiers is False:
                 continue
 
             points = []
-            for start, label in tier.entryList:
-                newStart = wavObj.findNearestZeroCrossing(start)
+            for start, label in tier.entries:
+                newStart = wav.findNearestZeroCrossing(start)
                 points.append(Point(newStart, label))
-            newTier = tier.new(entryList=points)
+            newTier = tier.new(entries=points)
         elif isinstance(tier, textgrid.IntervalTier):
             if adjustIntervalTiers is False:
                 continue
 
             intervals = []
-            for start, end, label in tier.entryList:
-                newStart = wavObj.findNearestZeroCrossing(start)
-                newStop = wavObj.findNearestZeroCrossing(end)
+            for start, end, label in tier.entries:
+                newStart = wav.findNearestZeroCrossing(start)
+                newStop = wav.findNearestZeroCrossing(end)
                 intervals.append(Interval(newStart, newStop, label))
-            newTier = tier.new(entryList=intervals)
+            newTier = tier.new(entries=intervals)
 
-        tg.replaceTier(tierName, newTier)
+        tg.replaceTier(tier.name, newTier)
 
     return tg
 
@@ -361,14 +356,14 @@ def splitAudioOnTier(
     mode: Final = getValue(noPartialIntervals)
 
     tg = textgrid.openTextgrid(tgFN, False)
-    entryList = tg.tierDict[tierName].entryList
+    entries = tg.getTier(tierName).entries
 
     if silenceLabel is not None:
-        entryList = [entry for entry in entryList if entry.label != silenceLabel]
+        entries = [entry for entry in entries if entry.label != silenceLabel]
 
     # Build the output name template
     name = os.path.splitext(os.path.split(wavFN)[1])[0]
-    orderOfMagnitude = int(math.floor(math.log10(len(entryList))))
+    orderOfMagnitude = int(math.floor(math.log10(len(entries))))
 
     # We want one more zero in the output than the order of magnitude
     outputTemplate = "%s_%%0%dd" % (name, orderOfMagnitude + 1)
@@ -379,7 +374,7 @@ def splitAudioOnTier(
     # interval labels have to be unique, or wave files with those
     # labels as names, will be overwritten
     if nameStyle == NameStyle.LABEL:
-        wordList = [interval.label for interval in entryList]
+        wordList = [interval.label for interval in entries]
         multipleInstList = []
         for word in set(wordList):
             if wordList.count(word) > 1:
@@ -395,8 +390,8 @@ def splitAudioOnTier(
 
     # Output wave files
     outputFNList = []
-    wavQObj = audio.WavQueryObj(wavFN)
-    for i, entry in enumerate(entryList):
+    wavQObj = audio.QueryWav(wavFN)
+    for i, entry in enumerate(entries):
         start, end, label = entry
 
         # Resolve output name
@@ -419,7 +414,7 @@ def splitAudioOnTier(
             )
 
         frames = wavQObj.getFrames(start, end)
-        wavQObj.outputModifiedWav(frames, outputFNFullPath)
+        wavQObj.outputFrames(frames, outputFNFullPath)
 
         outputFNList.append((start, end, outputName + ".wav"))
 
@@ -428,7 +423,7 @@ def splitAudioOnTier(
             subTG = tg.crop(start, end, mode, True)
 
             if isinstance(outputTGFlag, str):
-                for tierName in subTG.tierNameList:
+                for tierName in subTG.tierNames:
                     if tierName != outputTGFlag:
                         subTG.removeTier(tierName)
 
@@ -440,7 +435,7 @@ def splitAudioOnTier(
 
 
 def alignBoundariesAcrossTiers(
-    tgFN: str, maxDifference: float = 0.01
+    tg: textgrid.Textgrid, tierName: str, maxDifference: float = 0.005
 ) -> textgrid.Textgrid:
     """Aligns boundaries or points in a textgrid that suffer from 'jitter'
 
@@ -453,122 +448,79 @@ def alignBoundariesAcrossTiers(
     to be the same value.  The replacement value is either the majority
     value found within /maxDifference/ or, if no majority exists, than
     the value used in the search query.
+
+    Args:
+        tg: the textgrid to operate on
+        tierName: the name of the reference tier to compare other tiers against
+        maxDifference: any boundaries that differ less this amount compared
+                       to boundaries in the reference tier will be adjusted
+
+    Returns:
+        the provided textgrid with aligned boundaries
+
+    Raises:
+        ArgumentError: The provided maxDifference is larger than the smallest difference in
+                       the tier to be used for comparisons, which could lead to strange results.
+                       In such a case, choose a smaller maxDifference.
     """
-    tg = textgrid.openTextgrid(tgFN, False)
+    referenceTier = tg.getTier(tierName)
+    times = _getTimestampsFromTier(referenceTier)
 
-    for tierName in tg.tierNameList:
-        altNameList = [tmpName for tmpName in tg.tierNameList if tmpName != tierName]
-
-        tier = tg.tierDict[tierName]
-        for entry in tier.entryList:
-            # Interval tier left boundary or point tier point
-            _findMisalignments(
-                tg, entry[0], maxDifference, altNameList, tierName, entry, 0
+    for time, nextTime in zip(times[1::], times[2::]):
+        if nextTime - time < maxDifference:
+            raise errors.ArgumentError(
+                "The provided maxDifference is larger than the smallest difference in"
+                "the tier used for comparison, which could lead to strange results."
+                "Please choose a smaller maxDifference.\n"
+                f"Max difference: {maxDifference}\n"
+                f"found difference {nextTime - time} for times {time} and {nextTime}"
             )
 
-        # Interval tier right boundary
-        if tier.tierType == textgrid.INTERVAL_TIER:
-            for entry in tier.entryList:
-                _findMisalignments(
-                    tg, entry[1], maxDifference, altNameList, tierName, entry, 1
-                )
+    for tier in tg.tiers:
+        if tier.name == tierName:
+            continue
+
+        newEntries: list = []
+        if tier.entryType == constants.Interval:
+            for start, stop, label in tier.entries:
+                startCompare = min(times, key=lambda x: abs(x - start))
+                stopCompare = min(times, key=lambda x: abs(x - stop))
+
+                if abs(start - startCompare) <= maxDifference:
+                    start = startCompare
+                if abs(stop - stopCompare) <= maxDifference:
+                    stop = stopCompare
+                newEntries.append((start, stop, label))
+        elif tier.entryType == constants.Point:
+            for time, label in tier.entries:
+                timeCompare = min(times, key=lambda x: abs(x - time))
+
+                if abs(time - timeCompare) <= maxDifference:
+                    time = timeCompare
+                newEntries.append((time, label))
+
+        tier = tier.new(entries=newEntries)
+        tg.replaceTier(tier.name, tier)
 
     return tg
 
 
-def _findMisalignments(
-    tg: textgrid.Textgrid,
-    timeV: float,
-    maxDifference: float,
-    tierNameList: List[str],
-    tierName: str,
-    entry: list,
-    orderID: int,
-) -> None:
-    """This is just used by alignBoundariesAcrossTiers()"""
-    # Get the start time
-    filterStartT = timeV - maxDifference
-    if filterStartT < 0:
-        filterStartT = 0
+def _getTimestampsFromTier(tier: textgrid_tier.TextgridTier) -> List[float]:
+    """Get all timestamps used in a tier"""
+    timestamps = []
+    if tier.entryType == constants.Interval:
+        timestamps = [
+            time
+            for start, stop, _ in tier.entries
+            for time in [
+                start,
+                stop,
+            ]
+        ]
+    elif tier.entryType == constants.Point:
+        timestamps = [time for time, _ in tier.entries]
 
-    # Get the end time
-    filterStopT = timeV + maxDifference
-    if filterStopT > tg.maxTimestamp:
-        filterStopT = tg.maxTimestamp
+    timestamps = list(set(timestamps))
+    timestamps.sort()
 
-    croppedTG = tg.crop(filterStartT, filterStopT, "lax", False)
-
-    matchList = [(tierName, timeV, entry, orderID)]
-    for subTierName in tierNameList:
-        subCroppedTier = croppedTG.tierDict[subTierName]
-
-        # For each item that exists in the search span, find the boundary
-        # that lies in the search span
-        for subCroppedEntry in subCroppedTier.entryList:
-
-            if subCroppedTier.tierType == textgrid.INTERVAL_TIER:
-                subStart, subEnd, _ = subCroppedEntry
-
-                # Left boundary?
-                leftMatchVal = None
-                if subStart >= filterStartT and subStart <= filterStopT:
-                    leftMatchVal = subStart
-
-                # Right boundary?
-                rightMatchVal = None
-                if subEnd >= filterStartT and subEnd <= filterStopT:
-                    rightMatchVal = subEnd
-
-                if (
-                    leftMatchVal is not None and rightMatchVal is not None
-                ):  # This shouldn't happen
-                    raise errors.UnexpectedError(
-                        "There should be at most one matching boundary."
-                    )
-
-                # Set the matching boundary info
-                if leftMatchVal is not None:
-                    matchVal = leftMatchVal
-                    subOrderID = 0
-                else:
-                    matchVal = rightMatchVal
-                    subOrderID = 1
-
-                # Match value could be none if, for an interval tier,
-                # no boundary sits inside the search span (the search span
-                # is wholly inside the interval)
-                if matchVal is None:
-                    continue
-
-            elif subCroppedTier.tierType == constants.POINT_TIER:
-                subStart, _ = subCroppedEntry
-                if subStart >= filterStartT and subStart <= filterStopT:
-                    matchVal = subStart
-                    subOrderID = 0
-
-            matchList.append((subTierName, matchVal, subCroppedEntry, subOrderID))
-
-    # Find the number of different values that are almost the same
-    valList = [row[1] for row in matchList]
-    valUniqueList = []
-    for val in valList:
-        if val not in valUniqueList:
-            valUniqueList.append(val)
-
-    # If they're all the same, there is nothing to do
-    # If some are different, take the most common value (or else the first
-    # one) and set all similar times to that value
-    if len(valUniqueList) > 1:
-        countList = [valList.count(val) for val in valUniqueList]
-        bestVal = valUniqueList[countList.index(max(countList))]
-        if bestVal is None:  # When can this happen?
-            raise errors.UnexpectedError("Could not find the optimal value")
-        for tierName, _, oldEntry, orderID in matchList:
-
-            newEntry = list(copy.deepcopy(oldEntry))
-            newEntry[orderID] = bestVal
-            castNewEntry = tg.tierDict[tierName].entryType(*newEntry)
-
-            tg.tierDict[tierName].deleteEntry(oldEntry)
-            tg.tierDict[tierName].entryList.append(castNewEntry)
-            tg.tierDict[tierName].entryList.sort()
+    return timestamps

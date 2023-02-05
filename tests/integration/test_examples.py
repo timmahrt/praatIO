@@ -26,6 +26,7 @@ from tests.testing_utils import CoverageIgnoredTest
 _root = os.path.join(Path(__file__).parents[2], "examples")
 sys.path.append(_root)
 
+
 # Ignoring test coverage because there is no validation in
 # these tests other than "no unhandled exception occured"
 # which is still important for the user-facing example code
@@ -82,7 +83,15 @@ class TestExamples(CoverageIgnoredTest):
         print(os.getcwd())
         import merge_tiers
 
-    def test_set_operations(self):
+    def test_splice_example(self):
+        """Running 'splice_example.py'"""
+        import splice_example
+
+    def test_split_audio_on_tier(self):
+        """Running 'split_audio_on_tier.py'"""
+        import split_audio_on_tier
+
+    def test_textgrid_set_operations(self):
         """Running 'textgrid_set_operations.py'"""
         import textgrid_set_operations
 
@@ -101,7 +110,6 @@ class TestExamples(CoverageIgnoredTest):
 
         root = os.path.join(".", "files")
         endingList = os.listdir(root)
-        endingDir = os.getcwd()
         rmList = [fn for fn in endingList if fn not in self.startingList]
 
         if self.oldRoot == root:

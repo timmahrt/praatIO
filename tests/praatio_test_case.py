@@ -17,3 +17,7 @@ class PraatioTestCase(unittest.TestCase):
     def assertAllAlmostEqual(self, listA, listB):
         for valA, valB in zip(listA, listB):
             self.assertAlmostEqual(valA, valB)
+
+
+if __name__ == "__main__":
+    unittest.main()

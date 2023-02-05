@@ -50,7 +50,7 @@ class TestIntervalTier(PraatioTestCase):
                 Interval(6, 7.5, "hi"),
                 Interval(9.1, 9.8, "planet"),
             ],
-            sut.entryList,
+            sut._entries,
         )
         self.assertEqual(INTERVAL_TIER, sut.tierType)
 
@@ -361,13 +361,13 @@ class TestIntervalTier(PraatioTestCase):
             ]
         )
         sut.deleteEntry(Interval(2.5, 3.0, "the"))
-        expectedEntryList = makeIntervalTier(
+        expectedentries = makeIntervalTier(
             intervals=[
                 Interval(1, 2.5, "hello"),
                 Interval(3.2, 4.0, "world"),
             ]
         )
-        self.assertEqual(sut, expectedEntryList)
+        self.assertEqual(sut, expectedentries)
 
     def test_delete_entry_throws_value_error_if_entry_does_not_exist(self):
         sut = makeIntervalTier(
@@ -704,13 +704,13 @@ class TestIntervalTier(PraatioTestCase):
         sut = makeIntervalTier(intervals=[])
         sut.insertEntry([1, 2, "hello"])
 
-        self.assertEqual([Interval(1, 2, "hello")], sut.entryList)
+        self.assertEqual([Interval(1, 2, "hello")], sut._entries)
 
     def test_insert_entry_accepts_an_interval(self):
         sut = makeIntervalTier(intervals=[])
         sut.insertEntry(Interval(1, 2, "hello"))
 
-        self.assertEqual([Interval(1, 2, "hello")], sut.entryList)
+        self.assertEqual([Interval(1, 2, "hello")], sut._entries)
 
     def test_insert_has_no_collision_when_boundaries_are_shared(self):
         sut = makeIntervalTier(
@@ -720,12 +720,12 @@ class TestIntervalTier(PraatioTestCase):
             [2, 3.5, "the"], collisionMode=constants.IntervalCollision.ERROR
         )
 
-        expectedEntryList = [
+        expectedentries = [
             Interval(1, 2, "hello"),
             Interval(2, 3.5, "the"),
             Interval(3.5, 4, "world"),
         ]
-        self.assertEqual(expectedEntryList, sut.entryList)
+        self.assertEqual(expectedentries, sut._entries)
 
     def test_insert_will_replace_overlapping_intervals_when_mode_is_replace(self):
         sut = makeIntervalTier(
@@ -742,12 +742,12 @@ class TestIntervalTier(PraatioTestCase):
             collisionReportingMode=constants.ErrorReportingMode.SILENCE,
         )
 
-        expectedEntryList = [
+        expectedentries = [
             Interval(0.3, 0.8, "see"),
             Interval(1.9, 3.6, "the"),
             Interval(4.0, 5.0, "time"),
         ]
-        self.assertEqual(expectedEntryList, sut.entryList)
+        self.assertEqual(expectedentries, sut._entries)
 
     def test_insert_will_merge_overlapping_intervals_when_mode_is_merge(self):
         sut = makeIntervalTier(
@@ -764,12 +764,12 @@ class TestIntervalTier(PraatioTestCase):
             collisionReportingMode=constants.ErrorReportingMode.SILENCE,
         )
 
-        expectedEntryList = [
+        expectedentries = [
             Interval(0.3, 0.8, "see"),
             Interval(1, 4, "hello-the-world"),
             Interval(4.0, 5.0, "time"),
         ]
-        self.assertEqual(expectedEntryList, sut.entryList)
+        self.assertEqual(expectedentries, sut._entries)
 
     def test_insert_throws_error_with_overlapping_intervals_when_mode_is_error(
         self,
@@ -944,7 +944,7 @@ class TestIntervalTier(PraatioTestCase):
             Interval(2.7, 3.0, "world"),
         ]
 
-        self.assertIntervalListsAreEqual(expectedIntervals, sut.entryList)
+        self.assertIntervalListsAreEqual(expectedIntervals, sut.entries)
         self.assertEqual(0, sut.minTimestamp)
         # 4.0 = 5 + (1.0 + 0.2 + 0.3) - (1.5 + 0.5 + 0.5)
         self.assertAlmostEqual(4.0, sut.maxTimestamp)
@@ -979,7 +979,7 @@ class TestIntervalTier(PraatioTestCase):
             Interval(10.0, 16.6, "world"),
         ]
 
-        self.assertIntervalListsAreEqual(expectedIntervals, sut.entryList)
+        self.assertIntervalListsAreEqual(expectedIntervals, sut.entries)
         self.assertEqual(0, sut.minTimestamp)
         # 17.6 = 5 + (6.6 + 5.5 + 3) - (1.5 + 0.5 + 0.5)
         self.assertAlmostEqual(17.6, sut.maxTimestamp)
@@ -1043,67 +1043,315 @@ class TestIntervalTier(PraatioTestCase):
             Interval(3.2, 3.7, "world"),
         ]
 
-        self.assertIntervalListsAreEqual(expectedIntervals, sut.entryList)
+        self.assertIntervalListsAreEqual(expectedIntervals, sut.entries)
         self.assertEqual(0, sut.minTimestamp)
         # 4.0 = 5 + (1.0 + 0.2 + 0.3) - (1.5 + 0.5 + 0.5)
         self.assertAlmostEqual(4.7, sut.maxTimestamp)
 
     def test_mintimestamp_behavior(self):
-        userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        userentries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
 
         # By default, the min and max timestamp values come from the entry list
-        tier = textgrid.IntervalTier("test", userEntryList)
+        tier = textgrid.IntervalTier("test", userentries)
         self.assertEqual(0.4, tier.minTimestamp)
         self.assertEqual(1.3, tier.maxTimestamp)
 
         # The user can specify the min and max timestamp
-        tier = textgrid.IntervalTier("test", userEntryList, 0.2, 2.0)
+        tier = textgrid.IntervalTier("test", userentries, 0.2, 2.0)
         self.assertEqual(0.2, tier.minTimestamp)
         self.assertEqual(2.0, tier.maxTimestamp)
 
         # When the user specified min/max timestamps are less/greater
         # than the min/max specified in the entry list, use the values
         # specified in the entry list
-        tier = textgrid.IntervalTier("test", userEntryList, 1.0, 1.1)
+        tier = textgrid.IntervalTier("test", userentries, 1.0, 1.1)
         self.assertEqual(0.4, tier.minTimestamp)
         self.assertEqual(1.3, tier.maxTimestamp)
 
-    def test_intersection(self):
+    def test_intersection_outputs_one_item_for_each_overlapping_pair(self):
         sourceTier = textgrid.IntervalTier(
-            "pitch_values",
+            "source",
             [
-                Interval(1, 2.5, "hello"),
-                Interval(2.8, 3.0, "the"),
-                Interval(3.5, 4.0, "world"),
+                Interval(1, 2.5, "foo"),  # overlaps with 1
+                Interval(2.8, 3.0, "bar"),  # overlaps with same as previous
+                Interval(3, 5, "wizz"),  # overlaps with 2
             ],
             minT=0,
             maxT=5,
         )
         intersectTier = textgrid.IntervalTier(
-            "pitch_values",
+            "target",
             [
-                Interval(1, 2.5, "It's"),
-                Interval(3.0, 3.5, "my"),
-                Interval(3.7, 4.2, "cat"),
-                Interval(4.3, 4.7, "there"),
+                Interval(1, 3.0, "buzz"),
+                Interval(3, 4, "cat"),
+                Interval(4, 5, "dog"),
             ],
             minT=0,
             maxT=9,
         )
 
         sut = sourceTier.intersection(intersectTier)
+        self.assertEqual(
+            [
+                Interval(1.0, 2.5, "foo-buzz"),
+                Interval(2.8, 3.0, "bar-buzz"),
+                Interval(3, 4, "wizz-cat"),
+                Interval(4, 5, "wizz-dog"),
+            ],
+            sut._entries,
+        )
+
+    def test_intersection_trims_non_overlapping_portions(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [
+                Interval(1, 2, "foo"),  # Trim the right side
+                Interval(2, 3, "bar"),  # Trim the left side
+                Interval(4, 5, "cat"),  # Don't trim any part
+                Interval(6, 8, "bird"),  # Trim both sides
+            ],
+            minT=0,
+            maxT=8,
+        )
+        intersectTier = textgrid.IntervalTier(
+            "target",
+            [
+                Interval(0.5, 1.5, "bang"),
+                Interval(2.5, 3.5, "wizz"),
+                Interval(3.5, 5.5, "dog"),
+                Interval(6.5, 7.5, "fish"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.intersection(intersectTier)
+        self.assertEqual(
+            [
+                Interval(1, 1.5, "foo-bang"),
+                Interval(2.5, 3, "bar-wizz"),
+                Interval(4, 5, "cat-dog"),
+                Interval(6.5, 7.5, "bird-fish"),
+            ],
+            sut._entries,
+        )
+
+    def test_intersection_can_specify_the_demarcator(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [Interval(1, 2, "foo")],
+            minT=0,
+            maxT=8,
+        )
+        intersectTier = textgrid.IntervalTier(
+            "target",
+            [Interval(0.5, 1.5, "bar")],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.intersection(intersectTier, demarcator="@")
+        self.assertEqual(
+            [Interval(1, 1.5, "foo@bar")],
+            sut._entries,
+        )
+
+    def test_intersection_meta_info_follows_the_source_tier(self):
+        tierA = textgrid.IntervalTier(
+            "A",
+            [
+                Interval(1, 2.5, "foo"),  # overlaps with 1
+                Interval(2.8, 3.0, "bar"),  # overlaps with same as previous
+                Interval(3, 5, "wizz"),  # overlaps with 2
+            ],
+            minT=0,
+            maxT=5,
+        )
+        tierB = textgrid.IntervalTier(
+            "B",
+            [
+                Interval(1, 3.0, "buzz"),
+                Interval(3, 4, "cat"),
+                Interval(4, 5, "dog"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        tierAIntersectB = tierA.intersection(tierB)
+        tierBIntersectA = tierB.intersection(tierA)
+
+        self.assertEqual(0, tierAIntersectB.minTimestamp)
+        self.assertEqual(5, tierAIntersectB.maxTimestamp)
+        self.assertEqual("A-B", tierAIntersectB.name)
+
+        self.assertEqual(0, tierBIntersectA.minTimestamp)
+        self.assertEqual(9, tierBIntersectA.maxTimestamp)
+        self.assertEqual("B-A", tierBIntersectA.name)
+
+    def test_merge_labels_when_the_target_intervals_are_smaller(self):
+        sourceTier = textgrid.IntervalTier(
+            "words",
+            [
+                Interval(1, 2.5, "upon"),
+                Interval(2.8, 3.0, "a"),
+                Interval(3.0, 4.2, "a"),
+                Interval(4.2, 4.7, "time"),
+            ],
+            minT=0,
+            maxT=5,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "phones",
+            [
+                # upon
+                Interval(1, 1.2, "AH0"),
+                Interval(1.2, 1.3, "P"),
+                Interval(1.4, 2.0, "AA1"),
+                Interval(2.0, 2.5, "N"),
+                # a
+                Interval(2.8, 3.0, "AH0"),
+                # a
+                Interval(3.0, 4.2, "EY1"),
+                # time
+                Interval(4.2, 4.3, "T"),
+                Interval(4.3, 4.6, "AY1"),
+                Interval(4.6, 4.7, "M"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge)
         self.assertEqual(0, sut.minTimestamp)
         self.assertEqual(5, sut.maxTimestamp)
         self.assertEqual(
-            [Interval(1.0, 2.5, "hello-It's"), Interval(3.7, 4.0, "world-cat")],
-            sut.entryList,
+            [
+                Interval(1.0, 2.5, "upon(AH0,P,AA1,N)"),
+                Interval(2.8, 3.0, "a(AH0)"),
+                Interval(3.0, 4.2, "a(EY1)"),
+                Interval(4.2, 4.7, "time(T,AY1,M)"),
+            ],
+            sut._entries,
+        )
+
+    def test_merge_labels_when_the_target_intervals_are_larger(self):
+        sourceTier = textgrid.IntervalTier(
+            "phones",
+            [
+                # upon
+                Interval(1, 1.2, "AH0"),
+                Interval(1.2, 1.3, "P"),
+                Interval(1.4, 2.0, "AA1"),
+                Interval(2.0, 2.5, "N"),
+                # a
+                Interval(2.8, 3.0, "AH0"),
+                # a
+                Interval(3.0, 4.2, "EY1"),
+                # time
+                Interval(4.2, 4.3, "T"),
+                Interval(4.3, 4.6, "AY1"),
+                Interval(4.6, 4.7, "M"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "words",
+            [
+                Interval(1, 2.5, "upon"),
+                Interval(2.8, 3.0, "a"),
+                Interval(3.0, 4.2, "a"),
+                Interval(4.2, 4.7, "time"),
+            ],
+            minT=0,
+            maxT=5,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge)
+        self.assertEqual(0, sut.minTimestamp)
+        self.assertEqual(9, sut.maxTimestamp)
+        self.assertEqual(
+            [
+                # upon
+                Interval(1, 1.2, "AH0(upon)"),
+                Interval(1.2, 1.3, "P(upon)"),
+                Interval(1.4, 2.0, "AA1(upon)"),
+                Interval(2.0, 2.5, "N(upon)"),
+                # a
+                Interval(2.8, 3.0, "AH0(a)"),
+                # a
+                Interval(3.0, 4.2, "EY1(a)"),
+                # time
+                Interval(4.2, 4.3, "T(time)"),
+                Interval(4.3, 4.6, "AY1(time)"),
+                Interval(4.6, 4.7, "M(time)"),
+            ],
+            sut._entries,
+        )
+
+    def test_merge_labels_doesnt_trim_non_overlapping_portions(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [
+                Interval(1, 2, "foo"),  # Non-overlapping right side
+                Interval(2, 3, "bar"),  # Non-overlapping left side
+                Interval(4, 5, "cat"),  # All overlapping
+                Interval(6, 8, "bird"),  # Non-overlapping on both sides
+            ],
+            minT=0,
+            maxT=8,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "target",
+            [
+                Interval(0.5, 1.5, "bang"),
+                Interval(2.5, 3.5, "wizz"),
+                Interval(3.5, 5.5, "dog"),
+                Interval(6.5, 7.5, "fish"),
+            ],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge)
+        self.assertEqual(
+            [
+                Interval(1, 2, "foo(bang)"),
+                Interval(2, 3, "bar(wizz)"),
+                Interval(4, 5, "cat(dog)"),
+                Interval(6, 8, "bird(fish)"),
+            ],
+            sut._entries,
+        )
+
+    def test_merge_labels_can_specify_the_demarcator(self):
+        sourceTier = textgrid.IntervalTier(
+            "source",
+            [Interval(1, 2, "foo")],
+            minT=0,
+            maxT=8,
+        )
+        tierToMerge = textgrid.IntervalTier(
+            "target",
+            [Interval(0.5, 1.5, "bang"), Interval(1.5, 3.5, "wizz")],
+            minT=0,
+            maxT=9,
+        )
+
+        sut = sourceTier.mergeLabels(tierToMerge, demarcator="@")
+        self.assertEqual(
+            [
+                Interval(1, 2, "foo(bang@wizz)"),
+            ],
+            sut._entries,
         )
 
     def test_validate_raises_error_if_an_intervals_start_happens_after_it_stops(self):
         sut = makeIntervalTier()
 
         self.assertTrue(sut.validate())
-        sut.entryList = [Interval(2.5, 1, "It's")]
+        sut._entries = [Interval(2.5, 1, "It's")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
         with self.assertRaises(errors.TextgridStateError) as _:
@@ -1113,7 +1361,7 @@ class TestIntervalTier(PraatioTestCase):
         sut = makeIntervalTier()
 
         self.assertTrue(sut.validate())
-        sut.entryList = [Interval(3.5, 4.0, "world"), Interval(1, 2.5, "hello")]
+        sut._entries = [Interval(3.5, 4.0, "world"), Interval(1, 2.5, "hello")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
 
         with self.assertRaises(errors.TextgridStateError) as _:
@@ -1128,7 +1376,7 @@ class TestIntervalTier(PraatioTestCase):
         )
 
         self.assertTrue(sut.validate())
-        sut.entryList = [Interval(0.5, 4.0, "world")]
+        sut._entries = [Interval(0.5, 4.0, "world")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
         with self.assertRaises(errors.OutOfBounds) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)
@@ -1142,7 +1390,7 @@ class TestIntervalTier(PraatioTestCase):
         )
 
         self.assertTrue(sut.validate())
-        sut.entryList = [Interval(0.5, 6.0, "world")]
+        sut._entries = [Interval(0.5, 6.0, "world")]
         self.assertFalse(sut.validate(constants.ErrorReportingMode.SILENCE))
         with self.assertRaises(errors.OutOfBounds) as _:
             sut.validate(constants.ErrorReportingMode.ERROR)

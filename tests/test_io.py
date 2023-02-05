@@ -56,10 +56,10 @@ def run_save(
         minimumIntervalLength=minimumIntervalLength,
     )
 
-    entryList = tgAsDict["tiers"][0]["entries"]
-    entryList = [[start, end, label] for start, end, label in entryList]
+    entries = tgAsDict["tiers"][0]["entries"]
+    entries = [[start, end, label] for start, end, label in entries]
 
-    return entryList
+    return entries
 
 
 class TestIo(PraatioTestCase):
@@ -167,7 +167,7 @@ class TestIo(PraatioTestCase):
             inputFN, False, duplicateNamesMode=constants.DuplicateNames.RENAME
         )
 
-        self.assertEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNameList)
+        self.assertSequenceEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNames)
 
     def test_tg_io_long_vs_short(self):
         """Tests reading of long vs short textgrids"""
@@ -203,18 +203,20 @@ class TestIo(PraatioTestCase):
 
         self.assertTrue(areTheSameFiles(longFN, outputFN, readFile))
 
-    def test_saving_and_loading_json(self):
-        """Tests that json files are saved non-destructively"""
+    def test_saving_and_loading_textgrid_json(self):
+        """Tests that textgrid-like json files are saved non-destructively"""
         fn = "mary.TextGrid"
         shortFN = join(self.dataRoot, fn)
-        outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
+        outputFN = join(self.outputRoot, "saved_textgrid_as_textgrid_json.json")
         outputLastFN = join(
             self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid"
         )
 
         tgFromTgFile = textgrid.openTextgrid(shortFN, False)
         tgFromTgFile.save(
-            outputFN, format=constants.TextgridFormats.JSON, includeBlankSpaces=True
+            outputFN,
+            format=constants.TextgridFormats.TEXTGRID_JSON,
+            includeBlankSpaces=True,
         )
 
         tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
@@ -226,9 +228,63 @@ class TestIo(PraatioTestCase):
 
         self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
 
+    def test_saving_and_loading_json(self):
+        """Tests that json files are saved correctly"""
+        fn = "mary.TextGrid"
+        shortFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
+        outputLastFN = join(
+            self.outputRoot, "saved_textgrid_as_json_then_textgrid.TextGrid"
+        )
+
+        tgFromTgFile = textgrid.openTextgrid(shortFN, False)
+        tgFromTgFile.save(
+            outputFN,
+            format=constants.TextgridFormats.JSON,
+            includeBlankSpaces=True,
+        )
+
+        tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
+        tgFromJsonFile.save(
+            outputLastFN,
+            format=constants.TextgridFormats.SHORT_TEXTGRID,
+            includeBlankSpaces=True,
+        )
+
+        self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
+
+    def test_saving_and_loading_json_leads_to_data_lose_in_one_edgecase(self):
+        # Each tier can have a unique min and max timestamp
+        # These timestamps can be different from the min and max specified for the file
+        # The default json file maintains only a single min and max, so if the user has
+        # different min and max timestamps in the tiers, that information will be lost
+        fn = "mary_with_constrained_tier_times.TextGrid"
+        shortFN = join(self.dataRoot, fn)
+        outputFN = join(self.outputRoot, "mary_with_constrained_tier_times.json")
+
+        tgFromTgFile = textgrid.openTextgrid(shortFN, False)
+        tgFromTgFile.save(
+            outputFN,
+            format=constants.TextgridFormats.JSON,
+            includeBlankSpaces=True,
+            reportingMode="silence",
+        )
+
+        tgFromJsonFile = textgrid.openTextgrid(outputFN, False)
+
+        # The timestamps in the source tg's tiers /don't/ match the source tg
+        for tier in tgFromTgFile.tiers:
+            self.assertNotEqual(tgFromTgFile.minTimestamp, tier.minTimestamp)
+            self.assertNotEqual(tgFromTgFile.maxTimestamp, tier.maxTimestamp)
+
+        # The timestamps in the json tg's tiers /do/ match the tg
+        for tier in tgFromJsonFile.tiers:
+            self.assertEqual(tgFromJsonFile.minTimestamp, tier.minTimestamp)
+            self.assertEqual(tgFromJsonFile.minTimestamp, tier.minTimestamp)
+
     def test_save(self):
-        userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
-        expectedEntryList = [
+        userEntries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntries = [
             [0.0, 0.4, ""],
             [0.4, 0.6, "A"],
             [0.6, 0.8, ""],
@@ -238,16 +294,16 @@ class TestIo(PraatioTestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = textgrid.IntervalTier("test", userEntryList, 0, 2.0)
+        tier = textgrid.IntervalTier("test", userEntries, 0, 2.0)
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg)
+        actualEntries = run_save(tg)
 
-        self.assertEqual(expectedEntryList, actualEntryList)
+        self.assertEqual(expectedEntries, actualEntries)
 
     def test_save_with_minimum_time_stamp(self):
-        userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
-        expectedEntryList = [
+        userEntries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntries = [
             [0.3, 0.4, ""],
             [0.4, 0.6, "A"],
             [0.6, 0.8, ""],
@@ -257,16 +313,16 @@ class TestIo(PraatioTestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tier = textgrid.IntervalTier("test", userEntries, 0.3, 2.0)
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg)
+        actualEntries = run_save(tg)
 
-        self.assertEqual(expectedEntryList, actualEntryList)
+        self.assertEqual(expectedEntries, actualEntries)
 
     def test_save_with_force_zero_as_minimum_time(self):
-        userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
-        expectedEntryList = [
+        userEntries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntries = [
             [0, 0.4, ""],
             [0.4, 0.6, "A"],
             [0.6, 0.8, ""],
@@ -276,16 +332,16 @@ class TestIo(PraatioTestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tier = textgrid.IntervalTier("test", userEntries, 0.3, 2.0)
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg, minTimestamp=0)
+        actualEntries = run_save(tg, minTimestamp=0)
 
-        self.assertEqual(expectedEntryList, actualEntryList)
+        self.assertEqual(expectedEntries, actualEntries)
 
     def test_save_with_force_larger_value_as_maximum_time(self):
-        userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
-        expectedEntryList = [
+        userEntries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntries = [
             [0.3, 0.4, ""],
             [0.4, 0.6, "A"],
             [0.6, 0.8, ""],
@@ -295,19 +351,19 @@ class TestIo(PraatioTestCase):
             [1.3, 3.0, ""],
         ]
 
-        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tier = textgrid.IntervalTier("test", userEntries, 0.3, 2.0)
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg, maxTimestamp=3.0)
+        actualEntries = run_save(tg, maxTimestamp=3.0)
 
-        self.assertEqual(expectedEntryList, actualEntryList)
+        self.assertEqual(expectedEntries, actualEntries)
 
     def test_save_with_force_too_small_minimum_time(self):
         # If you choose to force save to use a minTimestamp, all
         # of your entries must be higher than that minTimestamp
-        userEntryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        userEntries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
 
-        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tier = textgrid.IntervalTier("test", userEntries, 0.3, 2.0)
         tg = textgrid.Textgrid()
         tg.addTier(tier)
 
@@ -318,8 +374,8 @@ class TestIo(PraatioTestCase):
         # The first entry will be stretched to fill the unlabeled region in
         # front of it: [0.30, 0.35, ''] (The unlabeled region starts at 0.3
         # instead of 0 because the minTimestamp for this tg is 0.3)
-        userEntryList = [[0.35, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
-        expectedEntryList = [
+        userEntries = [[0.35, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntries = [
             [0.3, 0.6, "A"],
             [0.6, 0.8, ""],
             [0.8, 1.0, "E"],
@@ -328,26 +384,26 @@ class TestIo(PraatioTestCase):
             [1.3, 2.0, ""],
         ]
 
-        tier = textgrid.IntervalTier("test", userEntryList, 0.3, 2.0)
+        tier = textgrid.IntervalTier("test", userEntries, 0.3, 2.0)
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg, minimumIntervalLength=0.06)
+        actualEntries = run_save(tg, minimumIntervalLength=0.06)
 
-        self.assertEqual(expectedEntryList, actualEntryList)
+        self.assertEqual(expectedEntries, actualEntries)
 
     def test_save_with_ignore_blank_sections(self):
         """
         Tests that blank sections can be ignored on saving a textgrid
         """
-        entryList = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
-        expectedEntryList = entryList  # Blank intervals should not be inserted
-        tier = textgrid.IntervalTier("test", entryList)
+        entries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
+        expectedEntries = entries  # Blank intervals should not be inserted
+        tier = textgrid.IntervalTier("test", entries)
 
         tg = textgrid.Textgrid()
         tg.addTier(tier)
-        actualEntryList = run_save(tg, includeBlankSpaces=False)
+        actualEntries = run_save(tg, includeBlankSpaces=False)
 
-        self.assertEqual(expectedEntryList, actualEntryList)
+        self.assertEqual(expectedEntries, actualEntries)
 
 
 if __name__ == "__main__":

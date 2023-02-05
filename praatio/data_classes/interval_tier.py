@@ -1,7 +1,7 @@
 """
 An IntervalTier is a tier containing an array of intervals -- data that spans a period of time
 """
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Sequence
 
 from typing_extensions import Literal
 
@@ -19,6 +19,40 @@ from praatio.utilities import constants
 from praatio.data_classes import textgrid_tier
 
 
+def _homogenizeEntries(entries):
+    """
+    Enforces consistency in intervals
+
+    - converts all entries to intervals
+    - removes whitespace in labels
+    - sorts values by time
+    """
+    processedEntries = [
+        Interval(float(start), float(end), label.strip())
+        for start, end, label in entries
+    ]
+    processedEntries.sort()
+    return processedEntries
+
+
+def _calculateMinAndMaxTime(entries: Sequence[Interval], minT=None, maxT=None):
+    minTimeList = [interval.start for interval in entries]
+    maxTimeList = [interval.end for interval in entries]
+
+    if minT is not None:
+        minTimeList.append(float(minT))
+    if maxT is not None:
+        maxTimeList.append(float(maxT))
+
+    try:
+        resolvedMinT = min(minTimeList)
+        resolvedMaxT = max(maxTimeList)
+    except ValueError:
+        raise errors.TimelessTextgridTierException()
+
+    return (resolvedMinT, resolvedMaxT)
+
+
 class IntervalTier(textgrid_tier.TextgridTier):
 
     tierType = INTERVAL_TIER
@@ -27,13 +61,13 @@ class IntervalTier(textgrid_tier.TextgridTier):
     def __init__(
         self,
         name: str,
-        entryList: List[Interval],
+        entries: List[Interval],
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
         """An interval tier is for annotating events that have duration
 
-        The entryList is of the form:
+        The entries is of the form:
         [(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]
 
         The data stored in the labels can be anything but will
@@ -41,45 +75,29 @@ class IntervalTier(textgrid_tier.TextgridTier):
         text e.g. ('erase this region') or numerical data e.g. (average pitch
         values like '132'))
         """
-        entryList = [
-            Interval(float(start), float(end), label) for start, end, label in entryList
-        ]
+        entries = _homogenizeEntries(entries)
+        calculatedMinT, calculatedMaxT = _calculateMinAndMaxTime(entries, minT, maxT)
 
-        if minT is not None:
-            minT = float(minT)
-        if maxT is not None:
-            maxT = float(maxT)
+        super(IntervalTier, self).__init__(
+            name, entries, calculatedMinT, calculatedMaxT
+        )
+        self._validate()
 
-        # Prevent poorly-formed textgrids from being created
-        for entry in entryList:
-            if entry[0] >= entry[1]:
+    def _validate(self):
+        """An interval tier is invalid if the entries are out of order or overlap with each other"""
+        for entry in self.entries:
+            if entry.start >= entry.end:
                 raise errors.TextgridStateError(
-                    f"The start time of an interval ({entry[0]}) "
-                    f"cannot occur after its end time ({entry[1]})"
+                    f"The start time of an interval ({entry.start}) "
+                    f"cannot occur after its end time ({entry.end})"
                 )
 
-        # Remove whitespace
-        tmpEntryList = []
-        for start, end, label in entryList:
-            tmpEntryList.append(Interval(start, end, label.strip()))
-        entryList = tmpEntryList
-
-        # Determine the minimum and maximum timestamps
-        minTimeList = [subList[0] for subList in entryList]
-        maxTimeList = [subList[1] for subList in entryList]
-
-        if minT is not None:
-            minTimeList.append(minT)
-        if maxT is not None:
-            maxTimeList.append(maxT)
-
-        try:
-            resolvedMinT = min(minTimeList)
-            resolvedMaxT = max(maxTimeList)
-        except ValueError:
-            raise errors.TimelessTextgridTierException()
-
-        super(IntervalTier, self).__init__(name, entryList, resolvedMinT, resolvedMaxT)
+        for entry, nextEntry in zip(self.entries[0::], self.entries[1::]):
+            if entry.end > nextEntry.start:
+                raise errors.TextgridStateError(
+                    "Two intervals in the same tier overlap in time:\n"
+                    f"({entry.start}, {entry.end}, {entry.label}) and ({entry.start}, {entry.end}, {entry.label})"
+                )
 
     def crop(
         self,
@@ -114,7 +132,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
             )
 
         newEntryList = utils.getIntervalsInInterval(
-            cropStart, cropEnd, self.entryList, mode
+            cropStart, cropEnd, self.entries, mode
         )
 
         if rebaseToZero is True:
@@ -138,8 +156,8 @@ class IntervalTier(textgrid_tier.TextgridTier):
         return croppedTier
 
     def deleteEntry(self, entry: Interval) -> None:
-        """Removes an entry from the entryList"""
-        self.entryList.pop(self.entryList.index(entry))
+        """Removes an entry from the entries"""
+        self._entries.pop(self._entries.index(entry))
 
     def difference(self, tier: "IntervalTier") -> "IntervalTier":
         """Takes the set difference of this tier and the given one
@@ -155,7 +173,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         """
         retTier = self.new()
 
-        for entry in tier.entryList:
+        for entry in tier.entries:
             retTier = retTier.eraseRegion(
                 entry.start,
                 entry.end,
@@ -186,7 +204,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         errorReporter = utils.getErrorReporter(reportingMode)
 
         newEntryList = []
-        for interval in self.entryList:
+        for interval in self.entries:
 
             newStart = offset + interval.start
             newEnd = offset + interval.end
@@ -243,7 +261,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         """
         utils.validateOption("collisionMode", collisionMode, constants.EraseCollision)
 
-        matchList = self.crop(start, end, CropCollision.LAX, False).entryList
+        matchList = self.crop(start, end, CropCollision.LAX, False).entries
         newTier = self.new()
 
         if len(matchList) == 0:
@@ -255,7 +273,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     "If this was expected, consider setting the collisionMode"
                 )
 
-            # Remove all the matches from the entryList
+            # Remove all the matches from the entries
             # Go in reverse order because we're destructively altering
             # the order of the list (messes up index order)
             for interval in matchList[::-1]:
@@ -280,7 +298,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
             diff = end - start
             newEntryList = []
-            for interval in newTier.entryList:
+            for interval in newTier.entries:
                 if interval.end <= start:
                     newEntryList.append(interval)
                 elif interval.start >= end:
@@ -312,7 +330,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     break
 
             newMax = newTier.maxTimestamp - diff
-            newTier = newTier.new(entryList=newEntryList, maxTimestamp=newMax)
+            newTier = newTier.new(entries=newEntryList, maxTimestamp=newMax)
 
         return newTier
 
@@ -327,7 +345,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         returnList = []
 
-        for interval in self.entryList:
+        for interval in self.entries:
             intervalDataList = utils.getValuesInInterval(
                 dataTupleList, interval.start, interval.end
             )
@@ -340,10 +358,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         This can include unlabeled segments and regions marked as silent.
         """
-        entryList = self.entryList
+        entries = self.entries
         invertedEntryList = [
-            Interval(entryList[i].end, entryList[i + 1].start, "")
-            for i in range(len(entryList) - 1)
+            Interval(entries[i].end, entries[i + 1].start, "")
+            for i in range(len(entries) - 1)
         ]
 
         # Remove entries that have no duration (ie lie between two entries
@@ -352,11 +370,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
             interval for interval in invertedEntryList if interval.start < interval.end
         ]
 
-        if entryList[0].start > 0:
-            invertedEntryList.insert(0, Interval(0, entryList[0].start, ""))
+        if entries[0].start > 0:
+            invertedEntryList.insert(0, Interval(0, entries[0].start, ""))
 
-        if entryList[-1].end < self.maxTimestamp:
-            invertedEntryList.append(Interval(entryList[-1].end, self.maxTimestamp, ""))
+        if entries[-1].end < self.maxTimestamp:
+            invertedEntryList.append(Interval(entries[-1].end, self.maxTimestamp, ""))
 
         invertedEntryList = [
             interval if isinstance(interval, Interval) else Interval(*interval)
@@ -403,15 +421,15 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         matchList = self.crop(
             interval.start, interval.end, CropCollision.LAX, False
-        ).entryList
+        )._entries
 
         if len(matchList) == 0:
-            self.entryList.append(interval)
+            self._entries.append(interval)
 
         elif collisionMode == constants.IntervalCollision.REPLACE:
             for matchEntry in matchList:
                 self.deleteEntry(matchEntry)
-            self.entryList.append(interval)
+            self._entries.append(interval)
 
         elif collisionMode == constants.IntervalCollision.MERGE:
             for matchEntry in matchList:
@@ -424,7 +442,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 max([tmpInterval.end for tmpInterval in matchList]),
                 "-".join([tmpInterval.label for tmpInterval in matchList]),
             )
-            self.entryList.append(newInterval)
+            self._entries.append(newInterval)
 
         else:
             raise errors.CollisionError(
@@ -437,11 +455,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         self.sort()
 
-        if self.entryList[0][0] < self.minTimestamp:
-            self.minTimestamp = self.entryList[0][0]
+        if self._entries[0][0] < self.minTimestamp:
+            self.minTimestamp = self._entries[0][0]
 
-        if self.entryList[-1][1] > self.maxTimestamp:
-            self.maxTimestamp = self.entryList[-1][1]
+        if self._entries[-1][1] > self.maxTimestamp:
+            self.maxTimestamp = self._entries[-1][1]
 
         if len(matchList) != 0:
             collisionReporter(
@@ -477,7 +495,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         )
 
         newEntryList = []
-        for interval in self.entryList:
+        for interval in self.entries:
             # Entry exists before the insertion point
             if interval.end <= start:
                 newEntryList.append(interval)
@@ -518,26 +536,35 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     )
 
         newTier = self.new(
-            entryList=newEntryList, maxTimestamp=self.maxTimestamp + duration
+            entries=newEntryList, maxTimestamp=self.maxTimestamp + duration
         )
 
         return newTier
 
-    def intersection(self, tier: "IntervalTier") -> "IntervalTier":
+    def intersection(self, tier: "IntervalTier", demarcator="-") -> "IntervalTier":
         """Takes the set intersection of this tier and the given one
 
-        Only intervals that exist in both tiers will remain in the
-        returned tier.  If intervals partially overlap, only the overlapping
-        portion will be returned.
+        - The output will contain one interval for each overlapping pair
+          e.g. [(1, 2, 'foo')] and [(1, 1.3, 'bang'), (1.7, 2, 'wizz')]
+                -> [(1, 1.3, 'foo-bang'), (1.7, 2, 'foo-wizz')]
+        - Only intervals that exist in both tiers will remain in the returned tier.
+          e.g. [(1, 2, 'foo'), (3, 4, 'bar')] and [(1, 2, 'bang'), (2, 3, 'wizz')]
+                -> [(1, 2, 'foo-bang')]
+        - If intervals partially overlap, only the overlapping portion will be returned.
+          e.g. [(1, 2, 'foo')] and [(0.5, 1.5, 'bang')]
+                -> [(1, 1.5, 'foo-bang')]
+
+        Compare with IntervalTier.mergeLabels
 
         Args:
             tier: the tier to intersect with
+            demarcator: the character to separate the labels of the overlapping intervals
 
         Returns:
             IntervalTier: the modified version of the current tier
         """
         retEntryList = []
-        for interval in tier.entryList:
+        for interval in tier.entries:
             subTier = self.crop(
                 interval.start, interval.end, CropCollision.TRUNCATED, False
             )
@@ -547,12 +574,61 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 (
                     subInterval.start,
                     subInterval.end,
-                    f"{subInterval.label}-{interval.label}",
+                    f"{subInterval.label}{demarcator}{interval.label}",
                 )
-                for subInterval in subTier.entryList
+                for subInterval in subTier.entries
             ]
 
             retEntryList.extend(subEntryList)
+
+        newName = f"{self.name}-{tier.name}"
+
+        retTier = self.new(newName, retEntryList)
+
+        return retTier
+
+    def mergeLabels(
+        self, tier: "IntervalTier", demarcator: str = ","
+    ) -> "IntervalTier":
+        """Merges labels of overlapping tiers into this tier
+
+        - All intervals in this tier will appear in the output; for the given tier, only intervals
+          that overlap with content in this tier will appear in the output
+          e.g. [(1, 2, 'foo'), (3, 4, 'bar')] and [(1, 2, 'bang'), (2, 3, 'wizz')]
+                -> [(1, 2, 'foo(bang)'), (3, 4, 'bar()')]
+        - If multiple entries exist in a subinterval, their labels will be concatenated
+          e.g. [(1, 2, 'hi')] and [(1, 1.5, 'h'), (1.5, 2, 'ai')] -> [(1, 2, 'hi(h,ai)')]
+
+        compare with IntervalTier.intersection
+
+        Args:
+            tier: the tier to intersect with
+            demarcator: the string to separate items that fall in the same subinterval
+
+        Returns:
+            IntervalTier: the modified version of the current tier
+        """
+        retEntryList = []
+        for interval in self.entries:
+            subTier = tier.crop(
+                interval.start, interval.end, CropCollision.TRUNCATED, False
+            )
+            if len(subTier._entries) == 0:
+                continue
+
+            subLabel = demarcator.join([entry.label for entry in subTier.entries])
+            label = f"{interval.label}({subLabel})"
+
+            start = min(interval.start, subTier._entries[0].start)
+            end = max(interval.end, subTier._entries[-1].end)
+
+            intersectedInterval = (
+                start,
+                end,
+                label,
+            )
+
+            retEntryList.append(intersectedInterval)
 
         newName = f"{self.name}-{tier.name}"
 
@@ -581,7 +657,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
         """
         cumulativeAdjustAmount = 0
         newEntryList = []
-        allIntervals = [self.entryList, targetTier.entryList]
+        allIntervals = [self.entries, targetTier.entries]
         for sourceInterval, targetInterval in utils.safeZip(allIntervals, True):
 
             # sourceInterval.start - lastFromEnd -> was this interval and the
@@ -599,7 +675,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
             newEntryList.append(Interval(newStart, newEnd, sourceInterval.label))
 
         newMin = self.minTimestamp
-        cumulativeDifference = newEntryList[-1].end - self.entryList[-1].end
+        cumulativeDifference = newEntryList[-1].end - self.entries[-1].end
         newMax = self.maxTimestamp + cumulativeDifference
 
         return IntervalTier(self.name, newEntryList, newMin, newMax)
@@ -622,7 +698,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         isValid = True
         previousInterval = None
-        for interval in self.entryList:
+        for interval in self.entries:
             if interval.start >= interval.end:
                 isValid = False
                 errorReporter(

@@ -7,6 +7,7 @@ to align boundaries at the same time.
 import os
 from os.path import join
 
+from praatio import textgrid
 from praatio import praatio_scripts
 
 path = join(".", "files")
@@ -19,5 +20,6 @@ maxDifference = 0.01
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-tg = praatio_scripts.alignBoundariesAcrossTiers(inputFN, maxDifference)
+originalTg = textgrid.openTextgrid(inputFN, False)
+tg = praatio_scripts.alignBoundariesAcrossTiers(originalTg, "word", maxDifference)
 tg.save(outputFN, "short_textgrid", True)

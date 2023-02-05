@@ -19,8 +19,8 @@ tg = textgrid.openTextgrid(join(path, "bobby_phones.TextGrid"), False)
 pp = data_points.open1DPointObject(join(path, "bobby.PointProcess"))
 
 newPoints = []
-tier = tg.tierDict["phone"]
-for interval in tier.entryList:
+tier = tg.getTier("phone")
+for interval in tier.entries:
     if interval.label.lower()[0] not in ["a", "e", "i", "o", "u"]:
         continue
     for val in pp.getPointsInInterval(interval.start, interval.end):

@@ -1,11 +1,15 @@
+#!/usr/bin/env python
+# encoding: utf-8
 """
-Praatio example of extracting a separate wav file for each labeled entry in a textgrid tier
+Created on Oct 21, 2021
+
+@author: tmahrt
 """
 
 import os
 from os.path import join
 
-from praatio import praatio_scripts
+from praatio import audio
 
 path = join(".", "files")
 outputPath = join(path, "sub_wavs")
@@ -13,9 +17,6 @@ outputPath = join(path, "sub_wavs")
 if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
-for wavFN, tgFN in [  # ("bobby.wav", "bobby_words.TextGrid"),
-    ("mary.wav", "mary.TextGrid")
-]:
-    praatio_scripts.splitAudioOnTier(
-        join(path, wavFN), join(path, tgFN), "phone", outputPath, True
-    )
+inputFN = join(path, "mary.wav")
+outputFN = join(outputPath, "mary_segment.wav")
+audio.extractSubwav(inputFN, outputFN, 0.33, 0.89)

@@ -33,35 +33,35 @@ def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0)
 
     duration = tg.maxTimestamp
     numEntries = int(math.ceil(duration * proportion))
-    entryList = tg.tierDict[tierName].entryList
+    entries = tg.getTier(tierName).entries
 
     # Get all silent intervals
-    entryList = [
+    entries = [
         (end - start, start, end, label)
-        for start, end, label in entryList
+        for start, end, label in entries
         if label == "silent"
     ]
 
     # Remove silent intervals at the start or end of the file
-    entryList = [entry for entry in entryList if entry[1] != 0 and entry[2] != duration]
+    entries = [entry for entry in entries if entry[1] != 0 and entry[2] != duration]
 
     # Put longest intervals first
-    entryList.sort(reverse=True)
+    entries.sort(reverse=True)
 
     # Get the mid point of the longest n intervals and convert them
     # into intervals to be transcribed
-    entryList = entryList[:numEntries]
-    pointList = [start + ((end - start) / 2.0) for _, start, end, _ in entryList]
+    entries = entries[:numEntries]
+    pointList = [start + ((end - start) / 2.0) for _, start, end, _ in entries]
     pointList.sort()
 
     pointList = [0.0] + pointList + [duration]
 
-    newEntryList = []
+    newEntries = []
     for i in range(len(pointList) - 1):
-        newEntryList.append((pointList[i], pointList[i + 1], "%d" % i))
+        newEntries.append((pointList[i], pointList[i + 1], "%d" % i))
 
     outputTG = textgrid.Textgrid()
-    tier = textgrid.IntervalTier("toTranscribe", newEntryList, 0, duration)
+    tier = textgrid.IntervalTier("toTranscribe", newEntries, 0, duration)
     outputTG.addTier(tier)
 
     outputTG.save(outputTGFN, "short_textgrid", True)

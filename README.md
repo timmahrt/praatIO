@@ -20,15 +20,16 @@ of speech.  [Praat can be downloaded here](<http://www.fon.hum.uva.nl/praat/>)
 # Table of contents
 1. [Documentation](#documentation)
 2. [Tutorials](#tutorials)
-3. [Version History](#version-history)
+3. [Version history](#version-history)
 4. [Requirements](#requirements)
 5. [Installation](#installation)
-6. [Version 4 to 5 Migration](#version-4-to-5-migration)
+6. [Upgrading major versions](#upgrading)
 7. [Usage](#usage)
-8. [Common Use Cases](#common-use-cases)
-9. [Tests](#tests)
-10. [Citing praatIO](#citing-praatio)
-11. [Acknowledgements](#acknowledgements)
+8. [Common use cases](#common-use-cases)
+9. [Output types](#output-types)
+10. [Tests](#tests)
+11. [Citing praatIO](#citing-praatio)
+12. [Acknowledgements](#acknowledgements)
 
 ## Documentation
 
@@ -79,46 +80,9 @@ If python is not in your path, you'll need to enter the full path e.g.
 
     C:\Python37\python.exe setup.py install
 
-## Version 4 to 5 Migration
+## Upgrading
 
-Many things changed between versions 4 and 5.  If you see an error like
-`WARNING: You've tried to import 'tgio' which was renamed 'textgrid' in praatio 5.x.`
-it means that you have installed version 5 but your code was written for praatio 4.x or earlier.
-
-The immediate solution is to uninstall praatio 5 and install praatio 4. From the command line:
-```
-pip uninstall praatio
-pip install "praatio<5"
-```
-
-If praatio is being installed as a project dependency--ie it is set as a dependency in setup.py like
-```
-    install_requires=["praatio"],
-```
-then changing it to the following should fix the problem
-```
-    install_requires=["praatio ~= 4.1"],
-```
-
-Many files, classes, and functions were renamed in praatio 5 to hopefully be clearer.  There
-were too many changes to list here but the `tgio` module was renamed `textgrid`.
-
-Also, the interface for `openTextgrid()` and `tg.save()` has changed. Here are examples of the required arguments in the new interface
-```
-textgrid.openTextgrid(
-  fn=name,
-  includeEmptyIntervals=False
-)
-```
-```
-tg.save(
-  fn=name,
-  format= "short_textgrid",
-  includeBlankSpaces= False
-)
-```
-
-Please consult the documentation to help in upgrading to version 5.
+Please view [UPGRADING.md](https://github.com/timmahrt/praatIO/blob/main/UPGRADING.md) for detailed information about how to upgrade from earlier versions.
 
 ## Usage
 
@@ -146,8 +110,8 @@ What can you do with this library?
 - query a textgrid to get information about the tiers or intervals contained within
     ```python
     tg = textgrid.openTextgrid("path_to_textgrid", False)
-    entryList = tg.tierDict["speaker_1_tier"].entryList # Get all intervals
-    entryList = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
+    entries = tg.tierDict["speaker_1_tier"].entries # Get all intervals
+    entries = tg.tierDict["phone_tier"].find("a") # Get the indicies of all occurrences of 'a'
     ```
 
 - create or augment textgrids using data from other sources
@@ -179,6 +143,66 @@ What can you do with this library?
     - `tgBoundariesToZeroCrossings()`: adjust all boundaries and points to fall at the nearest zero crossing in the corresponding audio file
     - `alignBoundariesAcrossTiers()`: for handmade textgrids, sometimes entries may look as if they are aligned at the same time but actually are off by a small amount, this will correct them
 
+
+## Output types
+
+PraatIO supports 4 textgrid output file types: short textgrid, long textgrid, json, and textgrid-like json.
+
+Short textgrids and long textgrids are both formats that are natively supported by praat.
+Short textgrids are meant to be more concise while long textgrids are meant to be more human-readable.
+For more information on these file formats, please see [praat's official documentation](https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html)
+
+JSON and textgrid-like JSON are more developer-friendly formats, but they are not supported by praat.
+The default JSON format is more minimal while the textgrid-like JSON is formatted with information similar to a textgrid file.
+
+The default JSON format does not support one use-case: a textgrid has a specified minimum and maximum timestamp.
+The textgrid's tiers also have a specified minimum and maximum timestamp.
+Under most circumstances, they are the same, but the user can specify them to be different and praat will respect this.
+If you have such textgrids, you should use the textgrid-like JSON.
+
+Here is the schema for the JSON output file:
+```
+{
+    "start": 0.0,
+    "end": 1.8,
+    "tiers": {
+        "phone": {
+            "type": "IntervalTier",
+            "entries": [[0.0, 0.3, ""], [0.3, 0.38, "m"]]
+        },
+        "pitch": {
+            "type": "TextTier",
+            "entries": [[0.32, "120"], [0.37, "85"]]
+        }
+    }
+}
+```
+
+Here is the schema for the Textgrid-like JSON output file.
+Notably, `tiers` is a list of hashes, rather than a hash of hashes.
+Also, each tier specifies it's name, and a min and max time.
+```
+{
+    "xmin": 0.0,
+    "xmax": 1.8,
+    "tiers": [
+        {
+            "class": "IntervalTier",
+            "name": "phone",
+            "xmin": 0.0,
+            "xmax": 1.8,
+            "entries": [[0.0, 0.3, ""], [0.3, 0.38, "m"]]
+        },
+        {
+            "class": "TextTier",
+            "name": "pitch",
+            "xmin": 0.0,
+            "xmax": 1.8,
+            "entries": [[0.32, "120"], [0.37, "85"]]
+        }
+    ]
+}
+```
 
 ## Tests
 

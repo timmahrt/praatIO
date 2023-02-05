@@ -10,7 +10,7 @@ item []:
         class = "IntervalTier" 
         name = "phone" 
         xmin = 0.0
-        xmax = 1.18979591837 
+        xmax = 1.194625
         intervals: size = 15 
         intervals [1]:
             xmin = 0.0124716553288 
@@ -70,5 +70,5 @@ item []:
             text = "ER0" 
         intervals [15]:
             xmin = 1.1171482864527198 
-            xmax = 1.18979591837 
+            xmax = 1.194625
             text = "" 

@@ -9,7 +9,7 @@ from praatio import textgrid
 from praatio import audio
 from praatio import praatio_scripts
 
-root = r"C:\Users\Tim\Dropbox\workspace\praatIO\examples\files"
+root = os.path.abspath(join(".", "files"))
 audioFN = join(root, "mary.wav")
 tgFN = join(root, "mary.TextGrid")
 
@@ -24,14 +24,14 @@ if not os.path.exists(outputPath):
 
 # Find the region to replace and the region that we'll replace it with
 tg = textgrid.openTextgrid(tgFN, False)
-tier = tg.tierDict[tierName]
-mEntry = tier.entryList[tier.find("m")[0]]
-bEntry = tier.entryList[tier.find("b")[0]]
+tier = tg.getTier(tierName)
+mEntry = tier.entries[tier.find("m")[0]]
+bEntry = tier.entries[tier.find("b")[0]]
 
 
-sourceAudioObj = audio.openAudioFile(audioFN)
-mAudioObj = sourceAudioObj.getSubsegment(mEntry[0], mEntry[1])
-bAudioObj = sourceAudioObj.getSubsegment(bEntry[0], bEntry[1])
+sourceAudioObj = audio.Wav.open(audioFN)
+mAudioObj = sourceAudioObj.getSubwav(mEntry[0], mEntry[1])
+bAudioObj = sourceAudioObj.getSubwav(bEntry[0], bEntry[1])
 
 # Replace 'm' with 'b'
 audioObj, tg = praatio_scripts.audioSplice(
@@ -40,7 +40,7 @@ audioObj, tg = praatio_scripts.audioSplice(
 
 # Replace 'b' with 'm'
 # The times are now different, so we have to get them again
-bEntry = tg.tierDict[tierName].entryList[tier.find("b")[0]]
+bEntry = tg.getTier(tierName).entries[tier.find("b")[0]]
 audioObj, tg = praatio_scripts.audioSplice(
     audioObj, mAudioObj, tg, tierName, "m", bEntry[0], bEntry[1]
 )

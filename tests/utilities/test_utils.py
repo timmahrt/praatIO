@@ -77,6 +77,26 @@ class TestUtils(unittest.TestCase):
         expectedZippedResult = [(1, 4), (2, 5), (3, 6), (None, 7)]
         self.assertEqual(expectedZippedResult, list(utils.safeZip(listToZip, False)))
 
+    def test_choose_closest_time(self):
+        # Prefers not-None candidate
+        self.assertEqual(5, utils.chooseClosestTime(6, 5, None))
+        self.assertEqual(5, utils.chooseClosestTime(6, None, 5))
+
+        # Ok with duplicate candidates
+        self.assertEqual(5, utils.chooseClosestTime(6, 5, 5))
+
+        # Prefers the first candidate if the two are equidistant
+        self.assertEqual(5, utils.chooseClosestTime(6, 5, 7))
+        self.assertEqual(7, utils.chooseClosestTime(6, 7, 5))
+
+        # Chooses the closest candidate, order doesn't matter
+        self.assertEqual(5, utils.chooseClosestTime(6, 5, 8))
+        self.assertEqual(5, utils.chooseClosestTime(6, 8, 5))
+
+        # Must submit at least one candidate
+        with self.assertRaises(errors.ArgumentError) as _:
+            utils.chooseClosestTime(6, None, None)
+
 
 if __name__ == "__main__":
     unittest.main()

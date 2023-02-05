@@ -156,8 +156,8 @@ def _openNormalKlattgrid(data: str) -> Klattgrid:
         else:
 
             # Process entries if this tier has any
-            entryList = _buildEntryList(sectionTuple)
-            tier = KlattPointTier(name, entryList, minT, maxT)
+            entries = _buildEntries(sectionTuple)
+            tier = KlattPointTier(name, entries, minT, maxT)
             kg.addTier(tier)
 
     return kg
@@ -224,8 +224,8 @@ def _proccessContainerTierInput(sectionData: str, name: str):
             subName, subMin, subMax, _, subTuple = tmpTuple
             subName = subName[:-1]
 
-            entryList = _buildEntryList(subTuple)
-            tier = KlattSubPointTier(subName, entryList, subMin, subMax)
+            entries = _buildEntries(subTuple)
+            tier = KlattSubPointTier(subName, entries, subMin, subMax)
             tierList.append(tier)
         kit = KlattIntermediateTier(subName.split()[0])
         for tier in tierList:
@@ -258,14 +258,14 @@ def _getSectionHeader(data, indexList, i):
     return name, minT, maxT, sectionData, tail
 
 
-def _buildEntryList(sectionTuple):
-    entryList = []
+def _buildEntries(sectionTuple):
+    entries = []
     if len(sectionTuple) > 1:  # Has points
         npoints = float(sectionTuple[0].split("=")[1].strip())
         if npoints > 0:
-            entryList = _processSectionData(sectionTuple[1])
+            entries = _processSectionData(sectionTuple[1])
 
-    return entryList
+    return entries
 
 
 def _processSectionData(sectionData: str) -> List[Tuple[float, float]]:

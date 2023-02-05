@@ -30,11 +30,15 @@ for wavFN, tgFN in (
     # done here.
     deleteList = []
     tg = textgrid.openTextgrid(join(path, tgFN), False)
-    deleteList.append(tg.tierDict["word"].entryList[0])
+    deleteList.append(tg.getTier("word").entries[0])
 
     # Get only time information from entries (i.e. remove label information)
     deleteList = [(start, end) for start, end, _ in deleteList]
 
     # Replace segments with a sine wave
-    wavQObj = audio.WavQueryObj(join(path, wavFN))
-    wavQObj.deleteWavSections(outputWavFN, deleteList=deleteList, operation="sine wave")
+    wav = audio.Wav.open(join(path, wavFN))
+    for start, end in deleteList:
+        sineFrames = audio.AudioGenerator.fromWav(wav).generateSineWave(
+            end - start, audio.DEFAULT_SINE_FREQUENCY
+        )
+        wav.replaceSegment(start, end, sineFrames)

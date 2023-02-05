@@ -9,6 +9,7 @@ from typing_extensions import Final
 INTERVAL_TIER: Final = "IntervalTier"
 POINT_TIER: Final = "TextTier"
 
+
 # https://stackoverflow.com/questions/34570814/equality-overloading-for-namedtuple
 class Interval(namedtuple("Interval", ["start", "end", "label"])):
     def __eq__(self, other):
@@ -46,8 +47,9 @@ class TextgridFormats:
     LONG_TEXTGRID: Final = "long_textgrid"
     SHORT_TEXTGRID: Final = "short_textgrid"
     JSON: Final = "json"
+    TEXTGRID_JSON: Final = "textgrid_json"
 
-    validOptions = [LONG_TEXTGRID, SHORT_TEXTGRID, JSON]
+    validOptions = [LONG_TEXTGRID, SHORT_TEXTGRID, JSON, TEXTGRID_JSON]
 
 
 class DataPointTypes:
