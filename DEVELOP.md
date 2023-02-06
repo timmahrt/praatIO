@@ -26,3 +26,9 @@ Releases are built and deployed with:
 `twine upload dist/*`
 
 Don't forget to tag the release.
+
+After releasing to pypi conda-forge should open a PR after some time (30min - 2 hours).
+https://conda-forge.org/docs/maintainer/updating_pkgs.html#pushing-to-regro-cf-autotick-bot-branch
+
+You'll need to approve the PR for it to build the release:
+https://github.com/conda-forge/praatio-feedstock/pulls
