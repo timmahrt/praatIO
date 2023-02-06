@@ -12,6 +12,7 @@ from praatio.utilities.constants import (
 from praatio.utilities import constants
 from praatio.utilities import errors
 from praatio.utilities import utils
+from praatio.utilities import my_math
 
 from praatio.data_classes import textgrid_tier
 
@@ -156,7 +157,7 @@ class PointTier(textgrid_tier.TextgridTier):
         for time, label in self.entries:
             timeCompare = min(referenceTimestamps, key=lambda x: abs(x - time))
 
-            if abs(time - timeCompare) <= maxDifference:
+            if my_math.lessThanOrEqual(abs(time - timeCompare), maxDifference):
                 time = timeCompare
             newEntries.append((time, label))
 

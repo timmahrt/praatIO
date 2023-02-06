@@ -14,6 +14,7 @@ from praatio.utilities.constants import (
 
 from praatio.utilities import errors
 from praatio.utilities import utils
+from praatio.utilities import my_math
 from praatio.utilities import constants
 
 from praatio.data_classes import textgrid_tier
@@ -173,7 +174,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
         return croppedTier
 
     def dejitter(
-        self, referenceTier: textgrid_tier.TextgridTier, maxDifference: float = 0.001
+        self,
+        referenceTier: textgrid_tier.TextgridTier,
+        maxDifference: float = 0.001,
     ) -> textgrid_tier.TextgridTier:
         """
         Set timestamps in this tier to be the same as values in the reference tier
@@ -198,9 +201,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
             startCompare = min(referenceTimestamps, key=lambda x: abs(x - start))
             stopCompare = min(referenceTimestamps, key=lambda x: abs(x - stop))
 
-            if abs(start - startCompare) <= maxDifference:
+            if my_math.lessThanOrEqual(abs(start - startCompare), maxDifference):
                 start = startCompare
-            if abs(stop - stopCompare) <= maxDifference:
+            if my_math.lessThanOrEqual(abs(stop - stopCompare), maxDifference):
                 stop = stopCompare
             newEntries.append((start, stop, label))
 
