@@ -6,12 +6,9 @@ from praatio.utilities import constants
 from praatio.utilities import errors
 
 from tests.praatio_test_case import PraatioTestCase
+from tests import testing_utils
 
-
-def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
-    if points is None:
-        points = [Point(1.3, "55"), Point(3.7, "99")]
-    return textgrid.PointTier(name, points, minT, maxT)
+makePointTier = testing_utils.makePointTier
 
 
 class TestPointTier(PraatioTestCase):
@@ -122,6 +119,55 @@ class TestPointTier(PraatioTestCase):
             maxT=3.8,
         )
         self.assertEqual(expectedPointTier, sut)
+
+    def test_dejitter_when_reference_tier_is_interval_tier(self):
+        sut = makePointTier(
+            points=[
+                Point(0.9, "will be modified"),
+                Point(2.1, "will also be modified"),
+                Point(2.5, "will not be modified"),
+                Point(3.56, "will also not be modified"),
+            ]
+        )
+        refInterval = testing_utils.makeIntervalTier(
+            intervals=[Interval(1, 2.0, "foo"), Interval(2.65, 3.45, "bar")]
+        )
+        self.assertSequenceEqual(
+            [
+                Point(1, "will be modified"),
+                Point(2.0, "will also be modified"),
+                Point(2.5, "will not be modified"),
+                Point(3.56, "will also not be modified"),
+            ],
+            sut.dejitter(refInterval, 0.1)._entries,
+        )
+
+    def test_dejitter_when_reference_tier_is_point_tier(self):
+        sut = makePointTier(
+            points=[
+                Point(0.9, "will be modified"),
+                Point(2.1, "will also be modified"),
+                Point(2.5, "will not be modified"),
+                Point(3.56, "will also not be modified"),
+            ]
+        )
+        refInterval = testing_utils.makePointTier(
+            points=[
+                Point(1, "foo"),
+                Point(2.0, "bar"),
+                Point(2.65, "bizz"),
+                Point(3.45, "whomp"),
+            ]
+        )
+        self.assertSequenceEqual(
+            [
+                Point(1, "will be modified"),
+                Point(2.0, "will also be modified"),
+                Point(2.5, "will not be modified"),
+                Point(3.56, "will also not be modified"),
+            ],
+            sut.dejitter(refInterval, 0.1)._entries,
+        )
 
     def test_erase_region_when_do_shrink_is_true(self):
         pointTier = makePointTier(

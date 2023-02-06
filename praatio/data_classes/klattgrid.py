@@ -138,6 +138,9 @@ class KlattPointTier(textgrid_tier.TextgridTier):
     def crop(self):
         raise NotImplementedError
 
+    def dejitter(self):
+        raise NotImplementedError
+
     def deleteEntry(self, entry):
         raise NotImplementedError
 
@@ -153,6 +156,10 @@ class KlattPointTier(textgrid_tier.TextgridTier):
     def insertSpace(self):
         raise NotImplementedError
 
+    @property
+    def timestamps(self):
+        raise NotImplementedError
+
     def validate(self):
         raise NotImplementedError
 
@@ -161,7 +168,7 @@ class KlattPointTier(textgrid_tier.TextgridTier):
             (timestamp, modFunc(float(value))) for timestamp, value in self.entries
         ]
 
-        self.entries = newEntries
+        self._entries = newEntries
 
     def getAsText(self) -> str:
         outputList = []

@@ -1,18 +1,14 @@
 import unittest
 
 from praatio import textgrid
-from praatio.utilities.constants import Interval, INTERVAL_TIER
+from praatio.utilities.constants import Interval, INTERVAL_TIER, Point
 from praatio.utilities import errors
 from praatio.utilities import constants
 
 from tests.praatio_test_case import PraatioTestCase
 from tests import testing_utils
 
-
-def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
-    if intervals is None:
-        intervals = [Interval(1, 2, "hello"), Interval(3.5, 4.0, "world")]
-    return textgrid.IntervalTier(name, intervals, minT, maxT)
+makeIntervalTier = testing_utils.makeIntervalTier
 
 
 class TestIntervalTier(PraatioTestCase):
@@ -351,6 +347,55 @@ class TestIntervalTier(PraatioTestCase):
             intervals=[Interval(2.7, 2.9, "fun")], minT=2.0, maxT=3.3
         )
         self.assertEqual(expectedIntervalTier, sut)
+
+    def test_dejitter_when_reference_tier_is_interval_tier(self):
+        sut = makeIntervalTier(
+            intervals=[
+                Interval(0, 0.9, "start will be modified"),
+                Interval(1, 2.1, "stop will be modified"),
+                Interval(2.2, 2.5, "will not be modified"),
+                Interval(2.5, 3.56, "will also not be modified"),
+            ]
+        )
+        refInterval = makeIntervalTier(
+            intervals=[Interval(1, 2.0, "foo"), Interval(2.65, 3.45, "bar")]
+        )
+        self.assertSequenceEqual(
+            [
+                Interval(0, 1, "start will be modified"),
+                Interval(1, 2.0, "stop will be modified"),
+                Interval(2.2, 2.5, "will not be modified"),
+                Interval(2.5, 3.56, "will also not be modified"),
+            ],
+            sut.dejitter(refInterval, 0.1)._entries,
+        )
+
+    def test_dejitter_when_reference_tier_is_point_tier(self):
+        sut = makeIntervalTier(
+            intervals=[
+                Interval(0, 0.9, "start will be modified"),
+                Interval(1, 2.1, "stop will be modified"),
+                Interval(2.2, 2.5, "will not be modified"),
+                Interval(2.5, 3.56, "will also not be modified"),
+            ]
+        )
+        refInterval = testing_utils.makePointTier(
+            points=[
+                Point(1, "foo"),
+                Point(2.0, "bar"),
+                Point(2.65, "bizz"),
+                Point(3.45, "whomp"),
+            ]
+        )
+        self.assertSequenceEqual(
+            [
+                Interval(0, 1, "start will be modified"),
+                Interval(1, 2.0, "stop will be modified"),
+                Interval(2.2, 2.5, "will not be modified"),
+                Interval(2.5, 3.56, "will also not be modified"),
+            ],
+            sut.dejitter(refInterval, 0.1)._entries,
+        )
 
     def test_delete_entry(self):
         sut = makeIntervalTier(

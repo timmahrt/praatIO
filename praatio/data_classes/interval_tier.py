@@ -14,6 +14,7 @@ from praatio.utilities.constants import (
 
 from praatio.utilities import errors
 from praatio.utilities import utils
+from praatio.utilities import my_math
 from praatio.utilities import constants
 
 from praatio.data_classes import textgrid_tier
@@ -99,6 +100,23 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     f"({entry.start}, {entry.end}, {entry.label}) and ({entry.start}, {entry.end}, {entry.label})"
                 )
 
+    @property
+    def timestamps(self) -> List[float]:
+        """All unique timestamps used in this tier"""
+        tmpTimestamps = [
+            time
+            for start, stop, _ in self.entries
+            for time in [
+                start,
+                stop,
+            ]
+        ]
+
+        uniqueTimestamps = list(set(tmpTimestamps))
+        uniqueTimestamps.sort()
+
+        return uniqueTimestamps
+
     def crop(
         self,
         cropStart: float,
@@ -154,6 +172,42 @@ class IntervalTier(textgrid_tier.TextgridTier):
         croppedTier = IntervalTier(self.name, newEntryList, minT, maxT)
 
         return croppedTier
+
+    def dejitter(
+        self,
+        referenceTier: textgrid_tier.TextgridTier,
+        maxDifference: float = 0.001,
+    ) -> textgrid_tier.TextgridTier:
+        """
+        Set timestamps in this tier to be the same as values in the reference tier
+
+        Timestamps will only be moved if they are less than maxDifference away from the
+        reference time.
+
+        This can be used to correct minor alignment errors between tiers, as made when
+        annotating files manually, etc.
+
+        Args:
+            referenceTier: the IntervalTier or PointTier to use as a reference
+            maxDifference: the maximum amount to allow timestamps to be moved by
+
+        Returns:
+            the modified version of the current tier
+        """
+        referenceTimestamps = referenceTier.timestamps
+
+        newEntries = []
+        for start, stop, label in self.entries:
+            startCompare = min(referenceTimestamps, key=lambda x: abs(x - start))
+            stopCompare = min(referenceTimestamps, key=lambda x: abs(x - stop))
+
+            if my_math.lessThanOrEqual(abs(start - startCompare), maxDifference):
+                start = startCompare
+            if my_math.lessThanOrEqual(abs(stop - stopCompare), maxDifference):
+                stop = stopCompare
+            newEntries.append((start, stop, label))
+
+        return self.new(entries=newEntries)
 
     def deleteEntry(self, entry: Interval) -> None:
         """Removes an entry from the entries"""

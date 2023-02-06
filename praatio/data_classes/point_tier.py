@@ -12,6 +12,7 @@ from praatio.utilities.constants import (
 from praatio.utilities import constants
 from praatio.utilities import errors
 from praatio.utilities import utils
+from praatio.utilities import my_math
 
 from praatio.data_classes import textgrid_tier
 
@@ -72,6 +73,16 @@ class PointTier(textgrid_tier.TextgridTier):
 
         super(PointTier, self).__init__(name, entries, calculatedMinT, calculatedMaxT)
 
+    @property
+    def timestamps(self) -> List[float]:
+        """All unique timestamps used in this tier"""
+        tmpTimestamps = [time for time, _ in self.entries]
+
+        uniqueTimestamps = list(set(tmpTimestamps))
+        uniqueTimestamps.sort()
+
+        return uniqueTimestamps
+
     def crop(
         self,
         cropStart: float,
@@ -120,6 +131,37 @@ class PointTier(textgrid_tier.TextgridTier):
     def deleteEntry(self, entry: Point) -> None:
         """Removes an entry from the entries"""
         self._entries.pop(self._entries.index(entry))
+
+    def dejitter(
+        self, referenceTier: textgrid_tier.TextgridTier, maxDifference: float = 0.001
+    ) -> "PointTier":
+        """
+        Set timestamps in this tier to be the same as values in the reference tier
+
+        Timestamps will only be moved if they are less than maxDifference away from the
+        reference time.
+
+        This can be used to correct minor alignment errors between tiers, as made when
+        annotating files manually, etc.
+
+        Args:
+            referenceTier: the IntervalTier or PointTier to use as a reference
+            maxDifference: the maximum amount to allow timestamps to be moved by
+
+        Returns:
+            the modified version of the current tier
+        """
+        referenceTimestamps = referenceTier.timestamps
+
+        newEntries = []
+        for time, label in self.entries:
+            timeCompare = min(referenceTimestamps, key=lambda x: abs(x - time))
+
+            if my_math.lessThanOrEqual(abs(time - timeCompare), maxDifference):
+                time = timeCompare
+            newEntries.append((time, label))
+
+        return self.new(entries=newEntries)
 
     def editTimestamps(
         self,
