@@ -104,8 +104,8 @@ textgrid.openTextgrid(
 ```
 tg.save(
   fn=name,
-  format= "short_textgrid",
-  includeBlankSpaces= False
+  format="short_textgrid",
+  includeBlankSpaces=True
 )
 ```
 
