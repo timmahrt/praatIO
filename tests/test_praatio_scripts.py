@@ -45,7 +45,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
         with self.assertRaises(errors.WrongOption) as _:
             praatio_scripts.splitAudioOnTier(
                 join(self.dataRoot, "bobby.wav"),
-                join(self.dataRoot, "bobby.Textgrid"),
+                join(self.dataRoot, "bobby.TextGrid"),
                 "word",
                 self.outputRoot,
                 outputTGFlag=True,
@@ -56,7 +56,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
         self.resetState()
         reportedWavs = praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             nameStyle=NameStyle.NAME_AND_I_AND_LABEL,
@@ -72,7 +72,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
     ):
         sut = praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             nameStyle=NameStyle.NAME_AND_I_AND_LABEL,
@@ -93,7 +93,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
     def test_split_audio_on_tier_with_name_and_label_outputs_expected_filenames(self):
         sut = praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             nameStyle=NameStyle.NAME_AND_LABEL,
@@ -114,7 +114,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
     def test_split_audio_on_tier_with_name_and_i_outputs_expected_filenames(self):
         sut = praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             nameStyle=NameStyle.NAME_AND_I,
@@ -135,7 +135,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
     def test_split_audio_on_tier_with_label_outputs_expected_filenames(self):
         sut = praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             nameStyle=NameStyle.LABEL,
@@ -201,7 +201,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
         self.resetState()
         praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
         )
@@ -209,7 +209,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
 
         praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
         )
@@ -225,7 +225,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
         self.resetState()
         praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             outputTGFlag=False,
@@ -236,7 +236,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
         self.resetState()
         praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             outputTGFlag=True,
@@ -290,7 +290,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
     def test_split_audio_on_tier_with_custom_silence_label_skips_those_labels(self):
         sut = praatio_scripts.splitAudioOnTier(
             join(self.dataRoot, "bobby.wav"),
-            join(self.dataRoot, "bobby.Textgrid"),
+            join(self.dataRoot, "bobby.TextGrid"),
             "word",
             self.outputRoot,
             silenceLabel="RIPPED",
