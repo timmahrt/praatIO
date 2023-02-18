@@ -6,7 +6,7 @@ import tempfile
 import pytest
 
 from praatio import textgrid
-from praatio.utilities.constants import Interval, INTERVAL_TIER, Point
+from praatio.utilities.constants import Interval, Point
 from praatio.utilities import textgrid_io
 from praatio.data_classes.textgrid import _tgToDictionary
 

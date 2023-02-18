@@ -8,7 +8,7 @@ see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
 import os
 from os.path import join
 import math
-from typing import Callable, List, Tuple, Optional
+from typing import Callable, List, Tuple
 
 from typing_extensions import Literal, Final
 

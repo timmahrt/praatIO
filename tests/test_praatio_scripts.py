@@ -1,10 +1,9 @@
 import unittest
 import os
 from os.path import join
-import io
-import contextlib
 import shutil
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+from typing import List
 
 from tests.testing_utils import tempTextgrid
 
@@ -35,10 +34,10 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
             shutil.rmtree(self.outputRoot)
             os.mkdir(self.outputRoot)
 
-    def getOutputTextgrids(self) -> list[str]:
+    def getOutputTextgrids(self) -> List[str]:
         return [fn for fn in os.listdir(self.outputRoot) if ".TextGrid" in fn]
 
-    def getOutputWavs(self) -> list[str]:
+    def getOutputWavs(self) -> List[str]:
         return [fn for fn in os.listdir(self.outputRoot) if ".wav" in fn]
 
     def test_split_audio_on_tier_throws_with_name_style_invalid_throws_exception(self):
