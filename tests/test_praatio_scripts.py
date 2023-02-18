@@ -4,6 +4,7 @@ from os.path import join
 import shutil
 from unittest.mock import patch
 from typing import List
+import sys
 
 from tests.testing_utils import tempTextgrid
 
@@ -153,6 +154,7 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
             reportedWavs,
         )
 
+    @unittest.skipIf(sys.version_info < (3, 8), "Mocks changed in python 2.8")
     @patch("builtins.print")
     def test_split_audio_on_tier_with_label_prints_warning_when_duplicate_labels(
         self, mockStdout
@@ -188,13 +190,14 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
 
         self.assertEqual(1, len(mockStdout.mock_calls))
         for sut in mockStdout.mock_calls[0].args:
-            self.assertRegex(
+            self.assertEqual(
                 sut,
                 f"Overwriting wave files in: {self.outputRoot}\n"
                 "Intervals exist with the same name:\nhello\nworld",
             )
 
     @patch("builtins.print")
+    @unittest.skipIf(sys.version_info < (3, 8), "Mocks changed in python 2.8")
     def test_split_audio_on_tier_prints_warning_when_overwriting_content(
         self, mockStdout
     ):
