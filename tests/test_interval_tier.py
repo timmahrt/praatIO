@@ -184,6 +184,14 @@ class TestIntervalTier(PraatioTestCase):
             str(cm.exception),
         )
 
+    def test_crop_when_crop_area_is_empty_and_user_rebases_to_zero(self):
+        originalIntervalTier = makeIntervalTier(intervals=[], minT=0, maxT=5)
+        sut = originalIntervalTier.crop(
+            2.0, 3.3, mode=constants.CropCollision.TRUNCATED, rebaseToZero=True
+        )
+
+        self.assertEqual(makeIntervalTier(intervals=[], minT=0, maxT=1.3), sut)
+
     def test_crop_truncates_overlapping_intervals_if_mode_is_truncate_and_rebase_true(
         self,
     ):
