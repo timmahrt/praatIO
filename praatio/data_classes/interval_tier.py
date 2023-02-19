@@ -141,6 +141,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            WrongOption: the mode is not valid
+            ArgumentError: cropStart occurs after cropEnd
         """
 
         utils.validateOption("mode", mode, CropCollision)
@@ -253,6 +257,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            WrongOption: the reportingMode is not valid
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
@@ -305,7 +312,8 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     removed that overlaps with the target entry
                 - 'categorical' all entries that overlap, even partially, with
                     the target entry will be completely removed
-                - None or any other value throws IntervalCollision
+                - 'error' if the interval to delete overlaps with any entry,
+                    raises 'CollisionError'
             doShrink: If True, moves leftward by (/end/ - /start/)
                 amount, each item that occurs after /end/
 
@@ -313,7 +321,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
             The modified version of the current tier
 
         Raises:
-            CollisionError
+            CollisionError: potentially raised if the interval to remove overlaps with
+                            an existing interval
+            WrongOption: the collisionMode is not valid
         """
         utils.validateOption("collisionMode", collisionMode, constants.EraseCollision)
 
@@ -459,6 +469,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            CollisionError: potentially raised if the interval to insert overlaps with
+                            an existing interval
+            WrongOption: the collisionMode or collisionReportingMode is not valid
         """
         utils.validateOption(
             "collisionMode", collisionMode, constants.IntervalCollision
@@ -751,6 +766,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             True if the tier is valid; False if not
+
+        Raises:
+            WrongOption: the reportingMode is not valid
+            TextgridStateError: potentially raised when the textgrid is not valid
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
