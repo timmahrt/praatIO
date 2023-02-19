@@ -21,43 +21,6 @@ from praatio.utilities.constants import Point, Interval, NameStyle
 from praatio.utilities import errors
 
 
-def _shiftTimes(
-    tg: textgrid.Textgrid, timeV: float, newTimeV: float
-) -> textgrid.Textgrid:
-    """Change all instances of timeV in the textgrid to newTimeV
-
-    These are meant to be small changes.  No checks are done to see
-    if the new interval steps on other intervals
-    """
-    tg = tg.new()
-    for tier in tg.tiers:
-        if isinstance(tier, textgrid.IntervalTier):
-            entries = [
-                entry
-                for entry in tier.entries
-                if entry[0] == timeV or entry[1] == timeV
-            ]
-            insertEntries = []
-            for entry in entries:
-                if entry[0] == timeV:
-                    newStart, newStop = newTimeV, entry[1]
-                elif entry[1] == timeV:
-                    newStart, newStop = entry[0], newTimeV
-                tier.deleteEntry(entry)
-                insertEntries.append((newStart, newStop, entry[2]))
-
-            for entry in insertEntries:
-                tier.insertEntry(entry)
-
-        elif isinstance(tier, textgrid.PointTier):
-            entries = [entry for entry in tier.entries if entry[0] == timeV]
-            for entry in entries:
-                tier.deleteEntry(entry)
-                tier.insertEntry(Point(newTimeV, entry[1]))
-
-    return tg
-
-
 def audioSplice(
     audioObj: audio.Wav,
     spliceSegment: audio.Wav,
@@ -133,6 +96,43 @@ def audioSplice(
         retTG = retTG.eraseRegion(insertStart, insertStop, doShrink=True)
 
     return audioObj, retTG
+
+
+def _shiftTimes(
+    tg: textgrid.Textgrid, timeV: float, newTimeV: float
+) -> textgrid.Textgrid:
+    """Change all instances of timeV in the textgrid to newTimeV
+
+    These are meant to be small changes.  No checks are done to see
+    if the new interval steps on other intervals
+    """
+    tg = tg.new()
+    for tier in tg.tiers:
+        if isinstance(tier, textgrid.IntervalTier):
+            entries = [
+                entry
+                for entry in tier.entries
+                if entry[0] == timeV or entry[1] == timeV
+            ]
+            insertEntries = []
+            for entry in entries:
+                if entry[0] == timeV:
+                    newStart, newStop = newTimeV, entry[1]
+                elif entry[1] == timeV:
+                    newStart, newStop = entry[0], newTimeV
+                tier.deleteEntry(entry)
+                insertEntries.append((newStart, newStop, entry[2]))
+
+            for entry in insertEntries:
+                tier.insertEntry(entry)
+
+        elif isinstance(tier, textgrid.PointTier):
+            entries = [entry for entry in tier.entries if entry[0] == timeV]
+            for entry in entries:
+                tier.deleteEntry(entry)
+                tier.insertEntry(Point(newTimeV, entry[1]))
+
+    return tg
 
 
 def spellCheckEntries(
