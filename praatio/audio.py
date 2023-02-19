@@ -216,8 +216,11 @@ class AbstractWav(ABC):
             ArgumentError: the timeStep is too small
             ZeroCrossingError: no zero crossings exist in the audio
         """
-
-        leftStartTime = rightStartTime = targetTime
+        # We'll read timeStep before the targetTime and after, then
+        # continue reading in timeStep chunks left and right until
+        # we find the zero crossing
+        leftStartTime = targetTime - timeStep
+        rightStartTime = targetTime
 
         samplesPerStep = timeStep * self.frameRate
         if samplesPerStep < 2:
@@ -255,7 +258,7 @@ class AbstractWav(ABC):
 
                 if len(zeroCrossingsInTime) > 0:
                     return min(
-                        zeroCrossingsInTime, key=lambda val: abs(leftStartTime - val)
+                        zeroCrossingsInTime, key=lambda val: abs(targetTime - val)
                     )
 
             leftStartTime -= timeStep
