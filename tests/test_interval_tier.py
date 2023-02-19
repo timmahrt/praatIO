@@ -1,4 +1,5 @@
 import unittest
+from os.path import join
 
 from praatio import textgrid
 from praatio.utilities.constants import Interval, INTERVAL_TIER, Point
@@ -1399,6 +1400,35 @@ class TestIntervalTier(PraatioTestCase):
             ],
             sut._entries,
         )
+
+    def test_to_zero_crossings(self):
+        wavFN = join(self.dataRoot, "bobby.wav")
+        tgFN = join(self.dataRoot, "bobby.TextGrid")
+
+        tg = textgrid.openTextgrid(tgFN, False)
+        originalTier = tg.getTier("word")
+
+        expectedFN = join(self.dataRoot, "bobby_boundaries_at_zero_crossings.TextGrid")
+        expectedTg = textgrid.openTextgrid(expectedFN, False)
+        expectedTier = expectedTg.getTier("word")
+
+        sut = originalTier.toZeroCrossings(wavFN)
+        sut.name = "auto"
+        expectedTier.name = "manual"
+        tg.addTier(sut)
+        tg.addTier(expectedTier)
+
+        tg.save(
+            join(self.outputRoot, "bobby_auto_to_zero_crossings.TextGrid"),
+            "short_textgrid",
+            True,
+        )
+
+        # TODO: There are very small differences between praat and praatio's
+        #       zero-crossing calculations.
+        self.assertEqual(len(expectedTier.entries), len(sut.entries))
+        for entry, sutEntry in zip(expectedTier.entries, sut.entries):
+            self.assertAlmostEqual(entry.start, sutEntry.start, 4)
 
     def test_validate_raises_error_if_an_intervals_start_happens_after_it_stops(self):
         sut = makeIntervalTier()
