@@ -37,8 +37,14 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
 
         tg = textgrid.openTextgrid(inputTGFN, False)
 
-        praatio_scripts.tgBoundariesToZeroCrossings(tg, wav, zeroCrossingTGFN)
+        outputTg = textgrid.Textgrid()
+        for tier in tg.tiers:
+            newTier = tier.toZeroCrossings(inputWavFN)
+            outputTg.addTier(newTier)
 
+        tg = outputTg
+
+        outputTg.save(zeroCrossingTGFN, "short_textgrid", True)
     else:
         tg = textgrid.openTextgrid(inputTGFN, False)
 

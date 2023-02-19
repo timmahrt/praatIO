@@ -160,6 +160,9 @@ class KlattPointTier(textgrid_tier.TextgridTier):
     def timestamps(self):
         raise NotImplementedError
 
+    def toZeroCrossings(self):
+        raise NotImplementedError
+
     def validate(self):
         raise NotImplementedError
 

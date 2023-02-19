@@ -12,6 +12,7 @@ from praatio.utilities.constants import (
     CropCollision,
 )
 
+from praatio import audio
 from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import my_math
@@ -755,6 +756,18 @@ class IntervalTier(textgrid_tier.TextgridTier):
         newMax = self.maxTimestamp + cumulativeDifference
 
         return IntervalTier(self.name, newEntryList, newMin, newMax)
+
+    def toZeroCrossings(self, wavFN: str) -> "IntervalTier":
+        """Moves all timestamps to the nearest zero crossing"""
+        wav = audio.QueryWav(wavFN)
+
+        intervals = []
+        for start, end, label in self.entries:
+            newStart = wav.findNearestZeroCrossing(start)
+            newStop = wav.findNearestZeroCrossing(end)
+            intervals.append(Interval(newStart, newStop, label))
+
+        return self.new(entries=intervals)
 
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"

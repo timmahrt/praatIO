@@ -1414,17 +1414,8 @@ class TestIntervalTier(PraatioTestCase):
 
         sut = originalTier.toZeroCrossings(wavFN)
         sut.name = "auto"
-        expectedTier.name = "manual"
-        tg.addTier(sut)
-        tg.addTier(expectedTier)
 
-        tg.save(
-            join(self.outputRoot, "bobby_auto_to_zero_crossings.TextGrid"),
-            "short_textgrid",
-            True,
-        )
-
-        # TODO: There are very small differences between praat and praatio's
+        # TODO: There are small differences between praat and praatio's
         #       zero-crossing calculations.
         self.assertEqual(len(expectedTier.entries), len(sut.entries))
         for entry, sutEntry in zip(expectedTier.entries, sut.entries):

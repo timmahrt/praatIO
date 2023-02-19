@@ -1,44 +1,74 @@
 File type = "ooTextFile"
 Object class = "TextGrid"
 
-0
-1.194625
-<exists>
-2
-"IntervalTier"
-"word"
-0.0124716553288
-1.18979591837
-6
-0.0124716553288
-0.06549652777777777
-""
-0.06549652777777777
-0.41062728658536585
-"BOBBY"
-0.41062728658536585
-0.6586395833333334
-"RIPPED"
-0.6586395833333334
-0.7411985997267759
-"THE"
-0.7411985997267759
-1.1171559027777775
-"LEDGER"
-1.1171559027777775
-1.18979591837
-""
-"IntervalTier"
-"phrase"
-0
-1.194625
-3
-0
-0.06549652777777777
-""
-0.06549652777777777
-1.1171559027777775
-"BOBBY RIPPED THE LEDGER"
-1.1171559027777775
-1.194625
-""
+xmin = 0 
+xmax = 1.194625 
+tiers? <exists> 
+size = 3 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "word" 
+        xmin = 0.0124716553288 
+        xmax = 1.18979591837 
+        intervals: size = 6 
+        intervals [1]:
+            xmin = 0.0124716553288 
+            xmax = 0.06549652777777777 
+            text = "" 
+        intervals [2]:
+            xmin = 0.06549652777777777 
+            xmax = 0.41062728658536585 
+            text = "BOBBY" 
+        intervals [3]:
+            xmin = 0.41062728658536585 
+            xmax = 0.6586395833333334 
+            text = "RIPPED" 
+        intervals [4]:
+            xmin = 0.6586395833333334 
+            xmax = 0.7411985997267759 
+            text = "THE" 
+        intervals [5]:
+            xmin = 0.7411985997267759 
+            xmax = 1.1171559027777775 
+            text = "LEDGER" 
+        intervals [6]:
+            xmin = 1.1171559027777775 
+            xmax = 1.18979591837 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "phrase" 
+        xmin = 0 
+        xmax = 1.194625 
+        intervals: size = 3 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.06549652777777777 
+            text = "" 
+        intervals [2]:
+            xmin = 0.06549652777777777 
+            xmax = 1.1171559027777775 
+            text = "BOBBY RIPPED THE LEDGER" 
+        intervals [3]:
+            xmin = 1.1171559027777775 
+            xmax = 1.194625 
+            text = "" 
+    item [3]:
+        class = "TextTier" 
+        name = "pitch" 
+        xmin = 0 
+        xmax = 1.194625 
+        points: size = 4 
+        points [1]:
+            number = 0.2787154431216931 
+            mark = "129.8" 
+        points [2]:
+            number = 0.5304904891304347 
+            mark = "75" 
+        points [3]:
+            number = 0.7031082057823129 
+            mark = "92.81" 
+        points [4]:
+            number = 0.8791542174796748 
+            mark = "87.46" 

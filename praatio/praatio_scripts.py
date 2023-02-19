@@ -264,44 +264,6 @@ def splitTierEntries(
     return tg
 
 
-def tgBoundariesToZeroCrossings(
-    tg: textgrid.Textgrid,
-    wav: audio.Wav,
-    adjustPointTiers: bool = True,
-    adjustIntervalTiers: bool = True,
-) -> textgrid.Textgrid:
-    """Makes all textgrid interval boundaries fall on pressure wave zero crossings
-
-    adjustPointTiers: if True, point tiers will be adjusted.
-    adjustIntervalTiers: if True, interval tiers will be adjusted.
-    """
-    for tier in tg.tiers:
-        newTier: textgrid_tier.TextgridTier
-        if isinstance(tier, textgrid.PointTier):
-            if adjustPointTiers is False:
-                continue
-
-            points = []
-            for start, label in tier.entries:
-                newStart = wav.findNearestZeroCrossing(start)
-                points.append(Point(newStart, label))
-            newTier = tier.new(entries=points)
-        elif isinstance(tier, textgrid.IntervalTier):
-            if adjustIntervalTiers is False:
-                continue
-
-            intervals = []
-            for start, end, label in tier.entries:
-                newStart = wav.findNearestZeroCrossing(start)
-                newStop = wav.findNearestZeroCrossing(end)
-                intervals.append(Interval(newStart, newStop, label))
-            newTier = tier.new(entries=intervals)
-
-        tg.replaceTier(tier.name, newTier)
-
-    return tg
-
-
 def splitAudioOnTier(
     wavFN: str,
     tgFN: str,

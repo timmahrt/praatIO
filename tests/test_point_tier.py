@@ -1,4 +1,5 @@
 import unittest
+from os.path import join
 
 from praatio import textgrid
 from praatio.utilities.constants import Interval, Point, POINT_TIER
@@ -445,6 +446,26 @@ class TestPointTier(PraatioTestCase):
             maxT=6.1,
         )
         self.assertEqual(predictedPointTier, sut)
+
+    def test_to_zero_crossings(self):
+        wavFN = join(self.dataRoot, "bobby.wav")
+        tgFN = join(self.dataRoot, "bobby.TextGrid")
+
+        tg = textgrid.openTextgrid(tgFN, False)
+        originalTier = tg.getTier("pitch")
+
+        expectedFN = join(self.dataRoot, "bobby_boundaries_at_zero_crossings.TextGrid")
+        expectedTg = textgrid.openTextgrid(expectedFN, False)
+        expectedTier = expectedTg.getTier("pitch")
+
+        sut = originalTier.toZeroCrossings(wavFN)
+        sut.name = "auto"
+
+        # TODO: There are small differences between praat and praatio's
+        #       zero-crossing calculations.
+        self.assertEqual(len(expectedTier.entries), len(sut.entries))
+        for entry, sutEntry in zip(expectedTier.entries, sut.entries):
+            self.assertAlmostEqual(entry.time, sutEntry.time, 3)
 
     def test_validate_throws_error_if_points_are_not_in_sequence(self):
         sut = makePointTier(
