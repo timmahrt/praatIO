@@ -21,6 +21,11 @@ splitAudioOnTier has a slightly new signature
   - None -> "name_and_label"
 - "noPartialIntervals" -> "allowPartialIntervals" to avoid a double negative
 
+### interval_tier.py
+
+insertSpace raises CollisionError rather than ArgumentError when the space to insert overlaps
+with an existing entry and the collisionMode is "error".
+
 ## Version 5 to 6 Migration
 
 ### JSON output files

@@ -746,7 +746,7 @@ class TestTextgrid(PraatioTestCase):
         ]:
             sut.addTier(tier)
 
-        with self.assertRaises(errors.ArgumentError) as _:
+        with self.assertRaises(errors.CollisionError) as _:
             sut.insertSpace(
                 1.5,
                 2,

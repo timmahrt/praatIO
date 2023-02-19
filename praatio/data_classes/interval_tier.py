@@ -545,6 +545,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            CollisionError: potentially raised if the interval to insert overlaps with
+                            an existing interval
+            WrongOption: the collisionMode is not valid
         """
         utils.validateOption(
             "collisionMode", collisionMode, constants.WhitespaceCollision
@@ -586,7 +591,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 elif collisionMode == constants.WhitespaceCollision.NO_CHANGE:
                     newEntryList.append(interval)
                 else:
-                    raise errors.ArgumentError(
+                    raise errors.CollisionError(
                         f"Collision occured during insertSpace() for interval '{interval}' "
                         f"and given white space insertion interval ({start}, {start + duration})"
                     )

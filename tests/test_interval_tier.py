@@ -960,7 +960,7 @@ class TestIntervalTier(PraatioTestCase):
             ]
         )
 
-        with self.assertRaises(errors.ArgumentError) as _:
+        with self.assertRaises(errors.CollisionError) as _:
             sut.insertSpace(
                 2.6,
                 1,
