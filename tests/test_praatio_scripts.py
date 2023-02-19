@@ -301,8 +301,125 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
         self.assertEqual(3, len(sut))
 
 
+class TestSpellCheckEntries(PraatioTestCase):
+    def spellcheck(self, x):
+        return x in ["hello", "world"]
+
+    def test_spell_check_entries_keeps_all_mispelled_words(self):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.6, "hello"],
+                [0.6, 0.8, "wolrd"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        sut = praatio_scripts.spellCheckEntries(tg, "foo", "bar", self.spellcheck)
+
+        expectedTier = textgrid.IntervalTier(
+            "bar",
+            [
+                [0.6, 0.8, "wolrd"],
+            ],
+            0,
+            1.0,
+        )
+
+        self.assertEqual(2, len(sut.tiers))
+        self.assertEqual(expectedTier, sut.getTier("bar"))
+
+    @patch("builtins.print")
+    @unittest.skipIf(sys.version_info < (3, 8), "Mocks changed in python 2.8")
+    def test_spell_check_entries_can_print_out_warnings(self, mockStdout):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.2, 0.4, "olleh"],
+                [0.4, 0.6, "hello"],
+                [0.6, 0.8, "wolrd"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        praatio_scripts.spellCheckEntries(
+            tg, "foo", "bar", self.spellcheck, printEntries=True
+        )
+        self.assertEqual(2, len(mockStdout.mock_calls))
+        for sut in mockStdout.mock_calls[0].args:
+            self.assertEqual((0.2, 0.4, "olleh"), sut)
+        for sut in mockStdout.mock_calls[1].args:
+            self.assertEqual((0.6, 0.8, "wolrd"), sut)
+
+    def test_spell_check_entries_splits_text_on_space(self):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.6, "olleh hello wolrd"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        sut = praatio_scripts.spellCheckEntries(tg, "foo", "bar", self.spellcheck)
+
+        expectedTier = textgrid.IntervalTier(
+            "bar",
+            [
+                [0.4, 0.6, "olleh, wolrd"],
+            ],
+            0,
+            1.0,
+        )
+
+        self.assertEqual(2, len(sut.tiers))
+        self.assertEqual(expectedTier, sut.getTier("bar"))
+
+    def test_spell_check_entries_ignores_punctuation(self):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.6, "olleh; hello--wolrd?!"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        sut = praatio_scripts.spellCheckEntries(tg, "foo", "bar", self.spellcheck)
+
+        expectedTier = textgrid.IntervalTier(
+            "bar",
+            [
+                [0.4, 0.6, "olleh, wolrd"],
+            ],
+            0,
+            1.0,
+        )
+
+        self.assertEqual(2, len(sut.tiers))
+        self.assertEqual(expectedTier, sut.getTier("bar"))
+
+    def test_spell_check_entries_throws_error_if_new_tier_name_exists_in_textgrid(self):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.6, "hello"],
+                [0.6, 0.8, "wolrd"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        with self.assertRaises(errors.TierNameExistsError) as _:
+            praatio_scripts.spellCheckEntries(tg, "foo", "foo", self.spellcheck)
+
+
 class TestPraatioScriptsThatDontOutputFiles(PraatioTestCase):
-    def test_split_tier_entries(self):
+    def test_split_tier_entries_will_append_a_new_tier_if_target_tier_name_is_novel(
+        self,
+    ):
         tg = textgrid.Textgrid(0, 1.0)
         targetTier = textgrid.IntervalTier(
             "foo",

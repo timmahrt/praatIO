@@ -156,8 +156,12 @@ def spellCheckEntries(
     Args:
         checkFunction: should return True if a word is spelled correctly and
             False otherwise
+
+    Raises:
+        TierNameExistsError: newTierName exists in the textgrid
     """
     punctuationList = [
+        "-",
         "_",
         ",",
         "'",
@@ -176,7 +180,7 @@ def spellCheckEntries(
 
         # Remove punctuation
         for char in punctuationList:
-            label = label.replace(char, "")
+            label = label.replace(char, " ")
 
         wordList = label.split()
         mispelledList = []
