@@ -14,6 +14,10 @@ If you are having difficulty upgrading, please don't hesistate to open an issue 
 
 ### praatio_scripts.py
 
+splitTierEntries has a simplified signature.
+"startT" and "endT" have been removed.
+Please prepare your textgrid (e.g. tg.crop()) before calling splitTierEntries.
+
 splitAudioOnTier has a slightly new signature
 - the options for nameStyle have been changed to better reflect the available options
   - "append" -> "name_and_i_and_label"

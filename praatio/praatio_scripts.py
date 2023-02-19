@@ -200,11 +200,7 @@ def spellCheckEntries(
 
 
 def splitTierEntries(
-    tg: textgrid.Textgrid,
-    sourceTierName: str,
-    targetTierName: str,
-    startT: float = None,
-    endT: float = None,
+    tg: textgrid.Textgrid, sourceTierName: str, targetTierName: str
 ) -> textgrid.Textgrid:
     """Split each entry in a tier by space
 
@@ -215,25 +211,22 @@ def splitTierEntries(
 
     This could be used to decompose utterances into words or, with pysle,
     words into phones.
+
+    Returns:
+        A modified version of the input textgrid
+
+    Raises:
+        CollisionError: If targetTierName exists in the textgrid, this will attempt
+                        to write the new content into it; if any of the new intervals
+                        overlap with existing intervals, this will fail.
     """
     minT = tg.minTimestamp
     maxT = tg.maxTimestamp
 
     sourceTier = tg.getTier(sourceTierName)
     targetTier = None
-
-    # Examine a subset of the source tier?
-    if startT is not None or endT is not None:
-        if startT is None:
-            startT = minT
-        if endT is None:
-            endT = maxT
-
-        sourceTier = sourceTier.crop(startT, endT, "truncated", False)
-
-        if targetTierName in tg.tierNames:
-            targetTier = tg.getTier(targetTierName)
-            targetTier = targetTier.eraseRegion(startT, endT, "truncate", False)
+    if targetTierName in tg.tierNames:
+        targetTier = tg.getTier(targetTierName)
 
     # Split the entries in the source tier
     newEntries = []

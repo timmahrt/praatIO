@@ -302,6 +302,63 @@ class TestPraatioScriptsThatOutputFiles(PraatioTestCase):
 
 
 class TestPraatioScriptsThatDontOutputFiles(PraatioTestCase):
+    def test_split_tier_entries(self):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.8, "hello world"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        sut = praatio_scripts.splitTierEntries(tg, "foo", "bar")
+
+        expectedTier = textgrid.IntervalTier(
+            "bar", [[0.4, 0.6, "hello"], [0.6, 0.8, "world"]], 0, 1.0
+        )
+
+        self.assertEqual(2, len(sut.tiers))
+        self.assertEqual(expectedTier, sut.getTier("bar"))
+
+    def test_split_tier_entries_raises_collision_error_when_overwriting_an_existing_entry(
+        self,
+    ):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.8, "hello world"],
+            ],
+        )
+        auxTier = textgrid.IntervalTier(
+            "bar",
+            [
+                [0.4, 0.5, "this will clash"],
+            ],
+        )
+
+        tg.addTier(targetTier)
+        tg.addTier(auxTier)
+
+        with self.assertRaises(errors.CollisionError) as _:
+            praatio_scripts.splitTierEntries(tg, "foo", "bar")
+
+    def test_split_tier_entries_raises_collision_error_when_source_and_target_tier_are_same(
+        self,
+    ):
+        tg = textgrid.Textgrid(0, 1.0)
+        targetTier = textgrid.IntervalTier(
+            "foo",
+            [
+                [0.4, 0.8, "hello world"],
+            ],
+        )
+        tg.addTier(targetTier)
+
+        with self.assertRaises(errors.CollisionError) as _:
+            praatio_scripts.splitTierEntries(tg, "foo", "foo")
+
     def test_align_boundaries_across_tiers_works_for_interval_tiers(self):
         refTier = textgrid.IntervalTier("foo", [(0, 1, "hello"), (1, 2, "world")])
 
