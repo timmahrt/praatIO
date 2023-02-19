@@ -14,16 +14,11 @@ from typing_extensions import Literal, Final
 
 from praatio import textgrid
 from praatio import audio
+from praatio.utilities import utils
 from praatio.data_classes import textgrid_tier
 from praatio.utilities import constants
-from praatio.utilities.constants import Point, Interval
+from praatio.utilities.constants import Point, Interval, NameStyle
 from praatio.utilities import errors
-
-
-class NameStyle:
-    APPEND = "append"
-    APPEND_NO_I = "append_no_i"
-    LABEL = "label"
 
 
 def _shiftTimes(
@@ -316,8 +311,10 @@ def splitAudioOnTier(
     tierName: str,
     outputPath: str,
     outputTGFlag: bool = False,
-    nameStyle: Optional[Literal["append", "append_no_i", "label"]] = None,
-    noPartialIntervals: bool = False,
+    nameStyle: Literal[
+        "name_and_i_and_label", "name_and_label", "name_and_i", "label"
+    ] = "name_and_i",
+    allowPartialIntervals: bool = True,
     silenceLabel: str = None,
 ) -> List[Tuple[float, float, str]]:
     """Outputs one subwav for each entry in the tier of a textgrid
@@ -331,11 +328,11 @@ def splitAudioOnTier(
             If is type str (a tier name), outputs a paired, cropped
             textgrid with only the specified tier
         nameStyle:
-            - 'append': append interval label to output name
-            - 'append_no_i': append label but not interval to output name
+            - 'name_and_i_and_label': append interval label to output name
+            - 'name_and_label': append label but not interval to output name
+            - 'name_and_i': output name plus the interval number
             - 'label': output name is the same as label
-            - None: output name plus the interval number
-        noPartialIntervals: if True: intervals in non-target tiers that
+        allowPartialIntervals: if False: intervals in non-target tiers that
             are not wholly contained by an interval in the target tier will not
             be included in the output textgrids
         silenceLabel: the label for silent regions.  If silences are
@@ -346,47 +343,33 @@ def splitAudioOnTier(
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
 
-    def getValue(myBool) -> Literal["strict", "lax", "truncated"]:
-        # This will make mypy happy
-        if myBool:
-            return constants.CropCollision.STRICT
-        else:
-            return constants.CropCollision.TRUNCATED
+    utils.validateOption("nameStyle", nameStyle, NameStyle)
 
-    mode: Final = getValue(noPartialIntervals)
+    mode: Final = _getMode(allowPartialIntervals)
 
     tg = textgrid.openTextgrid(tgFN, False)
     entries = tg.getTier(tierName).entries
 
-    if silenceLabel is not None:
-        entries = [entry for entry in entries if entry.label != silenceLabel]
-
     # Build the output name template
-    name = os.path.splitext(os.path.split(wavFN)[1])[0]
+    outputNameBase = os.path.splitext(os.path.split(wavFN)[1])[0]
     orderOfMagnitude = int(math.floor(math.log10(len(entries))))
 
     # We want one more zero in the output than the order of magnitude
-    outputTemplate = "%s_%%0%dd" % (name, orderOfMagnitude + 1)
+    outputTemplate = "%s_%%0%dd" % (outputNameBase, orderOfMagnitude + 1)
+    nameStyleToNameGenerator = {
+        "name_and_i_and_label": lambda _name, label, i: f"{outputTemplate % i}_{label}",
+        "name_and_label": lambda name, label, _i: f"{name}_{label}",
+        "name_and_i": lambda _name, _label, i: f"{outputTemplate % i}",
+        "label": lambda _name, label, _i: label,
+    }
+    generateName = nameStyleToNameGenerator[nameStyle]
 
-    firstWarning = True
+    if silenceLabel is not None:
+        entries = [entry for entry in entries if entry.label != silenceLabel]
 
-    # If we're using the 'label' namestyle for outputs, all of the
-    # interval labels have to be unique, or wave files with those
-    # labels as names, will be overwritten
-    if nameStyle == NameStyle.LABEL:
-        wordList = [interval.label for interval in entries]
-        multipleInstList = []
-        for word in set(wordList):
-            if wordList.count(word) > 1:
-                multipleInstList.append(word)
-
-        if len(multipleInstList) > 0:
-            instListTxt = "\n".join(multipleInstList)
-            print(
-                f"Overwriting wave files in: {outputPath}\n"
-                f"Intervals exist with the same name:\n{instListTxt}"
-            )
-            firstWarning = False
+    logger = utils.TogglableLogger(autoDisable=True)
+    _validateEntriesForWriting(nameStyle, entries, logger, outputPath)
+    logger.autoDisable = False
 
     # Output wave files
     outputFNList = []
@@ -394,20 +377,11 @@ def splitAudioOnTier(
     for i, entry in enumerate(entries):
         start, end, label = entry
 
-        # Resolve output name
-        if nameStyle == NameStyle.APPEND_NO_I:
-            outputName = f"{name}_{label}"
-        elif nameStyle == NameStyle.LABEL:
-            outputName = label
-        else:
-            outputName = outputTemplate % i
-            if nameStyle == NameStyle.APPEND:
-                outputName += f"_{label}"
-
+        outputName = generateName(outputNameBase, label, i)
         outputFNFullPath = join(outputPath, outputName + ".wav")
 
-        if os.path.exists(outputFNFullPath) and firstWarning:
-            print(
+        if os.path.exists(outputFNFullPath):
+            logger.write(
                 f"Overwriting wave files in: {outputPath}\n"
                 "Files existed before or intervals exist with "
                 f"the same name:\n{outputName}"
@@ -432,6 +406,33 @@ def splitAudioOnTier(
             )
 
     return outputFNList
+
+
+def _getMode(allowPartialIntervals: bool) -> Literal["strict", "lax", "truncated"]:
+    # This helper function is just to make mypy happy
+    if allowPartialIntervals:
+        return constants.CropCollision.TRUNCATED
+    else:
+        return constants.CropCollision.STRICT
+
+
+def _validateEntriesForWriting(nameStyle, entries, logger, outputPath):
+    # If we're using the 'label' namestyle for outputs, all of the
+    # interval labels have to be unique, or wave files with those
+    # labels as names, will be overwritten
+    if nameStyle == NameStyle.LABEL:
+        wordList = [interval.label for interval in entries]
+        multipleInstList = []
+        for word in utils.getUnique(wordList):
+            if wordList.count(word) > 1:
+                multipleInstList.append(word)
+
+        if len(multipleInstList) > 0:
+            instListTxt = "\n".join(multipleInstList)
+            logger.write(
+                f"Overwriting wave files in: {outputPath}\n"
+                f"Intervals exist with the same name:\n{instListTxt}"
+            )
 
 
 # TODO: Remove this method in the next major version

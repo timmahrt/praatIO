@@ -106,3 +106,12 @@ class DuplicateNames:
     RENAME: Final = "rename"
 
     validOptions = [ERROR, RENAME]
+
+
+class NameStyle:
+    NAME_AND_I_AND_LABEL = "name_and_i_and_label"
+    NAME_AND_LABEL = "name_and_label"
+    NAME_AND_I = "name_and_i"
+    LABEL = "label"
+
+    validOptions = [NAME_AND_I_AND_LABEL, NAME_AND_LABEL, NAME_AND_I, LABEL]

@@ -8,7 +8,7 @@ import itertools
 import wave
 from importlib import resources
 from typing_extensions import Literal
-from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional
+from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional, Sequence
 
 from praatio.utilities import errors
 from praatio.utilities import constants
@@ -22,6 +22,25 @@ if hasattr(resources, "files"):
 else:
     with resources.path("praatio", "praatScripts") as path:
         scriptsPath = path
+
+
+class TogglableLogger:
+    """
+    A logger that can enabled/disabled
+
+    If autoDisable=True, after writing once, the logger will shut itself off
+    """
+
+    def __init__(self, autoDisable: bool):
+        self.writable = True
+        self.autoDisable = autoDisable
+
+    def write(self, content: Any):
+        if self.writable:
+            print(content)
+
+            if self.autoDisable:
+                self.writable = False
 
 
 def find(list, value, reverse) -> Optional[int]:
@@ -359,6 +378,17 @@ def invertIntervalList(
         invList = [interval for interval in invList if interval[0] != interval[1]]
 
     return invList
+
+
+def getUnique(values: Sequence) -> Sequence:
+    """
+    Returns all of the unique elements in /values/
+
+    I had long used set() for this purpose but set()
+    doesn't preserve order.
+    """
+    # https://stackoverflow.com/a/64863151
+    return list(dict.fromkeys(values))
 
 
 def makeDir(path: str) -> None:

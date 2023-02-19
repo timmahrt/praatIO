@@ -1,11 +1,14 @@
 import os
 import contextlib
 import unittest
+import tempfile
 
 import pytest
 
 from praatio import textgrid
 from praatio.utilities.constants import Interval, INTERVAL_TIER, Point
+from praatio.utilities import textgrid_io
+from praatio.data_classes.textgrid import _tgToDictionary
 
 
 def areTheSameFiles(fn1, fn2, fileHandler, *args):
@@ -58,3 +61,19 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
     if points is None:
         points = [Point(1.3, "55"), Point(3.7, "99")]
     return textgrid.PointTier(name, points, minT, maxT)
+
+
+@contextlib.contextmanager
+def tempTextgrid(tg):
+    tgAsDict = _tgToDictionary(tg)
+    tgAsStr = textgrid_io.getTextgridAsStr(tgAsDict, "short_textgrid", True)
+    tmp = tempfile.NamedTemporaryFile()
+
+    tmpFd = open(tmp.name, "w")
+    tmpFd.write(tgAsStr)
+    tmpFd.flush()
+
+    try:
+        yield tmpFd
+    finally:
+        tmpFd.close()
