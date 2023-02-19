@@ -26,7 +26,10 @@ splitAudioOnTier has a slightly new signature
 - "noPartialIntervals" -> "allowPartialIntervals" to avoid a double negative
 
 tgBoundariesToZeroCrossings was removed
-- use the new TextgridTier.toZeroCrossings() instead
+- use the new TextgridTier.toZeroCrossings() method instead
+
+alignBoundariesAcrossTiers was removed
+- use the new TextgridTier.dejitter() method instead
 
 ### interval_tier.py
 

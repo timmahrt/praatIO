@@ -8,7 +8,6 @@ import os
 from os.path import join
 
 from praatio import textgrid
-from praatio import praatio_scripts
 
 path = join(".", "files")
 outputPath = join(path, "aligned-tier_textgrids")
@@ -21,5 +20,11 @@ if not os.path.exists(outputPath):
     os.mkdir(outputPath)
 
 originalTg = textgrid.openTextgrid(inputFN, False)
-tg = praatio_scripts.alignBoundariesAcrossTiers(originalTg, "word", maxDifference)
-tg.save(outputFN, "short_textgrid", True)
+newTg = textgrid.Textgrid()
+referenceTier = originalTg.getTier("word")
+for tier in originalTg.tiers:
+    if tier == referenceTier:
+        newTg.addTier(tier)
+        continue
+    newTg.addTier(tier.dejitter(referenceTier, maxDifference))
+newTg.save(outputFN, "short_textgrid", True)

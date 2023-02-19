@@ -8,7 +8,6 @@ import copy
 import wave
 
 from praatio import textgrid
-from praatio import praatio_scripts
 from praatio import audio
 from praatio.utilities import utils
 
