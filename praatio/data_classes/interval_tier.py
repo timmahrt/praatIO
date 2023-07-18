@@ -96,7 +96,8 @@ class IntervalTier(textgrid_tier.TextgridTier):
             if entry.end > nextEntry.start:
                 raise errors.TextgridStateError(
                     "Two intervals in the same tier overlap in time:\n"
-                    f"({entry.start}, {entry.end}, {entry.label}) and ({entry.start}, {entry.end}, {entry.label})"
+                    f"({entry.start}, {entry.end}, {entry.label}) and "
+                    f"({nextEntry.start}, {nextEntry.end}, {nextEntry.label})"
                 )
 
     def crop(
