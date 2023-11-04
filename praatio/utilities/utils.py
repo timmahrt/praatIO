@@ -6,7 +6,7 @@ import os
 import subprocess
 import itertools
 import wave
-import importlib.resources as pkg_resources
+from importlib import resources
 from typing_extensions import Literal
 from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional
 
@@ -16,11 +16,11 @@ from praatio.utilities import constants
 Interval = constants.Interval
 
 # New in python 3.9
-if hasattr(pkg_resources, "files"):
-    scriptsPath = pkg_resources.files("praatio") / "praatScripts"
+if hasattr(resources, "files"):
+    scriptsPath = resources.files("praatio") / "praatScripts"
 # Deprecated in python 3.11
 else:
-    scriptsPath = pkg_resources.path(
+    scriptsPath = resources.path(
         "praatio",
         "praatScripts",
     )
