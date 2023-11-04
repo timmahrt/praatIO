@@ -20,10 +20,8 @@ if hasattr(resources, "files"):
     scriptsPath = resources.files("praatio") / "praatScripts"
 # Deprecated in python 3.11
 else:
-    scriptsPath = resources.path(
-        "praatio",
-        "praatScripts",
-    )
+    with resources.path("praatio", "praatScripts") as path:
+        scriptsPath = path
 
 
 def find(list, value, reverse) -> Optional[int]:
