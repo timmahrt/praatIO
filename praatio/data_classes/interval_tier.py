@@ -12,6 +12,7 @@ from praatio.utilities.constants import (
     CropCollision,
 )
 
+from praatio import audio
 from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import my_math
@@ -141,6 +142,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            WrongOption: the mode is not valid
+            ArgumentError: cropStart occurs after cropEnd
         """
 
         utils.validateOption("mode", mode, CropCollision)
@@ -155,15 +160,16 @@ class IntervalTier(textgrid_tier.TextgridTier):
         )
 
         if rebaseToZero is True:
-            newSmallestValue = newEntryList[0][0]
-            if newSmallestValue < cropStart:
-                timeDiff = newSmallestValue
-            else:
-                timeDiff = cropStart
-            newEntryList = [
-                Interval(start - timeDiff, end - timeDiff, label)
-                for start, end, label in newEntryList
-            ]
+            if len(newEntryList) > 0:
+                newSmallestValue = newEntryList[0].start
+                if newSmallestValue < cropStart:
+                    timeDiff = newSmallestValue
+                else:
+                    timeDiff = cropStart
+                newEntryList = [
+                    Interval(start - timeDiff, end - timeDiff, label)
+                    for start, end, label in newEntryList
+                ]
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
@@ -252,6 +258,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            WrongOption: the reportingMode is not valid
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
@@ -304,7 +313,8 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     removed that overlaps with the target entry
                 - 'categorical' all entries that overlap, even partially, with
                     the target entry will be completely removed
-                - None or any other value throws IntervalCollision
+                - 'error' if the interval to delete overlaps with any entry,
+                    raises 'CollisionError'
             doShrink: If True, moves leftward by (/end/ - /start/)
                 amount, each item that occurs after /end/
 
@@ -312,7 +322,9 @@ class IntervalTier(textgrid_tier.TextgridTier):
             The modified version of the current tier
 
         Raises:
-            CollisionError
+            CollisionError: potentially raised if the interval to remove overlaps with
+                            an existing interval
+            WrongOption: the collisionMode is not valid
         """
         utils.validateOption("collisionMode", collisionMode, constants.EraseCollision)
 
@@ -458,6 +470,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            CollisionError: potentially raised if the interval to insert overlaps with
+                            an existing interval
+            WrongOption: the collisionMode or collisionReportingMode is not valid
         """
         utils.validateOption(
             "collisionMode", collisionMode, constants.IntervalCollision
@@ -544,6 +561,11 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             the modified version of the current tier
+
+        Raises:
+            CollisionError: potentially raised if the interval to insert overlaps with
+                            an existing interval
+            WrongOption: the collisionMode is not valid
         """
         utils.validateOption(
             "collisionMode", collisionMode, constants.WhitespaceCollision
@@ -585,7 +607,7 @@ class IntervalTier(textgrid_tier.TextgridTier):
                 elif collisionMode == constants.WhitespaceCollision.NO_CHANGE:
                     newEntryList.append(interval)
                 else:
-                    raise errors.ArgumentError(
+                    raise errors.CollisionError(
                         f"Collision occured during insertSpace() for interval '{interval}' "
                         f"and given white space insertion interval ({start}, {start + duration})"
                     )
@@ -735,6 +757,18 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         return IntervalTier(self.name, newEntryList, newMin, newMax)
 
+    def toZeroCrossings(self, wavFN: str) -> "IntervalTier":
+        """Moves all timestamps to the nearest zero crossing"""
+        wav = audio.QueryWav(wavFN)
+
+        intervals = []
+        for start, end, label in self.entries:
+            newStart = wav.findNearestZeroCrossing(start)
+            newStop = wav.findNearestZeroCrossing(end)
+            intervals.append(Interval(newStart, newStop, label))
+
+        return self.new(entries=intervals)
+
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"
     ) -> bool:
@@ -745,6 +779,10 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         Returns:
             True if the tier is valid; False if not
+
+        Raises:
+            WrongOption: the reportingMode is not valid
+            TextgridStateError: potentially raised when the textgrid is not valid
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode

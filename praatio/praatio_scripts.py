@@ -8,59 +8,17 @@ see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
 import os
 from os.path import join
 import math
-from typing import Callable, List, Tuple, Optional
+from typing import Callable, List, Tuple
 
 from typing_extensions import Literal, Final
 
 from praatio import textgrid
 from praatio import audio
+from praatio.utilities import utils
 from praatio.data_classes import textgrid_tier
 from praatio.utilities import constants
-from praatio.utilities.constants import Point, Interval
+from praatio.utilities.constants import Point, Interval, NameStyle
 from praatio.utilities import errors
-
-
-class NameStyle:
-    APPEND = "append"
-    APPEND_NO_I = "append_no_i"
-    LABEL = "label"
-
-
-def _shiftTimes(
-    tg: textgrid.Textgrid, timeV: float, newTimeV: float
-) -> textgrid.Textgrid:
-    """Change all instances of timeV in the textgrid to newTimeV
-
-    These are meant to be small changes.  No checks are done to see
-    if the new interval steps on other intervals
-    """
-    tg = tg.new()
-    for tier in tg.tiers:
-        if isinstance(tier, textgrid.IntervalTier):
-            entries = [
-                entry
-                for entry in tier.entries
-                if entry[0] == timeV or entry[1] == timeV
-            ]
-            insertEntries = []
-            for entry in entries:
-                if entry[0] == timeV:
-                    newStart, newStop = newTimeV, entry[1]
-                elif entry[1] == timeV:
-                    newStart, newStop = entry[0], newTimeV
-                tier.deleteEntry(entry)
-                insertEntries.append((newStart, newStop, entry[2]))
-
-            for entry in insertEntries:
-                tier.insertEntry(entry)
-
-        elif isinstance(tier, textgrid.PointTier):
-            entries = [entry for entry in tier.entries if entry[0] == timeV]
-            for entry in entries:
-                tier.deleteEntry(entry)
-                tier.insertEntry(Point(newTimeV, entry[1]))
-
-    return tg
 
 
 def audioSplice(
@@ -140,6 +98,43 @@ def audioSplice(
     return audioObj, retTG
 
 
+def _shiftTimes(
+    tg: textgrid.Textgrid, timeV: float, newTimeV: float
+) -> textgrid.Textgrid:
+    """Change all instances of timeV in the textgrid to newTimeV
+
+    These are meant to be small changes.  No checks are done to see
+    if the new interval steps on other intervals
+    """
+    tg = tg.new()
+    for tier in tg.tiers:
+        if isinstance(tier, textgrid.IntervalTier):
+            entries = [
+                entry
+                for entry in tier.entries
+                if entry[0] == timeV or entry[1] == timeV
+            ]
+            insertEntries = []
+            for entry in entries:
+                if entry[0] == timeV:
+                    newStart, newStop = newTimeV, entry[1]
+                elif entry[1] == timeV:
+                    newStart, newStop = entry[0], newTimeV
+                tier.deleteEntry(entry)
+                insertEntries.append((newStart, newStop, entry[2]))
+
+            for entry in insertEntries:
+                tier.insertEntry(entry)
+
+        elif isinstance(tier, textgrid.PointTier):
+            entries = [entry for entry in tier.entries if entry[0] == timeV]
+            for entry in entries:
+                tier.deleteEntry(entry)
+                tier.insertEntry(Point(newTimeV, entry[1]))
+
+    return tg
+
+
 def spellCheckEntries(
     tg: textgrid.Textgrid,
     targetTierName: str,
@@ -161,8 +156,12 @@ def spellCheckEntries(
     Args:
         checkFunction: should return True if a word is spelled correctly and
             False otherwise
+
+    Raises:
+        TierNameExistsError: newTierName exists in the textgrid
     """
     punctuationList = [
+        "-",
         "_",
         ",",
         "'",
@@ -181,7 +180,7 @@ def spellCheckEntries(
 
         # Remove punctuation
         for char in punctuationList:
-            label = label.replace(char, "")
+            label = label.replace(char, " ")
 
         wordList = label.split()
         mispelledList = []
@@ -205,11 +204,7 @@ def spellCheckEntries(
 
 
 def splitTierEntries(
-    tg: textgrid.Textgrid,
-    sourceTierName: str,
-    targetTierName: str,
-    startT: float = None,
-    endT: float = None,
+    tg: textgrid.Textgrid, sourceTierName: str, targetTierName: str
 ) -> textgrid.Textgrid:
     """Split each entry in a tier by space
 
@@ -220,25 +215,22 @@ def splitTierEntries(
 
     This could be used to decompose utterances into words or, with pysle,
     words into phones.
+
+    Returns:
+        A modified version of the input textgrid
+
+    Raises:
+        CollisionError: If targetTierName exists in the textgrid, this will attempt
+                        to write the new content into it; if any of the new intervals
+                        overlap with existing intervals, this will fail.
     """
     minT = tg.minTimestamp
     maxT = tg.maxTimestamp
 
     sourceTier = tg.getTier(sourceTierName)
     targetTier = None
-
-    # Examine a subset of the source tier?
-    if startT is not None or endT is not None:
-        if startT is None:
-            startT = minT
-        if endT is None:
-            endT = maxT
-
-        sourceTier = sourceTier.crop(startT, endT, "truncated", False)
-
-        if targetTierName in tg.tierNames:
-            targetTier = tg.getTier(targetTierName)
-            targetTier = targetTier.eraseRegion(startT, endT, "truncate", False)
+    if targetTierName in tg.tierNames:
+        targetTier = tg.getTier(targetTierName)
 
     # Split the entries in the source tier
     newEntries = []
@@ -272,52 +264,16 @@ def splitTierEntries(
     return tg
 
 
-def tgBoundariesToZeroCrossings(
-    tg: textgrid.Textgrid,
-    wav: audio.Wav,
-    adjustPointTiers: bool = True,
-    adjustIntervalTiers: bool = True,
-) -> textgrid.Textgrid:
-    """Makes all textgrid interval boundaries fall on pressure wave zero crossings
-
-    adjustPointTiers: if True, point tiers will be adjusted.
-    adjustIntervalTiers: if True, interval tiers will be adjusted.
-    """
-    for tier in tg.tiers:
-        newTier: textgrid_tier.TextgridTier
-        if isinstance(tier, textgrid.PointTier):
-            if adjustPointTiers is False:
-                continue
-
-            points = []
-            for start, label in tier.entries:
-                newStart = wav.findNearestZeroCrossing(start)
-                points.append(Point(newStart, label))
-            newTier = tier.new(entries=points)
-        elif isinstance(tier, textgrid.IntervalTier):
-            if adjustIntervalTiers is False:
-                continue
-
-            intervals = []
-            for start, end, label in tier.entries:
-                newStart = wav.findNearestZeroCrossing(start)
-                newStop = wav.findNearestZeroCrossing(end)
-                intervals.append(Interval(newStart, newStop, label))
-            newTier = tier.new(entries=intervals)
-
-        tg.replaceTier(tier.name, newTier)
-
-    return tg
-
-
 def splitAudioOnTier(
     wavFN: str,
     tgFN: str,
     tierName: str,
     outputPath: str,
     outputTGFlag: bool = False,
-    nameStyle: Optional[Literal["append", "append_no_i", "label"]] = None,
-    noPartialIntervals: bool = False,
+    nameStyle: Literal[
+        "name_and_i_and_label", "name_and_label", "name_and_i", "label"
+    ] = "name_and_i",
+    allowPartialIntervals: bool = True,
     silenceLabel: str = None,
 ) -> List[Tuple[float, float, str]]:
     """Outputs one subwav for each entry in the tier of a textgrid
@@ -331,11 +287,11 @@ def splitAudioOnTier(
             If is type str (a tier name), outputs a paired, cropped
             textgrid with only the specified tier
         nameStyle:
-            - 'append': append interval label to output name
-            - 'append_no_i': append label but not interval to output name
+            - 'name_and_i_and_label': append interval label to output name
+            - 'name_and_label': append label but not interval to output name
+            - 'name_and_i': output name plus the interval number
             - 'label': output name is the same as label
-            - None: output name plus the interval number
-        noPartialIntervals: if True: intervals in non-target tiers that
+        allowPartialIntervals: if False: intervals in non-target tiers that
             are not wholly contained by an interval in the target tier will not
             be included in the output textgrids
         silenceLabel: the label for silent regions.  If silences are
@@ -346,47 +302,33 @@ def splitAudioOnTier(
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
 
-    def getValue(myBool) -> Literal["strict", "lax", "truncated"]:
-        # This will make mypy happy
-        if myBool:
-            return constants.CropCollision.STRICT
-        else:
-            return constants.CropCollision.TRUNCATED
+    utils.validateOption("nameStyle", nameStyle, NameStyle)
 
-    mode: Final = getValue(noPartialIntervals)
+    mode: Final = _getMode(allowPartialIntervals)
 
     tg = textgrid.openTextgrid(tgFN, False)
     entries = tg.getTier(tierName).entries
 
-    if silenceLabel is not None:
-        entries = [entry for entry in entries if entry.label != silenceLabel]
-
     # Build the output name template
-    name = os.path.splitext(os.path.split(wavFN)[1])[0]
+    outputNameBase = os.path.splitext(os.path.split(wavFN)[1])[0]
     orderOfMagnitude = int(math.floor(math.log10(len(entries))))
 
     # We want one more zero in the output than the order of magnitude
-    outputTemplate = "%s_%%0%dd" % (name, orderOfMagnitude + 1)
+    outputTemplate = "%s_%%0%dd" % (outputNameBase, orderOfMagnitude + 1)
+    nameStyleToNameGenerator = {
+        "name_and_i_and_label": lambda _name, label, i: f"{outputTemplate % i}_{label}",
+        "name_and_label": lambda name, label, _i: f"{name}_{label}",
+        "name_and_i": lambda _name, _label, i: f"{outputTemplate % i}",
+        "label": lambda _name, label, _i: label,
+    }
+    generateName = nameStyleToNameGenerator[nameStyle]
 
-    firstWarning = True
+    if silenceLabel is not None:
+        entries = [entry for entry in entries if entry.label != silenceLabel]
 
-    # If we're using the 'label' namestyle for outputs, all of the
-    # interval labels have to be unique, or wave files with those
-    # labels as names, will be overwritten
-    if nameStyle == NameStyle.LABEL:
-        wordList = [interval.label for interval in entries]
-        multipleInstList = []
-        for word in set(wordList):
-            if wordList.count(word) > 1:
-                multipleInstList.append(word)
-
-        if len(multipleInstList) > 0:
-            instListTxt = "\n".join(multipleInstList)
-            print(
-                f"Overwriting wave files in: {outputPath}\n"
-                f"Intervals exist with the same name:\n{instListTxt}"
-            )
-            firstWarning = False
+    logger = utils.TogglableLogger(autoDisable=True)
+    _validateEntriesForWriting(nameStyle, entries, logger, outputPath)
+    logger.autoDisable = False
 
     # Output wave files
     outputFNList = []
@@ -394,20 +336,11 @@ def splitAudioOnTier(
     for i, entry in enumerate(entries):
         start, end, label = entry
 
-        # Resolve output name
-        if nameStyle == NameStyle.APPEND_NO_I:
-            outputName = f"{name}_{label}"
-        elif nameStyle == NameStyle.LABEL:
-            outputName = label
-        else:
-            outputName = outputTemplate % i
-            if nameStyle == NameStyle.APPEND:
-                outputName += f"_{label}"
-
+        outputName = generateName(outputNameBase, label, i)
         outputFNFullPath = join(outputPath, outputName + ".wav")
 
-        if os.path.exists(outputFNFullPath) and firstWarning:
-            print(
+        if os.path.exists(outputFNFullPath):
+            logger.write(
                 f"Overwriting wave files in: {outputPath}\n"
                 "Files existed before or intervals exist with "
                 f"the same name:\n{outputName}"
@@ -434,55 +367,28 @@ def splitAudioOnTier(
     return outputFNList
 
 
-# TODO: Remove this method in the next major version
-#       Migrate to using the new Textgridtier.dejitter()
-def alignBoundariesAcrossTiers(
-    tg: textgrid.Textgrid, tierName: str, maxDifference: float = 0.005
-) -> textgrid.Textgrid:
-    """Aligns boundaries or points in a textgrid that suffer from 'jitter'
+def _getMode(allowPartialIntervals: bool) -> Literal["strict", "lax", "truncated"]:
+    # This helper function is just to make mypy happy
+    if allowPartialIntervals:
+        return constants.CropCollision.TRUNCATED
+    else:
+        return constants.CropCollision.STRICT
 
-    Often times, boundaries in different tiers are meant to line up.
-    For example the boundary of the first phone in a word and the start
-    of the word.  If manually annotated, however, those values might
-    not be the same, even if they were intended to be the same.
 
-    This script will force all boundaries within /maxDifference/ amount
-    to be the same value.  The replacement value is either the majority
-    value found within /maxDifference/ or, if no majority exists, than
-    the value used in the search query.
+def _validateEntriesForWriting(nameStyle, entries, logger, outputPath):
+    # If we're using the 'label' namestyle for outputs, all of the
+    # interval labels have to be unique, or wave files with those
+    # labels as names, will be overwritten
+    if nameStyle == NameStyle.LABEL:
+        wordList = [interval.label for interval in entries]
+        multipleInstList = []
+        for word in utils.getUnique(wordList):
+            if wordList.count(word) > 1:
+                multipleInstList.append(word)
 
-    Args:
-        tg: the textgrid to operate on
-        tierName: the name of the reference tier to compare other tiers against
-        maxDifference: any boundaries that differ less this amount compared
-                       to boundaries in the reference tier will be adjusted
-
-    Returns:
-        the provided textgrid with aligned boundaries
-
-    Raises:
-        ArgumentError: The provided maxDifference is larger than the smallest difference in
-                       the tier to be used for comparisons, which could lead to strange results.
-                       In such a case, choose a smaller maxDifference.
-    """
-    referenceTier = tg.getTier(tierName)
-    times = referenceTier.timestamps
-
-    for time, nextTime in zip(times[1::], times[2::]):
-        if nextTime - time < maxDifference:
-            raise errors.ArgumentError(
-                "The provided maxDifference is larger than the smallest difference in"
-                "the tier used for comparison, which could lead to strange results."
-                "Please choose a smaller maxDifference.\n"
-                f"Max difference: {maxDifference}\n"
-                f"found difference {nextTime - time} for times {time} and {nextTime}"
+        if len(multipleInstList) > 0:
+            instListTxt = "\n".join(multipleInstList)
+            logger.write(
+                f"Overwriting wave files in: {outputPath}\n"
+                f"Intervals exist with the same name:\n{instListTxt}"
             )
-
-    for tier in tg.tiers:
-        if tier.name == tierName:
-            continue
-
-        tier = tier.dejitter(referenceTier, maxDifference)
-        tg.replaceTier(tier.name, tier)
-
-    return tg

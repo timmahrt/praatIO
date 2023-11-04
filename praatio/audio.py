@@ -28,6 +28,45 @@ DEFAULT_SINE_FREQUENCY = 200
 NUM_BITS_IN_A_BYTE = 8
 
 
+def _diffBooleans(a: bool, b: bool) -> int:
+    if a == b:
+        return 0
+    elif a is True and b is False:
+        return -1
+
+    # For mypy
+    # a is False and b is True
+    return 1
+
+
+def _getZeroCrossings(
+    samples: List[int], startTime: float, framerate: int
+) -> List[float]:
+    """
+    Given a list of samples, return a list of times where zero-crossings occur
+
+    Inspired by:
+    https://stackoverflow.com/a/44322349
+    """
+    rightGreater = [val > 0 for val in samples]
+    rightComp = [
+        _diffBooleans(a, b) for a, b in zip(rightGreater[0::], rightGreater[1::])
+    ]
+
+    def getClosest(i):
+        # A zero crossing happens between two values (e.g. a change from positive to negative)
+        # Choose the smaller of the two values involved
+        return min([i, i + 1], key=lambda i: abs(samples[i]))
+
+    zeroCrossings = [getClosest(i) for i in range(len(rightComp)) if rightComp[i] != 0]
+
+    zeroCrossingsInTime = [
+        startTime + (zeroI / float(framerate)) for zeroI in zeroCrossings
+    ]
+
+    return zeroCrossingsInTime
+
+
 def calculateMaxAmplitude(sampleWidth: int) -> int:
     """Gets the largest possible amplitude representable by a given sample width
 
@@ -155,25 +194,16 @@ class AbstractWav(ABC):
                 )
             )
 
-    def _iterZeroCrossings(
-        self,
-        start: float,
-        withinThreshold,
-        step: float,
-        reverse: bool,
-    ) -> Optional[float]:
-        if not withinThreshold(start):
-            return None
-
-        startTime, endTime = utils.getInterval(start, step, self.duration, reverse)
-        samples = self.getSamples(startTime, endTime)
-
-        return _findNextZeroCrossing(startTime, samples, self.frameRate, reverse)
-
     @property
     @abstractmethod
     def duration(self) -> float:  # pragma: no cover
         pass
+
+    def getSamplesAtTime(self, start, step, reverse):
+        startTime, endTime = utils.getInterval(start, step, self.duration, reverse)
+        samples = self.getSamples(startTime, endTime)
+
+        return samples
 
     def findNearestZeroCrossing(
         self, targetTime: float, timeStep: float = ZERO_CROSSING_TIMESTEP
@@ -181,9 +211,16 @@ class AbstractWav(ABC):
         """Finds the nearest zero crossing at the given time in an audio file
 
         Looks both before and after the timeStamp
-        """
 
-        leftStartTime = rightStartTime = targetTime
+        Raises:
+            ArgumentError: the timeStep is too small
+            ZeroCrossingError: no zero crossings exist in the audio
+        """
+        # We'll read timeStep before the targetTime and after, then
+        # continue reading in timeStep chunks left and right until
+        # we find the zero crossing
+        leftStartTime = targetTime - timeStep
+        rightStartTime = targetTime
 
         samplesPerStep = timeStep * self.frameRate
         if samplesPerStep < 2:
@@ -193,38 +230,39 @@ class AbstractWav(ABC):
             )
 
         # Find zero crossings
-        smallestLeft = None
-        smallestRight = None
-        oneSampleDuration = 1 / self.frameRate
+        oneSampleDuration = 2 / self.frameRate
         while True:
-            # Increasing our timeStep by one sample enables
-            # us to find zero-crossings that sit at the boundary
-            # of two samples (two different iterations of this loop)
-            smallestLeft = self._iterZeroCrossings(
-                leftStartTime, lambda x: x > 0, timeStep + oneSampleDuration, True
-            )
-            smallestRight = self._iterZeroCrossings(
-                rightStartTime,
-                lambda x: x + timeStep < self.duration,
-                timeStep + oneSampleDuration,
-                False,
-            )
+            if leftStartTime < 0 and rightStartTime > self.duration:
+                raise errors.ZeroCrossingError()  # This should probably never happen
 
-            if smallestLeft is not None or smallestRight is not None:
-                break
-            # TODO: I think this case shouldn't be possible
-            elif leftStartTime < 0 and rightStartTime > self.duration:
-                raise (errors.FindZeroCrossingError(0, self.duration))
-            else:
-                # oneSampleDuration is not added here
-                leftStartTime -= timeStep
-                rightStartTime += timeStep
+            samplesToRead = []
+            if leftStartTime > 0:
+                leftIncrement = timeStep + oneSampleDuration
+                if leftStartTime - leftIncrement < 0:
+                    leftStartTime = 0
+                samplesToRead.append([leftStartTime, leftIncrement])
 
-        # Under ordinary circumstances, this should not occur
-        if smallestLeft is None and smallestRight is None:
-            raise errors.FindZeroCrossingError(0, self.duration)
+            if rightStartTime < self.duration:
+                rightIncrement = timeStep + oneSampleDuration
+                if rightStartTime + rightIncrement > self.duration:
+                    rightIncrement = self.duration - rightStartTime
+                samplesToRead.append([rightStartTime, rightIncrement])
 
-        return utils.chooseClosestTime(targetTime, smallestLeft, smallestRight)
+            zeroCrossingsInTime = []
+            if len(samplesToRead) > 0:
+                for startTime, increment in samplesToRead:
+                    samples = self.getSamplesAtTime(startTime, increment, False)
+                    zeroCrossingsInTime.extend(
+                        _getZeroCrossings(samples, startTime, self.frameRate)
+                    )
+
+                if len(zeroCrossingsInTime) > 0:
+                    return min(
+                        zeroCrossingsInTime, key=lambda val: abs(targetTime - val)
+                    )
+
+            leftStartTime -= timeStep
+            rightStartTime += timeStep
 
     @abstractmethod
     def getFrames(self, startTime: float, endTime: float) -> bytes:  # pragma: no cover
@@ -403,50 +441,6 @@ class AudioGenerator:
     def generateSilence(self, duration: float) -> bytes:
         zeroBinValue = struct.pack(sampleWidthDict[self.sampleWidth], 0)
         return zeroBinValue * round(self.frameRate * duration)
-
-
-def _findNextZeroCrossing(
-    startTime: float,
-    samples: Tuple[int, ...],
-    frameRate: float,
-    reverse: bool,
-) -> Optional[float]:
-    """Finds the nearest zero crossing, searching in one direction
-
-    Can do a 'reverse' search by setting reverse to True.  In that case,
-    the sample list is searched from back to front.
-
-    targetTime is the startTime if reverse=False and
-        the endTime if reverse=True
-    """
-    zeroI = _getNearestZero(samples, reverse)
-    if zeroI is None:
-        zeroI = _getZeroThresholdCrossing(samples, reverse)
-        if zeroI is None:
-            return None
-
-    return startTime + zeroI / float(frameRate)
-
-
-def _getNearestZero(samples: Tuple[int, ...], reverse: bool) -> Optional[int]:
-    return utils.find(samples, 0, reverse)
-
-
-def _getZeroThresholdCrossing(samples: Tuple[int, ...], reverse: bool) -> Optional[int]:
-    signList = [utils.sign(val) for val in samples]
-    changeList = [signList[i] != signList[i + 1] for i in range(len(samples) - 1)]
-    zeroI = utils.find(changeList, True, reverse)
-
-    if zeroI is None:
-        return None
-
-    # We found the zero by comparing points to the point adjacent to them.
-    # It is possible the adjacent point is closer to zero than this one,
-    # in which case, it is the better zeroedI
-    if abs(samples[zeroI]) > abs(samples[zeroI + 1]):
-        zeroI = zeroI + 1
-
-    return zeroI
 
 
 def _computeKeepDeleteIntervals(

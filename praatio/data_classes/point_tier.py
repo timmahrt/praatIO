@@ -5,6 +5,7 @@ from typing import List, Tuple, Optional, Any, Sequence
 
 from typing_extensions import Literal
 
+from praatio import audio
 from praatio.utilities.constants import (
     Point,
     POINT_TIER,
@@ -402,6 +403,17 @@ class PointTier(textgrid_tier.TextgridTier):
         )
 
         return newTier
+
+    def toZeroCrossings(self, wavFN: str) -> "PointTier":
+        """Moves all timestamps to the nearest zero crossing"""
+        wav = audio.QueryWav(wavFN)
+
+        points = []
+        for time, label in self.entries:
+            newTime = wav.findNearestZeroCrossing(time)
+            points.append(Point(newTime, label))
+
+        return self.new(entries=points)
 
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"

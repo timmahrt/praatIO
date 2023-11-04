@@ -256,5 +256,9 @@ class TextgridTier(ABC):
         pass
 
     @abstractmethod
+    def toZeroCrossings(self, wavFN) -> "TextgridTier":  # pragma: no cover
+        pass
+
+    @abstractmethod
     def validate(self, reportingMode) -> bool:  # pragma: no cover
         pass

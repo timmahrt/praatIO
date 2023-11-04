@@ -24,6 +24,11 @@ class ParsingError(PraatioException):
     pass
 
 
+class ZeroCrossingError(PraatioException):
+    def __str__(self):
+        return "No zero crossings found in wav data"
+
+
 class ArgumentError(PraatioException):
     pass
 
@@ -116,18 +121,6 @@ class PraatExecutionFailed(PraatioException):
         )
         cmdTxt = " ".join(self.cmdList)
         return errorStr + cmdTxt
-
-
-class FindZeroCrossingError(PraatioException):
-    def __init__(self, startTime: float, endTime: float):
-        super(FindZeroCrossingError, self).__init__()
-
-        self.startTime = startTime
-        self.endTime = endTime
-
-    def __str__(self):
-        retString = "No zero crossing found between %f and %f"
-        return retString % (self.startTime, self.endTime)
 
 
 class NormalizationException(PraatioException):

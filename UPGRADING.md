@@ -6,8 +6,35 @@ For more information about the most recent version of Praatio, please see the do
 If you are having difficulty upgrading, please don't hesistate to open an issue or contact me.
 
 # Table of contents
-1. [Version 5 to 6](#version-5-to-6-migration)
-2. [Version 4 to 5](#version-4-to-5-migration)
+1. [Version 6 to 7](#version-6-to-7-migration)
+2. [Version 5 to 6](#version-5-to-6-migration)
+3. [Version 4 to 5](#version-4-to-5-migration)
+
+## Version 6 to 7 Migration
+
+### praatio_scripts.py
+
+splitTierEntries has a simplified signature.
+"startT" and "endT" have been removed.
+Please prepare your textgrid (e.g. tg.crop()) before calling splitTierEntries.
+
+splitAudioOnTier has a slightly new signature
+- the options for nameStyle have been changed to better reflect the available options
+  - "append" -> "name_and_i_and_label"
+  - "append_no_i" -> "name_and_label"
+  - None -> "name_and_label"
+- "noPartialIntervals" -> "allowPartialIntervals" to avoid a double negative
+
+tgBoundariesToZeroCrossings was removed
+- use the new TextgridTier.toZeroCrossings() method instead
+
+alignBoundariesAcrossTiers was removed
+- use the new TextgridTier.dejitter() method instead
+
+### interval_tier.py
+
+insertSpace raises CollisionError rather than ArgumentError when the space to insert overlaps
+with an existing entry and the collisionMode is "error".
 
 ## Version 5 to 6 Migration
 
