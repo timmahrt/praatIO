@@ -21,6 +21,10 @@ def isclose(a: float, b: float, rel_tol: float = 1e-14, abs_tol: float = 0.0) ->
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
+def lessThanOrEqual(a: float, b: float):
+    return isclose(a, b) or a < b
+
+
 def filterTimeSeriesData(
     filterFunc: Callable[[List[float], int, bool], List[float]],
     featureTimeList: List[list],
