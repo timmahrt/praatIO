@@ -434,6 +434,8 @@ def splitAudioOnTier(
     return outputFNList
 
 
+# TODO: Remove this method in the next major version
+#       Migrate to using the new Textgridtier.dejitter()
 def alignBoundariesAcrossTiers(
     tg: textgrid.Textgrid, tierName: str, maxDifference: float = 0.005
 ) -> textgrid.Textgrid:
@@ -464,7 +466,7 @@ def alignBoundariesAcrossTiers(
                        In such a case, choose a smaller maxDifference.
     """
     referenceTier = tg.getTier(tierName)
-    times = _getTimestampsFromTier(referenceTier)
+    times = referenceTier.timestamps
 
     for time, nextTime in zip(times[1::], times[2::]):
         if nextTime - time < maxDifference:
@@ -480,47 +482,7 @@ def alignBoundariesAcrossTiers(
         if tier.name == tierName:
             continue
 
-        newEntries: list = []
-        if tier.entryType == constants.Interval:
-            for start, stop, label in tier.entries:
-                startCompare = min(times, key=lambda x: abs(x - start))
-                stopCompare = min(times, key=lambda x: abs(x - stop))
-
-                if abs(start - startCompare) <= maxDifference:
-                    start = startCompare
-                if abs(stop - stopCompare) <= maxDifference:
-                    stop = stopCompare
-                newEntries.append((start, stop, label))
-        elif tier.entryType == constants.Point:
-            for time, label in tier.entries:
-                timeCompare = min(times, key=lambda x: abs(x - time))
-
-                if abs(time - timeCompare) <= maxDifference:
-                    time = timeCompare
-                newEntries.append((time, label))
-
-        tier = tier.new(entries=newEntries)
+        tier = tier.dejitter(referenceTier, maxDifference)
         tg.replaceTier(tier.name, tier)
 
     return tg
-
-
-def _getTimestampsFromTier(tier: textgrid_tier.TextgridTier) -> List[float]:
-    """Get all timestamps used in a tier"""
-    timestamps = []
-    if tier.entryType == constants.Interval:
-        timestamps = [
-            time
-            for start, stop, _ in tier.entries
-            for time in [
-                start,
-                stop,
-            ]
-        ]
-    elif tier.entryType == constants.Point:
-        timestamps = [time for time, _ in tier.entries]
-
-    timestamps = list(set(timestamps))
-    timestamps.sort()
-
-    return timestamps

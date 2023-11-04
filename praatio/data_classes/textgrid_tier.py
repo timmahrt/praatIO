@@ -75,6 +75,11 @@ class TextgridTier(ABC):
     def entries(self):
         return tuple(self._entries)
 
+    @property
+    @abstractmethod
+    def timestamps(self) -> List[float]:
+        pass
+
     def appendTier(self, tier: "TextgridTier") -> "TextgridTier":
         """Append a tier to the end of this one.
 
@@ -207,6 +212,14 @@ class TextgridTier(ABC):
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def dejitter(
+        self,
+        referenceTier: "TextgridTier",
+        maxDifference: float = 0.001,
+    ) -> "TextgridTier":  # pragma: no cover
         pass
 
     @abstractmethod

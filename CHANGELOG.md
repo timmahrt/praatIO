@@ -3,6 +3,9 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 6.1 (Nov 4, 2023)
+- Add `TextgridTier.dejitter()` method for improving consistency between tiers
+
 Ver 6.0 (Feb 4, 2023)
 - Refactored 'audio.py' for maintainability (see [UPGRADING.md](https://github.com/timmahrt/praatIO/blob/main/UPGRADING.md) for details)
 - Added unit tests for 'audio.py'
