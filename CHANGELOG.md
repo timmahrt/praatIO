@@ -3,7 +3,7 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
-Ver 6.1 (Feb 6, 2023)
+Ver 6.1 (Nov 4, 2023)
 - Add `TextgridTier.dejitter()` method for improving consistency between tiers
 
 Ver 6.0 (Feb 4, 2023)
