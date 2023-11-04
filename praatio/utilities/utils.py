@@ -6,7 +6,7 @@ import os
 import subprocess
 import itertools
 import wave
-from pkg_resources import resource_filename
+from importlib import resources
 from typing_extensions import Literal
 from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional
 
@@ -15,11 +15,13 @@ from praatio.utilities import constants
 
 Interval = constants.Interval
 
-# Get the folder one level above the current folder
-scriptsPath = resource_filename(
-    "praatio",
-    "praatScripts",
-)
+# New in python 3.9
+if hasattr(resources, "files"):
+    scriptsPath = resources.files("praatio") / "praatScripts"
+# Deprecated in python 3.11
+else:
+    with resources.path("praatio", "praatScripts") as path:
+        scriptsPath = path
 
 
 def find(list, value, reverse) -> Optional[int]:
@@ -386,7 +388,6 @@ def findAll(txt: str, subStr: str) -> List[int]:
 def runPraatScript(
     praatEXE: str, scriptFN: str, argList: List[Any], cwd: str = None
 ) -> None:
-
     # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
         raise errors.FileNotFound(praatEXE)
