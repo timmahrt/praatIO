@@ -21,7 +21,7 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
 
 
 class TestTextgrid(PraatioTestCase):
-    def test_len_returns_the_number_of_tiers_in_the_textgrid(self):
+    def test__len__returns_the_number_of_tiers_in_the_textgrid(self):
         tier1 = makeIntervalTier()
         tier2 = makePointTier()
 
@@ -41,7 +41,7 @@ class TestTextgrid(PraatioTestCase):
         sut.removeTier(tier2.name)
         self.assertEqual(len(sut), 0)
 
-    def test_iter_iterates_through_tiers(self):
+    def test__iter__iterates_through_tiers(self):
         tier1 = makeIntervalTier()
         tier2 = makePointTier()
 

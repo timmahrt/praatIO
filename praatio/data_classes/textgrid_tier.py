@@ -55,14 +55,14 @@ class TextgridTier(ABC):
             yield entry
 
     def __eq__(self, other):
-        if isinstance(self, type(other)):
+        if not isinstance(self, type(other)):
             return False
 
         isEqual = True
         isEqual &= self.name == other.name
         isEqual &= math.isclose(self.minTimestamp, other.minTimestamp)
         isEqual &= math.isclose(self.maxTimestamp, other.maxTimestamp)
-        isEqual &= len(self.entries) == len(self.entries)
+        isEqual &= len(self.entries) == len(other.entries)
 
         # TODO: Intervals and Points now use isclose, so we can simplify this
         #       logic (selfEntry == otherEntry); however, this will break

@@ -9,10 +9,51 @@ from tests.praatio_test_case import PraatioTestCase
 from tests import testing_utils
 
 makePointTier = testing_utils.makePointTier
+makeIntervalTier = testing_utils.makeIntervalTier
 
 
 class TestPointTier(PraatioTestCase):
-    def test_len_returns_the_number_of_points_in_the_point_tier(self):
+    def test__eq__(self):
+        sut = makePointTier(name="foo", points=[], minT=1, maxT=4)
+        pointTier = makePointTier(name="foo", points=[], minT=1, maxT=4)
+        intervalTier = makeIntervalTier()
+        point1 = Point(1.0, "hello")
+        point2 = Point(3.0, "world")
+
+        # must be the same type
+        self.assertEqual(sut, pointTier)
+        self.assertNotEqual(sut, intervalTier)
+
+        # must have the same entries
+        sut.insertEntry(point1)
+        self.assertNotEqual(sut, pointTier)
+
+        # just having the same number of entries is not enough
+        pointTier.insertEntry(point2)
+        self.assertNotEqual(sut, pointTier)
+
+        sut.insertEntry(point2)
+        pointTier.insertEntry(point1)
+        self.assertEqual(sut, pointTier)
+
+        # must have the same name
+        pointTier.name = "bar"
+        self.assertNotEqual(sut, pointTier)
+        pointTier.name = "foo"
+        self.assertEqual(sut, pointTier)
+
+        # must have the same min/max timestamps
+        pointTier.minTimestamp = 0.5
+        self.assertNotEqual(sut, pointTier)
+
+        pointTier.minTimestamp = 1
+        pointTier.maxTimestamp = 5
+        self.assertNotEqual(sut, pointTier)
+
+        sut.maxTimestamp = 5
+        self.assertEqual(sut, pointTier)
+
+    def test__len__returns_the_number_of_points_in_the_point_tier(self):
         point1 = Point(1, "hello")
         point2 = Point(3.5, "world")
 
@@ -32,7 +73,7 @@ class TestPointTier(PraatioTestCase):
         sut.deleteEntry(point2)
         self.assertEqual(len(sut), 0)
 
-    def test_iter_iterates_through_points_in_the_point_tier(self):
+    def test__iter__iterates_through_points_in_the_point_tier(self):
         point1 = Point(1, "hello")
         point2 = Point(3.5, "world")
 
