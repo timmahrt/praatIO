@@ -21,6 +21,41 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
 
 
 class TestTextgrid(PraatioTestCase):
+    def test__len__returns_the_number_of_tiers_in_the_textgrid(self):
+        tier1 = makeIntervalTier()
+        tier2 = makePointTier()
+
+        sut = textgrid.Textgrid()
+
+        self.assertEqual(len(sut), 0)
+
+        sut.addTier(tier1)
+        self.assertEqual(len(sut), 1)
+
+        sut.addTier(tier2)
+        self.assertEqual(len(sut), 2)
+
+        sut.removeTier(tier1.name)
+        self.assertEqual(len(sut), 1)
+
+        sut.removeTier(tier2.name)
+        self.assertEqual(len(sut), 0)
+
+    def test__iter__iterates_through_tiers(self):
+        tier1 = makeIntervalTier()
+        tier2 = makePointTier()
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        seenTiers = []
+        for tier in sut:
+            seenTiers.append(tier)
+
+        self.assertEqual(seenTiers, [tier1, tier2])
+
     def test_inequivalence_with_non_textgrids(self):
         sut = textgrid.Textgrid()
         self.assertNotEqual(sut, 55)
@@ -317,7 +352,10 @@ class TestTextgrid(PraatioTestCase):
             makeIntervalTier(
                 "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
             ),
-            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+            makePointTier(
+                "cats",
+                [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"], [5.9, "cheesecake"]],
+            ),
         ]:
             originalTextgrid.addTier(tier)
 
@@ -325,7 +363,7 @@ class TestTextgrid(PraatioTestCase):
         expectedTextgrid = textgrid.Textgrid(0, 3.3)
         for tier in [
             makeIntervalTier("phrases", [[0.5, 1.5, "world"]], maxT=3.3),
-            makePointTier("cats", [[1.1, "soda"]], maxT=3.3),
+            makePointTier("cats", [[1.1, "soda"], [2.1, "pizza"]], maxT=3.3),
         ]:
             expectedTextgrid.addTier(tier)
 
@@ -339,7 +377,10 @@ class TestTextgrid(PraatioTestCase):
             makeIntervalTier(
                 "phrases", [[1, 2, "hello"], [3, 4, "world"], [5.5, 6, "goodnight"]]
             ),
-            makePointTier("cats", [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"]]),
+            makePointTier(
+                "cats",
+                [[1, "ice cream"], [3.6, "soda"], [4.6, "pizza"], [5.9, "cheesecake"]],
+            ),
         ]:
             originalTextgrid.addTier(tier)
 
@@ -347,7 +388,7 @@ class TestTextgrid(PraatioTestCase):
         expectedTextgrid = textgrid.Textgrid(2.5, 5.8)
         for tier in [
             makeIntervalTier("phrases", [[3, 4, "world"]], 2.5, 5.8),
-            makePointTier("cats", [[3.6, "soda"]], 2.5, 5.8),
+            makePointTier("cats", [[3.6, "soda"], [4.6, "pizza"]], 2.5, 5.8),
         ]:
             expectedTextgrid.addTier(tier)
 

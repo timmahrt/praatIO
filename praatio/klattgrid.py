@@ -36,7 +36,6 @@ from praatio.utilities import utils
 
 
 def openKlattgrid(fnFullPath: str) -> Klattgrid:
-
     try:
         with io.open(fnFullPath, "r", encoding="utf-16") as fd:
             data = fd.read()
@@ -106,7 +105,6 @@ def resynthesize(
     doCascade: bool = True,
     scriptFN: Optional[str] = None,
 ) -> None:
-
     if doCascade:
         method = "Cascade"
     else:
@@ -120,7 +118,6 @@ def resynthesize(
 
 
 def _openNormalKlattgrid(data: str) -> Klattgrid:
-
     kg = Klattgrid()
 
     # Toss header
@@ -149,12 +146,10 @@ def _openNormalKlattgrid(data: str) -> Klattgrid:
             "delta_formants",
             "frication_formants",
         ]:
-
             kct = _proccessContainerTierInput(sectionData, name)
             kg.addTier(kct)
 
         else:
-
             # Process entries if this tier has any
             entries = _buildEntries(sectionTuple)
             tier = KlattPointTier(name, entries, minT, maxT)
@@ -269,7 +264,6 @@ def _buildEntries(sectionTuple):
 
 
 def _processSectionData(sectionData: str) -> List[Tuple[float, float]]:
-
     sectionData += "\n"
 
     startI = 0

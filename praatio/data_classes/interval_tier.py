@@ -55,7 +55,6 @@ def _calculateMinAndMaxTime(entries: Sequence[Interval], minT=None, maxT=None):
 
 
 class IntervalTier(textgrid_tier.TextgridTier):
-
     tierType = INTERVAL_TIER
     entryType = Interval
 
@@ -260,7 +259,6 @@ class IntervalTier(textgrid_tier.TextgridTier):
 
         newEntryList = []
         for interval in self.entries:
-
             newStart = offset + interval.start
             newEnd = offset + interval.end
 
@@ -338,7 +336,6 @@ class IntervalTier(textgrid_tier.TextgridTier):
             # right edges
             # if categorical, it doesn't make it into the list at all
             if collisionMode == constants.EraseCollision.TRUNCATE:
-
                 # Check left edge
                 if matchList[0].start < start:
                     newEntry = Interval(matchList[0].start, start, matchList[0].label)
@@ -350,7 +347,6 @@ class IntervalTier(textgrid_tier.TextgridTier):
                     newTier.insertEntry(newEntry)
 
         if doShrink is True:
-
             diff = end - start
             newEntryList = []
             for interval in newTier.entries:
@@ -714,7 +710,6 @@ class IntervalTier(textgrid_tier.TextgridTier):
         newEntryList = []
         allIntervals = [self.entries, targetTier.entries]
         for sourceInterval, targetInterval in utils.safeZip(allIntervals, True):
-
             # sourceInterval.start - lastFromEnd -> was this interval and the
             # last one adjacent?
             newStart = sourceInterval.start + cumulativeAdjustAmount

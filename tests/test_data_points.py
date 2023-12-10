@@ -56,7 +56,6 @@ class TestDataPoint(PraatioTestCase):
         )
 
     def test_point_process_io_long_vs_short(self):
-
         shortFN = join(self.dataRoot, "bobby.PointProcess")
         longFN = join(self.dataRoot, "bobby_longfile.PointProcess")
 
