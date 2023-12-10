@@ -73,7 +73,7 @@ class TestIntervalTier(PraatioTestCase):
         sut.deleteEntry(interval2)
         self.assertEqual(len(sut), 0)
 
-    def test__iter__iterates_through_points_in_the_point_tier(self):
+    def test__iter__iterates_through_intervals_in_the_interval_tier(self):
         interval1 = Interval(1.0, 2.0, "hello")
         interval2 = Interval(2.0, 3.0, "world")
 
