@@ -47,6 +47,9 @@ class TextgridTier(ABC):
         self.maxTimestamp = maxT
         self.errorReporter = utils.getErrorReporter(errorMode)
 
+    def __len__(self):
+        return len(self._entries)
+
     def __eq__(self, other):
         if isinstance(self, type(other)):
             return False

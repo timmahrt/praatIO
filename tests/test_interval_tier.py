@@ -12,6 +12,26 @@ makeIntervalTier = testing_utils.makeIntervalTier
 
 
 class TestIntervalTier(PraatioTestCase):
+    def test_len_returns_the_number_of_intervals_in_the_interval_tier(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[])
+
+        self.assertEqual(len(sut), 0)
+
+        sut.insertEntry(interval1)
+        self.assertEqual(len(sut), 1)
+
+        sut.insertEntry(interval2)
+        self.assertEqual(len(sut), 2)
+
+        sut.deleteEntry(interval1)
+        self.assertEqual(len(sut), 1)
+
+        sut.deleteEntry(interval2)
+        self.assertEqual(len(sut), 0)
+
     def test_inequivalence_with_non_interval_tiers(self):
         sut = makeIntervalTier()
         self.assertNotEqual(sut, 55)

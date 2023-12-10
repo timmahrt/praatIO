@@ -21,6 +21,26 @@ def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
 
 
 class TestTextgrid(PraatioTestCase):
+    def test_len_returns_the_number_of_tiers_in_the_textgrid(self):
+        tier1 = makeIntervalTier()
+        tier2 = makePointTier()
+
+        sut = textgrid.Textgrid()
+
+        self.assertEqual(len(sut), 0)
+
+        sut.addTier(tier1)
+        self.assertEqual(len(sut), 1)
+
+        sut.addTier(tier2)
+        self.assertEqual(len(sut), 2)
+
+        sut.removeTier(tier1.name)
+        self.assertEqual(len(sut), 1)
+
+        sut.removeTier(tier2.name)
+        self.assertEqual(len(sut), 0)
+
     def test_inequivalence_with_non_textgrids(self):
         sut = textgrid.Textgrid()
         self.assertNotEqual(sut, 55)

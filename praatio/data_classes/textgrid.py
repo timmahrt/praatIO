@@ -53,6 +53,9 @@ class Textgrid:
         self.minTimestamp: float = minTimestamp  # type: ignore[assignment]
         self.maxTimestamp: float = maxTimestamp  # type: ignore[assignment]
 
+    def __len__(self):
+        return len(self._tierDict)
+
     def __eq__(self, other):
         if not isinstance(other, Textgrid):
             return False

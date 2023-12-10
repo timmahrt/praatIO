@@ -12,6 +12,26 @@ makePointTier = testing_utils.makePointTier
 
 
 class TestPointTier(PraatioTestCase):
+    def test_len_returns_the_number_of_points_in_the_point_tier(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+
+        sut = makePointTier(points=[])
+
+        self.assertEqual(len(sut), 0)
+
+        sut.insertEntry(point1)
+        self.assertEqual(len(sut), 1)
+
+        sut.insertEntry(point2)
+        self.assertEqual(len(sut), 2)
+
+        sut.deleteEntry(point1)
+        self.assertEqual(len(sut), 1)
+
+        sut.deleteEntry(point2)
+        self.assertEqual(len(sut), 0)
+
     def test_inequivalence_with_non_point_tiers(self):
         sut = makePointTier()
         self.assertNotEqual(sut, 55)
