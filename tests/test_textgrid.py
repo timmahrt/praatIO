@@ -41,6 +41,21 @@ class TestTextgrid(PraatioTestCase):
         sut.removeTier(tier2.name)
         self.assertEqual(len(sut), 0)
 
+    def test_iter_iterates_through_tiers(self):
+        tier1 = makeIntervalTier()
+        tier2 = makePointTier()
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        seenTiers = []
+        for tier in sut:
+            seenTiers.append(tier)
+
+        self.assertEqual(seenTiers, [tier1, tier2])
+
     def test_inequivalence_with_non_textgrids(self):
         sut = textgrid.Textgrid()
         self.assertNotEqual(sut, 55)

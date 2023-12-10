@@ -32,6 +32,18 @@ class TestPointTier(PraatioTestCase):
         sut.deleteEntry(point2)
         self.assertEqual(len(sut), 0)
 
+    def test_iter_iterates_through_points_in_the_point_tier(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+
+        sut = makePointTier(points=[point1, point2])
+
+        seenPoints = []
+        for point in sut:
+            seenPoints.append(point)
+
+        self.assertEqual(seenPoints, [point1, point2])
+
     def test_inequivalence_with_non_point_tiers(self):
         sut = makePointTier()
         self.assertNotEqual(sut, 55)

@@ -50,6 +50,10 @@ class TextgridTier(ABC):
     def __len__(self):
         return len(self._entries)
 
+    def __iter__(self):
+        for entry in self.entries:
+            yield entry
+
     def __eq__(self, other):
         if isinstance(self, type(other)):
             return False

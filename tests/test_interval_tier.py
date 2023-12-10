@@ -32,6 +32,18 @@ class TestIntervalTier(PraatioTestCase):
         sut.deleteEntry(interval2)
         self.assertEqual(len(sut), 0)
 
+    def test_iter_iterates_through_points_in_the_point_tier(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        seenIntervals = []
+        for interval in sut:
+            seenIntervals.append(interval)
+
+        self.assertEqual(seenIntervals, [interval1, interval2])
+
     def test_inequivalence_with_non_interval_tiers(self):
         sut = makeIntervalTier()
         self.assertNotEqual(sut, 55)
