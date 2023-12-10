@@ -10,9 +10,82 @@ from tests.praatio_test_case import PraatioTestCase
 from tests import testing_utils
 
 makeIntervalTier = testing_utils.makeIntervalTier
+makePointTier = testing_utils.makePointTier
 
 
 class TestIntervalTier(PraatioTestCase):
+    def test__eq__(self):
+        sut = makeIntervalTier(name="foo", intervals=[], minT=1.0, maxT=4.0)
+        intervalTier = makeIntervalTier(name="foo", intervals=[], minT=1.0, maxT=4.0)
+        pointTier = makePointTier()
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        # must be the same type
+        self.assertEqual(sut, intervalTier)
+        self.assertNotEqual(sut, pointTier)
+
+        # must have the same entries
+        sut.insertEntry(interval1)
+        self.assertNotEqual(sut, intervalTier)
+
+        # just having the same number of entries is not enough
+        intervalTier.insertEntry(interval2)
+        self.assertNotEqual(sut, intervalTier)
+
+        sut.insertEntry(interval2)
+        intervalTier.insertEntry(interval1)
+        self.assertEqual(sut, intervalTier)
+
+        # must have the same name
+        intervalTier.name = "bar"
+        self.assertNotEqual(sut, intervalTier)
+        intervalTier.name = "foo"
+        self.assertEqual(sut, intervalTier)
+
+        # must have the same min/max timestamps
+        intervalTier.minTimestamp = 0.5
+        self.assertNotEqual(sut, intervalTier)
+
+        intervalTier.minTimestamp = 1
+        intervalTier.maxTimestamp = 5
+        self.assertNotEqual(sut, intervalTier)
+
+        sut.maxTimestamp = 5
+        self.assertEqual(sut, intervalTier)
+
+    def test__len__returns_the_number_of_intervals_in_the_interval_tier(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[])
+
+        self.assertEqual(len(sut), 0)
+
+        sut.insertEntry(interval1)
+        self.assertEqual(len(sut), 1)
+
+        sut.insertEntry(interval2)
+        self.assertEqual(len(sut), 2)
+
+        sut.deleteEntry(interval1)
+        self.assertEqual(len(sut), 1)
+
+        sut.deleteEntry(interval2)
+        self.assertEqual(len(sut), 0)
+
+    def test__iter__iterates_through_intervals_in_the_interval_tier(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        seenIntervals = []
+        for interval in sut:
+            seenIntervals.append(interval)
+
+        self.assertEqual(seenIntervals, [interval1, interval2])
+
     def test_inequivalence_with_non_interval_tiers(self):
         sut = makeIntervalTier()
         self.assertNotEqual(sut, 55)

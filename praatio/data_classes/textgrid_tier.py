@@ -24,7 +24,6 @@ T = TypeVar("T", bound="TextgridTier")
 
 
 class TextgridTier(ABC):
-
     tierType: str
     entryType: Union[Type[constants.Point], Type[constants.Interval]]
 
@@ -48,15 +47,22 @@ class TextgridTier(ABC):
         self.maxTimestamp = maxT
         self.errorReporter = utils.getErrorReporter(errorMode)
 
+    def __len__(self):
+        return len(self._entries)
+
+    def __iter__(self):
+        for entry in self.entries:
+            yield entry
+
     def __eq__(self, other):
-        if type(self) != type(other):
+        if not isinstance(self, type(other)):
             return False
 
         isEqual = True
         isEqual &= self.name == other.name
         isEqual &= math.isclose(self.minTimestamp, other.minTimestamp)
         isEqual &= math.isclose(self.maxTimestamp, other.maxTimestamp)
-        isEqual &= len(self.entries) == len(self.entries)
+        isEqual &= len(self.entries) == len(other.entries)
 
         # TODO: Intervals and Points now use isclose, so we can simplify this
         #       logic (selfEntry == otherEntry); however, this will break

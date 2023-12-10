@@ -190,7 +190,8 @@ class AbstractWav(ABC):
         if self.nchannels != 1:
             raise (
                 errors.ArgumentError(
-                    "Only audio with a single channel can be loaded. Your file was #{self.nchannels}."
+                    "Only audio with a single channel can be loaded. "
+                    "Your file was #{self.nchannels}."
                 )
             )
 
@@ -318,7 +319,6 @@ class QueryWav(AbstractWav):
         return readFramesAtTime(self.audiofile, startTime, endTime)
 
     def getSamples(self, startTime: float, endTime: float) -> Tuple[int, ...]:
-
         frames = self.getFrames(startTime, endTime)
         audioFrameList = convertFromBytes(frames, self.sampleWidth)
 

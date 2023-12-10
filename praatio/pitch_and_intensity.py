@@ -68,7 +68,6 @@ def _extractPIPiecewise(
 
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
-
         utils.makeDir(tmpOutputPath)
         splitAudioList = praatio_scripts.splitAudioOnTier(
             inputFN, tgFN, tierName, tmpOutputPath, False
@@ -129,7 +128,6 @@ def _extractPIFile(
 
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
-
         # The praat script uses append mode, so we need to clear any prior
         # result
         if os.path.exists(outputFN):
@@ -183,7 +181,6 @@ def extractIntensity(
 
     firstTime = not os.path.exists(outputFN)
     if firstTime or forceRegenerate is True:
-
         # The praat script uses append mode, so we need to clear any prior
         # result
         if os.path.exists(outputFN):

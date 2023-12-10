@@ -3,6 +3,10 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 6.2 (Dec 10, 2023)
+- Add `__len__` and `__iter__` methods to Textgrid and TextgridTier
+- Fix behavior of `__eq__` method in TextgridTier
+
 Ver 6.1 (Nov 4, 2023)
 - Add `TextgridTier.dejitter()` method for improving consistency between tiers
 
