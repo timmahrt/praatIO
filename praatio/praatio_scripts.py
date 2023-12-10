@@ -99,7 +99,6 @@ def audioSplice(
 
     # Ensure all time points involved in splicing fall on zero crossings
     if alignToZeroCrossing is True:
-
         # Cut the splice segment to zero crossings
         spliceDuration = spliceSegment.duration
         spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
@@ -178,7 +177,6 @@ def spellCheckEntries(
 
     mispelledEntries = []
     for start, end, label in tier.entries:
-
         # Remove punctuation
         for char in punctuationList:
             label = label.replace(char, "")
@@ -260,7 +258,6 @@ def splitTierEntries(
 
     # Or insert new entries into existing target tier
     else:
-
         for entry in newEntries:
             targetTier.insertEntry(entry, constants.IntervalCollision.ERROR)
 

@@ -24,7 +24,6 @@ T = TypeVar("T", bound="TextgridTier")
 
 
 class TextgridTier(ABC):
-
     tierType: str
     entryType: Union[Type[constants.Point], Type[constants.Interval]]
 
@@ -49,7 +48,7 @@ class TextgridTier(ABC):
         self.errorReporter = utils.getErrorReporter(errorMode)
 
     def __eq__(self, other):
-        if type(self) != type(other):
+        if isinstance(self, type(other)):
             return False
 
         isEqual = True
