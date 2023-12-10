@@ -47,7 +47,6 @@ def _calculateMinAndMaxTime(entries: Sequence[Point], minT=None, maxT=None):
 
 
 class PointTier(textgrid_tier.TextgridTier):
-
     tierType = POINT_TIER
     entryType = Point
 
@@ -186,7 +185,6 @@ class PointTier(textgrid_tier.TextgridTier):
 
         newEntries: List[Point] = []
         for timestamp, label in self.entries:
-
             newTimestamp = timestamp + offset
             utils.checkIsUndershoot(newTimestamp, self.minTimestamp, errorReporter)
             utils.checkIsOvershoot(newTimestamp, self.maxTimestamp, errorReporter)
