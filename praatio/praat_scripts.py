@@ -9,7 +9,7 @@ import os
 from os.path import join
 import io
 import csv
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Iterable
 
 from praatio import audio
 from praatio import data_points
@@ -89,7 +89,7 @@ def getFormants(
     preemphasis: float = 50,
     scriptFN: Optional[str] = None,
     undefinedValue: Optional[str] = None,
-) -> List:
+) -> List[List[float]]:
     """Get F1, F2, and F3 for the audio file
 
     maxFormant = 5500 for females, 5000 for males, <8000 for children
@@ -123,7 +123,7 @@ def getFormants(
         dataList = dataList[1:]
 
     # Handle undefined values, convert values to float
-    returnList = []
+    returnList: List[List[float]] = []
     for row in dataList:
         keep = True
         for i in range(1, 4):
@@ -174,7 +174,7 @@ def getSpectralInfo(
     spectralPower: int = 2,
     spectralMoment: int = 3,
     scriptFN: Optional[str] = None,
-) -> Tuple[List, List]:
+) -> Tuple[List[str], List[List[str]]]:
     """Extracts various spectral measures from an audio file
 
     Measures include: center_of_gravity, standard_deviation
@@ -215,7 +215,7 @@ def resynthesizePitch(
     minPitch: float,
     maxPitch: float,
     scriptFN: Optional[str] = None,
-    pointList: Optional[List] = None,
+    pointList: Optional[Iterable[Tuple[float, float]]] = None,
 ) -> None:
     """Resynthesizes the pitch in a wav file with the given pitch contour file
 

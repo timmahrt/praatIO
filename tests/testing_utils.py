@@ -51,13 +51,13 @@ class CoverageIgnoredTest(unittest.TestCase, metaclass=_DecoratedMethodsClass):
     pass
 
 
-def makeIntervalTier(name="words", intervals=None, minT=0, maxT=5.0):
+def makeIntervalTier(name="words", intervals=None, minT=0.0, maxT=5.0):
     if intervals is None:
         intervals = [Interval(1, 2, "hello"), Interval(3.5, 4.0, "world")]
     return textgrid.IntervalTier(name, intervals, minT, maxT)
 
 
-def makePointTier(name="pitch_values", points=None, minT=0, maxT=5.0):
+def makePointTier(name="pitch_values", points=None, minT=0.0, maxT=5.0):
     if points is None:
         points = [Point(1.3, "55"), Point(3.7, "99")]
     return textgrid.PointTier(name, points, minT, maxT)

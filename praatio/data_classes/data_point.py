@@ -8,9 +8,7 @@ so different from a PointTier, except that PointTiers specifically hold annotati
 data.
 """
 import io
-
-from typing_extensions import Literal
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, Iterable
 
 from praatio.utilities import constants
 from praatio.utilities import errors
@@ -19,14 +17,14 @@ from praatio.utilities import errors
 class PointObject:
     def __init__(
         self,
-        pointList: List[Tuple[float, ...]],
+        pointList: Iterable[Iterable[float]],
         objectClass: str,
-        minTime: float = 0,
-        maxTime: float = None,
+        minTime: float = 0.0,
+        maxTime: Optional[float] = None,
     ):
         self.pointList = [tuple(row) for row in pointList]  # Sanitize input
         self.objectClass = objectClass
-        self.minTime = minTime if minTime > 0 else 0
+        self.minTime = minTime if minTime > 0.0 else 0.0
         self.maxTime = maxTime
 
     def __eq__(self, other):
@@ -66,7 +64,7 @@ class PointObject:
         self, start: float, end: float, startIndex: int = 0
     ) -> List[float]:
 
-        returnPointList = []
+        returnPointList: List[float] = []
         for entry in self.pointList[startIndex:]:
             time = entry[0]
             if time >= start:
@@ -83,8 +81,8 @@ class PointObject1D(PointObject):
 
     def __init__(
         self,
-        pointList: List[Tuple[float]],
-        objectClass: Literal["point"],
+        pointList: Iterable[Tuple[float]],
+        objectClass: str,
         minTime: float = 0,
         maxTime: Optional[float] = None,
     ):
@@ -95,10 +93,8 @@ class PointObject1D(PointObject):
 
         if maxTime is None:
             maxTime = max([row[0] for row in pointList])
-
-        castPointList = cast(List[Tuple[float, ...]], pointList)
         super(PointObject1D, self).__init__(
-            castPointList, objectClass, minTime, maxTime
+            pointList, objectClass, minTime, maxTime
         )
 
 
@@ -107,10 +103,10 @@ class PointObject2D(PointObject):
 
     def __init__(
         self,
-        pointList: List[Tuple[float, float]],
-        objectClass: Literal["pitch", "duration"],
-        minTime: float = 0,
-        maxTime: float = None,
+        pointList: Iterable[Tuple[float, float]],
+        objectClass: str,
+        minTime: float = 0.0,
+        maxTime: Optional[float] = None,
     ):
         suitable2dPointTypes = [
             constants.DataPointTypes.PITCH,
@@ -125,8 +121,6 @@ class PointObject2D(PointObject):
 
         if maxTime is None:
             maxTime = max([timeV for timeV, _ in pointList])
-
-        castPointList = cast(List[Tuple[float, ...]], pointList)
         super(PointObject2D, self).__init__(
-            castPointList, objectClass, minTime, maxTime
+            pointList, objectClass, minTime, maxTime
         )

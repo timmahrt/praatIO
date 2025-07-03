@@ -8,17 +8,15 @@ see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
 import os
 from os.path import join
 import math
-from typing import Callable, List, Tuple
+from typing import Callable, Iterable, List, Tuple, Optional
 
 from typing_extensions import Literal, Final
 
 from praatio import textgrid
 from praatio import audio
 from praatio.utilities import utils
-from praatio.data_classes import textgrid_tier
 from praatio.utilities import constants
 from praatio.utilities.constants import Point, Interval, NameStyle
-from praatio.utilities import errors
 
 
 def audioSplice(
@@ -28,7 +26,7 @@ def audioSplice(
     tierName: str,
     newLabel: str,
     insertStart: float,
-    insertStop: float = None,
+    insertStop: Optional[float] = None,
     alignToZeroCrossing: bool = True,
 ) -> Tuple[audio.Wav, textgrid.Textgrid]:
     """Splices a segment into an audio file and corresponding textgrid
@@ -113,14 +111,14 @@ def _shiftTimes(
                 for entry in tier.entries
                 if entry[0] == timeV or entry[1] == timeV
             ]
-            insertEntries = []
+            insertEntries: List[Interval] = []
             for entry in entries:
                 if entry[0] == timeV:
                     newStart, newStop = newTimeV, entry[1]
                 elif entry[1] == timeV:
                     newStart, newStop = entry[0], newTimeV
                 tier.deleteEntry(entry)
-                insertEntries.append((newStart, newStop, entry[2]))
+                insertEntries.append(Interval(newStart, newStop, entry[2]))
 
             for entry in insertEntries:
                 tier.insertEntry(entry)
@@ -174,14 +172,14 @@ def spellCheckEntries(
     tg = tg.new()
     tier = tg.getTier(targetTierName)
 
-    mispelledEntries = []
+    mispelledEntries: List[Interval] = []
     for start, end, label in tier.entries:
         # Remove punctuation
         for char in punctuationList:
             label = label.replace(char, " ")
 
         wordList = label.split()
-        mispelledList = []
+        mispelledList: List[str] = []
         for word in wordList:
             if not checkFunction(word):
                 mispelledList.append(word)
@@ -231,7 +229,7 @@ def splitTierEntries(
         targetTier = tg.getTier(targetTierName)
 
     # Split the entries in the source tier
-    newEntries = []
+    newEntries: List[Interval] = []
     for start, end, label in sourceTier.entries:
         labelList = label.split()
         intervalLength = (end - start) / float(len(labelList))
@@ -271,7 +269,7 @@ def splitAudioOnTier(
         "name_and_i_and_label", "name_and_label", "name_and_i", "label"
     ] = "name_and_i",
     allowPartialIntervals: bool = True,
-    silenceLabel: str = None,
+    silenceLabel: Optional[str] = None,
 ) -> List[Tuple[float, float, str]]:
     """Outputs one subwav for each entry in the tier of a textgrid
 
@@ -328,7 +326,7 @@ def splitAudioOnTier(
     logger.autoDisable = False
 
     # Output wave files
-    outputFNList = []
+    outputFNList: List[Tuple[float, float, str]] = []
     wavQObj = audio.QueryWav(wavFN)
     for i, entry in enumerate(entries):
         start, end, label = entry
@@ -372,13 +370,18 @@ def _getMode(allowPartialIntervals: bool) -> Literal["strict", "lax", "truncated
         return constants.CropCollision.STRICT
 
 
-def _validateEntriesForWriting(nameStyle, entries, logger, outputPath):
+def _validateEntriesForWriting(
+    nameStyle: Literal["name_and_i_and_label", "name_and_label", "name_and_i", "label"],
+    entries: Iterable[Interval],
+    logger: utils.TogglableLogger,
+    outputPath: str,
+):
     # If we're using the 'label' namestyle for outputs, all of the
     # interval labels have to be unique, or wave files with those
     # labels as names, will be overwritten
     if nameStyle == NameStyle.LABEL:
         wordList = [interval.label for interval in entries]
-        multipleInstList = []
+        multipleInstList: List[str] = []
         for word in utils.getUnique(wordList):
             if wordList.count(word) > 1:
                 multipleInstList.append(word)

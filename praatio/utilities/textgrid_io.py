@@ -1,6 +1,6 @@
 import re
 import json
-from typing import Optional, Tuple, List, Any, Dict, Match
+from typing import Optional, Union, Tuple, List, Any, Dict, Match
 
 from typing_extensions import Literal
 
@@ -17,7 +17,7 @@ from praatio.utilities.constants import (
 )
 
 
-def reSearch(pattern, string, flags=None) -> Match[str]:
+def reSearch(pattern: Union[str, re.Pattern], string: str, flags=None) -> Match[str]:
     """Search for the string to match. Throws an error if no match is found."""
     if flags:
         matches = re.search(pattern, string, flags)
@@ -292,7 +292,7 @@ def _prepTgForSaving(
 
     # Fill in the blank spaces for interval tiers
     if includeBlankSpaces:
-        newTierList = []
+        newTierList: List[Dict] = []
         for tier in tg["tiers"]:
             if tier["class"] == POINT_TIER:
                 newTierList.append(tier)
@@ -403,7 +403,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
     tgMax = float(headerList[4].split("=")[1].strip())
 
     # Process each tier individually (will be output to separate folders)
-    tiers = []
+    tiers: List[Dict] = []
     tierList = re.split(r"item ?\[", data, flags=re.MULTILINE)[1:]
     for tierTxt in tierList:
         if 'class = "IntervalTier"' in tierTxt:
@@ -421,7 +421,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
             # A tier with no entries
             if re.search(r"size ?= ?0", tierTxt):
                 header = tierTxt
-                tierData = []
+                tierData: List[str] = []
             else:
                 raise
         tierName = reSearch(
@@ -509,7 +509,7 @@ def _parseShortTextgrid(data: str) -> Dict:
     tgMax = float(headerList[4].strip())
 
     # Load the data for each tier
-    tiers = []
+    tiers: List[Dict] = []
     for blockStartI, blockEndI, isInterval in tupleList:
         tierData = data[blockStartI:blockEndI]
 

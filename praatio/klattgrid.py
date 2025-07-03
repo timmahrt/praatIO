@@ -23,7 +23,7 @@ see **examples/klatt_resynthesis.py**
 
 import io
 from os.path import join
-from typing import List, Tuple, Optional
+from typing import List, Sequence, Tuple, Optional
 
 from praatio.data_classes.klattgrid import (
     Klattgrid,
@@ -177,7 +177,7 @@ def _proccessContainerTierInput(sectionData: str, name: str):
     ]
 
     # 'Formant' search query finds duplicates -- remove them
-    newFormantList = []
+    newFormantList: List[int] = []
     for value in formantIndexList:
         if all([value not in subList for subList in subFilterIndexList]):
             newFormantList.append(value)
@@ -210,7 +210,7 @@ def _proccessContainerTierInput(sectionData: str, name: str):
     for indexList in indexListOfLists:
         if indexList == []:
             continue
-        tierList = []
+        tierList: List[KlattSubPointTier] = []
         for j in range(len(indexList) - 1):
             try:
                 tmpTuple = _getSectionHeader(sectionData, indexList, j)
@@ -230,14 +230,14 @@ def _proccessContainerTierInput(sectionData: str, name: str):
     return kct
 
 
-def _findIndicies(data, keyword):
+def _findIndicies(data: str, keyword: str):
     indexList = utils.findAll(data, keyword)
     indexList = [data.rfind("\n", 0, i) for i in indexList]
 
     return indexList
 
 
-def _getSectionHeader(data, indexList, i):
+def _getSectionHeader(data: str, indexList: Sequence[int], i: int):
     sectionStart = indexList[i]
     sectionEnd = indexList[i + 1]
     sectionData = data[sectionStart:sectionEnd].strip()
@@ -253,7 +253,7 @@ def _getSectionHeader(data, indexList, i):
     return name, minT, maxT, sectionData, tail
 
 
-def _buildEntries(sectionTuple):
+def _buildEntries(sectionTuple: Sequence[str]):
     entries = []
     if len(sectionTuple) > 1:  # Has points
         npoints = float(sectionTuple[0].split("=")[1].strip())
@@ -267,7 +267,7 @@ def _processSectionData(sectionData: str) -> List[Tuple[float, float]]:
     sectionData += "\n"
 
     startI = 0
-    tupleList = []
+    tupleList: List[Tuple[float, float]] = []
     while True:
         try:
             startI = sectionData.index("=", startI) + 1  # Past the equal sign

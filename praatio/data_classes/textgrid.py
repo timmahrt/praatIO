@@ -5,7 +5,7 @@ This is the 'heart' of praatio.
 """
 import io
 import copy
-from typing import Optional, Tuple, Sequence
+from typing import Optional, Tuple, List, Iterable, Any
 from typing_extensions import Literal
 from collections import OrderedDict
 
@@ -16,9 +16,9 @@ from praatio.utilities.constants import (
     CropCollision,
 )
 
-from praatio.data_classes import textgrid_tier
-from praatio.data_classes import point_tier
-from praatio.data_classes import interval_tier
+from praatio.data_classes.textgrid_tier import TextgridTier
+from praatio.data_classes.point_tier import PointTier
+from praatio.data_classes.interval_tier import IntervalTier
 from praatio.utilities import constants
 from praatio.utilities import errors
 from praatio.utilities import my_math
@@ -39,7 +39,7 @@ class Textgrid:
         maxTimestamp(float): the maximum allowable timestamp in the textgrid
     """
 
-    def __init__(self, minTimestamp: float = None, maxTimestamp: float = None):
+    def __init__(self, minTimestamp: Optional[float] = None, maxTimestamp: Optional[float] = None):
         """Constructor for Textgrids
 
         Args:
@@ -47,9 +47,11 @@ class Textgrid:
             maxTimestamp: the maximum allowable timestamp in the textgrid
         """
 
-        self._tierDict: OrderedDict[str, textgrid_tier.TextgridTier] = OrderedDict()
+        self._tierDict: OrderedDict[str, TextgridTier[Any]] = OrderedDict()
 
-        # Timestamps are determined by the first tier added
+        # TODO: Timestamps are determined by the first tier added.
+        # But it causes unexpected problems if users call certain methods before adding any tiers.
+        # It's better to add checks in those methods.
         self.minTimestamp: float = minTimestamp  # type: ignore[assignment]
         self.maxTimestamp: float = maxTimestamp  # type: ignore[assignment]
 
@@ -60,7 +62,7 @@ class Textgrid:
         for entry in self.tiers:
             yield entry
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Textgrid):
             return False
 
@@ -80,12 +82,12 @@ class Textgrid:
         return tuple(self._tierDict.keys())
 
     @property
-    def tiers(self) -> Tuple[textgrid_tier.TextgridTier, ...]:
+    def tiers(self) -> Tuple[TextgridTier[Any], ...]:
         return tuple(self._tierDict.values())
 
     def addTier(
         self,
-        tier: textgrid_tier.TextgridTier,
+        tier: TextgridTier[Any],
         tierIndex: Optional[int] = None,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
@@ -170,7 +172,7 @@ class Textgrid:
                 combinedTierNames.append(tierName)
 
         # Determine the tier names that will be in the final textgrid
-        finalTierNames = []
+        finalTierNames: List[str] = []
         if onlyMatchingNames is False:
             finalTierNames = combinedTierNames
         else:
@@ -195,9 +197,8 @@ class Textgrid:
 
                 if tierName in retTG.tierNames:
                     tier = retTG.getTier(tierName)
-                    newEntries = retTG.getTier(tierName).entries
-                    newEntries += appendTier.entries
-
+                    newEntries = list(retTG.getTier(tierName).entries)
+                    newEntries.extend(appendTier.entries)
                     tier = tier.new(
                         entries=newEntries,
                         minTimestamp=minTime,
@@ -206,8 +207,7 @@ class Textgrid:
                     retTG.replaceTier(tierName, tier)
 
                 else:
-                    tier = appendTier
-                    tier = tier.new(minTimestamp=minTime, maxTimestamp=maxTime)
+                    tier = appendTier.new(minTimestamp=minTime, maxTimestamp=maxTime)
                     retTG.addTier(tier)
 
         return retTG
@@ -338,7 +338,7 @@ class Textgrid:
 
         return tg
 
-    def getTier(self, tierName: str) -> textgrid_tier.TextgridTier:
+    def getTier(self, tierName: str) -> TextgridTier[Any]:
         """Get the tier with the specified name"""
         return self._tierDict[tierName]
 
@@ -383,7 +383,7 @@ class Textgrid:
         return newTG
 
     def mergeTiers(
-        self, tierNames: Optional[Sequence[str]] = None, preserveOtherTiers: bool = True
+        self, tierNames: Optional[Iterable[str]] = None, preserveOtherTiers: bool = True
     ) -> "Textgrid":
         """Combine tiers
 
@@ -400,13 +400,13 @@ class Textgrid:
             tierNames = self.tierNames
 
         # Determine the tiers to merge
-        intervalTierNames = []
-        pointTierNames = []
+        intervalTierNames: List[str] = []
+        pointTierNames: List[str] = []
         for tierName in tierNames:
             tier = self.getTier(tierName)
-            if isinstance(tier, interval_tier.IntervalTier):
+            if isinstance(tier, IntervalTier):
                 intervalTierNames.append(tierName)
-            elif isinstance(tier, point_tier.PointTier):
+            elif isinstance(tier, PointTier):
                 pointTierNames.append(tierName)
 
         # Merge the interval tiers
@@ -513,13 +513,13 @@ class Textgrid:
         self.removeTier(oldName)
         self.addTier(oldTier.new(newName, oldTier.entries), tierIndex)
 
-    def removeTier(self, name: str) -> textgrid_tier.TextgridTier:
+    def removeTier(self, name: str) -> TextgridTier[Any]:
         return self._tierDict.pop(name)
 
     def replaceTier(
         self,
         name: str,
-        newTier: textgrid_tier.TextgridTier,
+        newTier: TextgridTier[Any],
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
         tierIndex = self.tierNames.index(name)
@@ -582,15 +582,14 @@ class Textgrid:
 
 
 def _tgToDictionary(tg: Textgrid) -> dict:
-    tiers = []
+    tiers: List[dict] = []
     for tier in tg.tiers:
-        tierAsDict = {
+        tiers.append({
             "class": tier.tierType,
             "name": tier.name,
             "xmin": tier.minTimestamp,
             "xmax": tier.maxTimestamp,
             "entries": tier.entries,
-        }
-        tiers.append(tierAsDict)
+        })
 
     return {"xmin": tg.minTimestamp, "xmax": tg.maxTimestamp, "tiers": tiers}

@@ -16,7 +16,7 @@ import os
 from os.path import join
 import io
 import math
-from typing import List, Tuple, Optional, cast
+from typing import List, Sequence, Tuple, Optional, cast
 
 from praatio import data_points
 from praatio import praatio_scripts
@@ -45,7 +45,7 @@ def _extractPIPiecewise(
     silenceThreshold: float = 0.03,
     pitchUnit: str = HERTZ,
     forceRegenerate: bool = True,
-    undefinedValue: float = None,
+    undefinedValue: Optional[float] = None,
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
@@ -111,7 +111,7 @@ def _extractPIFile(
     silenceThreshold: float = 0.03,
     pitchUnit: str = HERTZ,
     forceRegenerate: bool = True,
-    undefinedValue: float = None,
+    undefinedValue: Optional[float] = None,
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
@@ -166,7 +166,7 @@ def extractIntensity(
     minPitch: float,
     sampleStep: float = 0.01,
     forceRegenerate: bool = True,
-    undefinedValue: float = None,
+    undefinedValue: Optional[float] = None,
 ) -> List[Tuple[float, ...]]:
     """Extract the intensity for an audio file
 
@@ -270,7 +270,7 @@ def extractPitch(
     sampleStep: float = 0.01,
     silenceThreshold: float = 0.03,
     forceRegenerate: bool = True,
-    undefinedValue: float = None,
+    undefinedValue: Optional[float] = None,
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
@@ -339,10 +339,10 @@ def extractPI(
     silenceThreshold: float = 0.03,
     pitchUnit: str = HERTZ,
     forceRegenerate: bool = True,
-    tgFN: str = None,
-    tierName: str = None,
-    tmpOutputPath: str = None,
-    undefinedValue: float = None,
+    tgFN: Optional[str] = None,
+    tierName: Optional[str] = None,
+    tmpOutputPath: Optional[str] = None,
+    undefinedValue: Optional[float] = None,
     medianFilterWindowSize: int = 0,
     pitchQuadInterp: bool = False,
 ) -> List[Tuple[float, ...]]:
@@ -405,7 +405,7 @@ def extractPI(
 
 
 def loadTimeSeriesData(
-    fn: str, undefinedValue: float = None
+    fn: str, undefinedValue: Optional[float] = None
 ) -> List[Tuple[float, ...]]:
     """For reading the output of get_pitch_and_intensity or get_intensity
 
@@ -428,7 +428,7 @@ def loadTimeSeriesData(
     if dataList[0][0] == "time":
         dataList = dataList[1:]
 
-    newDataList = []
+    newDataList: List[Tuple[float, ...]] = []
     for row in dataList:
         time = float(row.pop(0))
         entry = [
@@ -456,11 +456,11 @@ def loadTimeSeriesData(
 
 
 def generatePIMeasures(
-    dataList: List[Tuple[float, float, float]],
+    dataList: Sequence[Tuple[float, float, float]],
     tgFN: str,
     tierName: str,
     doPitch: bool,
-    medianFilterWindowSize: int = None,
+    medianFilterWindowSize: Optional[int] = None,
     globalZNormalization: bool = False,
     localZNormalizationWindowSize: int = 0,
 ) -> List[Tuple[float, ...]]:
@@ -481,12 +481,11 @@ def generatePIMeasures(
     if globalZNormalization is True and localZNormalizationWindowSize > 0:
         raise errors.NormalizationException()
 
-    castDataList = cast(List[Tuple[float, ...]], dataList)
     if globalZNormalization is True:
         if doPitch:
-            castDataList = my_math.znormalizeSpeakerData(castDataList, 1, True)
+            dataList = my_math.znormalizeSpeakerData(dataList, 1, True)  # type: ignore[arg-type]
         else:
-            castDataList = my_math.znormalizeSpeakerData(castDataList, 2, True)
+            dataList = my_math.znormalizeSpeakerData(dataList, 2, True)  # type: ignore[arg-type]
 
     # Raw values should have 0 filtered; normalized values are centered around 0, so don't filter
     filterZeroFlag = not globalZNormalization
@@ -496,11 +495,11 @@ def generatePIMeasures(
         raise errors.IncompatibleTierError(tg.getTier(tierName))
 
     tier = cast(textgrid.IntervalTier, tg.getTier(tierName))
-    piData = tier.getValuesInIntervals(castDataList)
+    piData = tier.getValuesInIntervals(dataList)
 
     outputList: List[List[float]] = []
     for interval, entries in piData:
-        label = interval[0]
+        label = interval[0]  # TODO: Really [0]? Is it interval.label?
         if doPitch:
             tmpValList = [f0Val for _, f0Val, _ in entries]
             f0Measures = getPitchMeasures(
@@ -545,10 +544,10 @@ def generatePIMeasures(
 
 
 def getPitchMeasures(
-    f0Values: List[float],
-    name: str = None,
-    label: str = None,
-    medianFilterWindowSize: int = None,
+    f0Values: Sequence[float],
+    name: Optional[str] = None,
+    label: Optional[str] = None,
+    medianFilterWindowSize: Optional[int] = None,
     filterZeroFlag: bool = False,
 ) -> Tuple[float, float, float, float, float, float]:
     """Get various measures (min, max, etc) for the passed in list of pitch values
@@ -597,7 +596,7 @@ def getPitchMeasures(
 
 
 def detectPitchErrors(
-    pitchList: List[Tuple[float, float]],
+    pitchList: Sequence[Tuple[float, float]],
     maxJumpThreshold: float = 0.70,
     tgToMark: Optional[textgrid.Textgrid] = None,
 ) -> Tuple[List[Point], Optional[textgrid.Textgrid]]:
@@ -616,7 +615,7 @@ def detectPitchErrors(
             f"Tier name '{tierName}' is already in provided textgrid"
         )
 
-    errorList = []
+    errorList: List[Point] = []
     for i in range(1, len(pitchList)):
         lastPitch = pitchList[i - 1][1]
         currentPitch = pitchList[i][1]

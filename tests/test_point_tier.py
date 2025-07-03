@@ -7,10 +7,7 @@ from praatio.utilities import constants
 from praatio.utilities import errors
 
 from tests.praatio_test_case import PraatioTestCase
-from tests import testing_utils
-
-makePointTier = testing_utils.makePointTier
-makeIntervalTier = testing_utils.makeIntervalTier
+from tests.testing_utils import makeIntervalTier, makePointTier
 
 
 class TestPointTier(PraatioTestCase):
@@ -203,7 +200,7 @@ class TestPointTier(PraatioTestCase):
                 Point(3.56, "will also not be modified"),
             ]
         )
-        refInterval = testing_utils.makeIntervalTier(
+        refInterval = makeIntervalTier(
             intervals=[Interval(1, 2.0, "foo"), Interval(2.65, 3.45, "bar")]
         )
         self.assertSequenceEqual(
@@ -225,7 +222,7 @@ class TestPointTier(PraatioTestCase):
                 Point(3.56, "will also not be modified"),
             ]
         )
-        refInterval = testing_utils.makePointTier(
+        refInterval = makePointTier(
             points=[
                 Point(1, "foo"),
                 Point(2.0, "bar"),

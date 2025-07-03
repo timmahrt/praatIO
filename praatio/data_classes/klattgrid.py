@@ -3,109 +3,14 @@
 KlattGrids can be used for synthesizing and manipulating speech
 """
 import io
+from typing import List, Optional, Dict, Callable, Union, Iterable, Tuple, Any, TypeVar, Generic
 
-from typing import List, Optional, Dict, Callable, Union
-
-from praatio.data_classes import textgrid
-from praatio.data_classes import textgrid_tier
+from praatio.data_classes.textgrid import Textgrid
+from praatio.data_classes.textgrid_tier import TextgridTier
 from praatio.utilities import errors
 
 
-class _KlattBaseTier:
-    def __init__(self, name: str):
-        self.tierNameList: List[str] = []  # Preserves the order of the tiers
-        self.tierDict: Dict[str, "_KlattBaseTier"] = {}
-        self.name = name
-        self.minTimestamp = None
-        self.maxTimestamp = None
-
-    def __eq__(self, other):
-        if not isinstance(other, _KlattBaseTier):
-            return False
-
-        isEqual = True
-        isEqual &= self.name == other.name
-        isEqual &= self.minTimestamp == other.minTimestamp
-        isEqual &= self.maxTimestamp == other.maxTimestamp
-
-        isEqual &= self.tierNameList == other.tierNameList
-        if isEqual:
-            for tierName in self.tierNameList:
-                isEqual &= self.tierDict[tierName] == other.tierDict[tierName]
-
-        return isEqual
-
-    def addTier(self, tier, tierIndex=None) -> None:
-
-        if tierIndex is None:
-            self.tierNameList.append(tier.name)
-        else:
-            self.tierNameList.insert(tierIndex, tier.name)
-
-        if tier.name in list(self.tierDict.keys()):
-            raise errors.TierNameExistsError(
-                f"Cannot add tier with name {tier.name} as it already exists in the Klattgrid"
-            )
-        self.tierDict[tier.name] = tier
-
-        minV = tier.minTimestamp
-        if self.minTimestamp is None or (minV is not None and minV < self.minTimestamp):
-            self.minTimestamp = minV
-
-        maxV = tier.maxTimestamp
-        if self.maxTimestamp is None or (maxV is not None and maxV > self.maxTimestamp):
-            self.maxTimestamp = maxV
-
-
-class KlattContainerTier(_KlattBaseTier):
-    """Contains a set of intermediate tiers"""
-
-    def getAsText(self):
-        outputTxt = ""
-        outputTxt += "%s? <exists>\n" % self.name
-
-        try:
-            self.minTimestamp = toIntOrFloat(self.minTimestamp)
-            outputTxt += "xmin = %s\nxmax = %s\n" % (
-                repr(self.minTimestamp),
-                repr(self.maxTimestamp),
-            )
-        except TypeError:
-            pass
-
-        for name in self.tierNameList:
-            outputTxt += self.tierDict[name].getAsText()
-
-        return outputTxt
-
-    def modifySubtiers(self, tierName: str, modFunc) -> None:
-        """
-        Modify values in every tier contained in the named intermediate tier
-        """
-        kit = self.tierDict[tierName]
-        for name in kit.tierNameList:
-            subpointTier = kit.tierDict[name]
-            subpointTier.modifyValues(modFunc)
-
-
-class KlattIntermediateTier(_KlattBaseTier):
-    """
-    Has many point tiers that are semantically related (e.g. formant tiers)
-    """
-
-    def getAsText(self):
-        outputTxt = ""
-        headerTxt = "%s: size=%d\n" % (self.name, len(self.tierNameList))
-
-        for name in self.tierNameList:
-            outputTxt += self.tierDict[name].getAsText()
-
-        outputTxt = headerTxt + outputTxt
-
-        return outputTxt
-
-
-class KlattPointTier(textgrid_tier.TextgridTier):
+class KlattPointTier(TextgridTier):
     """
     A Klatt tier not contained within another tier
     """
@@ -113,7 +18,7 @@ class KlattPointTier(textgrid_tier.TextgridTier):
     def __init__(
         self,
         name: str,
-        entries: List,
+        entries: Iterable[Tuple],
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
@@ -166,15 +71,13 @@ class KlattPointTier(textgrid_tier.TextgridTier):
     def validate(self):
         raise NotImplementedError
 
-    def modifyValues(self, modFunc: Callable[[float], bool]) -> None:
-        newEntries = [
+    def modifyValues(self, modFunc: Callable[[float], float]) -> None:
+        self._entries = [
             (timestamp, modFunc(float(value))) for timestamp, value in self.entries
         ]
 
-        self._entries = newEntries
-
     def getAsText(self) -> str:
-        outputList = []
+        outputList: List[str] = []
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputList.append("%s? <exists> " % self.name)
         outputList.append("xmin = %s" % repr(self.minTimestamp))
@@ -197,7 +100,7 @@ class KlattSubPointTier(KlattPointTier):
     """
 
     def getAsText(self) -> str:
-        outputList = []
+        outputList: List[str] = []
         outputList.append("%s:" % self.name)
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputList.append("    xmin = %s" % repr(self.minTimestamp))
@@ -212,8 +115,104 @@ class KlattSubPointTier(KlattPointTier):
         return "\n".join(outputList) + "\n"
 
 
-class Klattgrid(textgrid.Textgrid):
-    def save(self, fn: str, minimumIntervalLength: Optional[float] = None):
+ContainedType = TypeVar("ContainedType", bound=Union[KlattSubPointTier, "_KlattBaseTier"])
+
+
+class _KlattBaseTier(Generic[ContainedType]):
+    def __init__(self, name: str):
+        self.tierNameList: List[str] = []  # Preserves the order of the tiers
+        self.tierDict: Dict[str, ContainedType] = {}
+        self.name = name
+        self.minTimestamp = None
+        self.maxTimestamp = None
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+
+        isEqual = True
+        isEqual &= self.name == other.name
+        isEqual &= self.minTimestamp == other.minTimestamp
+        isEqual &= self.maxTimestamp == other.maxTimestamp
+
+        isEqual &= self.tierNameList == other.tierNameList
+        if isEqual:
+            for tierName in self.tierNameList:
+                isEqual &= self.tierDict[tierName] == other.tierDict[tierName]
+
+        return isEqual
+
+    def addTier(self, tier: ContainedType, tierIndex: Optional[int] = None) -> None:
+        if tierIndex is None:
+            self.tierNameList.append(tier.name)
+        else:
+            self.tierNameList.insert(tierIndex, tier.name)
+
+        if tier.name in list(self.tierDict.keys()):
+            raise errors.TierNameExistsError(
+                f"Cannot add tier with name {tier.name} as it already exists in the Klattgrid"
+            )
+        self.tierDict[tier.name] = tier
+
+        minV = tier.minTimestamp
+        if self.minTimestamp is None or (minV is not None and minV < self.minTimestamp):
+            self.minTimestamp = minV
+
+        maxV = tier.maxTimestamp
+        if self.maxTimestamp is None or (maxV is not None and maxV > self.maxTimestamp):
+            self.maxTimestamp = maxV
+
+
+class KlattIntermediateTier(_KlattBaseTier[KlattSubPointTier]):
+    """
+    Has many point tiers that are semantically related (e.g. formant tiers)
+    """
+
+    def getAsText(self) -> str:
+        outputTxt = ""
+        headerTxt = "%s: size=%d\n" % (self.name, len(self.tierNameList))
+
+        for name in self.tierNameList:
+            outputTxt += self.tierDict[name].getAsText()
+
+        outputTxt = headerTxt + outputTxt
+
+        return outputTxt
+
+
+class KlattContainerTier(_KlattBaseTier[KlattIntermediateTier]):
+    """Contains a set of intermediate tiers"""
+
+    def getAsText(self) -> str:
+        outputTxt = ""
+        outputTxt += "%s? <exists>\n" % self.name
+
+        try:
+            self.minTimestamp = toIntOrFloat(self.minTimestamp)
+            outputTxt += "xmin = %s\nxmax = %s\n" % (
+                repr(self.minTimestamp),
+                repr(self.maxTimestamp),
+            )
+        except TypeError:
+            pass
+
+        for name in self.tierNameList:
+            outputTxt += self.tierDict[name].getAsText()
+
+        return outputTxt
+
+    def modifySubtiers(self, tierName: str, modFunc: Callable[[float], bool]) -> None:
+        """
+        Modify values in every tier contained in the named intermediate tier
+        """
+        kit = self.tierDict[tierName]
+        for name in kit.tierNameList:
+            subpointTier = kit.tierDict[name]
+            subpointTier.modifyValues(modFunc)
+
+
+class Klattgrid(Textgrid):
+    def save(self, fn: str, minimumIntervalLength: Optional[float] = None) -> None:
         """
 
         minimumIntervalLength is used for compatibility with Textgrid.save()
@@ -249,7 +248,7 @@ def toIntOrFloat(val: Union[str, float]) -> float:
 
 def _cleanNumericValues(dataStr: str) -> str:
     dataList = dataStr.split("\n")
-    newDataList = []
+    newDataList: List[str] = []
     for row in dataList:
         row = row.rstrip()
         try:

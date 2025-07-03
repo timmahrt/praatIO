@@ -4,7 +4,7 @@ Various math utilities
 
 import math
 import statistics
-from typing import Callable, List, Tuple
+from typing import Callable, Iterable, List, Sequence, Tuple
 
 from praatio.utilities import errors
 
@@ -27,11 +27,11 @@ def lessThanOrEqual(a: float, b: float):
 
 def filterTimeSeriesData(
     filterFunc: Callable[[List[float], int, bool], List[float]],
-    featureTimeList: List[list],
+    featureTimeList: Iterable[Iterable[float]],
     windowSize: int,
     index: int,
     useEdgePadding: bool,
-) -> List[list]:
+) -> List[List[float]]:
     """Filter time-stamped data values within a window
 
     filterFunc could be medianFilter() or znormFilter()
@@ -59,7 +59,7 @@ def filterTimeSeriesData(
 
 
 def znormalizeSpeakerData(
-    featureTimeList: List[Tuple[float, ...]], index: int, filterZeroValues: bool
+    featureTimeList: Sequence[Sequence[float]], index: int, filterZeroValues: bool
 ) -> List[Tuple[float, ...]]:
     """znormalize time series data
 
@@ -83,7 +83,7 @@ def znormalizeSpeakerData(
         stdDevVal = statistics.stdev(featValuesNoZeroes)
 
         featValues = [
-            (val - meanVal) / stdDevVal if val > 0 else 0 for val in featValues
+            (val - meanVal) / stdDevVal if val > 0.0 else 0.0 for val in featValues
         ]
 
     if len(featureTimeList) != len(featValues):
@@ -99,7 +99,7 @@ def znormalizeSpeakerData(
     return outputList
 
 
-def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[float]:
+def medianFilter(dist: Sequence[float], window: int, useEdgePadding: bool) -> List[float]:
     """median filter each value in a dataset; filtering occurs within a given window
 
     Median filtering is used to "smooth" out extreme values.  It can be useful if
@@ -114,7 +114,7 @@ def medianFilter(dist: List[float], window: int, useEdgePadding: bool) -> List[f
 
 
 def znormWindowFilter(
-    dist: List[float], window: int, useEdgePadding: bool, filterZeroValues: bool
+    dist: Sequence[float], window: int, useEdgePadding: bool, filterZeroValues: bool
 ) -> List[float]:
     """z-normalize each value in a dataset; normalization occurs within a given window
 
@@ -132,8 +132,8 @@ def znormWindowFilter(
     if not filterZeroValues:
         filteredOutput = _stepFilter(znormalizeCenterVal, dist, window, useEdgePadding)
     else:
-        zeroIndexList = []
-        nonzeroValList = []
+        zeroIndexList: List[int] = []
+        nonzeroValList: List[float] = []
         for i, val in enumerate(dist):
             if val > 0.0:
                 nonzeroValList.append(val)
@@ -151,15 +151,18 @@ def znormWindowFilter(
 
 
 def _stepFilter(
-    filterFunc, dist: List[float], window: int, useEdgePadding: bool
+    filterFunc: Callable[[List[float]], float],
+    dist: Sequence[float],
+    window: int,
+    useEdgePadding: bool
 ) -> List[float]:
 
     offset = int(math.floor(window / 2.0))
     length = len(dist)
 
-    returnList = []
+    returnList: List[float] = []
     for x in range(length):
-        dataToFilter = []
+        dataToFilter: List[float] = []
         # If using edge padding or if 0 <= context <= length
         if useEdgePadding or (((0 <= x - offset) and (x + offset < length))):
 
@@ -167,7 +170,7 @@ def _stepFilter(
             currentContext = [
                 dist[x],
             ]
-            postContext = []
+            postContext: List[float] = []
 
             lastKnownLargeIndex = 0
             for y in range(1, offset + 1):  # 1-based
@@ -198,7 +201,7 @@ def _stepFilter(
     return returnList
 
 
-def znormalizeData(valList: List[float]) -> List[float]:
+def znormalizeData(valList: Iterable[float]) -> List[float]:
     """Given a list of floats, return the z-normalized values of the floats
 
     The formula is: z(v) = (v - mean) / stdDev
@@ -206,14 +209,12 @@ def znormalizeData(valList: List[float]) -> List[float]:
     It can be used, for example, to compare the pitch values of different speakers who
     naturally have different pitch ranges.
     """
-    valList = valList[:]
     meanVal = statistics.mean(valList)
     stdDevVal = statistics.stdev(valList)
-
     return [(val - meanVal) / stdDevVal for val in valList]
 
 
-def rms(intensityValues: List[float]) -> float:
+def rms(intensityValues: Iterable[float]) -> float:
     """Return the root mean square for the input set of values"""
     intensityValues = [val ** 2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)

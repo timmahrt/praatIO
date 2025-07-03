@@ -9,7 +9,7 @@ import math
 import wave
 import struct
 import copy
-from typing import List, Tuple, Optional, Callable
+from typing import List, Sequence, Tuple, Optional, Callable, Iterable
 from abc import ABC, abstractmethod
 from functools import partial
 
@@ -40,7 +40,7 @@ def _diffBooleans(a: bool, b: bool) -> int:
 
 
 def _getZeroCrossings(
-    samples: List[int], startTime: float, framerate: int
+    samples: Sequence[int], startTime: float, framerate: int
 ) -> List[float]:
     """
     Given a list of samples, return a list of times where zero-crossings occur
@@ -129,8 +129,8 @@ def readFramesAtTime(
 
 def readFramesAtTimes(
     audiofile: wave.Wave_read,
-    keepIntervals: List[Tuple[float, float]] = None,
-    deleteIntervals: List[Tuple[float, float]] = None,
+    keepIntervals: Optional[Iterable[Tuple[float, float]]] = None,
+    deleteIntervals: Optional[Iterable[Tuple[float, float]]] = None,
     replaceFunc: Optional[Callable[[float], bytes]] = None,
 ) -> bytes:
     """Reads an audio file into memory, with some configuration
@@ -177,7 +177,7 @@ def readFramesAtTimes(
 
 
 class AbstractWav(ABC):
-    def __init__(self, params: List):
+    def __init__(self, params: wave._wave_params):
         self.params = params
 
         self.nchannels: int = params[0]
@@ -200,7 +200,7 @@ class AbstractWav(ABC):
     def duration(self) -> float:  # pragma: no cover
         pass
 
-    def getSamplesAtTime(self, start, step, reverse):
+    def getSamplesAtTime(self, start: float, step: float, reverse: bool) -> Tuple[int, ...]:
         startTime, endTime = utils.getInterval(start, step, self.duration, reverse)
         samples = self.getSamples(startTime, endTime)
 
@@ -236,11 +236,11 @@ class AbstractWav(ABC):
             if leftStartTime < 0 and rightStartTime > self.duration:
                 raise errors.ZeroCrossingError()  # This should probably never happen
 
-            samplesToRead = []
+            samplesToRead: List[List[float]] = []
             if leftStartTime > 0:
                 leftIncrement = timeStep + oneSampleDuration
                 if leftStartTime - leftIncrement < 0:
-                    leftStartTime = 0
+                    leftStartTime = 0.0
                 samplesToRead.append([leftStartTime, leftIncrement])
 
             if rightStartTime < self.duration:
@@ -249,7 +249,7 @@ class AbstractWav(ABC):
                     rightIncrement = self.duration - rightStartTime
                 samplesToRead.append([rightStartTime, rightIncrement])
 
-            zeroCrossingsInTime = []
+            zeroCrossingsInTime: List[float] = []
             if len(samplesToRead) > 0:
                 for startTime, increment in samplesToRead:
                     samples = self.getSamplesAtTime(startTime, increment, False)
@@ -278,16 +278,14 @@ class AbstractWav(ABC):
     def outputFrames(self, frames: bytes, outputFN: str) -> None:
         """Output frames using the same parameters as this Wav"""
         outWave = wave.open(outputFN, "w")
-        outWave.setparams(
-            [
-                self.nchannels,
-                self.sampleWidth,
-                self.frameRate,
-                len(frames),
-                self.comptype,
-                self.compname,
-            ]
-        )
+        outWave.setparams((
+            self.nchannels,
+            self.sampleWidth,
+            self.frameRate,
+            len(frames),
+            self.comptype,
+            self.compname,
+        ))
         outWave.writeframes(frames)
 
 
@@ -309,7 +307,9 @@ class QueryWav(AbstractWav):
         duration = float(self.nframes) / self.frameRate
         return duration
 
-    def getFrames(self, startTime: float = None, endTime: float = None) -> bytes:
+    def getFrames(
+        self, startTime: Optional[float] = None, endTime: Optional[float] = None,
+    ) -> bytes:
         if startTime is None:
             startTime = 0
 
@@ -333,7 +333,7 @@ class Wav(AbstractWav):
     large files.
     """
 
-    def __init__(self, frames: bytes, params: List):
+    def __init__(self, frames: bytes, params: wave._wave_params):
         self.frames = frames
         super(Wav, self).__init__(params)
 
@@ -391,36 +391,32 @@ class Wav(AbstractWav):
 
     def save(self, outputFN: str) -> None:
         outWave = wave.open(outputFN, "w")
-        outWave.setparams(
-            [
-                self.nchannels,
-                self.sampleWidth,
-                self.frameRate,
-                len(self.frames),
-                self.comptype,
-                self.compname,
-            ]
-        )
+        outWave.setparams((
+            self.nchannels,
+            self.sampleWidth,
+            self.frameRate,
+            len(self.frames),
+            self.comptype,
+            self.compname,
+        ))
         outWave.writeframes(self.frames)
 
 
 class AudioGenerator:
-    def __init__(self, sampleWidth, frameRate):
-        self.sampleWidth: int = sampleWidth
-        self.frameRate: int = frameRate
+    def __init__(self, sampleWidth: int, frameRate: int):
+        self.sampleWidth = sampleWidth
+        self.frameRate = frameRate
 
     @classmethod
     def fromWav(cls, wav: AbstractWav) -> "AudioGenerator":
         """Build an AudioGenerator with parameters derived from a Wav or QueryWav"""
         return AudioGenerator(wav.sampleWidth, wav.frameRate)
 
-    def buildSineWaveGenerator(self, frequency, amplitude) -> Callable[[float], bytes]:
+    def buildSineWaveGenerator(
+        self, frequency: int, amplitude: Optional[float]
+    ) -> Callable[[float], bytes]:
         """Returns a function that takes a duration and returns a generated sine wave"""
-        return partial(
-            self.generateSineWave,
-            frequency=frequency,
-            amplitude=amplitude,
-        )
+        return partial(self.generateSineWave, frequency=frequency, amplitude=amplitude)
 
     def generateSineWave(
         self,
@@ -446,8 +442,8 @@ class AudioGenerator:
 def _computeKeepDeleteIntervals(
     start: float,
     stop: float,
-    keepIntervals: List[Tuple[float, float]] = None,
-    deleteIntervals: List[Tuple[float, float]] = None,
+    keepIntervals: Optional[Iterable[Tuple[float, float]]] = None,
+    deleteIntervals: Optional[Iterable[Tuple[float, float]]] = None,
 ) -> List[Tuple[float, float, str]]:
     """Returns a list of intervals, each one labeled 'keep' or 'delete'"""
     if keepIntervals and deleteIntervals:
@@ -457,7 +453,7 @@ def _computeKeepDeleteIntervals(
 
     elif not keepIntervals and not deleteIntervals:
         computedKeepIntervals = [(start, stop)]
-        computedDeleteIntervals = []
+        computedDeleteIntervals: List[Tuple[float, float]] = []
 
     elif deleteIntervals:
         deleteTimestamps = [(interval[0], interval[1]) for interval in deleteIntervals]

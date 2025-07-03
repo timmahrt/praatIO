@@ -8,7 +8,9 @@ import itertools
 import wave
 from importlib import resources
 from typing_extensions import Literal
-from typing import Any, Iterator, List, Tuple, NoReturn, Type, Optional, Sequence
+from typing import (
+    Any, List, Tuple, NoReturn, Type, Optional, Iterable, Collection, Sequence, Callable, TypeVar
+)
 
 from praatio.utilities import errors
 from praatio.utilities import constants
@@ -43,7 +45,7 @@ class TogglableLogger:
                 self.writable = False
 
 
-def find(list, value, reverse) -> Optional[int]:
+def find(list: Sequence[Any], value: Any, reverse: bool) -> Optional[int]:
     """Returns the first/last index of an item in a list"""
     if value not in list:
         return None
@@ -68,7 +70,9 @@ def reportWarning(_exception: Type[BaseException], text: str) -> None:
     print(text)
 
 
-def getErrorReporter(reportingMode: Literal["silence", "warning", "error"]):
+def getErrorReporter(
+    reportingMode: Literal["silence", "warning", "error"],
+) -> Callable[[Type[BaseException], str], None]:
     modeToFunc = {
         constants.ErrorReportingMode.SILENCE: reportNoop,
         constants.ErrorReportingMode.WARNING: reportWarning,
@@ -78,7 +82,11 @@ def getErrorReporter(reportingMode: Literal["silence", "warning", "error"]):
     return modeToFunc[reportingMode]
 
 
-def checkIsUndershoot(time: float, referenceTime: float, errorReporter) -> bool:
+def checkIsUndershoot(
+    time: float,
+    referenceTime: float,
+    errorReporter: Callable[[Type[BaseException], str], None],
+) -> bool:
     if time < referenceTime:
         errorReporter(
             errors.OutOfBounds,
@@ -89,7 +97,11 @@ def checkIsUndershoot(time: float, referenceTime: float, errorReporter) -> bool:
         return False
 
 
-def checkIsOvershoot(time: float, referenceTime: float, errorReporter) -> bool:
+def checkIsOvershoot(
+    time: float,
+    referenceTime: float,
+    errorReporter: Callable[[Type[BaseException], str], None],
+) -> bool:
     if time > referenceTime:
         errorReporter(
             errors.OutOfBounds,
@@ -100,7 +112,7 @@ def checkIsOvershoot(time: float, referenceTime: float, errorReporter) -> bool:
         return False
 
 
-def validateOption(variableName, value, optionClass):
+def validateOption(variableName: str, value: str, optionClass):
     if value not in optionClass.validOptions:
         raise errors.WrongOption(variableName, value, optionClass.validOptions)
 
@@ -168,7 +180,7 @@ def intervalOverlapCheck(
 def getIntervalsInInterval(
     start: float,
     end: float,
-    intervals: List[Interval],
+    intervals: Iterable[Interval],
     mode: Literal["strict", "lax", "truncated"],
 ) -> List[Interval]:
     """Gets all intervals that exist between /start/ and /end/
@@ -190,7 +202,7 @@ def getIntervalsInInterval(
     # TODO: move to Interval class?
     validateOption("mode", mode, constants.CropCollision)
 
-    containedIntervals = []
+    containedIntervals: List[Interval] = []
     for interval in intervals:
         matchedEntry = None
 
@@ -314,14 +326,16 @@ def getValueAtTime(
     return retRow, i
 
 
-def getValuesInInterval(dataTupleList: List, start: float, end: float) -> List:
+def getValuesInInterval(
+    dataTupleList: Iterable[Tuple[float, ...]], start: float, end: float
+) -> List[Tuple[float, ...]]:
     """Gets the values that exist within an interval
 
     The function assumes that the data is formated as
     [(t1, v1a, v1b, ...), (t2, v2a, v2b, ...)]
     """
     # TODO: move to Interval class?
-    intervalDataList = []
+    intervalDataList: List[Tuple[float, ...]] = []
     for dataTuple in dataTupleList:
         time = dataTuple[0]
         if start <= time and end >= time:
@@ -341,7 +355,9 @@ def sign(x: float) -> int:
 
 
 def invertIntervalList(
-    inputList: List[Tuple[float, float]], minValue: float = None, maxValue: float = None
+    inputList: Iterable[Tuple[float, float]],
+    minValue: Optional[float] = None,
+    maxValue: Optional[float] = None,
 ) -> List[Tuple[float, float]]:
     """Inverts the segments of a list of intervals
 
@@ -380,7 +396,10 @@ def invertIntervalList(
     return invList
 
 
-def getUnique(values: Sequence) -> Sequence:
+T = TypeVar("T")
+
+
+def getUnique(values: Iterable[T]) -> List[T]:
     """
     Returns all of the unique elements in /values/
 
@@ -402,7 +421,7 @@ def makeDir(path: str) -> None:
 
 def findAll(txt: str, subStr: str) -> List[int]:
     """Find the starting indicies of all instances of subStr in txt"""
-    indexList = []
+    indexList: List[int] = []
     index = 0
     while True:
         try:
@@ -416,7 +435,7 @@ def findAll(txt: str, subStr: str) -> List[int]:
 
 
 def runPraatScript(
-    praatEXE: str, scriptFN: str, argList: List[Any], cwd: str = None
+    praatEXE: str, scriptFN: str, argList: Iterable[Any], cwd: Optional[str] = None
 ) -> None:
     # Popen gives a not-very-transparent error
     if not os.path.exists(praatEXE):
@@ -424,8 +443,8 @@ def runPraatScript(
     if not os.path.exists(scriptFN):
         raise errors.FileNotFound(scriptFN)
 
-    argList = ["%s" % arg for arg in argList]
-    cmdList = [praatEXE, "--run", scriptFN] + argList
+    cmdList = [praatEXE, "--run", scriptFN]
+    cmdList.extend(map(str, argList))
 
     myProcess = subprocess.Popen(cmdList, cwd=cwd)
 
@@ -433,7 +452,7 @@ def runPraatScript(
         raise errors.PraatExecutionFailed(cmdList)
 
 
-def safeZip(listOfLists: List[list], enforceLength: bool) -> Iterator[Any]:
+def safeZip(listOfLists: Sequence[Collection], enforceLength: bool):
     """A safe version of python's zip()
 
     If two sublists are of different sizes, python's zip will truncate

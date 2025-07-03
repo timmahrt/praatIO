@@ -8,9 +8,7 @@ from praatio.utilities import constants
 
 from tests.praatio_test_case import PraatioTestCase
 from tests import testing_utils
-
-makeIntervalTier = testing_utils.makeIntervalTier
-makePointTier = testing_utils.makePointTier
+from tests.testing_utils import makeIntervalTier, makePointTier
 
 
 class TestIntervalTier(PraatioTestCase):
@@ -461,7 +459,7 @@ class TestIntervalTier(PraatioTestCase):
                 Interval(2.5, 3.56, "will also not be modified"),
             ]
         )
-        refInterval = testing_utils.makePointTier(
+        refInterval = makePointTier(
             points=[
                 Point(1, "foo"),
                 Point(2.0, "bar"),

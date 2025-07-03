@@ -1,24 +1,21 @@
 """
 A PointTier is a tier containing an array of points -- data that exists at a specific point in time
 """
-from typing import List, Tuple, Optional, Any, Sequence
+from typing import List, Tuple, Optional, Iterable, Any
 
 from typing_extensions import Literal
 
 from praatio import audio
-from praatio.utilities.constants import (
-    Point,
-    POINT_TIER,
-)
+from praatio.utilities.constants import Point, POINT_TIER
 from praatio.utilities import constants
 from praatio.utilities import errors
 from praatio.utilities import utils
 from praatio.utilities import my_math
 
-from praatio.data_classes import textgrid_tier
+from praatio.data_classes.textgrid_tier import TextgridTier
 
 
-def _homogenizeEntries(entries):
+def _homogenizeEntries(entries: Iterable[Tuple[float, str]]) -> List[Point]:
     """
     Enforces consistency in points
 
@@ -31,7 +28,12 @@ def _homogenizeEntries(entries):
     return processedEntries
 
 
-def _calculateMinAndMaxTime(entries: Sequence[Point], minT=None, maxT=None):
+def _calculateMinAndMaxTime(
+    entries: Iterable[Point],
+    minT: Optional[float] = None,
+    maxT: Optional[float] = None,
+) -> Tuple[float, float]:
+
     timeList = [time for time, label in entries]
     if minT is not None:
         timeList.append(float(minT))
@@ -47,14 +49,14 @@ def _calculateMinAndMaxTime(entries: Sequence[Point], minT=None, maxT=None):
     return (calculatedMinT, calculatedMaxT)
 
 
-class PointTier(textgrid_tier.TextgridTier):
+class PointTier(TextgridTier[Point]):
     tierType = POINT_TIER
     entryType = Point
 
     def __init__(
         self,
         name: str,
-        entries: List[Point],
+        entries: Iterable[Tuple[float, str]],
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
@@ -108,7 +110,7 @@ class PointTier(textgrid_tier.TextgridTier):
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
-        newEntries = []
+        newEntries: List[Point] = []
 
         for entry in self.entries:
             timestamp = entry.time
@@ -133,7 +135,7 @@ class PointTier(textgrid_tier.TextgridTier):
         self._entries.pop(self._entries.index(entry))
 
     def dejitter(
-        self, referenceTier: textgrid_tier.TextgridTier, maxDifference: float = 0.001
+        self, referenceTier: "PointTier", maxDifference: float = 0.001
     ) -> "PointTier":
         """
         Set timestamps in this tier to be the same as values in the reference tier
@@ -153,13 +155,13 @@ class PointTier(textgrid_tier.TextgridTier):
         """
         referenceTimestamps = referenceTier.timestamps
 
-        newEntries = []
+        newEntries: List[Point] = []
         for time, label in self.entries:
             timeCompare = min(referenceTimestamps, key=lambda x: abs(x - time))
 
             if my_math.lessThanOrEqual(abs(time - timeCompare), maxDifference):
                 time = timeCompare
-            newEntries.append((time, label))
+            newEntries.append(Point(time, label))
 
         return self.new(entries=newEntries)
 
@@ -210,7 +212,7 @@ class PointTier(textgrid_tier.TextgridTier):
 
     def getValuesAtPoints(
         self,
-        dataTupleList: List[Tuple[float, ...]],
+        dataTupleList: Iterable[Tuple[float, ...]],
         fuzzyMatching: bool = False,
     ) -> List[Tuple[Any, ...]]:
         """Get the values that occur at points in the point tier
@@ -236,7 +238,7 @@ class PointTier(textgrid_tier.TextgridTier):
         """
 
         currentIndex = 0
-        retList = []
+        retList: List[Tuple[Any, ...]] = []
 
         sortedDataTupleList = sorted(dataTupleList)
         for timestamp, label in self.entries:
@@ -284,7 +286,7 @@ class PointTier(textgrid_tier.TextgridTier):
                 newTier.deleteEntry(point)
 
         if doShrink is True:
-            newEntries = []
+            newEntries: List[Point] = []
             diff = end - start
             for point in newTier.entries:
                 if point.time < start:
@@ -389,7 +391,7 @@ class PointTier(textgrid_tier.TextgridTier):
             PointTier: the modified version of the current tier
         """
 
-        newEntries = []
+        newEntries: List[Point] = []
         for point in self.entries:
             if point.time <= start:
                 newEntries.append(point)
@@ -406,7 +408,7 @@ class PointTier(textgrid_tier.TextgridTier):
         """Moves all timestamps to the nearest zero crossing"""
         wav = audio.QueryWav(wavFN)
 
-        points = []
+        points: List[Point] = []
         for time, label in self.entries:
             newTime = wav.findNearestZeroCrossing(time)
             points.append(Point(newTime, label))

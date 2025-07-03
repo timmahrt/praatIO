@@ -4,33 +4,28 @@ The abstract class used by all textgrid tiers
 import re
 import copy
 import math
-from typing import (
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import List, Optional, Type, TypeVar, Iterable, Any, Generic, Tuple
 from abc import ABC, abstractmethod
 
 from typing_extensions import Literal
-
 
 from praatio.utilities import constants
 from praatio.utilities import errors
 from praatio.utilities import utils
 
-T = TypeVar("T", bound="TextgridTier")
+
+EntryType = TypeVar("EntryType", constants.Point, constants.Interval)
+TierType = TypeVar("TierType", bound="TextgridTier")
 
 
-class TextgridTier(ABC):
+class TextgridTier(ABC, Generic[EntryType]):
     tierType: str
-    entryType: Union[Type[constants.Point], Type[constants.Interval]]
+    entryType: Type[EntryType]
 
     def __init__(
         self,
         name: str,
-        entries: List,
+        entries: List[EntryType],
         minT: float,
         maxT: float,
         errorMode: Literal["silence", "warning", "error"] = "warning",
@@ -39,6 +34,7 @@ class TextgridTier(ABC):
         utils.validateOption("errorMode", errorMode, constants.ErrorReportingMode)
 
         """See PointTier or IntervalTier"""
+        entries = list(entries)
         entries.sort()
 
         self.name = name
@@ -54,7 +50,7 @@ class TextgridTier(ABC):
         for entry in self.entries:
             yield entry
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(self, type(other)):
             return False
 
@@ -71,22 +67,22 @@ class TextgridTier(ABC):
             for selfEntry, otherEntry in zip(self.entries, other.entries):
                 for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
                     try:
-                        isEqual &= math.isclose(selfSubEntry, otherSubEntry)
+                        isEqual &= math.isclose(selfSubEntry, otherSubEntry)  # type:ignore[arg-type]
                     except TypeError:
                         isEqual &= selfSubEntry == otherSubEntry
 
         return isEqual
 
     @property
-    def entries(self):
+    def entries(self) -> Tuple[EntryType, ...]:
         return tuple(self._entries)
 
     @property
     @abstractmethod
-    def timestamps(self) -> List[float]:
+    def timestamps(self) -> List[float]:  # pragma: no cover
         pass
 
-    def appendTier(self, tier: "TextgridTier") -> "TextgridTier":
+    def appendTier(self: TierType, tier: TierType) -> TierType:
         """Append a tier to the end of this one.
 
         This tier's maxtimestamp will be lengthened by the amount in the passed in tier.
@@ -129,7 +125,7 @@ class TextgridTier(ABC):
         Returns:
             A list of indicies
         """
-        returnList = []
+        returnList: List[int] = []
         if usingRE is True:
             for i, entry in enumerate(self.entries):
                 matchList = re.findall(matchLabel, entry.label, re.I)
@@ -147,12 +143,12 @@ class TextgridTier(ABC):
         return returnList
 
     def new(
-        self: T,
+        self: TierType,
         name: Optional[str] = None,
-        entries: Optional[list] = None,
+        entries: Optional[Iterable[EntryType]] = None,
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
-    ) -> T:
+    ) -> TierType:
         """Make a new tier derived from the current one"""
         if name is None:
             name = self.name
@@ -164,6 +160,8 @@ class TextgridTier(ABC):
                 else entry
                 for entry in entries
             ]
+        else:
+            entries = list(entries)
         if minTimestamp is None:
             minTimestamp = self.minTimestamp
         if maxTimestamp is None:
@@ -184,7 +182,7 @@ class TextgridTier(ABC):
         ]
         self._entries.sort()
 
-    def union(self, tier: "TextgridTier") -> "TextgridTier":
+    def union(self: TierType, tier: TierType) -> TierType:
         """The given tier is set unioned to this tier.
 
         All entries in the given tier are added to the current tier.
@@ -205,16 +203,16 @@ class TextgridTier(ABC):
 
     @abstractmethod
     def editTimestamps(
-        self,
+        self: TierType,
         offset: float,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
-    ) -> "TextgridTier":  # pragma: no cover
+    ) -> TierType:  # pragma: no cover
         pass
 
     @abstractmethod
     def insertEntry(
         self,
-        entry,
+        entry: EntryType,
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:  # pragma: no cover
@@ -222,49 +220,49 @@ class TextgridTier(ABC):
 
     @abstractmethod
     def dejitter(
-        self,
-        referenceTier: "TextgridTier",
+        self: TierType,
+        referenceTier: TierType,
         maxDifference: float = 0.001,
-    ) -> "TextgridTier":  # pragma: no cover
+    ) -> TierType:  # pragma: no cover
         pass
 
     @abstractmethod
     def eraseRegion(
-        self,
+        self: TierType,
         start: float,
         end: float,
         collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
-    ) -> "TextgridTier":  # pragma: no cover
+    ) -> TierType:  # pragma: no cover
         pass
 
     @abstractmethod
     def crop(
-        self,
+        self: TierType,
         cropStart: float,
         cropEnd: float,
         mode: Literal["strict", "lax", "truncated"],
         rebaseToZero: bool,
-    ) -> "TextgridTier":  # pragma: no cover
+    ) -> TierType:  # pragma: no cover
         pass
 
     @abstractmethod
     def insertSpace(
-        self,
+        self: TierType,
         start: float,
         duration: float,
         collisionMode: Literal["stretch", "split", "no_change", "error"],
-    ) -> "TextgridTier":  # pragma: no cover
+    ) -> TierType:  # pragma: no cover
         pass
 
     @abstractmethod
-    def deleteEntry(self, entry) -> None:  # pragma: no cover
+    def deleteEntry(self, entry: EntryType) -> None:  # pragma: no cover
         pass
 
     @abstractmethod
-    def toZeroCrossings(self, wavFN) -> "TextgridTier":  # pragma: no cover
+    def toZeroCrossings(self: TierType, wavFN: str) -> TierType:  # pragma: no cover
         pass
 
     @abstractmethod
-    def validate(self, reportingMode) -> bool:  # pragma: no cover
-        pass
+    def validate(self, reportingMode: Literal["silence", "warning", "error"]) -> bool:
+        pass  # pragma: no cover

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 
 from praatio.utilities import constants
 
@@ -38,7 +38,7 @@ class UnexpectedError(PraatioException):
 
 
 class WrongOption(PraatioException):
-    def __init__(self, argumentName: str, givenValue: str, availableOptions: List[str]):
+    def __init__(self, argumentName: str, givenValue: str, availableOptions: Iterable[str]):
         self.argumentName = argumentName
         self.givenValue = givenValue
         self.availableOptions = availableOptions
@@ -103,7 +103,7 @@ class IncompatibleTierError(TextgridException):
 
 
 class PraatExecutionFailed(PraatioException):
-    def __init__(self, cmdList: List[str]):
+    def __init__(self, cmdList: Iterable[str]):
         super(PraatExecutionFailed, self).__init__()
         self.cmdList = cmdList
 

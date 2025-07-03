@@ -23,10 +23,7 @@ see the **examples/** directory for examples using textgrid.py
 """
 
 import io
-from typing import (
-    Union,
-    Type,
-)
+from typing import Union, Type, List
 
 from typing_extensions import Literal
 
@@ -77,7 +74,7 @@ def openTextgrid(
 
     tgAsDict = textgrid_io.parseTextgridStr(data, includeEmptyIntervals)
 
-    tierNames = []
+    tierNames: List[str] = []
     for tier in tgAsDict["tiers"]:
         name = tier["name"]
         if name in tierNames:

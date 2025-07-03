@@ -4,7 +4,7 @@ see **examples/get_vowel_points.py**
 """
 
 import io
-from typing import Tuple
+from typing import List, Tuple
 
 from praatio.data_classes.data_point import PointObject1D, PointObject2D
 
@@ -16,7 +16,7 @@ def open1DPointObject(fn: str) -> PointObject1D:
         data, objectType, minT, maxT = _parseNormalHeader(fn)
 
         start = 0
-        dataList = []
+        dataList: List[Tuple[float]] = []
         while True:
             try:
                 start = data.index("=", start)
@@ -43,7 +43,7 @@ def open2DPointObject(fn: str) -> PointObject2D:
         data, objectType, minT, maxT = _parseNormalHeader(fn)
 
         start = 0
-        dataList = []
+        dataList: List[Tuple[float, float]] = []
         while True:
             try:
                 start = data.index("=", start)
