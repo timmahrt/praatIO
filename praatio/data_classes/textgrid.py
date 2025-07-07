@@ -59,8 +59,7 @@ class Textgrid:
         return len(self._tierDict)
 
     def __iter__(self):
-        for entry in self.tiers:
-            yield entry
+        return iter(self._tierDict.values())
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Textgrid):
@@ -121,32 +120,32 @@ class Textgrid:
 
         if tierIndex is None:
             self._tierDict[tier.name] = tier
-        else:  # Need to recreate the tierDict with the new order
-            newOrderedTierNameList = list(self.tierNames)
-            newOrderedTierNameList.insert(tierIndex, tier.name)
-
-            newTierDict = OrderedDict()
+        else:
+            tierNamesAfterThis = tuple(self.tierNames)[tierIndex:]
+            # Insert the new tier at the end
             self._tierDict[tier.name] = tier
-            for tmpName in newOrderedTierNameList:
-                newTierDict[tmpName] = self.getTier(tmpName)
-            self._tierDict = newTierDict
+            # Then move tiers that should be after it in the correct order
+            for tierName in tierNamesAfterThis:
+                self._tierDict.move_to_end(tierName)
 
         minV = tier.minTimestamp
-        if self.minTimestamp is not None and minV < self.minTimestamp:
+        if self.minTimestamp is None:
+            self.minTimestamp = minV
+        elif minV < self.minTimestamp:
             errorReporter(
                 errors.TextgridStateAutoModified,
                 f"Minimum timestamp in Textgrid changed from ({self.minTimestamp}) to ({minV})",
             )
-        if self.minTimestamp is None or minV < self.minTimestamp:
             self.minTimestamp = minV
 
         maxV = tier.maxTimestamp
-        if self.maxTimestamp is not None and maxV > self.maxTimestamp:
+        if self.maxTimestamp is None:
+            self.maxTimestamp = maxV
+        elif maxV > self.maxTimestamp:
             errorReporter(
                 errors.TextgridStateAutoModified,
                 f"Maximum timestamp in Textgrid changed from ({self.maxTimestamp}) to ({maxV})",
             )
-        if self.maxTimestamp is None or maxV > self.maxTimestamp:
             self.maxTimestamp = maxV
 
     def appendTextgrid(self, tg: "Textgrid", onlyMatchingNames: bool) -> "Textgrid":

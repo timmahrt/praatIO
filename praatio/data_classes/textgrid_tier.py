@@ -45,8 +45,7 @@ class TextgridTier(ABC, Generic[EntryType]):
         return len(self._entries)
 
     def __iter__(self):
-        for entry in self.entries:
-            yield entry
+        return iter(self._entries)
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(self, type(other)):
@@ -87,7 +86,7 @@ class TextgridTier(ABC, Generic[EntryType]):
         """
         if self.tierType != tier.tierType:
             raise errors.ArgumentError(
-                f"Cannot append a tier of type {type(self)} to a tier of type {type(tier)}."
+                f"Cannot append a tier of type {type(tier)} to a tier of type {type(self)}."
             )
 
         maxTime = self.maxTimestamp + tier.maxTimestamp
@@ -253,9 +252,9 @@ class TextgridTier(ABC, Generic[EntryType]):
     ) -> TierType:  # pragma: no cover
         pass
 
-    @abstractmethod
-    def deleteEntry(self, entry: EntryType) -> None:  # pragma: no cover
-        pass
+    def deleteEntry(self, entry: EntryType) -> None:
+        """Removes an entry from the entries"""
+        self._entries.remove(entry)
 
     @abstractmethod
     def toZeroCrossings(self: TierType, wavFN: str) -> TierType:  # pragma: no cover

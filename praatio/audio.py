@@ -28,17 +28,6 @@ DEFAULT_SINE_FREQUENCY = 200
 NUM_BITS_IN_A_BYTE = 8
 
 
-def _diffBooleans(a: bool, b: bool) -> int:
-    if a == b:
-        return 0
-    elif a is True and b is False:
-        return -1
-
-    # For mypy
-    # a is False and b is True
-    return 1
-
-
 def _getZeroCrossings(
     samples: Sequence[int], startTime: float, framerate: int
 ) -> List[float]:
@@ -48,17 +37,14 @@ def _getZeroCrossings(
     Inspired by:
     https://stackoverflow.com/a/44322349
     """
-    rightGreater = [val > 0 for val in samples]
-    rightComp = [
-        _diffBooleans(a, b) for a, b in zip(rightGreater[0::], rightGreater[1::])
-    ]
+    sign = [val > 0 for val in samples]
 
     def getClosest(i):
-        # A zero crossing happens between two values (e.g. a change from positive to negative)
-        # Choose the smaller of the two values involved
+        # A zero crossing happens between two values, one possitive and one negative.
+        # Choose the one closer to zero.
         return min([i, i + 1], key=lambda i: abs(samples[i]))
 
-    zeroCrossings = [getClosest(i) for i in range(len(rightComp)) if rightComp[i] != 0]
+    zeroCrossings = [getClosest(i) for i in range(len(sign) - 1) if sign[i] != sign[i + 1]]
 
     zeroCrossingsInTime = [
         startTime + (zeroI / float(framerate)) for zeroI in zeroCrossings
@@ -336,10 +322,7 @@ class Wav(AbstractWav):
         super(Wav, self).__init__(params)
 
     def __eq__(self, other):
-        if not isinstance(other, Wav):
-            return False
-
-        return self.frames == other.frames
+        return isinstance(other, Wav) and self.frames == other.frames
 
     def _getIndexAtTime(self, startTime: float) -> int:
         """Get the index in the frame list for the given time."""

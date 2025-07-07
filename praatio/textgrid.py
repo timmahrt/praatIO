@@ -80,7 +80,7 @@ def openTextgrid(
         if name in tierNames:
             if duplicateNamesMode == constants.DuplicateNames.ERROR:
                 raise errors.DuplicateTierName(
-                    f"Your textgrid contains tiers with the same name '{name}'. "
+                    f"Your textgrid contains tiers with the same name {name!r}. "
                     "This is not allowed. It is recommended that you rename them. "
                     "If you set openTextgrid(..., duplicateNamesMode='rename'), praatio "
                     "will automatically append numbers to the end of tiers to ensure they "

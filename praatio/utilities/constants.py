@@ -15,11 +15,9 @@ class Interval(NamedTuple):
     label: str
 
     def __eq__(self, other: Any):
-        if not isinstance(other, Interval):
-            return False
-
         return (
-            math.isclose(self.start, other.start)
+            isinstance(other, Interval)
+            and math.isclose(self.start, other.start)
             and math.isclose(self.end, other.end)
             and self.label == other.label
         )
@@ -33,11 +31,9 @@ class Point(NamedTuple):
     label: str
 
     def __eq__(self, other: Any):
-        if not isinstance(other, Point):
-            return False
-
         return (
-            math.isclose(self.time, other.time, abs_tol=1e-14)
+            isinstance(other, Point)
+            and math.isclose(self.time, other.time, abs_tol=1e-14)
             and self.label == other.label
         )
 

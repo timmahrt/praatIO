@@ -68,12 +68,12 @@ def _removeUltrashortIntervals(
     # This will link intervals that were connected by an interval
     # that was shorter than minLength
     for j in range(len(newEntries) - 1):
-        diff = abs(newEntries[j][1] - newEntries[j + 1][0])
+        diff = abs(newEntries[j].end - newEntries[j + 1].start)
         if diff > 0 and diff < minLength:
             newEntries[j] = Interval(
-                newEntries[j][0],
-                newEntries[j + 1][0],
-                newEntries[j][2],
+                newEntries[j].start,
+                newEntries[j + 1].start,
+                newEntries[j].label,
             )
 
     tier["entries"] = newEntries

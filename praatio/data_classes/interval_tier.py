@@ -21,11 +21,10 @@ def _homogenizeEntries(entries: Iterable[Tuple[float, float, str]]) -> List[Inte
 
     - Convert all entries to intervals.
     - Remove whitespace in labels.
-    - Sort values by time.
+    - Sort values by start time.
     """
     processedEntries = [
-        Interval(float(start), float(end), label.strip())
-        for start, end, label in entries
+        Interval(float(start), float(end), label.strip()) for start, end, label in entries
     ]
     processedEntries.sort()
     return processedEntries
@@ -46,12 +45,9 @@ def _calculateMinAndMaxTime(
         maxTimeList.append(float(maxT))
 
     try:
-        resolvedMinT = min(minTimeList)
-        resolvedMaxT = max(maxTimeList)
+        return (min(minTimeList), max(maxTimeList))
     except ValueError:
         raise errors.TimelessTextgridTierException()
-
-    return (resolvedMinT, resolvedMaxT)
 
 
 class IntervalTier(TextgridTier[Interval]):
@@ -211,10 +207,6 @@ class IntervalTier(TextgridTier[Interval]):
 
         return self.new(entries=newEntries)
 
-    def deleteEntry(self, entry: Interval) -> None:
-        """Remove an entry from the entries."""
-        self._entries.pop(self._entries.index(entry))
-
     def difference(self, tier: "IntervalTier") -> "IntervalTier":
         """Take the set difference of this tier and the given one.
 
@@ -277,17 +269,7 @@ class IntervalTier(TextgridTier[Interval]):
 
             newEntries.append(Interval(newStart, newEnd, label))
 
-        # Determine new min and max timestamps
-        newMin = min([interval.start for interval in newEntries])
-        newMax = max([interval.end for interval in newEntries])
-
-        if newMin > self.minTimestamp:
-            newMin = self.minTimestamp
-
-        if newMax < self.maxTimestamp:
-            newMax = self.maxTimestamp
-
-        return IntervalTier(self.name, newEntries, newMin, newMax)
+        return IntervalTier(self.name, newEntries, self.minTimestamp, self.maxTimestamp)
 
     def eraseRegion(
         self,
@@ -386,8 +368,7 @@ class IntervalTier(TextgridTier[Interval]):
                     # so if we've found it, move on
                     break
 
-            newMax = newTier.maxTimestamp - diff
-            newTier = newTier.new(entries=newEntries, maxTimestamp=newMax)
+            newTier = newTier.new(entries=newEntries, maxTimestamp=newTier.maxTimestamp - diff)
 
         return newTier
 
@@ -650,11 +631,7 @@ class IntervalTier(TextgridTier[Interval]):
 
             retEntries.extend(subEntries)
 
-        newName = f"{self.name}-{tier.name}"
-
-        retTier = self.new(newName, retEntries)
-
-        return retTier
+        return self.new(f"{self.name}-{tier.name}", retEntries)
 
     def mergeLabels(self, tier: "IntervalTier", demarcator: str = ",") -> "IntervalTier":
         """Merge labels of overlapping tiers into this tier.
@@ -691,11 +668,7 @@ class IntervalTier(TextgridTier[Interval]):
 
             retEntries.append(Interval(start, end, label))
 
-        newName = f"{self.name}-{tier.name}"
-
-        retTier = self.new(newName, retEntries)
-
-        return retTier
+        return self.new(f"{self.name}-{tier.name}", retEntries)
 
     def morph(
         self,

@@ -45,7 +45,7 @@ class WrongOption(PraatioException):
 
     def __str__(self):
         return (
-            f"For argument '{self.argumentName}' was given the value '{self.givenValue}'. "
+            f"For argument {self.argumentName!r} was given the value {self.givenValue!r}. "
             f"However, expected one of [{', '.join(self.availableOptions)}]"
         )
 

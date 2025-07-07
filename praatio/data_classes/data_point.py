@@ -15,6 +15,12 @@ from praatio.utilities import errors
 
 
 class PointObject:
+    suitablePointTypes = [
+        constants.DataPointTypes.POINT,
+        constants.DataPointTypes.PITCH,
+        constants.DataPointTypes.DURATION,
+    ]
+
     def __init__(
         self,
         pointList: Iterable[Iterable[float]],
@@ -22,6 +28,9 @@ class PointObject:
         minTime: float = 0.0,
         maxTime: Optional[float] = None,
     ):
+        if objectClass not in type(self).suitablePointTypes:
+            raise errors.WrongOption("objectClass", objectClass, type(self).suitablePointTypes)
+
         self.pointList = [tuple(row) for row in pointList]  # Sanitize input
         self.objectClass = objectClass
         self.minTime = minTime if minTime > 0.0 else 0.0
@@ -78,6 +87,7 @@ class PointObject:
 
 class PointObject1D(PointObject):
     """Points that only carry temporal information."""
+    suitablePointTypes = [constants.DataPointTypes.POINT]
 
     def __init__(
         self,
@@ -86,11 +96,6 @@ class PointObject1D(PointObject):
         minTime: float = 0,
         maxTime: Optional[float] = None,
     ):
-
-        suitable1dPointTypes = [constants.DataPointTypes.POINT]
-        if objectClass not in suitable1dPointTypes:
-            raise errors.WrongOption("objectClass", objectClass, suitable1dPointTypes)
-
         if maxTime is None:
             maxTime = max([row[0] for row in pointList])
         super(PointObject1D, self).__init__(
@@ -100,6 +105,10 @@ class PointObject1D(PointObject):
 
 class PointObject2D(PointObject):
     """Points that carry a temporal value and some other value."""
+    suitablePointTypes = [
+        constants.DataPointTypes.PITCH,
+        constants.DataPointTypes.DURATION,
+    ]
 
     def __init__(
         self,
@@ -108,17 +117,6 @@ class PointObject2D(PointObject):
         minTime: float = 0.0,
         maxTime: Optional[float] = None,
     ):
-        suitable2dPointTypes = [
-            constants.DataPointTypes.PITCH,
-            constants.DataPointTypes.DURATION,
-        ]
-        if objectClass not in suitable2dPointTypes:
-            raise errors.WrongOption(
-                "objectClass",
-                objectClass,
-                suitable2dPointTypes,
-            )
-
         if maxTime is None:
             maxTime = max([timeV for timeV, _ in pointList])
         super(PointObject2D, self).__init__(

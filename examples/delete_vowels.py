@@ -14,7 +14,7 @@ from praatio.utilities import utils
 
 def isVowel(label):
     return any(
-        [vowel in label.lower() for vowel in ["a", "e", "i", "o", "u", "ə", "œ"]]
+        vowel in label.lower() for vowel in ["a", "e", "i", "o", "u", "ə", "œ"]
     )
 
 

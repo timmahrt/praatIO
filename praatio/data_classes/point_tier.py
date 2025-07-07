@@ -41,12 +41,9 @@ def _calculateMinAndMaxTime(
         timeList.append(float(maxT))
 
     try:
-        calculatedMinT = min(timeList)
-        calculatedMaxT = max(timeList)
+        return (min(timeList), max(timeList))
     except ValueError:
         raise errors.TimelessTextgridTierException()
-
-    return (calculatedMinT, calculatedMaxT)
 
 
 class PointTier(TextgridTier[Point]):
@@ -129,10 +126,6 @@ class PointTier(TextgridTier[Point]):
             maxT = cropEnd
 
         return PointTier(self.name, newEntries, minT, maxT)
-
-    def deleteEntry(self, entry: Point) -> None:
-        """Remove an entry from the entries."""
-        self._entries.pop(self._entries.index(entry))
 
     def dejitter(
         self, referenceTier: "PointTier", maxDifference: float = 0.001
@@ -242,13 +235,12 @@ class PointTier(TextgridTier[Point]):
 
         sortedDataTupleList = sorted(dataTupleList)
         for timestamp, label in self.entries:
-            retTuple = utils.getValueAtTime(
+            retRow, currentIndex = utils.getValueAtTime(
                 timestamp,
                 sortedDataTupleList,
                 fuzzyMatching=fuzzyMatching,
                 startI=currentIndex,
             )
-            retRow, currentIndex = retTuple
             retList.append(retRow)
 
         return retList
@@ -294,8 +286,7 @@ class PointTier(TextgridTier[Point]):
                 elif point.time > end:
                     newEntries.append(Point(point.time - diff, point.label))
 
-            newMax = newTier.maxTimestamp - diff
-            newTier = newTier.new(entries=newEntries, maxTimestamp=newMax)
+            newTier = newTier.new(entries=newEntries, maxTimestamp=newTier.maxTimestamp - diff)
 
         return newTier
 
@@ -335,42 +326,38 @@ class PointTier(TextgridTier[Point]):
         else:
             newPoint = entry
 
-        matchList = []
-        i = None
-        for i, point in enumerate(self.entries):
+        match = None
+        for point in self.entries:
             if point.time == newPoint.time:
-                matchList.append(point)
+                match = point
                 break
 
-        if not matchList:
+        if match is None:
             self._entries.append(newPoint)
 
         elif collisionMode == constants.IntervalCollision.REPLACE:
-            self.deleteEntry(self.entries[i])
+            self.deleteEntry(match)
             self._entries.append(newPoint)
 
         elif collisionMode == constants.IntervalCollision.MERGE:
-            oldPoint = self.entries[i]
             mergedPoint = Point(
-                newPoint.time, "-".join([oldPoint.label, newPoint.label])
+                newPoint.time, match.label + "-" + newPoint.label
             )
-            self.deleteEntry(self._entries[i])
+            self.deleteEntry(match)
             self._entries.append(mergedPoint)
 
         else:
             raise errors.CollisionError(
-                f"Attempted to insert interval {point} into tier {self.name} "
-                "of textgrid but overlapping entries "
-                f"{[tuple(interval) for interval in matchList]} "
-                "already exist"
+                f"Attempted to insert point {newPoint} into tier {self.name} "
+                f"of textgrid but overlapping entry {match} already exists"
             )
 
         self.sort()
 
-        if matchList:
+        if match is not None:
             collisionReporter(
                 errors.CollisionError,
-                f"Collision warning for ({point}) with items ({matchList}) of tier '{self.name}'",
+                f"Collision warning for ({newPoint}) with items ({match}) of tier '{self.name}'",
             )
 
     def insertSpace(
@@ -398,11 +385,7 @@ class PointTier(TextgridTier[Point]):
             elif point.time > start:
                 newEntries.append(Point(point.time + duration, point.label))
 
-        newTier = self.new(
-            entries=newEntries, maxTimestamp=self.maxTimestamp + duration
-        )
-
-        return newTier
+        return self.new(entries=newEntries, maxTimestamp=self.maxTimestamp + duration)
 
     def toZeroCrossings(self, wavFN: str) -> "PointTier":
         """Move all timestamps to the nearest zero crossing."""

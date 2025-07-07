@@ -363,33 +363,26 @@ def invertIntervalList(
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
     [(0.5, 1.2), (3.4, 5.0)] -> [(0.0, 0.5), (1.2, 3.4)]
     """
-    if any([interval[0] >= interval[1] for interval in inputList]):
-        raise errors.ArgumentError("Interval start occured before interval end")
+    if any(interval[0] >= interval[1] for interval in inputList):
+        raise errors.ArgumentError("Invalid interval.")
 
     inputList = sorted(inputList)
 
-    # Special case -- empty lists
-    invList: List[Tuple[float, float]]
-    if not inputList and minValue is not None and maxValue is not None:
-        invList = [
-            (minValue, maxValue),
-        ]
-    else:
-        # Insert in a garbage head and tail value for the purpose
-        # of inverting, in the range does not start and end at the
-        # smallest and largest values
-        if minValue is not None and inputList[0][0] > minValue:
-            inputList.insert(0, (-1, minValue))
-        if maxValue is not None and inputList[-1][1] < maxValue:
-            inputList.append((maxValue, maxValue + 1))
+    # Insert in a garbage head and tail value for the purpose
+    # of inverting, when the range does not start and end at the
+    # smallest and largest values
+    if minValue is not None:
+        inputList.insert(0, (-1, minValue))
+    if maxValue is not None:
+        inputList.append((maxValue, maxValue + 1))
 
-        invList = [
-            (inputList[i][1], inputList[i + 1][0]) for i in range(0, len(inputList) - 1)
-        ]
+    invList = [(inputList[i][1], inputList[i + 1][0]) for i in range(0, len(inputList) - 1)]
 
-        # If two intervals in the input share a boundary, we'll get invalid intervals in the output
-        # eg invertIntervalList([(0, 1), (1, 2)]) -> [(1, 1)]
-        invList = [interval for interval in invList if interval[0] != interval[1]]
+    if any(interval[0] > interval[1] for interval in invList):
+        raise errors.ArgumentError("Overlapping intervals or intervals out of bounds.")
+    # If two intervals in the input share a boundary, we'll get invalid intervals in the output
+    # eg invertIntervalList([(0, 1), (1, 2)]) -> [(1, 1)]
+    invList = [interval for interval in invList if interval[0] < interval[1]]
 
     return invList
 
@@ -461,7 +454,7 @@ def safeZip(listOfLists: Sequence[Collection], enforceLength: bool):
     """
     if enforceLength:
         length = len(listOfLists[0])
-        if not all([length == len(subList) for subList in listOfLists]):
+        if not all(length == len(subList) for subList in listOfLists):
             raise errors.SafeZipException("Lists to zip have different sizes.")
 
     return itertools.zip_longest(*listOfLists)
@@ -491,30 +484,22 @@ def chooseClosestTime(
     Returns:
         the closer of the two options to the target time
     Raises:
-        ArgumentError: When no left or right candidate is provided
+        ArgumentError: Both candidates are not provided.
     """
-    closestTime: float
-    if candidateA is None and candidateB is None:
-        raise errors.ArgumentError("Must provide at")
+    candidates: List[float] = []
+    if candidateA is not None:
+        candidates.append(candidateA)
+    if candidateB is not None:
+        candidates.append(candidateB)
 
-    elif candidateA is None and candidateB is not None:
-        closestTime = candidateB
-    elif candidateB is None and candidateA is not None:
-        closestTime = candidateA
-    elif candidateB is not None and candidateA is not None:
-        aDiff = abs(candidateA - targetTime)
-        bDiff = abs(candidateB - targetTime)
+    if not candidates:
+        raise errors.ArgumentError("Must provide at least one candidate.")
 
-        if aDiff <= bDiff:
-            closestTime = candidateA
-        else:
-            closestTime = candidateB
-
-    return closestTime
+    return min(candidates, key=lambda x: abs(x - targetTime))
 
 
 def getInterval(
-    startTime: float, duration: float, max: float, reverse: bool
+    startTime: float, duration: float, maximum: float, reverse: bool
 ) -> Tuple[float, float]:
     """Return an interval before or after some start time.
 
@@ -523,22 +508,13 @@ def getInterval(
     Args:
         startTime: the time to get the interval from
         duration: duration of the interval
-        max: the maximum allowed time
+        maximum: the maximum allowed time
         reverse: is the interval before or after the targetTime?
 
     Returns:
         the start and end time of an interval
     """
     if reverse:
-        endTime = startTime
-        startTime -= duration
+        return (max(0.0, startTime - duration), startTime)
     else:
-        endTime = startTime + duration
-
-    # Don't read over the edges
-    if startTime < 0:
-        startTime = 0
-    elif endTime > max:
-        endTime = max
-
-    return (startTime, endTime)
+        return (startTime, min(maximum, startTime + duration))

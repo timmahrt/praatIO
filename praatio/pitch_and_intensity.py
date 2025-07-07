@@ -612,7 +612,7 @@ def detectPitchErrors(
     tierName = _PITCH_ERROR_TIER_NAME
     if tgToMark is not None and tierName in tgToMark.tierNames:
         raise errors.ArgumentError(
-            f"Tier name '{tierName}' is already in provided textgrid"
+            f"Tier name {tierName!r} is already in provided textgrid"
         )
 
     errorList: List[Point] = []

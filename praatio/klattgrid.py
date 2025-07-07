@@ -179,7 +179,7 @@ def _proccessContainerTierInput(sectionData: str, name: str):
     # 'Formant' search query finds duplicates -- remove them
     newFormantList: List[int] = []
     for value in formantIndexList:
-        if all([value not in subList for subList in subFilterIndexList]):
+        if all(value not in subList for subList in subFilterIndexList):
             newFormantList.append(value)
     formantIndexList = newFormantList
 

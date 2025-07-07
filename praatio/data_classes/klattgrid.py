@@ -245,7 +245,7 @@ def _cleanNumericValues(dataStr: str) -> str:
         try:
             if "min" in row or "max" in row:
                 raise errors.ParsingError(
-                    f"Found unexpected keyword 'min' or 'max' in row '{row}'"
+                    f"Found unexpected keyword 'min' or 'max' in row {row!r}."
                 )
 
             head, tail = row.split("=")
