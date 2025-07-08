@@ -1,5 +1,7 @@
 import unittest
 from os.path import join
+import io
+from contextlib import redirect_stdout
 
 from praatio import textgrid
 from praatio.utilities.constants import Interval, Point, POINT_TIER
@@ -82,6 +84,21 @@ class TestPointTier(PraatioTestCase):
             seenPoints.append(point)
 
         self.assertEqual(seenPoints, [point1, point2])
+
+    def test_print_format(self):
+        sut = makePointTier()
+        with io.StringIO() as buf, redirect_stdout(buf):
+            print(sut)
+            self.assertEqual(
+                buf.getvalue(),
+                "PointTier('pitch_values', [(1.3, '55'), (3.7, '99')], 0.0, 5.0)\n"
+            )
+
+    def test__repr__round_trip(self):
+        from praatio.textgrid import PointTier
+        sut = makePointTier()
+        reconstructed = eval(repr(sut))
+        self.assertEqual(sut, reconstructed)
 
     def test_inequivalence_with_non_point_tiers(self):
         sut = makePointTier()

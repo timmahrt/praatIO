@@ -491,11 +491,10 @@ class IntervalTier(TextgridTier[Interval]):
 
         else:
             raise errors.CollisionError(
-                "Attempted to insert interval "
-                f"({interval.start}, {interval.end}, '{interval.label}') into tier {self.name} "
+                f"Attempted to insert interval {interval} into tier {self.name} "
                 "of textgrid but overlapping entries "
-                f"{[tuple(interval) for interval in matchList]} "
-                "already exist"
+                + " ".join(map(str, matchList))
+                + " already exist"
             )
 
         self.sort()
@@ -509,8 +508,7 @@ class IntervalTier(TextgridTier[Interval]):
         if matchList:
             collisionReporter(
                 errors.CollisionError,
-                f"Collision warning for ({interval}) with items "
-                f"({matchList}) of tier '{self.name}'",
+                f"Collision warning for {interval} with items {matchList} of tier {self.name!r}"
             )
 
     def insertSpace(

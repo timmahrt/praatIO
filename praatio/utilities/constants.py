@@ -25,6 +25,9 @@ class Interval(NamedTuple):
     def __ne__(self, other: Any):
         return not self == other
 
+    def __repr__(self):
+        return str(tuple(self))
+
 
 class Point(NamedTuple):
     time: float
@@ -39,6 +42,9 @@ class Point(NamedTuple):
 
     def __ne__(self, other: Any):
         return not self == other
+
+    def __repr__(self):
+        return str(tuple(self))
 
 
 MIN_INTERVAL_LENGTH: Final = 0.00000001  # Arbitrary threshold

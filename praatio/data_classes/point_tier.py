@@ -357,7 +357,7 @@ class PointTier(TextgridTier[Point]):
         if match is not None:
             collisionReporter(
                 errors.CollisionError,
-                f"Collision warning for ({newPoint}) with items ({match}) of tier '{self.name}'",
+                f"Collision warning for {newPoint} with items {match} of tier {self.name!r}",
             )
 
     def insertSpace(

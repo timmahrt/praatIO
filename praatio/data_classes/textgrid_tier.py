@@ -70,6 +70,10 @@ class TextgridTier(ABC, Generic[EntryType]):
 
         return isEqual
 
+    def __repr__(self):
+        return type(self).__name__ + \
+            f"{(self.name, self._entries, self.minTimestamp, self.maxTimestamp)}"
+
     @property
     def entries(self) -> Tuple[EntryType, ...]:
         return tuple(self._entries)

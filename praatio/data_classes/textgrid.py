@@ -76,6 +76,9 @@ class Textgrid:
 
         return isEqual
 
+    def __repr__(self):
+        return f"{type(self).__name__}{(list(self.tiers), self.minTimestamp, self.maxTimestamp)}"
+
     @property
     def tierNames(self) -> Tuple[str, ...]:
         return tuple(self._tierDict.keys())

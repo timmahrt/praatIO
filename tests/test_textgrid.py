@@ -1,4 +1,6 @@
 import unittest
+import io
+from contextlib import redirect_stdout
 
 from praatio import textgrid
 from praatio.utilities import constants
@@ -43,6 +45,24 @@ class TestTextgrid(PraatioTestCase):
             seenTiers.append(tier)
 
         self.assertEqual(seenTiers, [tier1, tier2])
+
+    def test_print_format(self):
+        tier1 = makeIntervalTier()
+        tier2 = makePointTier()
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        with io.StringIO() as buf, redirect_stdout(buf):
+            print(sut)
+            self.assertEqual(
+                buf.getvalue(),
+                "Textgrid(["
+                "IntervalTier('words', [(1.0, 2.0, 'hello'), (3.5, 4.0, 'world')], 0.0, 5.0), "
+                "PointTier('pitch_values', [(1.3, '55'), (3.7, '99')], 0.0, 5.0)], 0.0, 5.0)\n"
+            )
 
     def test_inequivalence_with_non_textgrids(self):
         sut = textgrid.Textgrid()

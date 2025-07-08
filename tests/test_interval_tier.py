@@ -1,5 +1,7 @@
 import unittest
 from os.path import join
+import io
+from contextlib import redirect_stdout
 
 from praatio import textgrid
 from praatio.utilities.constants import Interval, INTERVAL_TIER, Point
@@ -83,6 +85,21 @@ class TestIntervalTier(PraatioTestCase):
             seenIntervals.append(interval)
 
         self.assertEqual(seenIntervals, [interval1, interval2])
+
+    def test_print_format(self):
+        sut = makeIntervalTier()
+        with io.StringIO() as buf, redirect_stdout(buf):
+            print(sut)
+            self.assertEqual(
+                buf.getvalue(),
+                "IntervalTier('words', [(1.0, 2.0, 'hello'), (3.5, 4.0, 'world')], 0.0, 5.0)\n"
+            )
+
+    def test__repr__round_trip(self):
+        from praatio.textgrid import IntervalTier
+        sut = makeIntervalTier()
+        reconstructed = eval(repr(sut))
+        self.assertEqual(sut, reconstructed)
 
     def test_inequivalence_with_non_interval_tiers(self):
         sut = makeIntervalTier()
@@ -906,7 +923,7 @@ class TestIntervalTier(PraatioTestCase):
 
         expectedErrMsg = (
             "Attempted to insert interval (1.5, 3, 'world') into tier words "
-            "of textgrid but overlapping entries [(1.0, 2.0, 'hello')] already exist"
+            "of textgrid but overlapping entries (1.0, 2.0, 'hello') already exist"
         )
         self.assertEqual(expectedErrMsg, str(cm.exception))
 
