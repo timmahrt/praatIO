@@ -4,6 +4,8 @@ import math
 
 from typing_extensions import Final
 
+from praatio.utilities import errors
+
 INTERVAL_TIER: Final = "IntervalTier"
 POINT_TIER: Final = "TextTier"
 
@@ -13,6 +15,28 @@ class Interval(NamedTuple):
     start: float
     end: float
     label: str
+
+    @classmethod
+    def build(cls, *args: Any):
+        """
+        Safe constructor for Interval.
+
+        Interval(start, end, label) doesn't check the type at runtime.
+        Should only be used on validated data.
+
+        Interval.build() is robust and performs type conversion and label stripping.
+        It accepts either 3 arguments (start, end, label),
+        or 1 argument (another Interval or a tuple or list of 3 elements).
+
+        Raises:
+            ArgumentError: Either wrong number of arguments, or failed to convert
+                the arguments to float or string.
+        """
+        try:
+            start, end, label = args[0] if len(args) == 1 else args
+            return cls(float(start), float(end), str(label).strip())
+        except (TypeError, ValueError):
+            raise errors.ArgumentError(f"Cannot build Interval from {args}")
 
     def __eq__(self, other: Any):
         return (
@@ -25,6 +49,14 @@ class Interval(NamedTuple):
     def __ne__(self, other: Any):
         return not self == other
 
+    def __add__(self, offset: float):
+        """Time shift forward by offset."""
+        return Interval(self.start + offset, self.end + offset, self.label)
+
+    def __sub__(self, offset: float):
+        """Time shift backward by offset."""
+        return Interval(self.start - offset, self.end - offset, self.label)
+
     def __repr__(self):
         return str(tuple(self))
 
@@ -32,6 +64,28 @@ class Interval(NamedTuple):
 class Point(NamedTuple):
     time: float
     label: str
+
+    @classmethod
+    def build(cls, *args: Any):
+        """
+        Safe constructor for Point.
+
+        Point(time, label) doesn't check the type at runtime.
+        Should only be used on validated data.
+
+        Point.build() is robust and performs type conversion and label stripping.
+        It accepts either 2 arguments (time, label),
+        or 1 argument (another Point or a tuple or list of 2 elements).
+
+        Raises:
+            ArgumentError: Either wrong number of arguments, or failed to convert
+                the arguments to float or string.
+        """
+        try:
+            time, label = args[0] if len(args) == 1 else args
+            return cls(float(time), str(label).strip())
+        except (TypeError, ValueError):
+            raise errors.ArgumentError(f"Cannot build Point from {args}")
 
     def __eq__(self, other: Any):
         return (
@@ -42,6 +96,14 @@ class Point(NamedTuple):
 
     def __ne__(self, other: Any):
         return not self == other
+
+    def __add__(self, offset: float):
+        """Time shift forward by offset."""
+        return Point(self.time + offset, self.label)
+
+    def __sub__(self, offset: float):
+        """Time shift backward by offset."""
+        return Point(self.time - offset, self.label)
 
     def __repr__(self):
         return str(tuple(self))

@@ -1,7 +1,7 @@
 """
 A PointTier is a tier containing an array of points -- data that exists at a specific point in time.
 """
-from typing import List, Tuple, Optional, Iterable, Any
+from typing import List, Tuple, Optional, Iterable, Sequence, Any
 
 from typing_extensions import Literal
 
@@ -23,7 +23,7 @@ def _homogenizeEntries(entries: Iterable[Tuple[float, str]]) -> List[Point]:
     - Remove whitespace in labels.
     - Sort values by time.
     """
-    processedEntries = [Point(float(time), label.strip()) for time, label in entries]
+    processedEntries = [Point.build(entry) for entry in entries]
     processedEntries.sort()
     return processedEntries
 
@@ -107,18 +107,10 @@ class PointTier(TextgridTier[Point]):
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
-        newEntries: List[Point] = []
-
-        for entry in self.entries:
-            timestamp = entry.time
-
-            if timestamp >= cropStart and timestamp <= cropEnd:
-                newEntries.append(entry)
+        newEntries = [entry for entry in self._entries if cropStart <= entry.time <= cropEnd]
 
         if rebaseToZero:
-            newEntries = [
-                Point(timeV - cropStart, label) for timeV, label in newEntries
-            ]
+            newEntries = [entry - cropStart for entry in newEntries]
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
@@ -284,7 +276,7 @@ class PointTier(TextgridTier[Point]):
                 if point.time < start:
                     newEntries.append(point)
                 elif point.time > end:
-                    newEntries.append(Point(point.time - diff, point.label))
+                    newEntries.append(point - diff)
 
             newTier = newTier.new(entries=newEntries, maxTimestamp=newTier.maxTimestamp - diff)
 
@@ -292,7 +284,7 @@ class PointTier(TextgridTier[Point]):
 
     def insertEntry(
         self,
-        entry: Point,
+        entry: Sequence[Any],
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
@@ -321,10 +313,7 @@ class PointTier(TextgridTier[Point]):
         )
         collisionReporter = utils.getErrorReporter(collisionReportingMode)
 
-        if not isinstance(entry, Point):
-            newPoint = Point(entry[0], entry[1])
-        else:
-            newPoint = entry
+        newPoint = Point.build(entry)
 
         match = None
         for point in self.entries:
@@ -383,7 +372,7 @@ class PointTier(TextgridTier[Point]):
             if point.time <= start:
                 newEntries.append(point)
             elif point.time > start:
-                newEntries.append(Point(point.time + duration, point.label))
+                newEntries.append(point + duration)
 
         return self.new(entries=newEntries, maxTimestamp=self.maxTimestamp + duration)
 

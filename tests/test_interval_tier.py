@@ -922,7 +922,7 @@ class TestIntervalTier(PraatioTestCase):
             sut.insertEntry([1.5, 3, "world"])
 
         expectedErrMsg = (
-            "Attempted to insert interval (1.5, 3, 'world') into tier words "
+            "Attempted to insert interval (1.5, 3.0, 'world') into tier words "
             "of textgrid but overlapping entries (1.0, 2.0, 'hello') already exist"
         )
         self.assertEqual(expectedErrMsg, str(cm.exception))

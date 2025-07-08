@@ -1,8 +1,7 @@
 """
 An IntervalTier is a tier containing an array of intervals -- data that spans a period of time.
 """
-from typing import List, Tuple, Optional, Iterable, Callable
-
+from typing import List, Tuple, Optional, Iterable, Callable, Sequence, Any
 from typing_extensions import Literal
 
 from praatio import audio
@@ -23,9 +22,7 @@ def _homogenizeEntries(entries: Iterable[Tuple[float, float, str]]) -> List[Inte
     - Remove whitespace in labels.
     - Sort values by start time.
     """
-    processedEntries = [
-        Interval(float(start), float(end), label.strip()) for start, end, label in entries
-    ]
+    processedEntries = [Interval.build(entry) for entry in entries]
     processedEntries.sort()
     return processedEntries
 
@@ -90,8 +87,7 @@ class IntervalTier(TextgridTier[Interval]):
             if entry.end > nextEntry.start:
                 raise errors.TextgridStateError(
                     "Two intervals in the same tier overlap in time:\n"
-                    f"({entry.start}, {entry.end}, {entry.label}) and "
-                    f"({nextEntry.start}, {nextEntry.end}, {nextEntry.label})"
+                    f"{entry} and {nextEntry}"
                 )
 
     @property
@@ -153,15 +149,8 @@ class IntervalTier(TextgridTier[Interval]):
 
         if rebaseToZero:
             if newEntries:
-                newSmallestValue = newEntries[0].start
-                if newSmallestValue < cropStart:
-                    timeDiff = newSmallestValue
-                else:
-                    timeDiff = cropStart
-                newEntries = [
-                    Interval(start - timeDiff, end - timeDiff, label)
-                    for start, end, label in newEntries
-                ]
+                timeDiff = min(newEntries[0].start, cropStart)
+                newEntries = [entry - timeDiff for entry in newEntries]
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
@@ -341,11 +330,7 @@ class IntervalTier(TextgridTier[Interval]):
                 if interval.end <= start:
                     newEntries.append(interval)
                 elif interval.start >= end:
-                    newEntries.append(
-                        Interval(
-                            interval.start - diff, interval.end - diff, interval.label
-                        )
-                    )
+                    newEntries.append(interval - diff)
 
             # Special case: an interval that spanned the deleted
             # section
@@ -416,16 +401,11 @@ class IntervalTier(TextgridTier[Interval]):
         if entries[-1].end < self.maxTimestamp:
             invertedEntries.append(Interval(entries[-1].end, self.maxTimestamp, ""))
 
-        invertedEntries = [
-            interval if isinstance(interval, Interval) else Interval(*interval)
-            for interval in invertedEntries
-        ]
-
-        return invertedEntries
+        return [Interval.build(interval) for interval in invertedEntries]
 
     def insertEntry(
         self,
-        entry: Interval,
+        entry: Sequence[Any],
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
@@ -459,10 +439,7 @@ class IntervalTier(TextgridTier[Interval]):
         )
         collisionReporter = utils.getErrorReporter(collisionReportingMode)
 
-        if not isinstance(entry, Interval):
-            interval = Interval(*entry)
-        else:
-            interval = entry
+        interval = Interval.build(entry)
 
         matchList = self.crop(
             interval.start, interval.end, constants.CropCollision.LAX, False
@@ -549,13 +526,7 @@ class IntervalTier(TextgridTier[Interval]):
                 newEntries.append(interval)
             # Entry exists after the insertion point
             elif interval.start >= start:
-                newEntries.append(
-                    Interval(
-                        interval.start + duration,
-                        interval.end + duration,
-                        interval.label,
-                    )
-                )
+                newEntries.append(interval + duration)
             # Entry straddles the insertion point
             elif interval.start <= start and interval.end > start:
                 if collisionMode == constants.WhitespaceCollision.STRETCH:
@@ -567,19 +538,13 @@ class IntervalTier(TextgridTier[Interval]):
                 elif collisionMode == constants.WhitespaceCollision.SPLIT:
                     # Left side of the split
                     newEntries.append(Interval(interval.start, start, interval.label))
-                    # Right side of the split
-                    newEntries.append(
-                        Interval(
-                            start + duration,
-                            start + duration + (interval.end - start),
-                            interval.label,
-                        )
-                    )
+                    # Right side of the split, shifted by duration
+                    newEntries.append(Interval(start, interval.end, interval.label) + duration)
                 elif collisionMode == constants.WhitespaceCollision.NO_CHANGE:
                     newEntries.append(interval)
                 else:
                     raise errors.CollisionError(
-                        f"Collision occured during insertSpace() for interval '{interval}' "
+                        f"Collision occured during insertSpace() for interval {interval} "
                         f"and given white space insertion interval ({start}, {start + duration})"
                     )
 
@@ -750,7 +715,7 @@ class IntervalTier(TextgridTier[Interval]):
                 isValid = False
                 errorReporter(
                     errors.TextgridStateError,
-                    f"Invalid interval. End time occurs before or on the start time({interval}).",
+                    f"Invalid interval. End time occurs before or on the start time: {interval}",
                 )
 
             if previousInterval and previousInterval.end > interval.start:
@@ -758,7 +723,7 @@ class IntervalTier(TextgridTier[Interval]):
                 errorReporter(
                     errors.TextgridStateError,
                     f"Intervals are not sorted in time: "
-                    f"[({previousInterval}), ({interval})]",
+                    f"{previousInterval} and {interval}",
                 )
 
             if utils.checkIsUndershoot(interval.start, self.minTimestamp, errorReporter):
