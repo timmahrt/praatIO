@@ -3,6 +3,7 @@ An IntervalTier is a tier containing an array of intervals -- data that spans a 
 """
 from typing import List, Tuple, Optional, Iterable, Callable, Sequence, Any
 from typing_extensions import Literal
+from itertools import chain
 
 from praatio import audio
 from praatio.utilities.constants import Interval, INTERVAL_TIER
@@ -14,64 +15,20 @@ from praatio.utilities import my_math
 from praatio.data_classes.textgrid_tier import TextgridTier
 
 
-def _homogenizeEntries(entries: Iterable[Tuple[float, float, str]]) -> List[Interval]:
-    """
-    Enforce consistency in intervals.
-
-    - Convert all entries to intervals.
-    - Remove whitespace in labels.
-    - Sort values by start time.
-    """
-    processedEntries = [Interval.build(entry) for entry in entries]
-    processedEntries.sort()
-    return processedEntries
-
-
-def _calculateMinAndMaxTime(
-    entries: Iterable[Interval],
-    minT: Optional[float] = None,
-    maxT: Optional[float] = None,
-) -> Tuple[float, float]:
-
-    minTimeList = [interval.start for interval in entries]
-    maxTimeList = [interval.end for interval in entries]
-
-    if minT is not None:
-        minTimeList.append(float(minT))
-    if maxT is not None:
-        maxTimeList.append(float(maxT))
-
-    try:
-        return (min(minTimeList), max(maxTimeList))
-    except ValueError:
-        raise errors.TimelessTextgridTierException()
-
-
 class IntervalTier(TextgridTier[Interval]):
+    """An interval tier is for annotating events that have duration."""
+
     tierType = INTERVAL_TIER
     entryType = Interval
 
     def __init__(
         self,
         name: str,
-        entries: Iterable[Tuple[float, float, str]],
+        entries: Iterable[Sequence[Any]] = [],
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
-        """An interval tier is for annotating events that have duration
-
-        The entries is of the form:
-        [(startTime1, endTime1, label1), (startTime2, endTime2, label2), ]
-
-        The data stored in the labels can be anything but will
-        be interpreted as text by praatio (the label could be descriptive
-        text e.g. ('erase this region') or numerical data e.g. (average pitch
-        values like '132'))
-        """
-        entries = _homogenizeEntries(entries)
-        calculatedMinT, calculatedMaxT = _calculateMinAndMaxTime(entries, minT, maxT)
-
-        super(IntervalTier, self).__init__(name, entries, calculatedMinT, calculatedMaxT)
+        super(IntervalTier, self).__init__(name, entries, minT, maxT)
         self._validate()
 
     def _validate(self):
@@ -92,20 +49,7 @@ class IntervalTier(TextgridTier[Interval]):
 
     @property
     def timestamps(self) -> List[float]:
-        """All unique timestamps used in this tier."""
-        tmpTimestamps = [
-            time
-            for start, stop, _ in self.entries
-            for time in [
-                start,
-                stop,
-            ]
-        ]
-
-        uniqueTimestamps = list(set(tmpTimestamps))
-        uniqueTimestamps.sort()
-
-        return uniqueTimestamps
+        return sorted(set(chain.from_iterable(entry[:2] for entry in self._entries)))
 
     def crop(
         self,
@@ -157,9 +101,7 @@ class IntervalTier(TextgridTier[Interval]):
             minT = cropStart
             maxT = cropEnd
 
-        croppedTier = IntervalTier(self.name, newEntries, minT, maxT)
-
-        return croppedTier
+        return self.new(entries=newEntries, minTimestamp=minT, maxTimestamp=maxT)
 
     def dejitter(
         self,
@@ -401,7 +343,7 @@ class IntervalTier(TextgridTier[Interval]):
         if entries[-1].end < self.maxTimestamp:
             invertedEntries.append(Interval(entries[-1].end, self.maxTimestamp, ""))
 
-        return [Interval.build(interval) for interval in invertedEntries]
+        return self._homogenizeEntries(invertedEntries, sort=False)
 
     def insertEntry(
         self,
@@ -475,12 +417,9 @@ class IntervalTier(TextgridTier[Interval]):
             )
 
         self.sort()
-
-        if self._entries[0][0] < self.minTimestamp:
-            self.minTimestamp = self._entries[0][0]
-
-        if self._entries[-1][1] > self.maxTimestamp:
-            self.maxTimestamp = self._entries[-1][1]
+        self.minTimestamp, self.maxTimestamp = self._calculateMinAndMaxTime(
+            minT=self.minTimestamp, maxT=self.maxTimestamp
+        )
 
         if matchList:
             collisionReporter(
@@ -674,7 +613,7 @@ class IntervalTier(TextgridTier[Interval]):
         cumulativeDifference = newEntries[-1].end - self.entries[-1].end
         newMax = self.maxTimestamp + cumulativeDifference
 
-        return IntervalTier(self.name, newEntries, newMin, newMax)
+        return self.new(entries=newEntries, minTimestamp=newMin, maxTimestamp=newMax)
 
     def toZeroCrossings(self, wavFN: str) -> "IntervalTier":
         """Move all timestamps to the nearest zero crossing."""

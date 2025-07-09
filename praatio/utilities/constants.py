@@ -109,6 +109,54 @@ class Point(NamedTuple):
         return str(tuple(self))
 
 
+class KlattPoint(NamedTuple):
+    time: float
+    value: float
+
+    @classmethod
+    def build(cls, *args: Any):
+        """
+        Safe constructor for KlattPoint.
+
+        KlattPoint(time, value) doesn't check the type at runtime.
+        Should only be used on validated data.
+
+        KlattPoint.build() is robust and performs type conversion and label stripping.
+        It accepts either 2 arguments (time, value),
+        or 1 argument (another KlattPoint or a tuple or list of 2 elements).
+
+        Raises:
+            ArgumentError: Either wrong number of arguments, or failed to convert
+                the arguments to float.
+        """
+        try:
+            time, value = args[0] if len(args) == 1 else args
+            return cls(float(time), float(value))
+        except (TypeError, ValueError):
+            raise errors.ArgumentError(f"Cannot build KlattPoint from {args}")
+
+    def __eq__(self, other: Any):
+        return (
+            isinstance(other, KlattPoint)
+            and math.isclose(self.time, other.time, abs_tol=1e-14)
+            and math.isclose(self.value, other.value, abs_tol=1e-14)
+        )
+
+    def __ne__(self, other: Any):
+        return not self == other
+
+    def __add__(self, offset: float):
+        """Time shift forward by offset."""
+        return KlattPoint(self.time + offset, self.value)
+
+    def __sub__(self, offset: float):
+        """Time shift backward by offset."""
+        return KlattPoint(self.time - offset, self.value)
+
+    def __str__(self):
+        return str(tuple(self))
+
+
 MIN_INTERVAL_LENGTH: Final = 0.00000001  # Arbitrary threshold
 
 

@@ -1,8 +1,7 @@
 """The abstract class used by all textgrid tiers."""
 import re
-import copy
 import math
-from typing import List, Optional, Type, TypeVar, Iterable, Any, Generic, Tuple
+from typing import List, Optional, Sequence, Type, TypeVar, Iterable, Any, Generic, Tuple
 from abc import ABC, abstractmethod
 
 from typing_extensions import Literal
@@ -12,34 +11,66 @@ from praatio.utilities import errors
 from praatio.utilities import utils
 
 
-EntryType = TypeVar("EntryType", constants.Point, constants.Interval)
+# EntryType: for defining TextgridTier as a generic container class
+EntryType = TypeVar("EntryType", constants.Point, constants.Interval, constants.KlattPoint)
+# KlattPoint doesn't have a label, making some methods not applicable, so we need another variable
+TextgridEntryType = TypeVar("TextgridEntryType", constants.Point, constants.Interval)
+# TierType: can be replaced with typing.Self in Python 3.11+
 TierType = TypeVar("TierType", bound="TextgridTier")
 
 
 class TextgridTier(ABC, Generic[EntryType]):
+    """A container that stores and operates over interval and point tiers."""
     tierType: str
     entryType: Type[EntryType]
 
     def __init__(
         self,
         name: str,
-        entries: List[EntryType],
-        minT: float,
-        maxT: float,
+        entries: Iterable[Sequence[Any]] = [],
+        minT: Optional[float] = None,
+        maxT: Optional[float] = None,
         errorMode: Literal["silence", "warning", "error"] = "warning",
     ):
-        """A container that stores and operates over interval and point tiers."""
+        """
+        PointTier entries: [(timeVal1, label1), (timeVal2, label2), ...]
+        IntervalTier entries: [(startTime1, endTime1, label1), (startTime2, endTime2, label2), ...]
+
+        The data stored in the labels can be anything but will be interpreted as
+        text by praatio. Labels could be descriptive text (e.g. 'peak point here')
+        or numerical data (e.g. pitch values like '132').
+
+        The constructor copies all entries, converts them to the proper entry type,
+        sorts the entries, and expands the minT and maxT to accommodate all timestamps.
+        """
         utils.validateOption("errorMode", errorMode, constants.ErrorReportingMode)
-
-        """See PointTier or IntervalTier"""
-        entries = list(entries)
-        entries.sort()
-
         self.name = name
-        self._entries = entries
-        self.minTimestamp = minT
-        self.maxTimestamp = maxT
+        self._entries = self._homogenizeEntries(entries)
+        self.minTimestamp, self.maxTimestamp = self._calculateMinAndMaxTime(minT=minT, maxT=maxT)
         self.errorReporter = utils.getErrorReporter(errorMode)
+
+    def new(
+        self: TierType,
+        name: Optional[str] = None,
+        entries: Optional[Iterable[Sequence[Any]]] = None,
+        minTimestamp: Optional[float] = None,
+        maxTimestamp: Optional[float] = None,
+    ) -> TierType:
+        """
+        Derive a new tier from an existing tier.
+
+        Also copies, converts and sorts all entries, and expands the minT
+        and maxT like the __init__ constructor.
+        """
+        if name is None:
+            name = self.name
+        if entries is None:
+            entries = self._entries
+        if minTimestamp is None:
+            minTimestamp = self.minTimestamp
+        if maxTimestamp is None:
+            maxTimestamp = self.maxTimestamp
+        return type(self)(name, entries, minTimestamp, maxTimestamp)
 
     def __len__(self):
         return len(self._entries)
@@ -48,27 +79,13 @@ class TextgridTier(ABC, Generic[EntryType]):
         return iter(self._entries)
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(self, type(other)):
-            return False
-
-        isEqual = True
-        isEqual &= self.name == other.name
-        isEqual &= math.isclose(self.minTimestamp, other.minTimestamp)
-        isEqual &= math.isclose(self.maxTimestamp, other.maxTimestamp)
-        isEqual &= len(self.entries) == len(other.entries)
-
-        # TODO: Intervals and Points now use isclose, so we can simplify this
-        #       logic (selfEntry == otherEntry); however, this will break
-        #       things for klattgrids
-        if isEqual:
-            for selfEntry, otherEntry in zip(self.entries, other.entries):
-                for selfSubEntry, otherSubEntry in zip(selfEntry, otherEntry):
-                    try:
-                        isEqual &= math.isclose(selfSubEntry, otherSubEntry)  # type:ignore[arg-type]
-                    except TypeError:
-                        isEqual &= selfSubEntry == otherSubEntry
-
-        return isEqual
+        return (
+            isinstance(other, type(self))
+            and self.name == other.name
+            and math.isclose(self.minTimestamp, other.minTimestamp)
+            and math.isclose(self.maxTimestamp, other.maxTimestamp)
+            and self._entries == other._entries
+        )
 
     def __repr__(self):
         return type(self).__name__ + \
@@ -81,7 +98,65 @@ class TextgridTier(ABC, Generic[EntryType]):
     @property
     @abstractmethod
     def timestamps(self) -> List[float]:  # pragma: no cover
+        """All unique timestamps used in entries, sorted, not including minT and maxT of the tier."""
         pass
+
+    @classmethod
+    def _homogenizeEntries(
+        cls,
+        entries: Iterable[Sequence[Any]],
+        sort: bool = True,
+    ) -> List[EntryType]:
+        """
+        Enforce consistency in entries.
+
+        - Copy and convert all entries to entryType.
+        - Strip whitespace in labels.
+        - Sort entries by time.
+        """
+        processedEntries = [cls.entryType.build(entry) for entry in entries]
+        if sort:
+            processedEntries.sort()
+        return processedEntries
+
+    def sort(self) -> None:
+        """
+        Enforce consistency in self._entries inplace.
+
+        - Copy and convert all entries to entryType.
+        - Strip whitespace in labels.
+        - Sort entries by time.
+        """
+        # A list containing tuples and lists will be sorted with tuples
+        # first and then lists.  To correctly sort, we need to make
+        # sure that all data structures inside the entry list are
+        # of the same data type.  The entry list is sorted whenever
+        # the entry list is modified, so this is probably the best
+        # place to enforce the data type
+        self._entries = self._homogenizeEntries(self._entries)
+
+    def _calculateMinAndMaxTime(
+        self,
+        timestamps: Optional[Iterable[float]] = None,
+        minT: Optional[float] = None,
+        maxT: Optional[float] = None,
+    ) -> Tuple[float, float]:
+        """
+        Args:
+            timestamps: If not provided, defaults to self.timestamps, which is all timestamps
+                in self.entries
+            minT, maxT: If provided, will be included in the calculation
+        """
+        timestamps = list(timestamps) if timestamps is not None else self.timestamps
+        if minT is not None:
+            timestamps.append(minT)
+        if maxT is not None:
+            timestamps.append(maxT)
+
+        try:
+            return (min(timestamps), max(timestamps))
+        except ValueError:
+            raise errors.TimelessTextgridTierException()
 
     def appendTier(self: TierType, tier: TierType) -> TierType:
         """Append a tier to the end of this one.
@@ -93,8 +168,6 @@ class TextgridTier(ABC, Generic[EntryType]):
                 f"Cannot append a tier of type {type(tier)} to a tier of type {type(self)}."
             )
 
-        maxTime = self.maxTimestamp + tier.maxTimestamp
-
         # We're increasing the size of the tier, so of course its intervals
         # may exceed the bounds of the tier's maxTimestamp, triggering
         # errors/warnings--we can ignore those
@@ -102,15 +175,13 @@ class TextgridTier(ABC, Generic[EntryType]):
             self.maxTimestamp, constants.ErrorReportingMode.SILENCE
         )
 
-        entries = self._entries + appendTier._entries
-        entries.sort()
-
         return self.new(
-            self.name, entries, minTimestamp=self.minTimestamp, maxTimestamp=maxTime
+            entries=self._entries + appendTier._entries,
+            maxTimestamp=self.maxTimestamp + tier.maxTimestamp,
         )
 
     def find(
-        self,
+        self: "TextgridTier[TextgridEntryType]",
         matchLabel: str,
         substrMatchFlag: bool = False,
         usingRE: bool = False,
@@ -142,46 +213,6 @@ class TextgridTier(ABC, Generic[EntryType]):
                         returnList.append(i)
 
         return returnList
-
-    def new(
-        self: TierType,
-        name: Optional[str] = None,
-        entries: Optional[Iterable[EntryType]] = None,
-        minTimestamp: Optional[float] = None,
-        maxTimestamp: Optional[float] = None,
-    ) -> TierType:
-        """Make a new tier derived from the current one."""
-        if name is None:
-            name = self.name
-        if entries is None:
-            entries = copy.deepcopy(self.entries)
-            entries = [
-                self.entryType(*entry)
-                if isinstance(entry, tuple) or isinstance(entry, list)
-                else entry
-                for entry in entries
-            ]
-        else:
-            entries = list(entries)
-        if minTimestamp is None:
-            minTimestamp = self.minTimestamp
-        if maxTimestamp is None:
-            maxTimestamp = self.maxTimestamp
-        return type(self)(name, entries, minTimestamp, maxTimestamp)
-
-    def sort(self) -> None:
-        """Sort the entries in the list of entries."""
-        # A list containing tuples and lists will be sorted with tuples
-        # first and then lists.  To correctly sort, we need to make
-        # sure that all data structures inside the entry list are
-        # of the same data type.  The entry list is sorted whenever
-        # the entry list is modified, so this is probably the best
-        # place to enforce the data type
-        self._entries = [
-            entry if isinstance(entry, self.entryType) else self.entryType(*entry)
-            for entry in self.entries
-        ]
-        self._entries.sort()
 
     def union(self: TierType, tier: TierType) -> TierType:
         """The given tier is set unioned to this tier.

@@ -3,40 +3,21 @@
 KlattGrids can be used for synthesizing and manipulating speech
 """
 import io
-from typing import List, Optional, Dict, Callable, Union, Iterable, Tuple, Any, TypeVar, Generic
+from typing import List, Optional, Dict, Callable, Union, Any, TypeVar, Generic
 
+from praatio.utilities.constants import KlattPoint
 from praatio.data_classes.textgrid import Textgrid
 from praatio.data_classes.textgrid_tier import TextgridTier
 from praatio.utilities import errors
 
 
-class KlattPointTier(TextgridTier):
+class KlattPointTier(TextgridTier[KlattPoint]):
     """A Klatt tier not contained within another tier."""
+    entryType = KlattPoint
 
-    def __init__(
-        self,
-        name: str,
-        entries: Iterable[Tuple],
-        minT: Optional[float] = None,
-        maxT: Optional[float] = None,
-    ):
-
-        entries = [(float(time), label) for time, label in entries]
-
-        # Determine the min and max timestamps
-        timeList = [time for time, label in entries]
-        if minT is not None:
-            timeList.append(float(minT))
-        if maxT is not None:
-            timeList.append(float(maxT))
-
-        try:
-            setMinT = min(timeList)
-            setMaxT = max(timeList)
-        except ValueError:
-            raise errors.TimelessTextgridTierException()
-
-        super(KlattPointTier, self).__init__(name, entries, setMinT, setMaxT)
+    @property
+    def timestamps(self) -> List[float]:
+        return sorted(set(time for time, _ in self._entries))
 
     def crop(self):
         raise NotImplementedError
@@ -59,10 +40,6 @@ class KlattPointTier(TextgridTier):
     def insertSpace(self):
         raise NotImplementedError
 
-    @property
-    def timestamps(self):
-        raise NotImplementedError
-
     def toZeroCrossings(self):
         raise NotImplementedError
 
@@ -71,7 +48,7 @@ class KlattPointTier(TextgridTier):
 
     def modifyValues(self, modFunc: Callable[[float], float]) -> None:
         self._entries = [
-            (timestamp, modFunc(float(value))) for timestamp, value in self.entries
+            KlattPoint(time, modFunc(value)) for time, value in self.entries
         ]
 
     def getAsText(self) -> str:
@@ -86,8 +63,8 @@ class KlattPointTier(TextgridTier):
 
         for i, entry in enumerate(self.entries):
             outputList.append("points [%d]:" % (i + 1))
-            outputList.append("    number = %s" % repr(entry[0]))
-            outputList.append("    value = %s" % repr(entry[1]))
+            outputList.append("    number = %s" % repr(entry.time))
+            outputList.append("    value = %s" % repr(entry.value))
 
         return "\n".join(outputList) + "\n"
 
@@ -105,8 +82,8 @@ class KlattSubPointTier(KlattPointTier):
 
         for i, entry in enumerate(self.entries):
             outputList.append("    points [%d]:" % (i + 1))
-            outputList.append("        number = %s" % repr(entry[0]))
-            outputList.append("        value = %s" % repr(entry[1]))
+            outputList.append("        number = %s" % repr(entry.time))
+            outputList.append("        value = %s" % repr(entry.value))
 
         return "\n".join(outputList) + "\n"
 
@@ -123,20 +100,14 @@ class _KlattBaseTier(Generic[ContainedType]):
         self.maxTimestamp = None
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, type(self)):
-            return False
-
-        isEqual = True
-        isEqual &= self.name == other.name
-        isEqual &= self.minTimestamp == other.minTimestamp
-        isEqual &= self.maxTimestamp == other.maxTimestamp
-
-        isEqual &= self.tierNameList == other.tierNameList
-        if isEqual:
-            for tierName in self.tierNameList:
-                isEqual &= self.tierDict[tierName] == other.tierDict[tierName]
-
-        return isEqual
+        return (
+            isinstance(other, type(self))
+            and self.name == other.name
+            and self.minTimestamp == other.minTimestamp
+            and self.maxTimestamp == other.maxTimestamp
+            and self.tierNameList == other.tierNameList
+            and self.tierDict == other.tierDict
+        )
 
     def addTier(self, tier: ContainedType, tierIndex: Optional[int] = None) -> None:
         if tierIndex is None:

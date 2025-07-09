@@ -1,7 +1,7 @@
 """
 A PointTier is a tier containing an array of points -- data that exists at a specific point in time.
 """
-from typing import List, Tuple, Optional, Iterable, Sequence, Any
+from typing import List, Tuple, Iterable, Sequence, Any
 
 from typing_extensions import Literal
 
@@ -15,72 +15,15 @@ from praatio.utilities import my_math
 from praatio.data_classes.textgrid_tier import TextgridTier
 
 
-def _homogenizeEntries(entries: Iterable[Tuple[float, str]]) -> List[Point]:
-    """
-    Enforce consistency in points.
-
-    - Convert all entries to points.
-    - Remove whitespace in labels.
-    - Sort values by time.
-    """
-    processedEntries = [Point.build(entry) for entry in entries]
-    processedEntries.sort()
-    return processedEntries
-
-
-def _calculateMinAndMaxTime(
-    entries: Iterable[Point],
-    minT: Optional[float] = None,
-    maxT: Optional[float] = None,
-) -> Tuple[float, float]:
-
-    timeList = [time for time, label in entries]
-    if minT is not None:
-        timeList.append(float(minT))
-    if maxT is not None:
-        timeList.append(float(maxT))
-
-    try:
-        return (min(timeList), max(timeList))
-    except ValueError:
-        raise errors.TimelessTextgridTierException()
-
-
 class PointTier(TextgridTier[Point]):
+    """A point tier is for annotating instaneous events."""
+
     tierType = POINT_TIER
     entryType = Point
 
-    def __init__(
-        self,
-        name: str,
-        entries: Iterable[Tuple[float, str]],
-        minT: Optional[float] = None,
-        maxT: Optional[float] = None,
-    ):
-        """A point tier is for annotating instaneous events.
-
-        The entries is of the form:
-        [(timeVal1, label1), (timeVal2, label2), ]
-
-        The data stored in the labels can be anything but will
-        be interpreted as text by praatio (the label could be descriptive
-        text e.g. ('peak point here') or numerical data e.g. (pitch values
-        like '132'))
-        """
-        entries = _homogenizeEntries(entries)
-        calculatedMinT, calculatedMaxT = _calculateMinAndMaxTime(entries, minT, maxT)
-
-        super(PointTier, self).__init__(name, entries, calculatedMinT, calculatedMaxT)
-
     @property
     def timestamps(self) -> List[float]:
-        """All unique timestamps used in this tier."""
-        tmpTimestamps = [time for time, _ in self.entries]
-
-        uniqueTimestamps = list(set(tmpTimestamps))
-        uniqueTimestamps.sort()
-
-        return uniqueTimestamps
+        return sorted(set(time for time, _ in self._entries))
 
     def crop(
         self,
@@ -117,7 +60,7 @@ class PointTier(TextgridTier[Point]):
             minT = cropStart
             maxT = cropEnd
 
-        return PointTier(self.name, newEntries, minT, maxT)
+        return self.new(entries=newEntries, minTimestamp=minT, maxTimestamp=maxT)
 
     def dejitter(
         self, referenceTier: "PointTier", maxDifference: float = 0.001

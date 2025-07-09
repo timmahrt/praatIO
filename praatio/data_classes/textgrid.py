@@ -62,19 +62,12 @@ class Textgrid:
         return iter(self._tierDict.values())
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, Textgrid):
-            return False
-
-        isEqual = True
-        isEqual &= my_math.isclose(self.minTimestamp, other.minTimestamp)
-        isEqual &= my_math.isclose(self.maxTimestamp, other.maxTimestamp)
-
-        isEqual &= self.tierNames == other.tierNames
-        if isEqual:
-            for tierName in self.tierNames:
-                isEqual &= self.getTier(tierName) == other.getTier(tierName)
-
-        return isEqual
+        return (
+            isinstance(other, type(self))
+            and my_math.isclose(self.minTimestamp, other.minTimestamp)
+            and my_math.isclose(self.maxTimestamp, other.maxTimestamp)
+            and self._tierDict == other._tierDict
+        )
 
     def __repr__(self):
         return f"{type(self).__name__}{(list(self.tiers), self.minTimestamp, self.maxTimestamp)}"
