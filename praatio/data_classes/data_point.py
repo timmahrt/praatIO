@@ -1,4 +1,4 @@
-"""An PointObject is used for storing non-annotation data in praat
+"""A PointObject is used for storing non-annotation data in praat.
 
 There are two variants: PointObject1D and PointObject2D
 
@@ -77,7 +77,7 @@ class PointObject:
 
 
 class PointObject1D(PointObject):
-    """Points that only carry temporal information"""
+    """Points that only carry temporal information."""
 
     def __init__(
         self,
@@ -99,7 +99,7 @@ class PointObject1D(PointObject):
 
 
 class PointObject2D(PointObject):
-    """Points that carry a temporal value and some other value"""
+    """Points that carry a temporal value and some other value."""
 
     def __init__(
         self,

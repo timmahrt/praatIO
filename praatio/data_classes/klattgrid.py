@@ -11,9 +11,7 @@ from praatio.utilities import errors
 
 
 class KlattPointTier(TextgridTier):
-    """
-    A Klatt tier not contained within another tier
-    """
+    """A Klatt tier not contained within another tier."""
 
     def __init__(
         self,
@@ -95,9 +93,7 @@ class KlattPointTier(TextgridTier):
 
 
 class KlattSubPointTier(KlattPointTier):
-    """
-    Tiers contained in a KlattIntermediateTier
-    """
+    """Tiers contained in a KlattIntermediateTier."""
 
     def getAsText(self) -> str:
         outputList: List[str] = []
@@ -164,9 +160,7 @@ class _KlattBaseTier(Generic[ContainedType]):
 
 
 class KlattIntermediateTier(_KlattBaseTier[KlattSubPointTier]):
-    """
-    Has many point tiers that are semantically related (e.g. formant tiers)
-    """
+    """Has many point tiers that are semantically related (e.g. formant tiers)."""
 
     def getAsText(self) -> str:
         outputTxt = ""
@@ -181,7 +175,7 @@ class KlattIntermediateTier(_KlattBaseTier[KlattSubPointTier]):
 
 
 class KlattContainerTier(_KlattBaseTier[KlattIntermediateTier]):
-    """Contains a set of intermediate tiers"""
+    """Contains a set of intermediate tiers."""
 
     def getAsText(self) -> str:
         outputTxt = ""
@@ -202,9 +196,7 @@ class KlattContainerTier(_KlattBaseTier[KlattIntermediateTier]):
         return outputTxt
 
     def modifySubtiers(self, tierName: str, modFunc: Callable[[float], bool]) -> None:
-        """
-        Modify values in every tier contained in the named intermediate tier
-        """
+        """Modify values in every tier contained in the named intermediate tier."""
         kit = self.tierDict[tierName]
         for name in kit.tierNameList:
             subpointTier = kit.tierDict[name]
@@ -214,9 +206,8 @@ class KlattContainerTier(_KlattBaseTier[KlattIntermediateTier]):
 class Klattgrid(Textgrid):
     def save(self, fn: str, minimumIntervalLength: Optional[float] = None) -> None:
         """
-
         minimumIntervalLength is used for compatibility with Textgrid.save()
-            but it has no impact on a Klattgrid
+            but it has no impact on a Klattgrid.
         """
 
         # Header

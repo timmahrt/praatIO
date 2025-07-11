@@ -40,7 +40,7 @@ def _removeBlanks(tier: Dict) -> None:
 def _removeUltrashortIntervals(
     tier: Dict, minLength: float, minTimestamp: float
 ) -> None:
-    """Remove intervals that are very tiny
+    """Remove intervals that are very tiny.
 
     Doing many small manipulations on intervals can lead to the creation
     of ultrashort intervals (e.g. 1*10^-15 seconds long).  This function
@@ -49,28 +49,25 @@ def _removeUltrashortIntervals(
 
     # First, remove tiny intervals
     newEntries: List[Interval] = []
-    j = 0  # index to newEntries
     for start, end, label in tier["entries"]:
 
         if end - start < minLength:
             # Correct ultra-short entries
-            if len(newEntries) > 0:
-                lastStart, _, lastLabel = newEntries[j - 1]
-                newEntries[j - 1] = Interval(lastStart, end, lastLabel)
+            if newEntries:
+                lastStart, _, lastLabel = newEntries[-1]
+                newEntries[-1] = Interval(lastStart, end, lastLabel)
         else:
             # Special case: the first entry in oldEntries was ultra-short
-            if len(newEntries) == 0 and start != minTimestamp:
+            if not newEntries and start != minTimestamp:
                 newEntries.append(Interval(minTimestamp, end, label))
             # Normal case
             else:
                 newEntries.append(Interval(start, end, label))
-            j += 1
 
     # Next, shift near equivalent tiny boundaries
     # This will link intervals that were connected by an interval
     # that was shorter than minLength
-    j = 0
-    while j < len(newEntries) - 1:
+    for j in range(len(newEntries) - 1):
         diff = abs(newEntries[j][1] - newEntries[j + 1][0])
         if diff > 0 and diff < minLength:
             newEntries[j] = Interval(
@@ -78,7 +75,6 @@ def _removeUltrashortIntervals(
                 newEntries[j + 1][0],
                 newEntries[j][2],
             )
-        j += 1
 
     tier["entries"] = newEntries
 
@@ -89,7 +85,7 @@ def _fillInBlanks(
     minTime: Optional[float] = None,
     maxTime: Optional[float] = None,
 ) -> None:
-    """Fills in the space between intervals with empty space
+    """Fill in the space between intervals with empty space.
 
     This is necessary to do when saving to create a well-formed textgrid
     """
@@ -100,7 +96,7 @@ def _fillInBlanks(
         maxTime = tier["xmax"]
 
     # Special case: empty textgrid
-    if len(tier["entries"]) == 0:
+    if not tier["entries"]:
         tier["entries"].append((minTime, maxTime, blankLabel))
 
     # Create a new entry list
@@ -140,7 +136,7 @@ def _fillInBlanks(
 
 
 def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
-    """Converts a string representation of a Textgrid into a dictionary
+    """Convert a string representation of a Textgrid into a dictionary.
 
     https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
 
@@ -165,7 +161,7 @@ def parseTextgridStr(data: str, includeEmptyIntervals: bool = False) -> Dict:
         else:
             tgAsDict = _parseNormalTextgrid(data)
 
-    if includeEmptyIntervals is False:
+    if not includeEmptyIntervals:
         for tier in tgAsDict["tiers"]:
             _removeBlanks(tier)
 
@@ -180,7 +176,7 @@ def getTextgridAsStr(
     maxTimestamp: Optional[float] = None,
     minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
 ) -> str:
-    """Converts a textgrid to a string, suitable for saving
+    """Convert a textgrid to a string, suitable for saving.
 
     Args:
         tg: the textgrid to convert to a string
@@ -225,9 +221,7 @@ def getTextgridAsStr(
 
 
 def _upconvertDictionaryFromJson(tgAsDict: dict) -> dict:
-    """
-    Convert from the sparse json format to the one shaped more literally like a textgrid
-    """
+    """Convert from the sparse json format to the one shaped more literally like a textgrid."""
     transformedDict = {}
     transformedDict["xmin"] = tgAsDict["start"]
     transformedDict["xmax"] = tgAsDict["end"]
@@ -249,9 +243,7 @@ def _upconvertDictionaryFromJson(tgAsDict: dict) -> dict:
 
 
 def _downconvertDictionaryForJson(tgAsDict: Dict) -> dict:
-    """
-    Convert from the textgrid-shaped json format to a more minimal json format
-    """
+    """Convert from the textgrid-shaped json format to a more minimal json format."""
     tiers = {}
     for tier in tgAsDict["tiers"]:
         tiers[tier["name"]] = {
@@ -390,9 +382,7 @@ def _tgToJson(tgAsDict: Dict) -> str:
 
 
 def _parseNormalTextgrid(data: str) -> Dict:
-    """
-    Reads a normal textgrid
-    """
+    """Read a normal textgrid."""
     data = data.replace("\r\n", "\n")
 
     # Toss textgrid header
@@ -487,7 +477,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
 
 
 def _parseShortTextgrid(data: str) -> Dict:
-    """Reads a short textgrid file"""
+    """Read a short textgrid file."""
     data = data.replace("\r\n", "\n")
 
     intervalIndicies = [(i, True) for i in utils.findAll(data, '"IntervalTier"')]

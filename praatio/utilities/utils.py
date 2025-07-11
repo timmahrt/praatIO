@@ -1,6 +1,4 @@
-"""
-Various generic utility functions
-"""
+"""Various generic utility functions."""
 
 import os
 import subprocess
@@ -46,7 +44,7 @@ class TogglableLogger:
 
 
 def find(list: Sequence[Any], value: Any, reverse: bool) -> Optional[int]:
-    """Returns the first/last index of an item in a list"""
+    """Return the first/last index of an item in a list."""
     if value not in list:
         return None
 
@@ -124,7 +122,7 @@ def intervalOverlapCheck(
     timeThreshold: float = 0,
     boundaryInclusive: bool = False,
 ) -> bool:
-    """Checks whether two intervals overlap
+    """Check whether two intervals overlap.
 
     Args:
         interval:
@@ -183,7 +181,7 @@ def getIntervalsInInterval(
     intervals: Iterable[Interval],
     mode: Literal["strict", "lax", "truncated"],
 ) -> List[Interval]:
-    """Gets all intervals that exist between /start/ and /end/
+    """Get all intervals that exist between /start/ and /end/.
 
     Args:
         start: the target interval start time
@@ -260,7 +258,7 @@ def getValueAtTime(
     fuzzyMatching: bool = False,
     startI: int = 0,
 ) -> Tuple[Tuple[Any, ...], int]:
-    """Get the value in the data list (sorted by time) that occurs at this point
+    """Get the value in the data list (sorted by time) that occurs at this point.
 
     If fuzzyMatching is True, if there is not a value
     at the requested timestamp, the nearest feature value will be taken.
@@ -281,7 +279,7 @@ def getValueAtTime(
     bestRow: Tuple[Any, ...] = ()
 
     # Only find exact timestamp matches
-    if fuzzyMatching is False:
+    if not fuzzyMatching:
         while True:
             try:
                 currRow = sortedDataTupleList[i]
@@ -329,7 +327,7 @@ def getValueAtTime(
 def getValuesInInterval(
     dataTupleList: Iterable[Tuple[float, ...]], start: float, end: float
 ) -> List[Tuple[float, ...]]:
-    """Gets the values that exist within an interval
+    """Get the values that exist within an interval.
 
     The function assumes that the data is formated as
     [(t1, v1a, v1b, ...), (t2, v2a, v2b, ...)]
@@ -345,7 +343,7 @@ def getValuesInInterval(
 
 
 def sign(x: float) -> int:
-    """Returns 1 if x is positive, 0 if x is 0, and -1 otherwise"""
+    """Return 1 if x is positive, 0 if x is 0, and -1 otherwise."""
     retVal = 0
     if x > 0:
         retVal = 1
@@ -359,7 +357,7 @@ def invertIntervalList(
     minValue: Optional[float] = None,
     maxValue: Optional[float] = None,
 ) -> List[Tuple[float, float]]:
-    """Inverts the segments of a list of intervals
+    """Invert the segments of a list of intervals.
 
     e.g.
     [(0,1), (4,5), (7,10)] -> [(1,4), (5,7)]
@@ -372,7 +370,7 @@ def invertIntervalList(
 
     # Special case -- empty lists
     invList: List[Tuple[float, float]]
-    if len(inputList) == 0 and minValue is not None and maxValue is not None:
+    if not inputList and minValue is not None and maxValue is not None:
         invList = [
             (minValue, maxValue),
         ]
@@ -411,7 +409,7 @@ def getUnique(values: Iterable[T]) -> List[T]:
 
 
 def makeDir(path: str) -> None:
-    """Create a new directory
+    """Create a new directory.
 
     Unlike os.mkdir, it does not throw an exception if the directory already exists
     """
@@ -420,7 +418,7 @@ def makeDir(path: str) -> None:
 
 
 def findAll(txt: str, subStr: str) -> List[int]:
-    """Find the starting indicies of all instances of subStr in txt"""
+    """Find the starting indices of all instances of subStr in txt."""
     indexList: List[int] = []
     index = 0
     while True:
@@ -453,7 +451,7 @@ def runPraatScript(
 
 
 def safeZip(listOfLists: Sequence[Collection], enforceLength: bool):
-    """A safe version of python's zip()
+    """A safe version of python's zip().
 
     If two sublists are of different sizes, python's zip will truncate
     the output to be the smaller of the two.
@@ -461,7 +459,7 @@ def safeZip(listOfLists: Sequence[Collection], enforceLength: bool):
     safeZip throws an exception if the size of the any sublist is different
     from the rest.
     """
-    if enforceLength is True:
+    if enforceLength:
         length = len(listOfLists[0])
         if not all([length == len(subList) for subList in listOfLists]):
             raise errors.SafeZipException("Lists to zip have different sizes.")
@@ -470,7 +468,7 @@ def safeZip(listOfLists: Sequence[Collection], enforceLength: bool):
 
 
 def getWavDuration(wavFN: str) -> float:
-    "For internal use.  See praatio.audio.QueryWav() for general use."
+    """For internal use.  See praatio.audio.QueryWav() for general use."""
     audiofile = wave.open(wavFN, "r")
     params = audiofile.getparams()
     framerate = params[2]
@@ -483,7 +481,7 @@ def getWavDuration(wavFN: str) -> float:
 def chooseClosestTime(
     targetTime: float, candidateA: Optional[float], candidateB: Optional[float]
 ) -> float:
-    """Chooses the closest time between two options that straddle the target time
+    """Choose the closest time between two options that straddle the target time.
 
     Args:
         targetTime: the time to compare against
@@ -497,7 +495,7 @@ def chooseClosestTime(
     """
     closestTime: float
     if candidateA is None and candidateB is None:
-        raise (errors.ArgumentError("Must provide at"))
+        raise errors.ArgumentError("Must provide at")
 
     elif candidateA is None and candidateB is not None:
         closestTime = candidateB
@@ -518,7 +516,7 @@ def chooseClosestTime(
 def getInterval(
     startTime: float, duration: float, max: float, reverse: bool
 ) -> Tuple[float, float]:
-    """returns an interval before or after some start time
+    """Return an interval before or after some start time.
 
     The returned timestamps will be between 0 and max
 
@@ -531,7 +529,7 @@ def getInterval(
     Returns:
         the start and end time of an interval
     """
-    if reverse is True:
+    if reverse:
         endTime = startTime
         startTime -= duration
     else:

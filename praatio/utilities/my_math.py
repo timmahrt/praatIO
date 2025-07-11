@@ -1,6 +1,4 @@
-"""
-Various math utilities
-"""
+"""Various math utilities."""
 
 import math
 import statistics
@@ -32,7 +30,7 @@ def filterTimeSeriesData(
     index: int,
     useEdgePadding: bool,
 ) -> List[List[float]]:
-    """Filter time-stamped data values within a window
+    """Filter time-stamped data values within a window.
 
     filterFunc could be medianFilter() or znormFilter()
 
@@ -61,7 +59,7 @@ def filterTimeSeriesData(
 def znormalizeSpeakerData(
     featureTimeList: Sequence[Sequence[float]], index: int, filterZeroValues: bool
 ) -> List[Tuple[float, ...]]:
-    """znormalize time series data
+    """z-normalize time series data.
 
     The idea is to normalize each speaker separately to be able
     to compare data across several speakers for speaker-dependent
@@ -100,7 +98,7 @@ def znormalizeSpeakerData(
 
 
 def medianFilter(dist: Sequence[float], window: int, useEdgePadding: bool) -> List[float]:
-    """median filter each value in a dataset; filtering occurs within a given window
+    """median filter each value in a dataset; filtering occurs within a given window.
 
     Median filtering is used to "smooth" out extreme values.  It can be useful if
     your data has lots of quick spikes.  The larger the window, the flatter the output
@@ -116,7 +114,7 @@ def medianFilter(dist: Sequence[float], window: int, useEdgePadding: bool) -> Li
 def znormWindowFilter(
     dist: Sequence[float], window: int, useEdgePadding: bool, filterZeroValues: bool
 ) -> List[float]:
-    """z-normalize each value in a dataset; normalization occurs within a given window
+    """z-normalize each value in a dataset; normalization occurs within a given window.
 
     If you suspect that events are sensitive to local changes, (e.g. local changes in pitch
     are more important absolute differences in pitch) then using windowed
@@ -202,7 +200,7 @@ def _stepFilter(
 
 
 def znormalizeData(valList: Iterable[float]) -> List[float]:
-    """Given a list of floats, return the z-normalized values of the floats
+    """Given a list of floats, return the z-normalized values of the floats.
 
     The formula is: z(v) = (v - mean) / stdDev
     In effect, this scales all values to the range [-4, 4].
@@ -215,7 +213,7 @@ def znormalizeData(valList: Iterable[float]) -> List[float]:
 
 
 def rms(intensityValues: Iterable[float]) -> float:
-    """Return the root mean square for the input set of values"""
+    """Return the root mean square for the input set of values."""
     intensityValues = [val ** 2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)
     return math.sqrt(meanVal)

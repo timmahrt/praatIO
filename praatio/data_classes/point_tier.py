@@ -1,5 +1,5 @@
 """
-A PointTier is a tier containing an array of points -- data that exists at a specific point in time
+A PointTier is a tier containing an array of points -- data that exists at a specific point in time.
 """
 from typing import List, Tuple, Optional, Iterable, Any
 
@@ -17,11 +17,11 @@ from praatio.data_classes.textgrid_tier import TextgridTier
 
 def _homogenizeEntries(entries: Iterable[Tuple[float, str]]) -> List[Point]:
     """
-    Enforces consistency in points
+    Enforce consistency in points.
 
-    - converts all entries to points
-    - removes whitespace in labels
-    - sorts values by time
+    - Convert all entries to points.
+    - Remove whitespace in labels.
+    - Sort values by time.
     """
     processedEntries = [Point(float(time), label.strip()) for time, label in entries]
     processedEntries.sort()
@@ -60,7 +60,7 @@ class PointTier(TextgridTier[Point]):
         minT: Optional[float] = None,
         maxT: Optional[float] = None,
     ):
-        """A point tier is for annotating instaneous events
+        """A point tier is for annotating instaneous events.
 
         The entries is of the form:
         [(timeVal1, label1), (timeVal2, label2), ]
@@ -77,7 +77,7 @@ class PointTier(TextgridTier[Point]):
 
     @property
     def timestamps(self) -> List[float]:
-        """All unique timestamps used in this tier"""
+        """All unique timestamps used in this tier."""
         tmpTimestamps = [time for time, _ in self.entries]
 
         uniqueTimestamps = list(set(tmpTimestamps))
@@ -92,7 +92,7 @@ class PointTier(TextgridTier[Point]):
         mode: Literal["strict", "lax", "truncated"] = "lax",
         rebaseToZero: bool = True,
     ) -> "PointTier":
-        """Creates a new tier containing all entries inside the new interval
+        """Create a new tier containing all entries inside the new interval.
 
         Args:
             cropStart:
@@ -118,7 +118,7 @@ class PointTier(TextgridTier[Point]):
             if timestamp >= cropStart and timestamp <= cropEnd:
                 newEntries.append(entry)
 
-        if rebaseToZero is True:
+        if rebaseToZero:
             newEntries = [
                 Point(timeV - cropStart, label) for timeV, label in newEntries
             ]
@@ -131,14 +131,14 @@ class PointTier(TextgridTier[Point]):
         return PointTier(self.name, newEntries, minT, maxT)
 
     def deleteEntry(self, entry: Point) -> None:
-        """Removes an entry from the entries"""
+        """Remove an entry from the entries."""
         self._entries.pop(self._entries.index(entry))
 
     def dejitter(
         self, referenceTier: "PointTier", maxDifference: float = 0.001
     ) -> "PointTier":
         """
-        Set timestamps in this tier to be the same as values in the reference tier
+        Set timestamps in this tier to be the same as values in the reference tier.
 
         Timestamps will only be moved if they are less than maxDifference away from the
         reference time.
@@ -170,7 +170,7 @@ class PointTier(TextgridTier[Point]):
         offset: float,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "PointTier":
-        """Modifies all timestamps by a constant amount
+        """Modify all timestamps by a constant amount.
 
         Args:
             offset:
@@ -215,7 +215,7 @@ class PointTier(TextgridTier[Point]):
         dataTupleList: Iterable[Tuple[float, ...]],
         fuzzyMatching: bool = False,
     ) -> List[Tuple[Any, ...]]:
-        """Get the values that occur at points in the point tier
+        """Get the values that occur at points in the point tier.
 
         The procedure assumes that all data is ordered in time.
         dataTupleList should be in the form
@@ -260,7 +260,7 @@ class PointTier(TextgridTier[Point]):
         collisionMode: Literal["truncate", "categorical", "error"] = "error",
         doShrink: bool = True,
     ) -> "PointTier":
-        """Makes a region in a tier blank (removes all contained entries)
+        """Make a region in a tier blank (removes all contained entries).
 
         Args:
             start: the start of the deletion interval
@@ -278,14 +278,14 @@ class PointTier(TextgridTier[Point]):
         croppedTier = newTier.crop(start, end, constants.CropCollision.TRUNCATED, False)
         matchList = croppedTier.entries
 
-        if len(matchList) > 0:
+        if matchList:
             # Remove all the matches from the entries
             # Go in reverse order because we're destructively altering
             # the order of the list (messes up index order)
             for point in matchList[::-1]:
                 newTier.deleteEntry(point)
 
-        if doShrink is True:
+        if doShrink:
             newEntries: List[Point] = []
             diff = end - start
             for point in newTier.entries:
@@ -305,7 +305,7 @@ class PointTier(TextgridTier[Point]):
         collisionMode: Literal["replace", "merge", "error"] = "error",
         collisionReportingMode: Literal["silence", "warning"] = "warning",
     ) -> None:
-        """Inserts an interval into the tier
+        """Insert an interval into the tier.
 
         Args:
             entry: the entry to insert
@@ -342,7 +342,7 @@ class PointTier(TextgridTier[Point]):
                 matchList.append(point)
                 break
 
-        if len(matchList) == 0:
+        if not matchList:
             self._entries.append(newPoint)
 
         elif collisionMode == constants.IntervalCollision.REPLACE:
@@ -367,7 +367,7 @@ class PointTier(TextgridTier[Point]):
 
         self.sort()
 
-        if len(matchList) != 0:
+        if matchList:
             collisionReporter(
                 errors.CollisionError,
                 f"Collision warning for ({point}) with items ({matchList}) of tier '{self.name}'",
@@ -379,7 +379,7 @@ class PointTier(TextgridTier[Point]):
         duration: float,
         _collisionMode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "PointTier":
-        """Inserts a region into the tier
+        """Insert a region into the tier.
 
         Args:
             start: the start time to insert a space at
@@ -405,7 +405,7 @@ class PointTier(TextgridTier[Point]):
         return newTier
 
     def toZeroCrossings(self, wavFN: str) -> "PointTier":
-        """Moves all timestamps to the nearest zero crossing"""
+        """Move all timestamps to the nearest zero crossing."""
         wav = audio.QueryWav(wavFN)
 
         points: List[Point] = []
@@ -418,7 +418,7 @@ class PointTier(TextgridTier[Point]):
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"
     ) -> bool:
-        """Validate this tier
+        """Validate this tier.
 
         Returns whether the tier is valid or not. If reportingMode is "warning"
         or "error" this will also print on error or stop execution, respectively.

@@ -1,7 +1,5 @@
 # encoding: utf-8
-"""
-This is a table of TIMIT-and-ARPABET-to-IPA codes.
-"""
+"""This is a table of TIMIT-and-ARPABET-to-IPA codes."""
 
 timitToIPA = {
     u"ng": u"ŋ",

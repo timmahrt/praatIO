@@ -21,7 +21,7 @@ class AudioWrapper:
             self.assertEqual(durationA, durationB)
 
         def test_extract_subwavs(self):
-            """Tests that extractSubwavs will output files with the expected duration"""
+            """Tests that extractSubwavs will output files with the expected duration."""
             outputWavFN = join(self.outputRoot, "bobby_word.wav")
 
             audio.extractSubwav(self.bobWavFN, outputWavFN, 0.06, 0.40)

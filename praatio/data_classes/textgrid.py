@@ -1,5 +1,5 @@
 """
-Functions for reading/writing/manipulating Textgrid classes
+Functions for reading/writing/manipulating Textgrid classes.
 
 This is the 'heart' of praatio.
 """
@@ -27,7 +27,7 @@ from praatio.utilities import utils
 
 
 class Textgrid:
-    """A container that stores and operates over interval and point tiers
+    """A container that stores and operates over interval and point tiers.
 
     Textgrids are used by the Praat software to group tiers.  Each tier
     contains different annotation information for an audio recording.
@@ -40,7 +40,7 @@ class Textgrid:
     """
 
     def __init__(self, minTimestamp: Optional[float] = None, maxTimestamp: Optional[float] = None):
-        """Constructor for Textgrids
+        """Constructor for Textgrids.
 
         Args:
             minTimestamp: the minimum allowable timestamp in the textgrid
@@ -150,7 +150,7 @@ class Textgrid:
             self.maxTimestamp = maxV
 
     def appendTextgrid(self, tg: "Textgrid", onlyMatchingNames: bool) -> "Textgrid":
-        """Append one textgrid to the end of this one
+        """Append one textgrid to the end of this one.
 
         Args:
             tg: the textgrid to add to this one
@@ -173,7 +173,7 @@ class Textgrid:
 
         # Determine the tier names that will be in the final textgrid
         finalTierNames: List[str] = []
-        if onlyMatchingNames is False:
+        if not onlyMatchingNames:
             finalTierNames = combinedTierNames
         else:
             for tierName in combinedTierNames:
@@ -219,7 +219,7 @@ class Textgrid:
         mode: Literal["strict", "lax", "truncated"],
         rebaseToZero: bool,
     ) -> "Textgrid":
-        """Creates a textgrid where all intervals fit within the crop region
+        """Create a textgrid where all intervals fit within the crop region.
 
         Args:
             cropStart: The start time of the crop interval
@@ -244,7 +244,7 @@ class Textgrid:
                 f"Crop error: start time ({cropStart}) must occur before end time ({cropEnd})"
             )
 
-        if rebaseToZero is True:
+        if rebaseToZero:
             minT = 0.0
             maxT = cropEnd - cropStart
         else:
@@ -269,7 +269,7 @@ class Textgrid:
         return newTG
 
     def eraseRegion(self, start: float, end: float, doShrink: bool) -> "Textgrid":
-        """Makes a region in a tier blank (removes all contained entries)
+        """Make a region in a tier blank (removes all contained entries).
 
         Intervals that span the region to erase will be truncated.
 
@@ -295,7 +295,7 @@ class Textgrid:
         diff = end - start
 
         maxTimestamp = self.maxTimestamp
-        if doShrink is True:
+        if doShrink:
             maxTimestamp -= diff
 
         newTG = Textgrid(self.minTimestamp, self.maxTimestamp)
@@ -314,7 +314,7 @@ class Textgrid:
         offset: float,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> "Textgrid":
-        """Modifies all timestamps by a constant amount
+        """Modify all timestamps by a constant amount.
 
         Args:
             offset: the amount to offset in seconds
@@ -331,7 +331,7 @@ class Textgrid:
 
         tg = Textgrid(self.minTimestamp, self.maxTimestamp)
         for tier in self.tiers:
-            if len(tier.entries) > 0:
+            if tier.entries:
                 tier = tier.editTimestamps(offset, reportingMode)
 
             tg.addTier(tier, reportingMode=reportingMode)
@@ -348,7 +348,7 @@ class Textgrid:
         duration: float,
         collisionMode: Literal["stretch", "split", "no_change", "error"] = "error",
     ) -> "Textgrid":
-        """Inserts a blank region into a textgrid
+        """Insert a blank region into a textgrid.
 
         Every item that occurs after *start* will be pushed back by
         *duration* seconds
@@ -385,7 +385,7 @@ class Textgrid:
     def mergeTiers(
         self, tierNames: Optional[Iterable[str]] = None, preserveOtherTiers: bool = True
     ) -> "Textgrid":
-        """Combine tiers
+        """Combine tiers.
 
         Args:
             tierList: A list of tier names to combine. If none, combine
@@ -411,14 +411,14 @@ class Textgrid:
 
         # Merge the interval tiers
         intervalTier = None
-        if len(intervalTierNames) > 0:
+        if intervalTierNames:
             intervalTier = self.getTier(intervalTierNames.pop(0))
             for tierName in intervalTierNames:
                 intervalTier = intervalTier.union(self.getTier(tierName))
 
         # Merge the point tiers
         pointTier = None
-        if len(pointTierNames) > 0:
+        if pointTierNames:
             pointTier = self.getTier(pointTierNames.pop(0))
             for tierName in pointTierNames:
                 pointTier = pointTier.union(self.getTier(tierName))
@@ -440,7 +440,7 @@ class Textgrid:
         return tg
 
     def new(self) -> "Textgrid":
-        """Returns a copy of this Textgrid"""
+        """Return a copy of this Textgrid."""
         return copy.deepcopy(self)
 
     def save(
@@ -453,7 +453,7 @@ class Textgrid:
         minimumIntervalLength: float = MIN_INTERVAL_LENGTH,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
-        """Save the current textgrid to a file
+        """Save the current textgrid to a file.
 
         Args:
             fn: the fullpath filename of the output
@@ -529,7 +529,7 @@ class Textgrid:
     def validate(
         self, reportingMode: Literal["silence", "warning", "error"] = "warning"
     ) -> bool:
-        """Validates this textgrid
+        """Validate this textgrid.
 
         Returns whether the textgrid is valid or not. If reportingMode is "warning"
         or "error" this will also print on error or stop execution, respectively.

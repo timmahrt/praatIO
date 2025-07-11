@@ -1,5 +1,5 @@
 """
-Replaces someone saying a name with a tone over the name to 'hide' the name.
+Replace someone saying a name with a tone over the name to 'hide' the name.
 
 The times that the names are spoken are taken from a transcript
 of the recording.

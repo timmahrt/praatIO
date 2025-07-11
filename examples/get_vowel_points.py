@@ -1,5 +1,5 @@
 """
-Praatio example for extracting points in a PointProcess for the vowels specified in a textgrid
+Praatio example for extracting points in a PointProcess for the vowels specified in a textgrid.
 """
 
 import os

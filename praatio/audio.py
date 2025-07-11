@@ -43,7 +43,7 @@ def _getZeroCrossings(
     samples: Sequence[int], startTime: float, framerate: int
 ) -> List[float]:
     """
-    Given a list of samples, return a list of times where zero-crossings occur
+    Given a list of samples, return a list of times where zero-crossings occur.
 
     Inspired by:
     https://stackoverflow.com/a/44322349
@@ -68,7 +68,7 @@ def _getZeroCrossings(
 
 
 def calculateMaxAmplitude(sampleWidth: int) -> int:
-    """Gets the largest possible amplitude representable by a given sample width
+    """Get the largest possible amplitude representable by a given sample width.
 
     The formula is 2^(n-1) - 1 where n is the number of bits
     - the first -1 is because the result is signed
@@ -86,7 +86,7 @@ def calculateMaxAmplitude(sampleWidth: int) -> int:
 
 
 def convertFromBytes(byteStr: bytes, sampleWidth: int) -> Tuple[int, ...]:
-    """Convert frames of a python wave object from bytes to numbers"""
+    """Convert frames of a python wave object from bytes to numbers."""
     byteCode = sampleWidthDict[sampleWidth]
     actualNumFrames = int(len(byteStr) / float(sampleWidth))
     audioFrameList = struct.unpack("<" + byteCode * actualNumFrames, byteStr)
@@ -95,7 +95,7 @@ def convertFromBytes(byteStr: bytes, sampleWidth: int) -> Tuple[int, ...]:
 
 
 def convertToBytes(numList: Tuple[int, ...], sampleWidth: int) -> bytes:
-    """Convert frames of a python wave object from numbers to bytes"""
+    """Convert frames of a python wave object from numbers to bytes."""
     byteCode = sampleWidthDict[sampleWidth]
     byteStr = struct.pack("<" + byteCode * len(numList), *numList)
 
@@ -103,21 +103,21 @@ def convertToBytes(numList: Tuple[int, ...], sampleWidth: int) -> bytes:
 
 
 def extractSubwav(fn: str, outputFN: str, startTime: float, endTime: float) -> None:
-    """Get a subsegment of an audio file"""
+    """Get a subsegment of an audio file."""
     wav = QueryWav(fn)
     frames = wav.getFrames(startTime, endTime)
     wav.outputFrames(frames, outputFN)
 
 
 def getDuration(fn: str) -> float:
-    """Get the total duration of an audio file"""
+    """Get the total duration of an audio file."""
     return QueryWav(fn).duration
 
 
 def readFramesAtTime(
     audiofile: wave.Wave_read, startTime: float, endTime: float
 ) -> bytes:
-    """Read the audio frames for the specified internal of an audio file"""
+    """Read the audio frames for the specified internal of an audio file."""
     params = audiofile.getparams()
     frameRate = params[2]
 
@@ -133,7 +133,7 @@ def readFramesAtTimes(
     deleteIntervals: Optional[Iterable[Tuple[float, float]]] = None,
     replaceFunc: Optional[Callable[[float], bytes]] = None,
 ) -> bytes:
-    """Reads an audio file into memory, with some configuration
+    """Read an audio file into memory, with some configuration.
 
     Args:
         audiofile: the time to get the interval from
@@ -188,11 +188,9 @@ class AbstractWav(ABC):
         self.compname = params[5]
 
         if self.nchannels != 1:
-            raise (
-                errors.ArgumentError(
-                    "Only audio with a single channel can be loaded. "
-                    "Your file was #{self.nchannels}."
-                )
+            raise errors.ArgumentError(
+                "Only audio with a single channel can be loaded. "
+                f"Your file has {self.nchannels} channels."
             )
 
     @property
@@ -209,9 +207,9 @@ class AbstractWav(ABC):
     def findNearestZeroCrossing(
         self, targetTime: float, timeStep: float = ZERO_CROSSING_TIMESTEP
     ) -> float:
-        """Finds the nearest zero crossing at the given time in an audio file
+        """Find the nearest zero crossing at the given time in an audio file.
 
-        Looks both before and after the timeStamp
+        Look both before and after the timeStamp.
 
         Raises:
             ArgumentError: the timeStep is too small
@@ -250,14 +248,14 @@ class AbstractWav(ABC):
                 samplesToRead.append([rightStartTime, rightIncrement])
 
             zeroCrossingsInTime: List[float] = []
-            if len(samplesToRead) > 0:
+            if samplesToRead:
                 for startTime, increment in samplesToRead:
                     samples = self.getSamplesAtTime(startTime, increment, False)
                     zeroCrossingsInTime.extend(
                         _getZeroCrossings(samples, startTime, self.frameRate)
                     )
 
-                if len(zeroCrossingsInTime) > 0:
+                if zeroCrossingsInTime:
                     return min(
                         zeroCrossingsInTime, key=lambda val: abs(targetTime - val)
                     )
@@ -276,7 +274,7 @@ class AbstractWav(ABC):
         pass
 
     def outputFrames(self, frames: bytes, outputFN: str) -> None:
-        """Output frames using the same parameters as this Wav"""
+        """Output frames using the same parameters as this Wav."""
         outWave = wave.open(outputFN, "w")
         outWave.setparams((
             self.nchannels,
@@ -290,7 +288,7 @@ class AbstractWav(ABC):
 
 
 class QueryWav(AbstractWav):
-    """A class for getting information about a wave file
+    """A class for getting information about a wave file.
 
     The wave file is never loaded--we only keep a reference to the
     file descriptor.  All operations on QueryWavs are fast.
@@ -326,7 +324,7 @@ class QueryWav(AbstractWav):
 
 
 class Wav(AbstractWav):
-    """A class for manipulating audio files
+    """A class for manipulating audio files.
 
     The wav file is represented by its wavform as a series of signed
     integers.  This can be very slow and take up lots of memory with
@@ -344,7 +342,7 @@ class Wav(AbstractWav):
         return self.frames == other.frames
 
     def _getIndexAtTime(self, startTime: float) -> int:
-        """Gets the index in the frame list for the given time"""
+        """Get the index in the frame list for the given time."""
         return round(startTime * self.frameRate * self.sampleWidth)
 
     @classmethod
@@ -409,13 +407,13 @@ class AudioGenerator:
 
     @classmethod
     def fromWav(cls, wav: AbstractWav) -> "AudioGenerator":
-        """Build an AudioGenerator with parameters derived from a Wav or QueryWav"""
+        """Build an AudioGenerator with parameters derived from a Wav or QueryWav."""
         return AudioGenerator(wav.sampleWidth, wav.frameRate)
 
     def buildSineWaveGenerator(
         self, frequency: int, amplitude: Optional[float]
     ) -> Callable[[float], bytes]:
-        """Returns a function that takes a duration and returns a generated sine wave"""
+        """Return a function that takes a duration and returns a generated sine wave."""
         return partial(self.generateSineWave, frequency=frequency, amplitude=amplitude)
 
     def generateSineWave(
@@ -445,7 +443,7 @@ def _computeKeepDeleteIntervals(
     keepIntervals: Optional[Iterable[Tuple[float, float]]] = None,
     deleteIntervals: Optional[Iterable[Tuple[float, float]]] = None,
 ) -> List[Tuple[float, float, str]]:
-    """Returns a list of intervals, each one labeled 'keep' or 'delete'"""
+    """Return a list of intervals, each one labeled 'keep' or 'delete'."""
     if keepIntervals and deleteIntervals:
         raise errors.ArgumentError(
             "You cannot specify both 'keepIntervals' or 'deleteIntervals'."

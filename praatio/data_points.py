@@ -1,4 +1,4 @@
-"""Code for reading, writing, and representing less complicated praat data files
+"""Code for reading, writing, and representing less complicated praat data files.
 
 see **examples/get_vowel_points.py**
 """

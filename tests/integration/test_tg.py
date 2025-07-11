@@ -13,7 +13,7 @@ from praatio.utilities import constants
 
 
 class TestTg(unittest.TestCase):
-    """Testing input and output"""
+    """Test input and output."""
 
     def __init__(self, *args, **kargs):
         super(TestTg, self).__init__(*args, **kargs)
@@ -42,7 +42,7 @@ class TestTg(unittest.TestCase):
         self.assertEqual(6, numEntries)
 
     def test_shift(self):
-        """Testing adjustments to textgrid times"""
+        """Test adjustments to textgrid times."""
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
         tg = textgrid.openTextgrid(tgFN, False)
@@ -52,7 +52,7 @@ class TestTg(unittest.TestCase):
         self.assertTrue(tg == unshiftedTG)
 
     def test_insert_delete_space(self):
-        """Testing insertion and deletion of space in a textgrid"""
+        """Test insertion and deletion of space in a textgrid."""
         tgFN = join(self.dataRoot, "mary.TextGrid")
 
         tg = textgrid.openTextgrid(tgFN, False)
@@ -62,7 +62,7 @@ class TestTg(unittest.TestCase):
         self.assertTrue(tg == unstretchedTG)
 
     def test_rename_tier(self):
-        """Testing renaming of tiers"""
+        """Test renaming of tiers."""
 
         tgFN = join(self.dataRoot, "mary.TextGrid")
 

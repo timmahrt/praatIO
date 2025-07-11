@@ -40,10 +40,10 @@ def run_save(
     minimumIntervalLength=None,
 ):
     """
-    Mock write function and return the first tier's entry list
+    Mock write function and return the first tier's entry list.
 
     tg.save() mutates the textgrid's data, so the entry list
-    before and after saving can be different
+    before and after saving can be different.
     """
 
     tgAsDict = tg_data_class._tgToDictionary(tg)
@@ -63,10 +63,10 @@ def run_save(
 
 
 class TestIo(PraatioTestCase):
-    """Testing input and output"""
+    """Test input and output."""
 
     def test_reading_textgrids_with_newlines_in_labels(self):
-        """Tests for reading/writing textgrids with newlines"""
+        """Tests for reading/writing textgrids with newlines."""
         fn = "bobby_words_with_newlines.TextGrid"
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
@@ -77,7 +77,7 @@ class TestIo(PraatioTestCase):
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
     def test_reading_long_textgrids_with_newlines_in_labels(self):
-        """Tests for reading/writing textgrids with newlines"""
+        """Tests for reading/writing textgrids with newlines."""
         fn = "bobby_words_with_newlines_longfile.TextGrid"
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
@@ -88,7 +88,7 @@ class TestIo(PraatioTestCase):
         self.assertTrue(areTheSameFiles(inputFN, outputFN, readFile))
 
     def test_reading_short_textgrids_with_start_times_of_negative_zero(self):
-        """Tests for reading/writing textgrids with negative zero"""
+        """Tests for reading/writing textgrids with negative zero."""
         fn = "mary.TextGrid"
         inputFN = join(self.dataRoot, fn)
         baselineTg = textgrid.openTextgrid(inputFN, False)
@@ -100,7 +100,7 @@ class TestIo(PraatioTestCase):
         self.assertEqual(baselineTg, sut)
 
     def test_reading_long_textgrids_with_start_times_of_negative_zero(self):
-        """Tests for reading/writing textgrids with negative zero"""
+        """Tests for reading/writing textgrids with negative zero."""
         fn = "mary_longfile.TextGrid"
         inputFN = join(self.dataRoot, fn)
         baselineTg = textgrid.openTextgrid(inputFN, False)
@@ -112,7 +112,7 @@ class TestIo(PraatioTestCase):
         self.assertEqual(baselineTg, sut)
 
     def test_tg_io(self):
-        """Tests for reading/writing textgrid io"""
+        """Tests for reading/writing textgrid io."""
         fn = "textgrid_to_merge.TextGrid"
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)
@@ -170,7 +170,7 @@ class TestIo(PraatioTestCase):
         self.assertSequenceEqual(["Mary", "Mary_2", "Mary_3"], sut.tierNames)
 
     def test_tg_io_long_vs_short(self):
-        """Tests reading of long vs short textgrids"""
+        """Tests reading of long vs short textgrids."""
 
         shortFN = join(self.dataRoot, "textgrid_to_merge.TextGrid")
         longFN = join(self.dataRoot, "textgrid_to_merge_longfile.TextGrid")
@@ -178,7 +178,7 @@ class TestIo(PraatioTestCase):
         self.assertTrue(areTheSameFiles(shortFN, longFN, textgrid.openTextgrid, True))
 
     def test_saving_short_textgrid(self):
-        """Tests that short textgrid files are saved non-destructively"""
+        """Tests that short textgrid files are saved non-destructively."""
         fn = "textgrid_to_merge.TextGrid"
         shortFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_short_file.textgrid")
@@ -189,7 +189,7 @@ class TestIo(PraatioTestCase):
         self.assertTrue(areTheSameFiles(shortFN, outputFN, readFile))
 
     def test_saving_long_textgrid(self):
-        """Tests that long textgrid files are saved non-destructively"""
+        """Tests that long textgrid files are saved non-destructively."""
         fn = "textgrid_to_merge_longfile.TextGrid"
         longFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_long_file.textgrid")
@@ -204,7 +204,7 @@ class TestIo(PraatioTestCase):
         self.assertTrue(areTheSameFiles(longFN, outputFN, readFile))
 
     def test_saving_and_loading_textgrid_json(self):
-        """Tests that textgrid-like json files are saved non-destructively"""
+        """Tests that textgrid-like json files are saved non-destructively."""
         fn = "mary.TextGrid"
         shortFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_textgrid_as_textgrid_json.json")
@@ -229,7 +229,7 @@ class TestIo(PraatioTestCase):
         self.assertTrue(areTheSameFiles(shortFN, outputLastFN, readFile))
 
     def test_saving_and_loading_json(self):
-        """Tests that json files are saved correctly"""
+        """Tests that json files are saved correctly."""
         fn = "mary.TextGrid"
         shortFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, "saved_textgrid_as_json.json")
@@ -392,9 +392,7 @@ class TestIo(PraatioTestCase):
         self.assertEqual(expectedEntries, actualEntries)
 
     def test_save_with_ignore_blank_sections(self):
-        """
-        Tests that blank sections can be ignored on saving a textgrid
-        """
+        """Tests that blank sections can be ignored on saving a textgrid."""
         entries = [[0.4, 0.6, "A"], [0.8, 1.0, "E"], [1.2, 1.3, "I"]]
         expectedEntries = entries  # Blank intervals should not be inserted
         tier = textgrid.IntervalTier("test", entries)

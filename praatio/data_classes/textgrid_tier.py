@@ -1,6 +1,4 @@
-"""
-The abstract class used by all textgrid tiers
-"""
+"""The abstract class used by all textgrid tiers."""
 import re
 import copy
 import math
@@ -30,7 +28,7 @@ class TextgridTier(ABC, Generic[EntryType]):
         maxT: float,
         errorMode: Literal["silence", "warning", "error"] = "warning",
     ):
-        "A container that stores and operates over interval and point tiers"
+        """A container that stores and operates over interval and point tiers."""
         utils.validateOption("errorMode", errorMode, constants.ErrorReportingMode)
 
         """See PointTier or IntervalTier"""
@@ -114,7 +112,7 @@ class TextgridTier(ABC, Generic[EntryType]):
         substrMatchFlag: bool = False,
         usingRE: bool = False,
     ) -> List[int]:
-        """Returns the index of all intervals that match the given label
+        """Return the index of all intervals that match the given label.
 
         Args:
             matchLabel: the label to search for
@@ -126,7 +124,7 @@ class TextgridTier(ABC, Generic[EntryType]):
             A list of indicies
         """
         returnList: List[int] = []
-        if usingRE is True:
+        if usingRE:
             for i, entry in enumerate(self.entries):
                 matchList = re.findall(matchLabel, entry.label, re.I)
                 if matchList != []:
@@ -149,7 +147,7 @@ class TextgridTier(ABC, Generic[EntryType]):
         minTimestamp: Optional[float] = None,
         maxTimestamp: Optional[float] = None,
     ) -> TierType:
-        """Make a new tier derived from the current one"""
+        """Make a new tier derived from the current one."""
         if name is None:
             name = self.name
         if entries is None:
@@ -169,7 +167,7 @@ class TextgridTier(ABC, Generic[EntryType]):
         return type(self)(name, entries, minTimestamp, maxTimestamp)
 
     def sort(self) -> None:
-        """Sorts the entries in the list of entries"""
+        """Sort the entries in the list of entries."""
         # A list containing tuples and lists will be sorted with tuples
         # first and then lists.  To correctly sort, we need to make
         # sure that all data structures inside the entry list are

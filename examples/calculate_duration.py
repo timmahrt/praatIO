@@ -1,7 +1,7 @@
 """
-Extracts the duration of each interval in each tier of the specified textgrids
+Extract the duration of each interval in each tier of the specified textgrids.
 
-Outputs the data in a csv friendly format
+Output the data in a csv friendly format.
 """
 
 import os

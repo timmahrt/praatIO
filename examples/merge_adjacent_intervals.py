@@ -10,7 +10,7 @@ from praatio import textgrid
 
 def merge_adjacent(path, fn, outputPath):
     """
-    Goes through every tier of a textgrid; combines adjacent filled intervals
+    Go through every tier of a textgrid; combine adjacent filled intervals.
     """
 
     assert path != outputPath

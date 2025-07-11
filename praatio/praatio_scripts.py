@@ -1,5 +1,5 @@
 """
-Common/generic scripts or utilities that extend the functionality of praatio
+Common/generic scripts or utilities that extend the functionality of praatio.
 
 see **examples/correct_misaligned_tiers.py**, **examples/delete_vowels.py**,
 **examples/extract_subwavs.py**, **examples/splice_example.py**.
@@ -29,7 +29,7 @@ def audioSplice(
     insertStop: Optional[float] = None,
     alignToZeroCrossing: bool = True,
 ) -> Tuple[audio.Wav, textgrid.Textgrid]:
-    """Splices a segment into an audio file and corresponding textgrid
+    """Splice a segment into an audio file and corresponding textgrid.
 
     Args:
         audioObj: the audio to splice into
@@ -54,7 +54,7 @@ def audioSplice(
     retTG = tg.new()
 
     # Ensure all time points involved in splicing fall on zero crossings
-    if alignToZeroCrossing is True:
+    if alignToZeroCrossing:
         # Cut the splice segment to zero crossings
         spliceDuration = spliceSegment.duration
         spliceZeroStart = spliceSegment.findNearestZeroCrossing(0)
@@ -98,7 +98,7 @@ def audioSplice(
 def _shiftTimes(
     tg: textgrid.Textgrid, timeV: float, newTimeV: float
 ) -> textgrid.Textgrid:
-    """Change all instances of timeV in the textgrid to newTimeV
+    """Change all instances of timeV in the textgrid to newTimeV.
 
     These are meant to be small changes.  No checks are done to see
     if the new interval steps on other intervals
@@ -139,7 +139,7 @@ def spellCheckEntries(
     checkFunction: Callable[[str], bool],
     printEntries: bool = False,
 ) -> textgrid.Textgrid:
-    """Spell checks words in a textgrid
+    """Spell check words in a textgrid.
 
     Entries can contain one or more words, separated by whitespace.
     If a mispelling is found, it is noted in a special tier and optionally
@@ -179,16 +179,12 @@ def spellCheckEntries(
             label = label.replace(char, " ")
 
         wordList = label.split()
-        mispelledList: List[str] = []
-        for word in wordList:
-            if not checkFunction(word):
-                mispelledList.append(word)
-
-        if len(mispelledList) > 0:
+        mispelledList = [word for word in wordList if not checkFunction(word)]
+        if mispelledList:
             mispelledTxt = ", ".join(mispelledList)
             mispelledEntries.append(Interval(start, end, mispelledTxt))
 
-            if printEntries is True:
+            if printEntries:
                 print((start, end, mispelledTxt))
 
     tier = textgrid.IntervalTier(
@@ -202,7 +198,7 @@ def spellCheckEntries(
 def splitTierEntries(
     tg: textgrid.Textgrid, sourceTierName: str, targetTierName: str
 ) -> textgrid.Textgrid:
-    """Split each entry in a tier by space
+    """Split each entry in a tier by space.
 
     The split entries will be placed on a new tier.  The split entries
     are equally allocated a subsegment of the interval occupied by the
@@ -271,7 +267,7 @@ def splitAudioOnTier(
     allowPartialIntervals: bool = True,
     silenceLabel: Optional[str] = None,
 ) -> List[Tuple[float, float, str]]:
-    """Outputs one subwav for each entry in the tier of a textgrid
+    """Output one subwav for each entry in the tier of a textgrid.
 
     Args:
         wavnFN:
@@ -347,7 +343,7 @@ def splitAudioOnTier(
         outputFNList.append((start, end, outputName + ".wav"))
 
         # Output the textgrid if requested
-        if outputTGFlag is not False:
+        if outputTGFlag:
             subTG = tg.crop(start, end, mode, True)
 
             if isinstance(outputTGFlag, str):
@@ -386,7 +382,7 @@ def _validateEntriesForWriting(
             if wordList.count(word) > 1:
                 multipleInstList.append(word)
 
-        if len(multipleInstList) > 0:
+        if multipleInstList:
             instListTxt = "\n".join(multipleInstList)
             logger.write(
                 f"Overwriting wave files in: {outputPath}\n"

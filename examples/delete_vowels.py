@@ -1,5 +1,5 @@
 """
-Praatio example for deleting the vowels from the textgrids and audio files
+Praatio example for deleting the vowels from the textgrids and audio files.
 """
 
 import os
@@ -29,7 +29,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
 
     wav = audio.QueryWav(inputWavFN)
 
-    if atZeroCrossing is True:
+    if atZeroCrossing:
         zeroCrossingTGPath = join(outputPath, "zero_crossing_tgs")
         zeroCrossingTGFN = join(zeroCrossingTGPath, tgFN)
         utils.makeDir(zeroCrossingTGPath)
@@ -53,7 +53,7 @@ def deleteVowels(inputTGFN, inputWavFN, outputPath, doShrink, atZeroCrossing=Tru
 
     wavReader = wave.open(inputWavFN, "r")
     replaceFunc = None
-    if doShrink is False:
+    if not doShrink:
         generator = audio.AudioGenerator.fromWav(wav)
         replaceFunc = generator.generateSilence
 

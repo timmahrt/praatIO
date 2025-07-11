@@ -1,3 +1,1 @@
-"""
-Various os, math, and language-related utilities.
-"""
+"""Various os, math, and language-related utilities."""

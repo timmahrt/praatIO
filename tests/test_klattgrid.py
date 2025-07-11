@@ -9,7 +9,7 @@ from tests.praatio_test_case import PraatioTestCase
 
 class TestKlattgrid(PraatioTestCase):
     def test_reading_and_writing_klattgrids_does_not_mutate_file(self):
-        """Tests for reading/writing klattgrids"""
+        """Tests for reading/writing klattgrids."""
         fn = "bobby.KlattGrid"
         inputFN = join(self.dataRoot, fn)
         outputFN = join(self.outputRoot, fn)

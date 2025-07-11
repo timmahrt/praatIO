@@ -46,7 +46,7 @@ def openTextgrid(
     reportingMode: Literal["silence", "warning", "error"] = "warning",
     duplicateNamesMode: Literal["error", "rename"] = "error",
 ) -> Textgrid:
-    """Opens a textgrid file (.TextGrid and .json are both fine)
+    """Open a textgrid file (.TextGrid and .json are both fine).
 
     https://www.fon.hum.uva.nl/praat/manual/TextGrid_file_formats.html
 
@@ -102,7 +102,7 @@ def openTextgrid(
 def _dictionaryToTg(
     tgAsDict: dict, reportingMode: Literal["silence", "warning", "error"]
 ) -> Textgrid:
-    """Converts a dictionary representation of a textgrid to a Textgrid"""
+    """Convert a dictionary representation of a textgrid to a Textgrid."""
     utils.validateOption("reportingMode", reportingMode, constants.ErrorReportingMode)
 
     tg = Textgrid()

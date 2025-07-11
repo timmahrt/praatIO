@@ -13,7 +13,7 @@ from praatio.data_classes.textgrid import _tgToDictionary
 
 def areTheSameFiles(fn1, fn2, fileHandler, *args):
     """
-    Tests that files contain the same data
+    Tests that files contain the same data.
 
     If fileHandler is a textgrid file reader like
     textgrid.openTextgrid then we can compare

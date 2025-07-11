@@ -1,6 +1,4 @@
-"""
-Constant values and primitive definitions that can be shared throughout the code
-"""
+"""Constant values and primitive definitions that can be shared throughout the code."""
 from typing import NamedTuple, Any
 import math
 

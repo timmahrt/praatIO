@@ -1,5 +1,5 @@
 """
-Praatio example of correcting small differences in boundaries across different tiers
+Praatio example of correcting small differences in boundaries across different tiers.
 
 This problem can happen when annotators are not careful
 to align boundaries at the same time.

@@ -1,4 +1,4 @@
-"""Functions for reading/writing/manipulating klattgrid files
+"""Functions for reading/writing/manipulating klattgrid files.
 
 A klattgrid can be used for speech synthesis/resynthesis.
 For more information on the praat klattgrid:
@@ -65,12 +65,12 @@ def wavToKlattgrid(
     subtractMean: bool = True,
     scriptFN: Optional[str] = None,
 ) -> None:
-    """Extracts the klattgrid from a wav file
+    """Extract the klattgrid from a wav file.
 
     The default values are the same as the ones used in praat
     """
 
-    if subtractMean is True:
+    if subtractMean:
         subtractMeanStr = "yes"
     else:
         subtractMeanStr = "no"

@@ -5,7 +5,7 @@ Created on Jan 27, 2016
 
 @author: tmahrt
 
-Runs user-facing example code
+Run user-facing example code.
 
 The examples were all written as scripts.  They weren't meant to be
 imported or run from other code.  So here, the integration test is just
@@ -31,68 +31,68 @@ sys.path.append(_root)
 # these tests other than "no unhandled exception occured"
 # which is still important for the user-facing example code
 class TestExamples(CoverageIgnoredTest):
-    """Ensure example tests run without unhandled exceptions"""
+    """Ensure example tests run without unhandled exceptions."""
 
     def test_add_tiers(self):
-        """Running 'add_tiers.py'"""
+        """Run 'add_tiers.py'."""
         print(os.getcwd())
         import add_tiers
 
         print(os.getcwd())
 
     def test_anonymize_recordings(self):
-        """Running 'anonymize_recording'"""
+        """Run 'anonymize_recording'."""
         import anonymize_recording
 
     def test_calculate_duration(self):
-        """Running 'calculate_duration.py'"""
+        """Run 'calculate_duration.py'."""
         print(os.getcwd())
         import calculate_duration
 
         print(os.getcwd())
 
     def test_correct_misaligned_tiers(self):
-        """Running 'correct_misaligned_tiers.py'"""
+        """Run 'correct_misaligned_tiers.py'."""
         print(os.getcwd())
         import correct_misaligned_tiers
 
         print(os.getcwd())
 
     def test_delete_vowels(self):
-        """Running 'delete_vowels.py'"""
+        """Run 'delete_vowels.py'."""
         print(os.getcwd())
         import delete_vowels
 
         print(os.getcwd())
 
     def test_extract_subwavs(self):
-        """Running 'extract_subwavs.py'"""
+        """Run 'extract_subwavs.py'."""
         print(os.listdir("."))
         import extract_subwavs
 
     def test_get_vowel_points(self):
-        """Running 'get_vowel_points.py'"""
+        """Run 'get_vowel_points.py'."""
         import get_vowel_points
 
     def test_merge_adjacent_intervals(self):
-        """Running 'merge_adjacent_intervals.py'"""
+        """Run 'merge_adjacent_intervals.py'."""
         import merge_adjacent_intervals
 
     def test_merge_tiers(self):
-        """Running 'merge_tiers.py'"""
+        """Run 'merge_tiers.py'."""
         print(os.getcwd())
         import merge_tiers
 
     def test_splice_example(self):
-        """Running 'splice_example.py'"""
+        """Run 'splice_example.py'."""
         import splice_example
 
     def test_split_audio_on_tier(self):
-        """Running 'split_audio_on_tier.py'"""
+        """Run 'split_audio_on_tier.py'."""
         import split_audio_on_tier
 
     def test_textgrid_set_operations(self):
-        """Running 'textgrid_set_operations.py'"""
+        """Run 'textgrid_set_operations.py'."""
         import textgrid_set_operations
 
     def setUp(self):
@@ -105,7 +105,7 @@ class TestExamples(CoverageIgnoredTest):
         self.startingDir = os.getcwd()
 
     def tearDown(self):
-        """Remove any files generated during the test"""
+        """Remove any files generated during the test."""
         # unittest.TestCase.tearDown(self)
 
         root = os.path.join(".", "files")

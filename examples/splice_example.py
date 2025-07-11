@@ -1,5 +1,5 @@
 """
-Example of using praatio's audio splice functions
+Example of using praatio's audio splice functions.
 """
 
 import os

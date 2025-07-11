@@ -1,5 +1,5 @@
 """
-Automatically segments an audio file based on silence.
+Automatically segment an audio file based on silence.
 
 Marks an utterance for speech and silence.  Then, via
 markTranscriptForAnnotations, chunks those segments into small,
@@ -20,7 +20,7 @@ from praatio.utilities import utils
 
 def markTranscriptForAnnotations(tgFN, tierName, outputTGFN, proportion=1 / 5.0):
     """
-    Prep a noisy silence annotation for an annotation task
+    Prep a noisy silence annotation for an annotation task.
 
     Voice activity detectors are liable to segment speech into very small
     chunks (fragments of speech and silence).  The point of this code is

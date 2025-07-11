@@ -1,5 +1,5 @@
 """
-Praatio example of extracting a separate wav file for each labeled entry in a textgrid tier
+Praatio example of extracting a separate wav file for each labeled entry in a textgrid tier.
 """
 
 import os
