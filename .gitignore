@@ -34,3 +34,4 @@ var/
 
 tests/files/*/
 examples/files/*/
+.coverage
