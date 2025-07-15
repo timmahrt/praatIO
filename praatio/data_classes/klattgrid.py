@@ -6,7 +6,7 @@ import io
 from typing import List, Optional, Dict, Callable, Union, Any, TypeVar, Generic
 
 from praatio.utilities.constants import KlattPoint
-from praatio.data_classes.textgrid import Textgrid
+from praatio.data_classes.textgrid import BaseTextgrid
 from praatio.data_classes.textgrid_tier import TextgridTier
 from praatio.utilities import errors
 
@@ -174,7 +174,7 @@ class KlattContainerTier(_KlattBaseTier[KlattIntermediateTier]):
             subpointTier.modifyValues(modFunc)
 
 
-class Klattgrid(Textgrid):
+class Klattgrid(BaseTextgrid[Union[KlattPointTier, KlattContainerTier]]):
     def save(self, fn: str, minimumIntervalLength: Optional[float] = None) -> None:
         """
         minimumIntervalLength is used for compatibility with Textgrid.save()
