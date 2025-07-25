@@ -46,6 +46,204 @@ class TestTextgrid(PraatioTestCase):
 
         self.assertEqual(seenTiers, [tier1, tier2])
 
+    def test__reversed__iterates_through_tiers_in_reverse_order(self):
+        tier1 = makeIntervalTier()
+        tier2 = makePointTier()
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        reversedTiers = list(reversed(sut))
+        self.assertEqual(reversedTiers, [tier2, tier1])
+
+    def test__contains__checks_if_tier_name_exists(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        self.assertIn("words", sut)
+        self.assertIn("pitch", sut)
+        self.assertNotIn("nonexistent", sut)
+
+    def test__getitem__with_string_key(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        self.assertEqual(sut["words"], tier1)
+        self.assertEqual(sut["pitch"], tier2)
+
+        with self.assertRaises(KeyError):
+            _ = sut["nonexistent"]
+
+    def test__getitem__with_integer_index(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        self.assertEqual(sut[0], tier1)
+        self.assertEqual(sut[1], tier2)
+        self.assertEqual(sut[-1], tier2)
+        self.assertEqual(sut[-2], tier1)
+
+        with self.assertRaises(IndexError):
+            _ = sut[2]
+
+    def test__getitem__with_slice(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+        tier3 = makeIntervalTier("phones")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+        sut.addTier(tier3)
+
+        self.assertEqual(sut[1:2], (tier2,))
+        self.assertEqual(sut[-1:], (tier3,))
+        self.assertEqual(sut[:2], (tier1, tier2))
+        self.assertEqual(sut[::2], (tier1, tier3))
+
+    def test__setitem__with_string_key_adds_new_tier(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut["words"] = tier1
+        sut["pitch"] = tier2
+
+        self.assertEqual(sut.tierNames, ("words", "pitch"))
+        self.assertEqual(sut.tiers, (tier1, tier2))
+
+    def test__setitem__with_string_key_replaces_existing_tier(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("words", [[1.5, "new"]])
+
+        sut = textgrid.Textgrid()
+
+        sut["words"] = tier1
+        sut["words"] = tier2
+
+        self.assertEqual(sut.tierNames, ("words",))
+        self.assertEqual(sut.tiers, (tier2,))
+
+    def test__setitem__raises_error_if_name_mismatch(self):
+        tier1 = makeIntervalTier("words")
+
+        sut = textgrid.Textgrid()
+
+        with self.assertRaises(errors.TierNameError):
+            sut["different_name"] = tier1
+
+    def test__setitem__with_integer_index(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+        tier3 = makeIntervalTier("phones")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        sut[0] = tier3
+        self.assertEqual(sut.tierNames, ("phones", "pitch"))
+        self.assertEqual(sut.tiers, (tier3, tier2))
+
+    def test__setitem__with_slice(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+        tier3 = makeIntervalTier("phones")
+        tier4 = makePointTier("max_pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+        sut.addTier(tier3)
+
+        sut[1:3] = [tier4]
+        self.assertEqual(sut.tierNames, ("words", "max_pitch"))
+        self.assertEqual(sut.tiers, (tier1, tier4))
+
+    def test__setitem__with_slice_step(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+        tier3 = makeIntervalTier("phones")
+        tier4 = makePointTier("max_pitch")
+        tier5 = makeIntervalTier("sentences")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+        sut.addTier(tier3)
+
+        sut[::2] = [tier4, tier5]
+        self.assertEqual(sut.tierNames, ("max_pitch", "pitch", "sentences"))
+        self.assertEqual(sut.tiers, (tier4, tier2, tier5))
+
+        with self.assertRaises(errors.ArgumentError):
+            sut[::2] = [tier4]
+        with self.assertRaises(errors.ArgumentError):
+            sut[::2] = [tier3, tier4, tier5]
+
+    def test__delitem__with_string_key(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        del sut["words"]
+        self.assertEqual(sut.tierNames, ("pitch",))
+        self.assertEqual(sut.tiers, (tier2,))
+
+    def test__delitem__with_integer_index(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+
+        del sut[1]
+        self.assertEqual(sut.tierNames, ("words",))
+        self.assertEqual(sut.tiers, (tier1,))
+
+    def test__delitem__with_slice(self):
+        tier1 = makeIntervalTier("words")
+        tier2 = makePointTier("pitch")
+        tier3 = makeIntervalTier("phones")
+
+        sut = textgrid.Textgrid()
+
+        sut.addTier(tier1)
+        sut.addTier(tier2)
+        sut.addTier(tier3)
+
+        del sut[:2]
+        self.assertEqual(sut.tierNames, ("phones",))
+        self.assertEqual(sut.tiers, (tier3,))
+
     def test_print_format(self):
         tier1 = makeIntervalTier()
         tier2 = makePointTier()

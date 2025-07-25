@@ -1,7 +1,9 @@
 """The abstract class used by all textgrid tiers."""
 import re
 import math
-from typing import List, Optional, Sequence, Type, TypeVar, Iterable, Any, Generic, Tuple
+from typing import (
+    Optional, Union, Tuple, List, Sequence, Type, TypeVar, Iterable, Any, Generic, overload
+)
 from abc import ABC, abstractmethod
 
 from typing_extensions import Literal
@@ -77,6 +79,63 @@ class TextgridTier(ABC, Generic[EntryType]):
 
     def __iter__(self):
         return iter(self._entries)
+
+    def __reversed__(self):
+        return reversed(self._entries)
+
+    def __contains__(self, entry: EntryType) -> bool:
+        return entry in self._entries
+
+    @overload
+    def __getitem__(self, index: int) -> EntryType:
+        ...  # int should be SupportsIndex in Python 3.8+
+
+    @overload
+    def __getitem__(self, index: slice) -> List[EntryType]:
+        ...
+
+    def __getitem__(self, index):
+        """Supports integer index and slicing. Slicing returns a list copy like list slicing.
+
+        Raises:
+            IndexError: The index out of range.
+        """
+        return self._entries[index]
+
+    def __setitem__(self, index: Union[int, slice], entry: Union[EntryType, Iterable[EntryType]]):
+        """Supports integer index and slicing. Replace the selected with a new entry or entries.
+
+        Raises:
+            IndexError: The index out of range.
+            CollisionError: Inserted entry overlaps with an existing entry.
+        """
+        # First remove all selected entries.
+        del self._entries[index]
+        # Then insert given entries.
+        # Either one or multiple entries may be inserted (compatible with slicing syntax).
+        # Determine which by using entryType.build to test if types match.
+        try:
+            entries = [self.entryType.build(entry)]
+        except errors.ArgumentError:
+            try:
+                entries = [self.entryType.build(e) for e in entry]
+            except errors.ArgumentError:
+                raise errors.ArgumentError(
+                    f"{entry} is neither a {self.entryType.__name__} "
+                    f"nor an iterable of {self.entryType.__name__}s."
+                )
+        # No matter one or multiple entries, they are converted to a list of entries.
+        # Now insert these entries.
+        for e in entries:
+            self.insertEntry(e)
+
+    def __delitem__(self, index: Union[int, slice]):
+        """Supports integer index and slicing.
+
+        Raises:
+            IndexError: The index out of range.
+        """
+        del self._entries[index]
 
     def __eq__(self, other: Any) -> bool:
         return (
@@ -288,7 +347,11 @@ class TextgridTier(ABC, Generic[EntryType]):
         pass
 
     def deleteEntry(self, entry: EntryType) -> None:
-        """Removes an entry from the entries"""
+        """Removes an entry from the entries.
+
+        Raises:
+            ValueError: The entry does not exist.
+        """
         self._entries.remove(entry)
 
     @abstractmethod

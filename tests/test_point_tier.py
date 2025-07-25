@@ -85,6 +85,111 @@ class TestPointTier(PraatioTestCase):
 
         self.assertEqual(seenPoints, [point1, point2])
 
+    def test__reversed__iterates_through_points_in_reverse_order(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+
+        sut = makePointTier(points=[point1, point2])
+
+        reversedPoints = list(reversed(sut))
+        self.assertEqual(reversedPoints, [point2, point1])
+
+    def test__contains__checks_if_point_exists(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+        point3 = Point(5.0, "test")
+
+        sut = makePointTier(points=[point1, point2])
+
+        self.assertIn(point1, sut)
+        self.assertIn(point2, sut)
+        self.assertNotIn(point3, sut)
+
+    def test__getitem__with_integer_index(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+
+        sut = makePointTier(points=[point1, point2])
+
+        self.assertEqual(sut[0], point1)
+        self.assertEqual(sut[1], point2)
+        self.assertEqual(sut[-1], point2)
+        self.assertEqual(sut[-2], point1)
+
+        with self.assertRaises(IndexError):
+            _ = sut[2]
+
+    def test__getitem__with_slice(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+        point3 = Point(5.0, "test")
+
+        sut = makePointTier(points=[point1, point2, point3])
+
+        self.assertEqual(sut[1:3], [point2, point3])
+        self.assertEqual(sut[2:], [point3])
+        self.assertEqual(sut[:-1], [point1, point2])
+        self.assertEqual(sut[::2], [point1, point3])
+
+    def test__setitem__with_integer_index(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+        point3 = Point(5.0, "test")
+
+        sut = makePointTier(points=[point2, point3])
+
+        sut[0] = point1
+        self.assertEqual(sut.entries, (point1, point3))
+
+        with self.assertRaises(IndexError):
+            sut[-3] = point2
+
+    def test__setitem__with_slice_accepts_lists(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+        point3 = Point(5.0, "test")
+
+        sut = makePointTier(points=[point1, point2, point3])
+
+        sut[1:3] = [[7, "new"]]
+        self.assertEqual(sut.entries, (point1, Point(7.0, "new")))
+
+    def test__setitem__with_slice_keeps_entries_sorted(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+        point3 = Point(5.0, "test")
+        point4 = Point(7.0, "foo")
+        point5 = Point(9.5, "bar")
+
+        sut = makePointTier(points=[point2, point4])
+
+        sut[1:1] = [point3, point5, point1]
+        self.assertEqual(sut.entries, (point1, point2, point3, point4, point5))
+
+    def test__delitem__with_integer_index(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+
+        sut = makePointTier(points=[point1, point2])
+
+        del sut[1]
+        self.assertEqual(sut.entries, (point1,))
+        del sut[0]
+        self.assertEqual(sut.entries, ())
+
+        with self.assertRaises(IndexError):
+            del sut[0]
+
+    def test__delitem__with_slice(self):
+        point1 = Point(1, "hello")
+        point2 = Point(3.5, "world")
+        point3 = Point(5.0, "test")
+
+        sut = makePointTier(points=[point1, point2, point3])
+
+        del sut[::2]
+        self.assertEqual(sut.entries, (point2,))
+
     def test_print_format(self):
         sut = makePointTier()
         with io.StringIO() as buf, redirect_stdout(buf):

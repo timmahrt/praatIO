@@ -82,6 +82,10 @@ class TextgridStateError(TextgridException):
     pass
 
 
+class TierNameError(TextgridException):
+    pass
+
+
 class TierNameExistsError(TextgridException):
     pass
 

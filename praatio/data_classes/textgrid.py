@@ -5,7 +5,9 @@ This is the 'heart' of praatio.
 """
 import io
 import copy
-from typing import TYPE_CHECKING, Optional, Tuple, List, Iterable, Any, Union, TypeVar, Generic
+from typing import (
+    TYPE_CHECKING, Optional, Union, Tuple, List, Iterable, Any, TypeVar, Generic, overload, cast
+)
 from typing_extensions import Literal
 from collections import OrderedDict
 
@@ -16,6 +18,7 @@ from praatio.utilities.constants import (
     CropCollision,
 )
 
+from praatio.data_classes.textgrid_tier import TextgridTier
 from praatio.data_classes.point_tier import PointTier
 from praatio.data_classes.interval_tier import IntervalTier
 if TYPE_CHECKING:
@@ -70,6 +73,107 @@ class BaseTextgrid(Generic[TierType]):
     def __iter__(self):
         return iter(self._tierDict.values())
 
+    def __reversed__(self):
+        return reversed(self._tierDict.values())
+
+    def __contains__(self, tierName: str) -> bool:
+        return tierName in self._tierDict
+
+    @overload
+    def __getitem__(self, index: Union[int, str]) -> TierType:
+        ...  # int should be SupportsIndex in Python 3.8+
+
+    @overload
+    def __getitem__(self, index: slice) -> Tuple[TierType]:
+        ...
+
+    def __getitem__(self, index):
+        """Supports string key like a dict, integer index and slicing like a list.
+
+        Raises:
+            KeyError: The string key does not exist.
+            IndexError: The integer index out of range.
+        """
+        if isinstance(index, str):
+            return self.getTier(index)
+        else:
+            return self.tiers[index]
+
+    @overload
+    def __setitem__(self, index: str, tier: TierType) -> None:
+        ...
+
+    @overload
+    def __setitem__(
+        self, index: Union[int, slice], tier: Union[TierType, Iterable[TierType]]
+    ) -> None:
+        ...
+
+    def __setitem__(self, index, tier):
+        """Add or replace a tier or tiers.
+
+        Supports string key like a dict, integer index and slicing like a list.
+
+        Raises:
+            TierNameError: The key to the dict conflicts with tier.name.
+            ArgumentError: Assign a different number of tiers while slicing with a non-one step.
+            IndexError: Interger index out of range.
+        """
+        if isinstance(index, str):
+            # Raise an error if the key conflicts with tier.name
+            if index != tier.name:
+                raise errors.TierNameError(
+                    f"The tier name {tier.name!r} doesn't match the key {index!r}.  "
+                    f"You can use tier.new(name={index!r}) to create a new copy."
+                )
+            # If the key exists, replace it. Otherwise, add it.
+            if index in self._tierDict:
+                self.replaceTier(index, tier)
+            else:
+                self.addTier(tier)
+
+        else:  # int or slice like a list
+            toInsert = (tier,) if isinstance(tier, TextgridTier) else tuple(tier)
+            # First remove all selected tiers.
+            if isinstance(index, slice):
+                toRemove = self.tierNames[index]
+                start_index, step = index.start, index.step
+                # slice requires some special handling
+                if start_index is None:
+                    start_index = 0
+                if step is None:
+                    step = 1
+                if step != 1 and len(toInsert) != len(toRemove):
+                    raise errors.ArgumentError(
+                        f"attempt to assign sequence of size {len(toInsert)} "
+                        f"to extended slice of size {len(toRemove)}"
+                    )
+                for name in toRemove:
+                    self.removeTier(name)
+            else:
+                self.removeTier(self.tierNames[index])
+                start_index, step = index, 1
+            # Then insert given tiers.
+            # Either one or multiple tiers may be inserted (compatible with slicing syntax).
+            for t in toInsert:
+                self.addTier(cast(TierType, t), start_index)
+                start_index += step
+
+    def __delitem__(self, index: Union[str, int, slice]):
+        """Supports string key like a dict, integer index and slicing like a list.
+
+        Raises:
+            KeyError: The string key does not exist.
+            IndexError: The integer index out of range.
+        """
+        if isinstance(index, str):
+            self.removeTier(index)
+        elif isinstance(index, slice):
+            for name in self.tierNames[index]:
+                self.removeTier(name)
+        else:
+            self.removeTier(self.tierNames[index])
+
     def __eq__(self, other: Any) -> bool:
         return (
             isinstance(other, type(self))
@@ -105,15 +209,12 @@ class BaseTextgrid(Generic[TierType]):
                 difference between the maxTimestamp in the tier and the current
                 textgrid.
 
-        Returns:
-            None
-
         Raises:
             TierNameExistsError: The textgrid already contains a tier with the same
-                name as the tier being added
+                name as the tier being added.
             TextgridStateAutoModified: The minimum or maximum timestamp was changed
-                when not permitted
-            IndexError: TierIndex is too large for the size of the existing tier list
+                when not permitted.
+            IndexError: TierIndex out of range.
         """
         utils.validateOption(
             "reportingMode", reportingMode, constants.ErrorReportingMode
@@ -156,7 +257,11 @@ class BaseTextgrid(Generic[TierType]):
                 self.maxTimestamp = maxV
 
     def getTier(self, tierName: str) -> TierType:
-        """Get the tier with the specified name"""
+        """Get the tier with the specified name.
+
+        Raises:
+            KeyError: The tierName does not exist.
+        """
         return self._tierDict[tierName]
 
     def new(self: GridType) -> GridType:
@@ -164,12 +269,20 @@ class BaseTextgrid(Generic[TierType]):
         return copy.deepcopy(self)
 
     def renameTier(self, oldName: str, newName: str) -> None:
+        """
+        Raises:
+            KeyError: The oldName does not exist.
+        """
         oldTier = self.getTier(oldName)
         tierIndex = self.tierNames.index(oldName)
         self.removeTier(oldName)
         self.addTier(oldTier.new(newName, oldTier.entries), tierIndex)  # type: ignore
 
     def removeTier(self, name: str) -> TierType:
+        """
+        Raises:
+            KeyError: The name does not exist.
+        """
         return self._tierDict.pop(name)
 
     def replaceTier(
@@ -178,6 +291,10 @@ class BaseTextgrid(Generic[TierType]):
         newTier: TierType,
         reportingMode: Literal["silence", "warning", "error"] = "warning",
     ) -> None:
+        """
+        Raises:
+            ValueError: The name does not exist.
+        """
         tierIndex = self.tierNames.index(name)
         self.removeTier(name)
         self.addTier(newTier, tierIndex, reportingMode)

@@ -86,6 +86,111 @@ class TestIntervalTier(PraatioTestCase):
 
         self.assertEqual(seenIntervals, [interval1, interval2])
 
+    def test__reversed__iterates_through_intervals_in_reverse_order(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        reversedIntervals = list(reversed(sut))
+        self.assertEqual(reversedIntervals, [interval2, interval1])
+
+    def test__contains__checks_if_interval_exists(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+        interval3 = Interval(3.0, 4.0, "test")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        self.assertIn(interval1, sut)
+        self.assertIn(interval2, sut)
+        self.assertNotIn(interval3, sut)
+
+    def test__getitem__with_integer_index(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        self.assertEqual(sut[0], interval1)
+        self.assertEqual(sut[1], interval2)
+        self.assertEqual(sut[-1], interval2)
+        self.assertEqual(sut[-2], interval1)
+
+        with self.assertRaises(IndexError):
+            _ = sut[2]
+
+    def test__getitem__with_slice(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+        interval3 = Interval(3.0, 4.0, "test")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2, interval3])
+
+        self.assertEqual(sut[0:2], [interval1, interval2])
+        self.assertEqual(sut[1:], [interval2, interval3])
+        self.assertEqual(sut[:-2], [interval1])
+        self.assertEqual(sut[::2], [interval1, interval3])
+
+    def test__setitem__with_integer_index_accepts_a_list(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        sut[1] = [3, 4, "test"]
+        self.assertEqual(sut.entries, (interval1, Interval(3.0, 4.0, "test")))
+
+        with self.assertRaises(IndexError):
+            sut[3] = interval2
+
+    def test__setitem__with_slice(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+        interval3 = Interval(3.0, 4.0, "test")
+        interval4 = Interval(4.0, 5.0, "new")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2, interval3])
+
+        sut[::2] = [interval4]
+        self.assertEqual(sut.entries, (interval2, interval4))
+
+    def test__setitem__with_slice_keeps_entries_sorted(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+        interval3 = Interval(3.0, 4.0, "test")
+        interval4 = Interval(4.0, 5.0, "foo")
+        interval5 = Interval(5.0, 6.0, "bar")
+
+        sut = makeIntervalTier(intervals=[interval2, interval4])
+
+        sut[1:1] = [interval3, interval1, interval5]
+        self.assertEqual(sut.entries, (interval1, interval2, interval3, interval4, interval5))
+
+    def test__delitem__with_integer_index(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2])
+
+        del sut[0]
+        self.assertEqual(sut.entries, (interval2,))
+        del sut[0]
+        self.assertEqual(sut.entries, ())
+
+        with self.assertRaises(IndexError):
+            del sut[1]
+
+    def test__delitem__with_slice(self):
+        interval1 = Interval(1.0, 2.0, "hello")
+        interval2 = Interval(2.0, 3.0, "world")
+        interval3 = Interval(3.0, 4.0, "test")
+
+        sut = makeIntervalTier(intervals=[interval1, interval2, interval3])
+
+        del sut[:2]
+        self.assertEqual(sut.entries, (interval3,))
+
     def test_print_format(self):
         sut = makeIntervalTier()
         with io.StringIO() as buf, redirect_stdout(buf):
