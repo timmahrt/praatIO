@@ -17,7 +17,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -U pip setuptools
-          pip install "importlib-metadata>=4.12" coveralls pytest pytest-cov
+          pip install "importlib-metadata>=4.12" coveralls pytest pytest-cov typing-extensions
           python setup.py install
       - name: Test with pytest
         run: |
