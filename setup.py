@@ -11,7 +11,7 @@ import io
 setup(
     name="praatio",
     python_requires=">3.6.0",
-    version="6.2.0",
+    version="6.2.1",
     author="Tim Mahrt",
     author_email="timmahrt@gmail.com",
     url="https://github.com/timmahrt/praatIO",
