@@ -1,6 +1,7 @@
 """
 The abstract class used by all textgrid tiers
 """
+
 import re
 import copy
 import math
@@ -159,9 +160,11 @@ class TextgridTier(ABC):
         if entries is None:
             entries = copy.deepcopy(self.entries)
             entries = [
-                self.entryType(*entry)
-                if isinstance(entry, tuple) or isinstance(entry, list)
-                else entry
+                (
+                    self.entryType(*entry)
+                    if isinstance(entry, tuple) or isinstance(entry, list)
+                    else entry
+                )
                 for entry in entries
             ]
         if minTimestamp is None:

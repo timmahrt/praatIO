@@ -1,6 +1,7 @@
 """
 Constant values and primitive definitions that can be shared throughout the code
 """
+
 from collections import namedtuple
 import math
 

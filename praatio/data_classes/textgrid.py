@@ -3,6 +3,7 @@ Functions for reading/writing/manipulating Textgrid classes
 
 This is the 'heart' of praatio.
 """
+
 import io
 import copy
 from typing import Optional, Tuple, Sequence
@@ -256,9 +257,9 @@ class Textgrid:
             tier = self.getTier(tierName)
             newTier = tier.crop(cropStart, cropEnd, mode, rebaseToZero)
 
-            reportingMode: Literal[
-                "silence", "warning", "error"
-            ] = constants.ErrorReportingMode.WARNING
+            reportingMode: Literal["silence", "warning", "error"] = (
+                constants.ErrorReportingMode.WARNING
+            )
             if mode == constants.CropCollision.LAX:
                 # We expect that there will be changes to the size
                 # of the textgrid when the mode is LAX
