@@ -4,7 +4,7 @@
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
 Ver 6.2.1 (Nov 15, 2025)
-- Fix case where use of non-native datatypes (e.g. Numpy.float64) in DataPoint led to invalid textgrids
+- Bugfix: sanitize input pointList data for PitchTier and DurationTier creation to avoid generating corrupt output files
 
 Ver 6.2 (Dec 10, 2023)
 - Add `__len__` and `__iter__` methods to Textgrid and TextgridTier
