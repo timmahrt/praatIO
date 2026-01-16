@@ -3,6 +3,9 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 6.2.2 (Jan 16, 2027)
+- Bugfix: sanitize numeric data in DataPoints
+
 Ver 6.2.1 (Nov 15, 2025)
 - Bugfix: sanitize input pointList data for PitchTier and DurationTier creation to avoid generating corrupt output files
 
