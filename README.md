@@ -70,13 +70,13 @@ PraatIO is on pypi and can be installed or upgraded from the command-line shell 
 
     python -m pip install praatio --upgrade
 
-Otherwise, to manually install, after downloading the source from github, from a command-line shell, navigate to the directory containing setup.py and type
+Otherwise, to manually install, after downloading the source from github, from a command-line shell, navigate to the root directory and type
 
-    python setup.py install
+    python -m pip install .
 
 If python is not in your path, you'll need to enter the full path e.g.
 
-    C:\Python37\python.exe setup.py install
+    C:\Python37\python.exe -m pip install .
 
 ## Upgrading
 
