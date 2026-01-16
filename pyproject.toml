@@ -21,9 +21,6 @@ packages = [
     "praatio.data_classes",
 ]
 
-[tool.hatch.build.targets.wheel.force-include]
-"praatio/praatScripts" = "praatio/praatScripts"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
