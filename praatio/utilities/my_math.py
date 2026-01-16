@@ -215,6 +215,6 @@ def znormalizeData(valList: List[float]) -> List[float]:
 
 def rms(intensityValues: List[float]) -> float:
     """Return the root mean square for the input set of values"""
-    intensityValues = [val ** 2 for val in intensityValues]
+    intensityValues = [val**2 for val in intensityValues]
     meanVal = sum(intensityValues) / len(intensityValues)
     return math.sqrt(meanVal)

@@ -7,6 +7,7 @@ PointObject2D stores temporal data and some other data (eg pitch).  It's not
 so different from a PointTier, except that PointTiers specifically hold annotation
 data.
 """
+
 import io
 
 from typing_extensions import Literal
@@ -14,17 +15,18 @@ from typing import List, Optional, Tuple, cast
 
 from praatio.utilities import constants
 from praatio.utilities import errors
+from praatio.utilities import my_math
 
 
 class PointObject:
     def __init__(
         self,
-        pointList: List[Tuple[float, ...]],
+        pointList: List[Tuple[float, ...]],  # Either (float) or (float, float)
         objectClass: str,
         minTime: float = 0,
         maxTime: float = None,
     ):
-        self.pointList = [tuple(row) for row in pointList]  # Sanitize input
+        self.pointList = [tuple(float(val) for val in row) for row in pointList]
         self.objectClass = objectClass
         self.minTime = minTime if minTime > 0 else 0
         self.maxTime = maxTime
@@ -49,15 +51,15 @@ class PointObject:
         header = 'File type = "ooTextFile"\n' 'Object class = "%s"\n' "\n%s\n%s\n%d"
         header %= (
             self.objectClass,
-            repr(self.minTime),
-            repr(self.maxTime),
+            my_math.numToStr(self.minTime),
+            my_math.numToStr(self.maxTime),
             len(self.pointList),
         )
 
-        tmp = [repr(val) for entry in self.pointList for val in entry]
+        tmp = [my_math.numToStr(val) for entry in self.pointList for val in entry]
         strPoints = "\n".join(tmp)
 
-        outputStr = u"%s\n%s\n" % (header, strPoints)
+        outputStr = "%s\n%s\n" % (header, strPoints)
 
         with io.open(fn, "w", encoding="utf-8") as fd:
             fd.write(outputStr)

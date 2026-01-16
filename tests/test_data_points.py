@@ -2,9 +2,23 @@ import unittest
 from os.path import join
 
 from praatio import data_points
+from praatio.utilities import constants
 
 from tests.testing_utils import areTheSameFiles
 from tests.praatio_test_case import PraatioTestCase
+
+
+# Create a custom float class that overrides the __repr__ method
+# similar to how Numpy.float64 overrides the __repr__ method
+class CustomFloat(float):
+    def __init__(self, value):
+        self.value = value
+
+    def __float__(self):
+        return self.value
+
+    def __repr__(self):
+        return f"CustomFloat({self.value})"
 
 
 class TestDataPoint(PraatioTestCase):
@@ -60,6 +74,36 @@ class TestDataPoint(PraatioTestCase):
         longFN = join(self.dataRoot, "bobby_longfile.PointProcess")
 
         self.assertTrue(areTheSameFiles(shortFN, longFN, data_points.open1DPointObject))
+
+    def test_point_object_1d_creation_with_custom_float(self):
+        sut = data_points.PointObject1D(
+            pointList=[
+                (CustomFloat(1.0),),
+                (CustomFloat(3.0),),
+            ],
+            objectClass=constants.DataPointTypes.POINT,
+            minTime=1,
+            maxTime=4,
+        )
+        self.assertEqual([(1.0,), (3.0,)], sut.pointList)
+        self.assertEqual("1.0", repr(sut.pointList[0][0]))
+        self.assertEqual("3.0", repr(sut.pointList[1][0]))
+
+    def test_point_object_2d_creation_with_custom_float(self):
+        sut = data_points.PointObject2D(
+            pointList=[
+                (CustomFloat(1.0), CustomFloat(2.0)),
+                (CustomFloat(3.0), CustomFloat(4.0)),
+            ],
+            objectClass=constants.DataPointTypes.PITCH,
+            minTime=1,
+            maxTime=4,
+        )
+        self.assertEqual([(1.0, 2.0), (3.0, 4.0)], sut.pointList)
+        self.assertEqual("1.0", repr(sut.pointList[0][0]))
+        self.assertEqual("2.0", repr(sut.pointList[0][1]))
+        self.assertEqual("3.0", repr(sut.pointList[1][0]))
+        self.assertEqual("4.0", repr(sut.pointList[1][1]))
 
 
 if __name__ == "__main__":

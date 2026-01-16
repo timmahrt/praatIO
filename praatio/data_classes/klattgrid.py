@@ -2,6 +2,7 @@
 
 KlattGrids can be used for synthesizing and manipulating speech
 """
+
 import io
 
 from typing import List, Optional, Dict, Callable, Union
@@ -9,6 +10,7 @@ from typing import List, Optional, Dict, Callable, Union
 from praatio.data_classes import textgrid
 from praatio.data_classes import textgrid_tier
 from praatio.utilities import errors
+from praatio.utilities import my_math
 
 
 class _KlattBaseTier:
@@ -67,8 +69,8 @@ class KlattContainerTier(_KlattBaseTier):
         try:
             self.minTimestamp = toIntOrFloat(self.minTimestamp)
             outputTxt += "xmin = %s\nxmax = %s\n" % (
-                repr(self.minTimestamp),
-                repr(self.maxTimestamp),
+                my_math.numToStr(self.minTimestamp),
+                my_math.numToStr(self.maxTimestamp),
             )
         except TypeError:
             pass
@@ -174,16 +176,16 @@ class KlattPointTier(textgrid_tier.TextgridTier):
         outputList = []
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputList.append("%s? <exists> " % self.name)
-        outputList.append("xmin = %s" % repr(self.minTimestamp))
-        outputList.append("xmax = %s" % repr(self.maxTimestamp))
+        outputList.append("xmin = %s" % my_math.numToStr(self.minTimestamp))
+        outputList.append("xmax = %s" % my_math.numToStr(self.maxTimestamp))
 
         if self.name not in ["phonation", "vocalTract", "coupling", "frication"]:
             outputList.append("points: size= %d" % len(self.entries))
 
         for i, entry in enumerate(self.entries):
             outputList.append("points [%d]:" % (i + 1))
-            outputList.append("    number = %s" % repr(entry[0]))
-            outputList.append("    value = %s" % repr(entry[1]))
+            outputList.append("    number = %s" % my_math.numToStr(entry[0]))
+            outputList.append("    value = %s" % my_math.numToStr(entry[1]))
 
         return "\n".join(outputList) + "\n"
 
@@ -197,14 +199,14 @@ class KlattSubPointTier(KlattPointTier):
         outputList = []
         outputList.append("%s:" % self.name)
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
-        outputList.append("    xmin = %s" % repr(self.minTimestamp))
-        outputList.append("    xmax = %s" % repr(self.maxTimestamp))
+        outputList.append("    xmin = %s" % my_math.numToStr(self.minTimestamp))
+        outputList.append("    xmax = %s" % my_math.numToStr(self.maxTimestamp))
         outputList.append("    points: size = %d" % len(self.entries))
 
         for i, entry in enumerate(self.entries):
             outputList.append("    points [%d]:" % (i + 1))
-            outputList.append("        number = %s" % repr(entry[0]))
-            outputList.append("        value = %s" % repr(entry[1]))
+            outputList.append("        number = %s" % my_math.numToStr(entry[0]))
+            outputList.append("        value = %s" % my_math.numToStr(entry[1]))
 
         return "\n".join(outputList) + "\n"
 
@@ -223,8 +225,8 @@ class Klattgrid(textgrid.Textgrid):
         outputTxt += 'Object class = "KlattGrid"\n\n'
         self.minTimestamp = toIntOrFloat(self.minTimestamp)
         outputTxt += "xmin = %s\nxmax = %s\n" % (
-            repr(self.minTimestamp),
-            repr(self.maxTimestamp),
+            my_math.numToStr(self.minTimestamp),
+            my_math.numToStr(self.maxTimestamp),
         )
 
         for tierName in self.tierNames:
