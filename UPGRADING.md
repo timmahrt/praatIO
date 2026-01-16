@@ -91,6 +91,13 @@ then changing it to the following should fix the problem
     install_requires=["praatio ~= 4.1"],
 ```
 
+Or, if using a pyproject.toml file:
+```
+dependencies = [
+    "praatio ~= 6.2",
+]
+```
+
 Many files, classes, and functions were renamed in praatio 5 to hopefully be clearer.  There
 were too many changes to list here but the `tgio` module was renamed `textgrid`.
 
