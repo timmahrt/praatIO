@@ -3,7 +3,10 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
-Ver 6.2.1 (Nov 15, 2025)
+Ver 6.2.2 (Jan 16, 2025)
+- Migrate from setup.py to pyproject.toml
+
+Ver 6.2.1 (Jan 16, 2025)
 - Bugfix: sanitize input pointList data for PitchTier and DurationTier creation to avoid generating corrupt output files
 
 Ver 6.2 (Dec 10, 2023)
