@@ -7,7 +7,8 @@ Ver 6.2.2 (Jan 16, 2025)
 - Migrate from setup.py to pyproject.toml
 
 Ver 6.2.1 (Jan 16, 2025)
-- Bugfix: sanitize input pointList data for PitchTier and DurationTier creation to avoid generating corrupt output files
+- Bugfix: sanitize input pointList data for PitchTier and DurationTier creation to avoid generating corrupt output files.
+  - Specifically, there was a problem when saving a tiers where the data points were numpy floats rather than python floats.
 
 Ver 6.2 (Dec 10, 2023)
 - Add `__len__` and `__iter__` methods to Textgrid and TextgridTier
