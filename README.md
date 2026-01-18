@@ -60,9 +60,11 @@ Please view [CHANGELOG.md](https://github.com/timmahrt/praatIO/blob/main/CHANGEL
 
 Python module `https://pypi.org/project/typing-extensions/`.  It should be installed automatically with praatio but you can install it manually if you have any problems.
 
-``Python 3.7.*`` or above (CI tested with python `3.7` through `3.12`).
+``Python 3.10.*`` or above (CI tested with python `3.10` through `3.14`).
 
 If you are using ``Python 2.x`` or ``Python < 3.7``, you can use `PraatIO 4.x`.
+
+If you are using ``3.7 <= Python < 3.10`` you can use `PraatIO 5.x`.
 
 ## Installation
 

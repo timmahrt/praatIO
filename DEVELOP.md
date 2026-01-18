@@ -22,9 +22,9 @@ Tests are run with
 Releases are built and deployed with:
 
 ```bash
-pip install --upgrade build
+python -m pip install --upgrade build
 python -m build
-pip install --upgrade twine
+python -m pip install --upgrade twine
 twine upload dist/*
 ```
 

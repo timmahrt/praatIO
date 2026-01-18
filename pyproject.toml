@@ -1,26 +1,51 @@
 [project]
 name = "praatio"
-version = "6.2.2"
+version = "7.0.0"
 description = "A library for working with praat, textgrids, time aligned audio transcripts, and audio files."
-readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 authors = [
     { name = "Tim Mahrt", email = "timmahrt@gmail.com" }
 ]
-license = { file = "LICENSE" }
-urls = { Homepage = "https://github.com/timmahrt/praatIO" }
+license = "MIT"
+license-file = "LICENSE"
+
+keywords = ["praat", "textgrid", "audio", "speech", "phonetics"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering",
+]
 
 dependencies = [
     "typing_extensions",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = [
-    "praatio",
-    "praatio.utilities",
-    "praatio.data_classes",
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "coveralls",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+"praatio/py.typed" = "praatio/py.typed"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project.urls]
+Documentation = "https://github.com/timmahrt/praatIO/blob/main/README.md"
+Source = "https://github.com/timmahrt/praatIO"
+Tracker = "https://github.com/timmahrt/praatIO/issues"
+Changelog = "https://github.com/timmahrt/praatIO/blob/main/CHANGELOG.md"
+License = "https://github.com/timmahrt/praatIO/blob/main/LICENSE"
