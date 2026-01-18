@@ -4,6 +4,7 @@ Praatio example of correcting small differences in boundaries across different t
 This problem can happen when annotators are not careful
 to align boundaries at the same time.
 """
+
 import os
 from os.path import join
 
