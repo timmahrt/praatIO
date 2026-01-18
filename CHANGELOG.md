@@ -3,6 +3,11 @@
 
 *Praatio uses semantic versioning (Major.Minor.Patch)*
 
+Ver 7.0.0 (Jan 18, 2025)
+- Drop support for Python < 3.10.
+- Add praatio.__version__
+- Add more metadata to pyproject.toml
+
 Ver 6.2.2 (Jan 16, 2025)
 - Migrate from setup.py to pyproject.toml
 
