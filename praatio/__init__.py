@@ -32,6 +32,8 @@ on the praatio github page:
 There is also a tutorial for working with praatio on the github page.
 """
 
+from importlib.metadata import version, PackageNotFoundError
+
 __all__ = [
     "audio",
     "data_points",
@@ -43,3 +45,8 @@ __all__ = [
     "data_classes",
     "utilities",
 ]
+
+try:
+    __version__ = version("praatio")
+except PackageNotFoundError:
+    __version__ = "unknown"
