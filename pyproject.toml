@@ -2,17 +2,16 @@
 name = "praatio"
 version = "7.0.0"
 description = "A library for working with praat, textgrids, time aligned audio transcripts, and audio files."
-readme = "README.md"
 requires-python = ">=3.10"
 authors = [
     { name = "Tim Mahrt", email = "timmahrt@gmail.com" }
 ]
-license = { file = "LICENSE" }
-urls = { Homepage = "https://github.com/timmahrt/praatIO" }
+license = "MIT"
+license-file = "LICENSE"
 
 keywords = ["praat", "textgrid", "audio", "speech", "phonetics"]
 classifiers = [
-    "5 - Production/Stable",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
@@ -43,3 +42,10 @@ test = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project.urls]
+Documentation = "https://github.com/timmahrt/praatIO/blob/main/README.md"
+Source = "https://github.com/timmahrt/praatIO"
+Tracker = "https://github.com/timmahrt/praatIO/issues"
+Changelog = "https://github.com/timmahrt/praatIO/blob/main/CHANGELOG.md"
+License = "https://github.com/timmahrt/praatIO/blob/main/LICENSE"
