@@ -65,6 +65,18 @@ def run_save(
 class TestIo(PraatioTestCase):
     """Testing input and output"""
 
+    def test_point_labels_with_quotes_roundtrip(self):
+        inputFN = join(self.dataRoot, "bobby_words_with_newlines.TextGrid")
+        tg = textgrid.openTextgrid(inputFN, True)
+        outputFN = join(self.outputRoot, "quoted_points.TextGrid")
+        for format in ["short_textgrid", "long_textgrid", "json", "textgrid_json"]:
+            with self.subTest(format=format):
+                restored = tg
+                for _ in range(2):
+                    restored.save(outputFN, format, True)
+                    restored = textgrid.openTextgrid(outputFN, True)
+                    self.assertEqual(restored, tg)
+
     def test_reading_textgrids_with_newlines_in_labels(self):
         """Tests for reading/writing textgrids with newlines"""
         fn = "bobby_words_with_newlines.TextGrid"

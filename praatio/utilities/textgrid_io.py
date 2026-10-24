@@ -470,6 +470,7 @@ def _parseNormalTextgrid(data: str) -> Dict:
                     flags=re.MULTILINE | re.DOTALL,
                 ).groups()[0]
                 label = label.strip()
+                label = re.sub(r'""', '"', label)
                 entries.append(Point(time, label))
 
         tierAsDict = {
